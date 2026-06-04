@@ -130,3 +130,12 @@ blockquote {
   border-left: 3px solid var(--line);
   color: var(--muted);
 }
+
+.site-footer {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
