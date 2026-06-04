@@ -1,4 +1,10 @@
-### Overview
+---
+layout: ../layouts/BaseLayout.astro
+title: Publications
+description: Publication and archive records for Meta-Writing Ecology, including OSF documents, Kindle fiction, DOI mirrors, and related public records.
+---
+
+# Overview
 
 The following documents outline key components of the Meta-Writing Ecology system:
 
@@ -19,7 +25,7 @@ Its value does not lie only in publication, but in its capacity to reorganize am
 
 ---
 
-### DOI Mirrors
+# DOI Mirrors
 
 Redundant archival mirrors for long-term preservation:
 
