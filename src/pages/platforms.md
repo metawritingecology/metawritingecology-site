@@ -1,3 +1,9 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: Platforms
+description: Public platform links for Meta-Writing Ecology, including OSF, GitHub, Medium, Substack, audio, video, and social surfaces.
+---
+
 # Platforms
 
 Meta-Writing Ecology exists as a distributed system across multiple platforms:
