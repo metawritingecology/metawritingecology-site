@@ -1,3 +1,9 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: Entry Surfaces
+description: Public entry surfaces for Meta-Writing Ecology.
+---
+
 # Entry Surfaces
 
 Meta-Writing Ecology can be entered through several public surfaces.
