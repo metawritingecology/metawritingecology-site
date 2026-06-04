@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+
+const {
+  title = "Meta-Writing Ecology",
+  description = "A recursive linguistic system and structural diagnostic framework."
+} = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <nav class="site-nav">
+        <a href="/">Home</a>
+        <a href="/about/">About</a>
+        <a href="/surfaces/">Entry Surfaces</a>
+        <a href="/entry-points/">Entry Points</a>
+        <a href="/fiction/">Fiction</a>
+        <a href="/publications/">Publications</a>
+        <a href="/platforms/">Platforms</a>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
