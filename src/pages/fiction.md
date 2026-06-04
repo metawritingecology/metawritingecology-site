@@ -1,3 +1,9 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: Fiction / Narrative Overflow
+description: Fictional works developed alongside Meta-Writing Ecology.
+---
+
 # Fiction / Narrative Overflow
 
 Meta-Writing Ecology also produces fictional work when structural pressure moves into narrative form.
