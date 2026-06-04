@@ -7,6 +7,7 @@ description: A structural orientation for preventing AI-mediated misreading thro
 # AI-Readable Knowledge Architecture
 
 ### Structural Misreading Prevention through Documentation Boundaries and Machine-Facing Interpretation Constraints
+**Full title:** AI-Readable Knowledge Architecture for Structural Misreading Prevention: Documentation Boundaries and Machine-Facing Interpretation Constraints
 
 - **Author:** Tzu Yuan Huang
 - **Version:** 0.1
