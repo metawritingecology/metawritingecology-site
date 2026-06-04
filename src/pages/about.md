@@ -1,3 +1,9 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: About the System
+description: About Meta-Writing Ecology.
+---
+
 # Project Nature
 
 Meta-Writing Ecology is not a single publication or research paper.
