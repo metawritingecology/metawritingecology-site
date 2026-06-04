@@ -1,3 +1,9 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: Entry Points / Cross-Theme Reading Paths
+description: Thematic entry points into Meta-Writing Ecology, organized by recurring zones such as field pressure, observation, burden transfer, drift, AI-mediated language, and decision boundaries.
+---
+
 # Entry Points
 
 Meta-Writing Ecology can also be entered through thematic zones rather than only through foundational documents.
