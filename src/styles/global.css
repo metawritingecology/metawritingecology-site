@@ -23,48 +23,33 @@ body {
   font-size: 17px;
 }
 
+h1,
+h2,
+h3 {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--accent);
+}
+
 main {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 72px 24px 96px;
 }
 
-h1,
-h2,
-h3 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--accent);
-}
 
 h1 {
-  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
   margin-bottom: 1rem;
 }
 
 h2 {
-  font-size: 1.35rem;
-  margin-top: 2.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
+  font-size: 1.25rem;
 }
 
 h3 {
-  font-size: 1.1rem;
-  margin-top: 1.75rem;
-}
-
-h2 {
-  font-size: 1.6rem;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--line);
-}
-
-h3 {
-  font-size: 1.2rem;
-  margin-top: 2rem;
+  font-size: 1.05rem;
 }
 
 p {
