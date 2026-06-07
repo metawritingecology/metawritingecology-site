@@ -1,0 +1,333 @@
+---
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Language Pressure Test Lab Prototype</title>
+    <meta
+      name="description"
+      content="Application-stage interface prototype for a pilot project on Meta-Writing Ecology language pressure surfaces."
+    />
+  </head>
+  <body>
+    <main class="prototype-shell">
+      <header class="prototype-header">
+        <p class="eyebrow">Pilot Project Mockup</p>
+        <h1>Language Pressure Test Lab Prototype</h1>
+        <p class="lede">
+          Application-stage interface prototype for a pilot project on
+          Meta-Writing Ecology language pressure surfaces.
+        </p>
+        <p class="boundary-note">
+          This page is an application-stage prototype. AI and search-output
+          samples shown here are placeholders or format demonstrations. Formal
+          outputs will be newly collected, dated, archived, and analyzed during
+          the project period.
+        </p>
+      </header>
+
+      <section class="test-groups" aria-label="Language pressure test groups">
+        <article class="test-card test-card-featured">
+          <div class="card-heading">
+            <p class="group-label">Test Group A</p>
+            <h2>Test Group A｜The Available Edition</h2>
+            <p>
+              A prototype interface for comparing how a selected short excerpt
+              may be compressed, replaced, inflated, or substituted across AI
+              and platform-facing surfaces.
+            </p>
+          </div>
+
+          <div class="pressure-lab" aria-label="Test Group A sample interface">
+            <section class="lab-column">
+              <h3>Source Excerpt + Pressure Annotation</h3>
+              <p class="column-note">
+                Selected excerpt for interface demonstration only. This is not a
+                chapter reproduction.
+              </p>
+              <blockquote class="excerpt-box">
+                <p>
+                  &ldquo;Availability is a surface condition. It describes what
+                  may be accessed, not what exists. A text may exist without
+                  being available. A surface may be available without containing
+                  the text it appears to introduce.&rdquo;
+                </p>
+              </blockquote>
+              <p class="source-note">
+                Selected short excerpt from The Available Edition, Episode 0.
+                Used here only for application-stage interface demonstration.
+              </p>
+
+              <div class="annotation-list">
+                <p>
+                  <span
+                    class="pressure p-availability"
+                    data-tag="Availability / Completeness Confusion"
+                    >Availability pressure</span
+                  >
+                  marks the risk that access is mistaken for completeness.
+                </p>
+                <p>
+                  <span
+                    class="pressure p-summary"
+                    data-tag="Summary Replacement"
+                    >Summary replacement</span
+                  >
+                  marks the risk that a surface summary stands in for reading.
+                </p>
+                <p>
+                  <span
+                    class="pressure p-reconstruction"
+                    data-tag="Reconstruction Pressure"
+                    >Reconstruction pressure</span
+                  >
+                  marks the risk that missing context is filled in as if it were
+                  present.
+                </p>
+              </div>
+            </section>
+
+            <section class="lab-column">
+              <h3>AI Output Comparison Placeholder</h3>
+              <div class="placeholder-stack">
+                <div class="placeholder-panel">
+                  <h4>GPT Output Area</h4>
+                  <p>To be collected during project period.</p>
+                </div>
+                <div class="placeholder-panel">
+                  <h4>Claude Output Area</h4>
+                  <p>To be collected during project period.</p>
+                </div>
+                <div class="placeholder-panel">
+                  <h4>Gemini Output Area</h4>
+                  <p>To be collected during project period.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="lab-column">
+              <h3>Search / Platform Surface Placeholder</h3>
+              <div class="placeholder-stack">
+                <div class="placeholder-panel">
+                  <h4>Google Capture Area</h4>
+                  <p>To be collected during project period.</p>
+                </div>
+                <div class="placeholder-panel">
+                  <h4>Bing Capture Area</h4>
+                  <p>To be collected during project period.</p>
+                </div>
+                <div class="placeholder-panel">
+                  <h4>Publication Surface Area</h4>
+                  <p>
+                    Amazon / Kindle publication surface to be documented during
+                    project period.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="legend" aria-label="Pressure tag legend">
+            <h3>Pressure Tag Legend</h3>
+            <ul>
+              <li><span class="legend-swatch p-availability"></span>Availability / Completeness Confusion</li>
+              <li><span class="legend-swatch p-summary"></span>Summary Replacement</li>
+              <li><span class="legend-swatch p-authority"></span>Surface Authority Inflation</li>
+              <li><span class="legend-swatch p-reconstruction"></span>Reconstruction Pressure</li>
+              <li><span class="legend-swatch p-platform"></span>Platform Surface Substitution</li>
+            </ul>
+          </aside>
+        </article>
+
+        <article class="test-card">
+          <p class="group-label">Test Group B</p>
+          <h2>Test Group B｜The Interface Illusion</h2>
+          <p>
+            Reserved for a future prototype surface. No sample interface or
+            collected outputs are published here.
+          </p>
+        </article>
+
+        <article class="test-card">
+          <p class="group-label">Test Group C</p>
+          <h2>Test Group C｜The Field Below the Index / The Mirror Field</h2>
+          <p>
+            Reserved for a future prototype surface. No sample interface or
+            collected outputs are published here.
+          </p>
+        </article>
+      </section>
+
+      <section class="use-boundary">
+        <h2>Use Boundary</h2>
+        <ul>
+          <li>This prototype demonstrates interface structure only.</li>
+          <li>It does not publish formal AI or search findings.</li>
+          <li>It does not reproduce full chapters from The Available Edition.</li>
+          <li>It is intended for application review and project visualization.</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(body) {
+    background: #12110f;
+  }
+
+  .prototype-shell {
+    max-width: 1180px;
+  }
+
+  .prototype-header {
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow,
+  .group-label {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+  }
+
+  .boundary-note {
+    background: #211f1a;
+    border: 1px solid #4a4030;
+    border-radius: 6px;
+    color: #f1e3c2;
+    max-width: 940px;
+    padding: 1rem 1.1rem;
+  }
+
+  .test-groups {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .test-card,
+  .lab-column,
+  .excerpt-box,
+  .placeholder-panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .test-card {
+    background: #181713;
+    padding: 1.1rem;
+  }
+
+  .test-card-featured {
+    padding: 1.25rem;
+  }
+
+  .pressure-lab {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1.25rem;
+  }
+
+  .lab-column {
+    background: #201e19;
+    min-width: 0;
+    padding: 1rem;
+  }
+
+  .column-note,
+  .source-note,
+  .placeholder-panel p,
+  .legend li {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .excerpt-box,
+  .placeholder-panel {
+    background: #14130f;
+    padding: 0.85rem;
+  }
+
+  .source-note {
+    margin-top: 0.6rem;
+  }
+
+  .pressure {
+    border-radius: 4px;
+    color: #f8efe0;
+    display: inline;
+    font-weight: 700;
+    padding: 0.08rem 0.28rem;
+  }
+
+  .pressure::after {
+    content: " [" attr(data-tag) "]";
+    font-size: 0.72em;
+    font-weight: 600;
+    opacity: 0.82;
+  }
+
+  .p-availability { background: #4f5f36; }
+  .p-summary { background: #6b5630; }
+  .p-authority { background: #5a4d6d; }
+  .p-reconstruction { background: #6a3f36; }
+  .p-platform { background: #385b61; }
+
+  .placeholder-stack {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .placeholder-panel h4 {
+    color: var(--accent);
+    font-size: 0.95rem;
+    margin: 0 0 0.25rem;
+  }
+
+  .legend {
+    border-top: 1px solid var(--line);
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+  }
+
+  .legend ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .legend li {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .legend-swatch {
+    border-radius: 999px;
+    display: inline-block;
+    height: 0.75rem;
+    width: 0.75rem;
+  }
+
+  .use-boundary {
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 920px) {
+    .pressure-lab {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
