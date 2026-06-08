@@ -155,7 +155,7 @@ It is readable as fiction, while also functioning as a narrative space where Met
 Publication status: Kindle eBook / first edition.
 
 ---
-# Kindle Publications
+## Kindle Publications
 
 The following Kindle eBooks are fictional works developed alongside Meta-Writing Ecology.
 
@@ -163,7 +163,7 @@ They are readable on their own as fiction.
 
 They are not explanations of the system, but narrative overflows from related structural fields: naming, classification, indexing, delivery, availability, allocation, repair, responsibility transfer, institutional language, delayed records, and machine-readable presence.
 
-## Available Kindle eBooks
+### Available Kindle eBooks
 
 - [**The Central Naming Tower: Book One — The Right to Name**](https://www.amazon.com/dp/B0H2JFVJ6R)
 - [**The Central Naming Tower: Book Two — The Door Without Number**](https://www.amazon.com/dp/B0H27831ZV)
