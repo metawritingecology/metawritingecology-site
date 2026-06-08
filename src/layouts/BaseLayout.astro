@@ -1,18 +1,40 @@
 ---
 import "../styles/global.css";
 
-const {
-  title = "Meta-Writing Ecology",
-  description = "A recursive linguistic system and structural diagnostic framework."
-} = Astro.props;
+const SITE_URL = "https://metawritingecology.org";
+const SITE_NAME = "Meta-Writing Ecology";
+const DEFAULT_TITLE = "Meta-Writing Ecology";
+const DEFAULT_DESCRIPTION =
+  "A recursive linguistic system and structural diagnostic framework.";
+
+const frontmatter = Astro.props.frontmatter ?? {};
+const title = Astro.props.title ?? frontmatter.title ?? DEFAULT_TITLE;
+const description =
+  Astro.props.description ?? frontmatter.description ?? DEFAULT_DESCRIPTION;
+const lang =
+  Astro.props.lang ??
+  frontmatter.lang ??
+  (Astro.url.pathname.startsWith("/zh/") ? "zh-Hant" : "en");
+const canonicalUrl = new URL(Astro.url.pathname, SITE_URL).toString();
+const ogLocale = lang === "zh-Hant" ? "zh_TW" : "en_US";
 ---
 
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
   </head>
 
   <body>
