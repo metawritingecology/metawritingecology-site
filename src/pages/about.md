@@ -16,7 +16,7 @@ Instead of presenting a finished theory, Meta-Writing Ecology operates as a **li
 
 ---
 
-# Working Interface
+## Working Interface
 
 Meta-Writing Ecology functions primarily as an ongoing writing and research system rather than a formalized service structure.
 
@@ -34,7 +34,7 @@ This interface remains intentionally limited. The system continues to develop pr
 
 ---
 
-# Author
+## Author
 
 [**Tzu Yuan Huang**](https://linktr.ee/tzuyuanhuang.tw)
 
