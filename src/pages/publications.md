@@ -25,7 +25,7 @@ Its value does not lie only in publication, but in its capacity to reorganize am
 
 ---
 
-# DOI Mirrors
+## DOI Mirrors
 
 Redundant archival mirrors for long-term preservation:
 
