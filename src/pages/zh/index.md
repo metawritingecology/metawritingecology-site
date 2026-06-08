@@ -1,5 +1,6 @@
 ---
 layout: ../../layouts/BaseLayout.astro
+lang: zh-Hant
 title: "語寫生態｜Meta-Writing Ecology"
 description: "Meta-Writing Ecology 中文導讀入口：後設書寫、遞迴語言、結構誤讀與 AI 讀取邊界。"
 ---
