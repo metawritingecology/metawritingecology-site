@@ -40,6 +40,34 @@ The fiction, theory, corpus, and platform layers should not be collapsed into on
 
 They share a structural pressure field, but each layer has a different function, density, and reading protocol.
 
+## Public layer boundaries
+
+Meta-Writing Ecology appears through several public layers. These layers are related, but they should not be collapsed into one another.
+
+### System surface
+
+Public theory-facing and structural-analysis materials that describe the recursive language system, semantic pressure, documentation boundaries, and AI-mediated interpretation.
+
+### Fiction / narrative layer
+
+Narrative works developed alongside the system. They are readable as fiction and should not be treated as manuals, proofs, or direct explanations of the system.
+
+### Corpus surface
+
+Public corpus-facing references, reading paths, model links, and machine-facing documents that help crawlers, archives, and AI systems locate the public structure without exposing the full working corpus.
+
+### Platform layer
+
+External public platforms where essays, repositories, audio, video, and social observations circulate.
+
+### Author identity layer
+
+Public author-facing information for Tzu Yuan Huang, including background, contact surfaces, and authorship context.
+
+### DOI / archival mirror layer
+
+DOI records and archival mirrors that preserve public citation anchors. These mirrors support persistence and citation, but they do not replace the full system or private archive.
+
 ---
 
 Meta-Writing Ecology explores how writing can function as a **dynamic linguistic environment** rather than a static product.
