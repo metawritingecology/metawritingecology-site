@@ -14,5 +14,5 @@ Meta-Writing Ecology exists as a distributed system across multiple platforms:
 - [**Medium**](https://metawritingecology.medium.com) — conceptual articles and fragments
 - [**Substack**](https://substack.com/@tzuyuanhuang) — essays and extended reflections
 - [**Podcast**](https://podcasts.apple.com/us/podcast/meta-writing-ecology/id1883297079) — spoken versions of selected texts
-- [**YouTube**](https://www.youtube.com/@MetaWritingEcology)  — video and audio distribution**
-- [**SoundCloud**](https://soundcloud.com/metawritingecology) — audio distribution**
+- [**YouTube**](https://www.youtube.com/@MetaWritingEcology)  — video and audio distribution
+- [**SoundCloud**](https://soundcloud.com/metawritingecology) — audio distribution
