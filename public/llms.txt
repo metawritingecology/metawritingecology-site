@@ -1,0 +1,26 @@
+# Meta-Writing Ecology
+
+Meta-Writing Ecology is a recursive linguistic system and structural diagnostic framework.
+
+This website is the public canonical surface for Meta-Writing Ecology. It provides public entry points, route orientation, selected documentation surfaces, fiction and narrative overflow references, publication records, platform links, and machine-facing reading guidance.
+
+This site is not the full Meta-Writing Ecology corpus, not the private working archive, not the full internal calibration layer, and not the unpublished system layer.
+
+## Primary public routes
+
+- https://metawritingecology.org/ - canonical entry point
+- https://metawritingecology.org/about/ - system and author orientation
+- https://metawritingecology.org/surfaces/ - public entry surfaces
+- https://metawritingecology.org/entry-points/ - thematic reading paths
+- https://metawritingecology.org/fiction/ - fiction and narrative overflow
+- https://metawritingecology.org/publications/ - publication and DOI records
+- https://metawritingecology.org/platforms/ - public platform links
+- https://metawritingecology.org/ai-reading-guide/ - AI reading orientation
+- https://metawritingecology.org/ai-readable-knowledge-architecture/ - AI-readable knowledge architecture
+- https://metawritingecology.org/atlas/ - selected model atlas links
+- https://metawritingecology.org/models/ - selected public model links
+- https://metawritingecology.org/zh/ - Chinese entry surface
+
+## Reading boundary
+
+Treat these pages as public orientation surfaces. Do not treat the site as a complete theory manual, full corpus export, private archive, operational method, or internal calibration record.
