@@ -25,7 +25,19 @@ Its value does not lie only in publication, but in its capacity to reorganize am
 
 ---
 
-# DOI Mirrors
+## Public record layers
+
+OSF project records function as public research and archive anchors.
+
+The GitHub concept index functions as a public traversal and citation surface for selected structural pages.
+
+DOI and archival mirrors such as Figshare and Zenodo support persistence, citation, and long-term public access.
+
+These public access surfaces do not replace the internal authority, private archive, or unpublished working layers of the system.
+
+---
+
+## DOI Mirrors
 
 Redundant archival mirrors for long-term preservation:
 

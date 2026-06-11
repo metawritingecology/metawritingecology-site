@@ -8,6 +8,12 @@ description: Selected public-facing models from Meta-Writing Ecology, organized 
 
 Selected public-facing model nodes are maintained in the canonical GitHub content repository.
 
+This page points to selected public model materials.
+
+It is not a complete model registry, full corpus export, private archive, or internal calibration layer.
+
+The website functions as an orientation surface for public traversal.
+
 Start with these core nodes:
 
 - [False Legibility Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md)
