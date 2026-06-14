@@ -32,6 +32,8 @@ The trilogy is published as Kindle eBooks through Amazon Kindle Direct Publishin
 
 [**The Field Below the Index**](https://amazon.com/author/metawritingecology) is a seven-part speculative fiction cycle developed alongside Meta-Writing Ecology.
 
+[Individual fiction page: The Field Below the Index](/fiction/the-field-below-the-index/)
+
 It belongs to the narrative simulation layer of the system.
 
 The work examines how a field can be used, praised, translated, depended upon, strategically framed, and pressured toward custody by external systems while remaining only partially recognized as a subject.
@@ -64,6 +66,8 @@ Publication status: Kindle eBook / first edition.
 
 [**The Available Edition**](https://www.amazon.com/dp/B0GZCQXWNH) is a fictional external-document cycle developed alongside Meta-Writing Ecology.
 
+[Individual fiction page: The Available Edition](/fiction/the-available-edition/)
+
 It belongs to the narrative interface layer of the system.
 
 The work is composed of fictional publication notes, correction notices, machine-reading guides, registries, boundary statements, citation notices, catalogue logs, availability statements, and other auxiliary documents surrounding an unavailable primary text.
@@ -81,6 +85,8 @@ Publication status: Kindle eBook / first edition.
 ## The Office of Allocated Meaning
 
 [The Office of Allocated Meaning: A Speculative Novel](https://www.amazon.com/dp/B0H2RXS9LS) is a speculative novel developed alongside Meta-Writing Ecology.
+
+[Individual fiction page: The Office of Allocated Meaning](/fiction/the-office-of-allocated-meaning/)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -102,6 +108,8 @@ Publication status: Kindle eBook / first edition.
 
 [**The City of the Residual Miracle**](https://www.amazon.com/dp/B0H34NDSN7) is a speculative novel developed alongside Meta-Writing Ecology.
 
+[Individual fiction page: The City of the Residual Miracle](/fiction/the-city-of-the-residual-miracle/)
+
 It belongs to the narrative simulation layer of the system.
 
 The work follows a civic-miracle environment in which mercy is requested, completed, recorded, thanked, reviewed, and preserved through public forms.
@@ -121,6 +129,8 @@ Publication status: Kindle eBook / first edition.
 ## The Repair of Neglected Wings
 
 [**The Repair of Neglected Wings**](https://www.amazon.com/dp/B0H3F1VR55) is a literary speculative novel developed alongside Meta-Writing Ecology.
+
+[Individual fiction page: The Repair of Neglected Wings](/fiction/the-repair-of-neglected-wings/)
 
 It belongs to the narrative simulation layer of the system.
 
