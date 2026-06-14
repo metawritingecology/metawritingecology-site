@@ -80,6 +80,7 @@ Meta-Writing Ecology 的公開索引、AI-readable 結構、出版記錄與跨�
 
 - [About the System](/about/)
 - [Entry Surfaces](/surfaces/)
+- [中文邊界說明](/zh/boundary/)
 - [Thematic Entry Points](/entry-points/)
 - [AI Reading Guide](/ai-reading-guide/)
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
