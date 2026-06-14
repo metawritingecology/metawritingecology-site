@@ -150,6 +150,8 @@ Publication status: Kindle eBook / first edition.
 
 [**The House Without Evidence**](https://www.amazon.com/dp/B0H3W3NSZH) is a literary novel developed alongside Meta-Writing Ecology.
 
+Links: [Fiction landing page](/fiction/the-house-without-evidence/) · [Kindle page](https://www.amazon.com/dp/B0H3W3NSZH)
+
 It belongs to the narrative simulation layer of the system.
 
 The work follows Nolan Vey, a client service specialist in an insurance company whose careful language helps clients navigate claims, notices, family decisions, policy documents, and letters they do not fully understand. His work is precise, useful, and often invisible. The system depends on his clarity, but rarely learns to see the person who provides it.
