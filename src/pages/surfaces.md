@@ -12,6 +12,8 @@ These surfaces do not replace the system architecture.
 
 They provide different points of access to the same recursive language ecology.
 
+For the public/private boundary, see [Public Boundary](/boundary/).
+
 ## Fiction surface
 
 For readers entering through fiction, begin with [Fiction / Narrative Overflow](/fiction/).
