@@ -15,7 +15,7 @@ The following documents outline key components of the Meta-Writing Ecology syste
 - [**Semantic Physics: Field Dynamics of Meaning Systems**](https://doi.org/10.17605/OSF.IO/XHFKS) — field-dynamic framework for semantic density, pressure, curvature, drift, and transformation.
 - [**Semantic Curvature Dynamics**](https://doi.org/10.17605/OSF.IO/UDTPG) — structural framework for migration, growth, dominance, and delayed cohesion in curved semantic space.
 - [**Reality Consistency Model**](https://doi.org/10.17605/OSF.IO/76ZJ2) — first recognizability, sustained reality, and structural verification in AI-mediated environments.
-- [**GitHub Concept Index**](https://github.com/metawritingecology/meta-writing-ecology) — DOI-linked structural pages for citation, search, and machine-mediated traversal.
+- [**GitHub Concept Index](https://github.com/metawritingecology/meta-writing-ecology) — DOI-linked structural pages for citation, search, and machine-mediated traversal.
 
 Together, these documents and interface layers provide the conceptual, structural, and archival foundation of the project.
 
@@ -34,6 +34,10 @@ The GitHub concept index functions as a public traversal and citation surface fo
 DOI and archival mirrors such as Figshare and Zenodo support persistence, citation, and long-term public access.
 
 These public access surfaces do not replace the internal authority, private archive, or unpublished working layers of the system.
+
+For a concise orientation to public anchors, see [Public Record Anchors](/public-records/).
+
+For public surface version boundaries, see [Public Version Notes](/public-version-notes/).
 
 ---
 
