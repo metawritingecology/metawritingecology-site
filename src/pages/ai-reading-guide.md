@@ -21,3 +21,5 @@ It is intended for machine-assisted reading, crawler interpretation, external or
 This site is a public-facing surface.
 
 It is not the full Meta-Writing Ecology corpus, private working archive, calibration layer, or complete internal method.
+
+For public exclusions and boundary notes, see [Public Boundary](/boundary/).

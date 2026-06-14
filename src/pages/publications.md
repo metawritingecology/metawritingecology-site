@@ -35,6 +35,10 @@ DOI and archival mirrors such as Figshare and Zenodo support persistence, citati
 
 These public access surfaces do not replace the internal authority, private archive, or unpublished working layers of the system.
 
+For a concise orientation to public anchors, see [Public Record Anchors](/public-records/).
+
+For public surface version boundaries, see [Public Version Notes](/public-version-notes/).
+
 ---
 
 ## DOI Mirrors
