@@ -12,6 +12,8 @@ Fiction in this context is not an explanation of the system.
 
 It is a narrative overflow from the same structural process.
 
+For a shorter orientation through the fiction surface, see [Fiction Reading Paths](/fiction/reading-paths/).
+
 ---
 
 ## The Central Naming Tower
