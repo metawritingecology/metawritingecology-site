@@ -52,6 +52,8 @@ Publication status: Kindle eBook / first edition.
 
 [**Delivery Not Established**](https://www.amazon.com/dp/B0H277BWRY) is a speculative novella developed alongside Meta-Writing Ecology.
 
+Links: [Fiction landing page](/fiction/delivery-not-established/) · [Kindle page](https://www.amazon.com/dp/B0H277BWRY)
+
 It belongs to the narrative simulation layer of the system.
 
 The work follows a municipal delivery and semantic maintenance environment in which address, presence, route, reception, and confirmation become unstable civic conditions rather than simple logistical facts.
