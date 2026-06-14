@@ -18,6 +18,8 @@ It is a narrative overflow from the same structural process.
 
 [**The Central Naming Tower**](https://amazon.com/author/metawritingecology) is a literary speculative fiction trilogy developed alongside Meta-Writing Ecology.
 
+Links: [Series landing page](/fiction/the-central-naming-tower/) · [Book One](https://www.amazon.com/dp/B0H2JFVJ6R) · [Book Two](https://www.amazon.com/dp/B0H27831ZV) · [Book Three](https://www.amazon.com/dp/B0H2BGZNQD)
+
 It is readable on its own as fiction.
 
 It is not a manual or a theory disguised as a story, but a narrative overflow from the same structural process: naming, classification, institutional language, care, memory, and the cost of being stabilized too early.
