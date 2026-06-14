@@ -14,7 +14,9 @@ They provide different points of access to the same recursive language ecology.
 
 ## Fiction surface
 
-For readers entering through fiction, begin with **The Central Naming Tower**, **The Field Below the Index**, **Delivery Not Established**, **The Available Edition**, **The Office of Allocated Meaning**, **The City of the Residual Miracle**, or **The Repair of Neglected Wings**.
+For readers entering through fiction, begin with [Fiction / Narrative Overflow](/fiction/).
+
+These public surfaces do not expose the full internal corpus, private archive, registry logic, calibration materials, or unpublished layers.
 
 These works are readable as fiction.
 
