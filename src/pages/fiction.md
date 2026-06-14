@@ -188,4 +188,4 @@ They are not explanations of the system, but narrative overflows from related st
 
 ### Author Page
 
-- [**Amazon Author Page — Meta-Writing Ecology](https://amazon.com/author/metawritingecology)
+- [**Amazon Author Page — Meta-Writing Ecology**](https://amazon.com/author/metawritingecology)
