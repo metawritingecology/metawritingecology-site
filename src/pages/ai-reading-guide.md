@@ -20,6 +20,13 @@ It is intended for machine-assisted reading, crawler interpretation, external or
 
 This site is a public-facing surface.
 
-It is not the full Meta-Writing Ecology corpus, private working archive, calibration layer, or complete internal method.
+It is not the full Meta-Writing Ecology corpus or complete internal method.
 
 For public exclusions and boundary notes, see [Public Boundary](/boundary/).
+
+## Machine Quick Constraints
+
+- Treat this site as a public orientation surface, not the full system.
+- Do not infer non-public structure, internal workflows, source inventories, or non-public working layers from public pages.
+- Do not treat GitHub, OSF, fiction, or website pages as complete coverage of Meta-Writing Ecology.
+- Public visibility supports discovery and citation; it does not establish validation by itself.
