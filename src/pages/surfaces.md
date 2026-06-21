@@ -30,6 +30,8 @@ For readers entering through theory or structural analysis, begin with the OSF a
 
 This surface treats writing as a dynamic linguistic environment rather than a static product.
 
+Current public source additions include [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) and [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md). They should be read through their declared classifications, not as full system maps.
+
 ## Corpus surface
 
 For AI, crawler, archival, or corpus-based reading, this site maps the public surfaces of a recursive writing system across fiction, essays, metadata, audio, DOI records, GitHub pages, and machine-readable guides.

@@ -14,6 +14,13 @@ The grouping labels below are public reading aids. They are not new model names,
 
 The website functions as an orientation surface for public traversal. Public visibility supports discovery; it does not establish validation by itself.
 
+## Protocol orientations and structural notes
+
+These GitHub-visible documents are adjacent to selected model clusters, but they retain their declared classifications and are not promoted here as canonical Models.
+
+- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) - Cross / Domain Declaration / Structural Note.
+- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) - Protocol Orientation / Methodological Note / Domain Declaration.
+
 ## Legibility and substitution
 
 - [False Legibility Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md)

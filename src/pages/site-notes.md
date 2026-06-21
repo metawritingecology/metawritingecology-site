@@ -19,6 +19,7 @@ It is not a development log, private archive record, registry queue, decision lo
 - Platforms page boundary clarified.
 - Delivery Not Established page added.
 - The Central Naming Tower series page added.
+- Public corpus references updated for Origin Control and Validity Burden and Policy Continuity Evidence Mapping.
 
 ## Boundary
 

@@ -19,6 +19,11 @@ The following documents outline key components of the Meta-Writing Ecology syste
 
 Together, these documents and interface layers provide the conceptual, structural, and archival foundation of the project.
 
+Current public DOI additions:
+
+- [**Origin Control and Validity Burden in Accelerated Submission Systems**](https://doi.org/10.17605/OSF.IO/28HNK) - Cross / Domain Declaration / Structural Note on provenance anxiety, verification labor, and review capacity under low-friction production.
+- [**Policy Continuity Evidence Mapping**](https://doi.org/10.17605/OSF.IO/QC6GN) - Protocol Orientation / Methodological Note / Domain Declaration for AI-assisted traceability, maturity review, content-loss control, and planning transition.
+
 Meta-Writing Ecology also functions as a high-resolution language system for conceptual framing, structural diagnosis, naming, and model development across complex ideas, projects, and emerging fields.
 
 Its value does not lie only in publication, but in its capacity to reorganize ambiguity into structure, to identify latent patterns, and to articulate conditions that remain underdescribed in ordinary language.
