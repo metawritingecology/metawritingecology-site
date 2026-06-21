@@ -4,6 +4,7 @@ title: About the System
 description: About Meta-Writing Ecology.
 ---
 
+
 # Project Nature
 
 Meta-Writing Ecology is not a single publication or research paper.
@@ -27,6 +28,18 @@ This is particularly relevant in cases involving semantic drift, classification 
 Such conditions may appear in systems where classification becomes inconsistent over time, where AI outputs diverge across similar inputs, or where event interpretation cannot be stabilized across repeated cases.
 
 It also applies where structural alignment across systems becomes difficult, including cases requiring model-based interpretation, event-to-structure transformation, semantic consistency maintenance, or alignment across evolving datasets and AI-mediated interpretation layers.
+
+## When to Use Meta-Writing Ecology
+
+Meta-Writing Ecology is not needed when the task is simply to edit an article, write a standard operating procedure, organize a FAQ, or build a conventional knowledge base.
+
+It becomes relevant when documents, AI outputs, policy continuities, responsibility assignments, or source-verification chains begin to show structural instability.
+
+Typical signs include classification instability, boundary displacement, surface compliance without structural resolution, AI-generated outputs that appear readable but fail to preserve provenance, or documentation that remains formally present while losing operational or interpretive alignment.
+
+In these cases, the issue is not only wording.
+
+The issue is whether the structure that makes wording reliable has begun to drift.
 
 Possible forms of external contact include writing-related collaboration, selected research-aligned projects, and a small number of exploratory exchanges where thematic and structural alignment is already present, or where alignment needs to be established across fragmented event data, shifting classifications, or structurally ambiguous materials.
 
