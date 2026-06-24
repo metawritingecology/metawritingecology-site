@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Model Atlas / Relation Map / Reading Paths
-description: Source-aligned navigation surface for the GitHub-visible Meta-Writing Ecology atlas, relation map, and reading paths.
+description: Public traversal surface for the Meta-Writing Ecology model atlas, relation map, and reading paths.
 ---
 
 # Model Atlas / Relation Map / Reading Paths
@@ -18,16 +18,16 @@ This page exposes the current source navigation layer for public site traversal.
 - [READING_PATHS.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
 - [Root README navigation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/README.md)
 
-## PR #2 Navigation Layer
+## Source Navigation Layer
 
-The merged GitHub navigation layer makes [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) discoverable from the source README, MODEL_ATLAS, RELATION_MAP, and READING_PATHS.
+The merged GitHub navigation layer makes [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) discoverable through the public source atlas, relation map, and reading paths.
 
-- Classification: Model / Conceptual Framework / Domain Declaration.
-- Source README category: Models.
-- MODEL_ATLAS category: Boundary / Representation.
-- RELATION_MAP category: Boundary / Representation.
-- Reading path: Evaluation / boundary robustness path.
-- DOI: [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
+It is positioned in the boundary / representation area of the source navigation system and connected to evaluation robustness, surface variation, false legibility, provenance, responsibility, and AI-readable knowledge architecture.
+
+The same source synchronization also preserves the corrected Reality Consistency DOI metadata.
+
+- Evaluation Boundary DOI: [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
+- Reality Consistency DOI: [https://doi.org/10.17605/OSF.IO/76ZJ2](https://doi.org/10.17605/OSF.IO/76ZJ2)
 
 ## Evaluation Boundary Relation-Map Surface
 
