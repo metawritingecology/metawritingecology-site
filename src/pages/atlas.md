@@ -1,30 +1,74 @@
 ---
 layout: ../layouts/BaseLayout.astro
-title: Model Atlas
-description: A navigational atlas for selected Meta-Writing Ecology models, relation maps, and reading paths.
+title: Model Atlas / Relation Map / Reading Paths
+description: Source-aligned navigation surface for the GitHub-visible Meta-Writing Ecology atlas, relation map, and reading paths.
 ---
 
-# Model Atlas
+# Model Atlas / Relation Map / Reading Paths
 
-The Model Atlas provides navigation across selected public-facing Meta-Writing Ecology model nodes.
+The canonical atlas, relation map, and reading paths are maintained in the public GitHub source repository.
 
-This page is a selected public atlas pointer.
+This page exposes the current source navigation layer for public site traversal. It does not replace the canonical source files, full internal archive, complete model registry, or non-public working map.
 
-It is not the full internal archive, full model registry, or complete working map of the system.
+## Canonical Source Navigation Files
 
-Canonical public atlas files may be maintained in the public GitHub content repository rather than duplicated in full on this website.
+- [GitHub Model Atlas README](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/README.md)
+- [MODEL_ATLAS.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/MODEL_ATLAS.md)
+- [RELATION_MAP.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/RELATION_MAP.md)
+- [READING_PATHS.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
+- [Root README navigation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/README.md)
 
-The canonical atlas files are maintained in the GitHub content repository.
+## PR #2 Navigation Layer
 
-- [Model Atlas](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/MODEL_ATLAS.md)
-- [Relation Map](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/RELATION_MAP.md)
-- [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
+The merged GitHub navigation layer makes [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) discoverable from the source README, MODEL_ATLAS, RELATION_MAP, and READING_PATHS.
+
+- Classification: Model / Conceptual Framework / Domain Declaration.
+- Source README category: Models.
+- MODEL_ATLAS category: Boundary / Representation.
+- RELATION_MAP category: Boundary / Representation.
+- Reading path: Evaluation / boundary robustness path.
+- DOI: [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
+
+## Evaluation Boundary Relation-Map Surface
+
+The source relation map places Evaluation Boundary in Boundary / Representation and relates it to these adjacent source files:
+
+- [false-legibility.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md)
+- [boundary-engineering.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/boundary-engineering.md)
+- [proxy-substitution.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/proxy-substitution.md)
+- [cost-visibility-redistribution.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/cost-visibility-redistribution.md)
+- [responsibility-alignment-model.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/responsibility-alignment-model.md)
+- [ai-readable-knowledge-architecture.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md)
+- [provenance-validity-separation-model.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/provenance-validity-separation-model.md)
+- [reality-consistency.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/reality-consistency.md)
+- [premature-circulation-diagnostics.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/premature-circulation-diagnostics.md)
+
+Use the canonical [RELATION_MAP.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/RELATION_MAP.md) for complete adjacency and function context.
+
+## Evaluation / Boundary Robustness Reading Path
+
+The source reading paths include this Evaluation / boundary robustness path:
+
+- [evaluation-boundary-failure-permitted-surface-variation.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md)
+- [false-legibility.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md)
+- [boundary-engineering.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/boundary-engineering.md)
+- [proxy-substitution.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/proxy-substitution.md)
+- [responsibility-alignment-model.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/responsibility-alignment-model.md)
+- [ai-readable-knowledge-architecture.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md)
+- [provenance-validity-separation-model.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/provenance-validity-separation-model.md)
+
+Use the canonical [READING_PATHS.md](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md) for all source reading paths.
 
 ## Current Public Corpus Additions
 
-The public corpus also includes recently published GitHub-visible documents that should be read through their stated classifications rather than as new canonical models.
+These GitHub-visible documents should be read through their source classifications rather than as new site-created categories:
 
-- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) - Cross / Domain Declaration / Structural Note.
-- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) - Protocol Orientation / Methodological Note / Domain Declaration.
+- [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) - Model / Conceptual Framework / Domain Declaration. DOI: [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
+- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) - Cross / Domain Declaration / Structural Note. DOI: [https://doi.org/10.17605/OSF.IO/28HNK](https://doi.org/10.17605/OSF.IO/28HNK)
+- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) - Protocol Orientation / Methodological Note / Domain Declaration. DOI: [https://doi.org/10.17605/OSF.IO/QC6GN](https://doi.org/10.17605/OSF.IO/QC6GN)
 
-Use the canonical reading paths for adjacency, sequence, and relation context rather than treating this website page as the complete atlas.
+## Source-Visible Unplaced / Human Review
+
+[External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) is source-visible and declares Cross / Structural Account / Domain Declaration with DOI [https://doi.org/10.17605/OSF.IO/6ZX9H](https://doi.org/10.17605/OSF.IO/6ZX9H).
+
+It is not currently placed in the source README, MODEL_ATLAS, RELATION_MAP, or READING_PATHS navigation layer, so this site marks it for human review rather than adding a site-invented category or relation path.

@@ -15,7 +15,9 @@ They help readers, citation systems, crawlers, and archives find public material
 - DOI / publication records listed on [Publications and DOI Records](/publications/)
 - OSF project records linked from public publication pages
 - The [GitHub Concept Index](https://github.com/metawritingecology/meta-writing-ecology)
-- Current OSF document records including [Origin Control and Validity Burden](https://doi.org/10.17605/OSF.IO/28HNK) and [Policy Continuity Evidence Mapping](https://doi.org/10.17605/OSF.IO/QC6GN)
+- Current OSF document records including [Evaluation Boundary Failure under Permitted Surface Variation](https://doi.org/10.17605/OSF.IO/ZH2EQ), [Origin Control and Validity Burden](https://doi.org/10.17605/OSF.IO/28HNK), and [Policy Continuity Evidence Mapping](https://doi.org/10.17605/OSF.IO/QC6GN)
+- The source-aligned [GitHub-visible model and navigation index](/models/)
+- The source-aligned [atlas, relation map, and reading paths surface](/atlas/)
 - Figshare and Zenodo mirrors already listed on the publications page
 - The [Amazon Author Page](https://amazon.com/author/metawritingecology) and Kindle fiction surface
 - Public platform links gathered on [Platforms](/platforms/)

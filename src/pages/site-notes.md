@@ -19,7 +19,8 @@ It is not a development log, private archive record, registry queue, decision lo
 - Platforms page boundary clarified.
 - Delivery Not Established page added.
 - The Central Naming Tower series page added.
-- Public corpus references updated for Origin Control and Validity Burden and Policy Continuity Evidence Mapping.
+- Public corpus references updated for Evaluation Boundary Failure under Permitted Surface Variation, Origin Control and Validity Burden, and Policy Continuity Evidence Mapping.
+- Model index, atlas, relation-map, reading-path, and DOI/public-record surfaces synchronized to the current GitHub-visible source navigation layer.
 
 ## Boundary
 

@@ -22,7 +22,7 @@ It is a guide to publicly available entry points. It is not a full archive, comp
 
 - [AI Reading Guide](/ai-reading-guide/) supports machine-assisted reading and crawler interpretation.
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/) provides a public machine-readable orientation layer.
-- [Model Atlas](/atlas/) and [Selected Public Model Clusters](/models/) point to selected public model materials.
+- [Model Atlas](/atlas/) and [GitHub-Visible Model and Navigation Index](/models/) expose source-aligned model, relation-map, reading-path, and DOI traversal surfaces.
 - [Document Types](/document-types/) explains how to read different public-facing page types.
 
 ## Public record surfaces

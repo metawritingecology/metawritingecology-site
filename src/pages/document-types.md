@@ -20,7 +20,7 @@ Examples include [About the System](/about/), [Entry Surfaces](/surfaces/), [Pub
 
 Traversal pages help readers, crawlers, and citation systems move across public materials.
 
-Examples include [AI Reading Guide](/ai-reading-guide/), [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/), [Model Atlas](/atlas/), and [Selected Public Model Clusters](/models/).
+Examples include [AI Reading Guide](/ai-reading-guide/), [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/), [Model Atlas](/atlas/), and [GitHub-Visible Model and Navigation Index](/models/).
 
 ## Public record pages
 
