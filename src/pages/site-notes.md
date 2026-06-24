@@ -21,6 +21,7 @@ It is not a development log, private archive record, registry queue, decision lo
 - The Central Naming Tower series page added.
 - Public corpus references updated for Evaluation Boundary Failure under Permitted Surface Variation, Origin Control and Validity Burden, and Policy Continuity Evidence Mapping.
 - Model index, atlas, relation-map, reading-path, and DOI/public-record surfaces synchronized to the current GitHub-visible source navigation layer.
+- AI-Readable Knowledge Architecture links updated to point to canonical GitHub source files instead of broken relative `.md` routes.
 
 ## Boundary
 
