@@ -10,6 +10,8 @@ This page gathers public record anchors for Meta-Writing Ecology, including OSF 
 
 DOI and archive records support persistence, discovery, and citation. They do not replace the complete corpus, private archive, non-public working layers, or canonical source files.
 
+Canonical source DOI record means that the public DOI and source file are recognized as public record anchors. It does not necessarily mean that the entry has been fully placed in the GitHub-visible navigation ontology.
+
 ## Current Canonical Source DOI Records
 
 - [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) - [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
