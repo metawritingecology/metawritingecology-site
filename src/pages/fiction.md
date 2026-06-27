@@ -12,6 +12,8 @@ Fiction in this context is not an explanation of the system.
 
 It is a narrative overflow from the same structural process.
 
+Fiction pages are public narrative surfaces. They may contain structural motifs adjacent to Meta-Writing Ecology, but they are not model proofs, theory manuals, registry entries, or source validation layers.
+
 For a shorter orientation through the fiction surface, see [Fiction Reading Paths](/fiction/reading-paths/).
 
 ---
@@ -44,7 +46,7 @@ The work examines how a field can be used, praised, translated, depended upon, s
 
 Its recurring structures include function without recognition, recognition cost, praise as soft capture, translation residue, supply dependency, strategic portability, and custody without ownership.
 
-It is readable as fiction, while also functioning as a narrative space where several Meta-Writing Ecology structures appear in story form.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -62,7 +64,7 @@ The work follows a municipal delivery and semantic maintenance environment in wh
 
 Its recurring structures include failed delivery, unlanded address, unacknowledged presence, receiving-site mismatch, held weight, route dependency, municipal notices, and the difference between being sent, being received, and being established.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through delivery systems, civic records, route failures, and the administrative handling of unresolved arrival.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -82,7 +84,7 @@ It stages a condition in which the surrounding materials become more readable, c
 
 Its recurring structures include unavailable primary text, external-document narration, auxiliary-material dominance, machine-reading constraint, summary refusal, citation boundary, catalogue placeholder removal, availability without access, and the risk that absence will be converted into a substitute text.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through publication surfaces, reading constraints, archive behavior, metadata pressure, and the administrative handling of an absent center.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -104,7 +106,7 @@ The novel follows how one preliminary portion creates misassignment, witness rel
 
 Its recurring structures include public meaning supply, allocation pressure, meaning ration cards, surface preparation, civic explanation, unassigned events, premature portioning, surviving witness association, correction hold, ambiguity status, non-portion surfaces, non-allocation, empty acknowledgment objects, unassigned holding, and the risk that explanation itself becomes a form of misassignment.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through civic distribution systems, public explanation queues, administrative correction, surface residues, role attachment, and the institutional handling of meanings that may need to remain unassigned.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -126,7 +128,7 @@ The novel stages the structural problem of what remains after fulfillment. Compl
 
 Its recurring structures include completed requests, residual miracle, public gratitude, chapel record, proof pressure, active surfaces, ordinary objects, Retirers, Invokers, Speakers, Gratitude Council review, quiet rooms, dust rooms, film courts, cooling houses, unblessed squares, passing tokens, old instructions, bad linen, dull bells, plain water, old thresholds, non-receiving, no stop words, and the procedural question of what a work was originally asked to do.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through civic miracles, institutional memory, residual surfaces, public thanks, procedural restraint, language hazard, and the administrative handling of completed work that has not fully left.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -146,7 +148,7 @@ The novel stages a city in which ordinary administrative language can become phy
 
 Its recurring structures include neglected wings, repair boundaries, responsibility sheets, source lists, quiet rooms, background frequencies, temporary receiving, unresolved transfer records, old drainage maps, resident reports, delayed receipt, archive restriction, non-reading perimeters, civic memory, procedural closure, and the danger of mistaking silence for repair.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through infrastructure, classification, delayed records, administrative language, source conditions, responsibility transfer, and the forms of harm that survive by being called ordinary.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
@@ -168,7 +170,7 @@ The novel stages a life shaped by documents, family language, public memory, inh
 
 Its recurring structures include standard voice, acceptable replies, client-facing clarity, no-pressure language, useful objects, household inventory, evidence without explanation, inherited caution, public memory, archive climate, family rules, former language, maternal reply, paternal language, sentence-level repair, active request clarity, decision rights, no application, object release, homemade words, allowed guards, work without recognized form, and the difference between an answer and a sentence.
 
-It is readable as fiction, while also functioning as a narrative space where Meta-Writing Ecology structures appear through ordinary work, insurance documents, family rules, inherited caution, public memory, language loss, household objects, administrative clarity, and the quiet pressure of living around what cannot be fully evidenced.
+It is readable independently as fiction. Its motifs are adjacent to Meta-Writing Ecology but do not function as formal model evidence.
 
 Publication status: Kindle eBook / first edition.
 
