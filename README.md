@@ -8,7 +8,7 @@ This repository does not contain the full Meta-Writing Ecology corpus, private w
 
 ## Project purpose
 
-The website functions as a canonical public entry surface.
+The website functions as the primary public entry surface for Meta-Writing Ecology. It is canonical as a public orientation route, but it is not the complete registry, internal authority map, or full working corpus.
 
 It is intended to be readable by human visitors, crawlers, archives, and AI-mediated reading systems without exposing private or internal working layers.
 
