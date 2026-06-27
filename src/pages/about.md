@@ -7,13 +7,9 @@ description: About Meta-Writing Ecology.
 
 # Project Nature
 
-Meta-Writing Ecology is not a single publication or research paper.
-
-It functions as an **ongoing linguistic ecosystem**, where texts accumulate, interact, and gradually reveal structural patterns.
+Meta-Writing Ecology is not a single publication or research paper. It functions as an ongoing recursive text system in which documents, models, public surfaces, fiction, and AI-readable materials accumulate, interact, and expose structural patterns over time.
 
 Through continuous writing, reflection, and conceptual modeling, the project explores how language systems can evolve over time rather than remain fixed or finalized.
-
-Instead of presenting a finished theory, Meta-Writing Ecology operates as a **living system of texts**, where meaning emerges through scale, recursion, and long-term accumulation.
 
 ---
 
