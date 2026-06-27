@@ -1,14 +1,18 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: GitHub-Visible Model and Navigation Index
-description: Source-aligned public index of GitHub-visible Meta-Writing Ecology models, cross entries, protocols, diagnostics, and navigation surfaces.
+description: Source-aligned public traversal index for GitHub-visible Meta-Writing Ecology files, classifications, DOI records, and navigation surfaces.
 ---
 
 # GitHub-Visible Model and Navigation Index
 
 This page is a public traversal index for GitHub-visible Meta-Writing Ecology source files.
 
-It is not a complete model registry, full corpus export, private archive, or internal calibration layer. The canonical source files remain in the public GitHub repository.
+It is not a complete model registry, full corpus export, private archive, or internal calibration layer. The canonical public source files remain in the public GitHub repository.
+
+The grouping labels below are navigation aids. They follow source-repository structure where available, but they do not create new model names, promote entries into the internal registry, or replace the complete authority map.
+
+DOI records support persistence, discovery, and citation. They do not by themselves establish complete registry placement, full navigation placement, or internal authority status.
 
 ## Canonical Navigation
 
@@ -17,6 +21,8 @@ It is not a complete model registry, full corpus export, private archive, or int
 - [Relation Map](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/RELATION_MAP.md)
 - [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
 - [Site Atlas Surface](/atlas/)
+
+These navigation files support public traversal. They do not replace the full internal archive, complete registry, or authority map.
 
 ## Boundary / Representation
 
@@ -68,4 +74,6 @@ It is not a complete model registry, full corpus export, private archive, or int
 
 [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) is source-visible and declares Cross / Structural Account / Domain Declaration with DOI [https://doi.org/10.17605/OSF.IO/6ZX9H](https://doi.org/10.17605/OSF.IO/6ZX9H).
 
-It is not currently placed in the source README, MODEL_ATLAS, RELATION_MAP, or READING_PATHS navigation layer, so this site marks it for human review rather than adding a site-invented category or relation path.
+This file is visible in the public source repository but is not currently placed in the source README, MODEL_ATLAS, RELATION_MAP, or READING_PATHS navigation layer.
+
+It is therefore marked here for human review rather than converted into a site-invented category or relation path.
