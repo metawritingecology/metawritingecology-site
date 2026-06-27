@@ -10,6 +10,8 @@ This page provides the outer AI-reading surface for Meta-Writing Ecology.
 
 It is intended for machine-assisted reading, crawler interpretation, external orientation, and structural traversal of the public Meta-Writing Ecology corpus.
 
+It is a reading protocol and orientation layer, not a model entry, registry item, or source validation layer.
+
 ## Primary machine-facing documents
 
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
