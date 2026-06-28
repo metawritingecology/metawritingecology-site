@@ -1,8 +1,5 @@
 ---
-import {
-  diagnosticReadNextLinks,
-  type DiagnosticEntry,
-} from "../data/diagnosticEntries";
+import type { DiagnosticEntry } from "../data/diagnosticEntries";
 
 interface Props {
   entry: DiagnosticEntry;
@@ -38,15 +35,15 @@ const { entry, compact = false } = Astro.props;
       <summary>Read Next</summary>
       <ul>
         {
-          entry.readNext.map((item) => {
-            const href = diagnosticReadNextLinks[item];
-
-            return (
-              <li>
-                {href ? <a href={href}>{item}</a> : <span>{item}</span>}
-              </li>
-            );
-          })
+          entry.readNext.map((item) => (
+            <li>
+              {item.href ? (
+                <a href={item.href}>{item.label}</a>
+              ) : (
+                <span>{item.label}</span>
+              )}
+            </li>
+          ))
         }
       </ul>
     </details>

@@ -1,18 +1,22 @@
+export type ReadNextItem = {
+  label: string;
+  href?: string;
+  source?: "site" | "source-repo";
+};
+
 export type DiagnosticEntry = {
   id: string;
   title: string;
   category: string;
   observedProblem: string;
   possibleStructures: string[];
-  readNext: string[];
+  readNext: ReadNextItem[];
   boundaryReminder: string;
   minimalFormula: string;
 };
 
-// Only titles with verified matching pages under src/pages are linked.
-export const diagnosticReadNextLinks: Record<string, string> = {
-  "AI-Readable Knowledge Architecture": "/ai-readable-knowledge-architecture/",
-};
+const sourceRepoBase =
+  "https://github.com/metawritingecology/meta-writing-ecology/blob/main";
 
 export const diagnosticEntries: DiagnosticEntry[] = [
   {
@@ -29,9 +33,21 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "false legibility",
     ],
     readNext: [
-      "AI-Readable Knowledge Architecture",
-      "Premature Circulation Model",
-      "Reality Consistency Model",
+      {
+        label: "AI-Readable Knowledge Architecture",
+        href: "/ai-readable-knowledge-architecture/",
+        source: "site",
+      },
+      {
+        label: "Premature Circulation Model",
+        href: `${sourceRepoBase}/premature-circulation-model.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Reality Consistency Model",
+        href: `${sourceRepoBase}/reality-consistency.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "This does not mean all summaries are invalid. The issue is whether a summary has been structurally repositioned as source, evidence, or authority.",
@@ -49,9 +65,21 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "documentation boundary failure",
     ],
     readNext: [
-      "AI-Readable Knowledge Architecture",
-      "False Legibility",
-      "Boundary-Role Segmentation Model",
+      {
+        label: "AI-Readable Knowledge Architecture",
+        href: "/ai-readable-knowledge-architecture/",
+        source: "site",
+      },
+      {
+        label: "False Legibility",
+        href: `${sourceRepoBase}/false-legibility.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Boundary-Role Segmentation Model",
+        href: `${sourceRepoBase}/boundary-role-segmentation-model.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "Readability does not prove correct positioning. This entry concerns cases where surface clarity hides structural mislocation.",
@@ -70,9 +98,21 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "downstream correction",
     ],
     readNext: [
-      "Premature Circulation Model",
-      "Premature Circulation Diagnostics",
-      "Reality Consistency Model",
+      {
+        label: "Premature Circulation Model",
+        href: `${sourceRepoBase}/premature-circulation-model.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Premature Circulation Diagnostics",
+        href: `${sourceRepoBase}/premature-circulation-diagnostics.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Reality Consistency Model",
+        href: `${sourceRepoBase}/reality-consistency.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "Circulation is not inherently harmful. This applies when movement begins before recognition, accountability, or verification conditions are mature enough.",
@@ -91,9 +131,21 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "burden absorption",
     ],
     readNext: [
-      "Responsibility Alignment Diagnostics",
-      "Boundary-Role Segmentation Model",
-      "Cost Visibility & Redistribution Model",
+      {
+        label: "Responsibility Alignment Diagnostics",
+        href: `${sourceRepoBase}/responsibility-alignment-diagnostics.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Boundary-Role Segmentation Model",
+        href: `${sourceRepoBase}/boundary-role-segmentation-model.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Cost Visibility & Redistribution Model",
+        href: `${sourceRepoBase}/cost-visibility-redistribution.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "This does not deny that responsibility can shift. It asks whether the shift is structurally aligned with authority, ownership, capacity, and burden.",
@@ -112,9 +164,21 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "hidden concentration",
     ],
     readNext: [
-      "Cost Visibility & Redistribution Model",
-      "Benefit-Burden Allocation Regimes",
-      "Responsibility Alignment Diagnostics",
+      {
+        label: "Cost Visibility & Redistribution Model",
+        href: `${sourceRepoBase}/cost-visibility-redistribution.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Benefit–Burden Allocation Regimes",
+        href: `${sourceRepoBase}/benefit-burden-allocation-regimes.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Responsibility Alignment Diagnostics",
+        href: `${sourceRepoBase}/responsibility-alignment-diagnostics.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "The issue is not whether a tool or system saves effort. The issue is where remaining cost becomes visible, hidden, displaced, or absorbed.",
@@ -133,9 +197,17 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "visible continuity != functional adequacy",
     ],
     readNext: [
-      "Descriptive Carrying Failure",
-      "Semantic Pressure",
-      "Reality Consistency Model",
+      { label: "Descriptive Carrying Failure" },
+      {
+        label: "Semantic Pressure",
+        href: `${sourceRepoBase}/semantic-pressure.md`,
+        source: "source-repo",
+      },
+      {
+        label: "Reality Consistency Model",
+        href: `${sourceRepoBase}/reality-consistency.md`,
+        source: "source-repo",
+      },
     ],
     boundaryReminder:
       "This does not mean every old term is obsolete. It applies when a descriptive framework remains recognizable while losing carrying capacity under new structural load.",
