@@ -1,0 +1,59 @@
+---
+import {
+  diagnosticReadNextLinks,
+  type DiagnosticEntry,
+} from "../data/diagnosticEntries";
+
+interface Props {
+  entry: DiagnosticEntry;
+  compact?: boolean;
+}
+
+const { entry, compact = false } = Astro.props;
+---
+
+<article
+  class:list={["diagnostic-card", { "diagnostic-card--compact": compact }]}
+  data-category={entry.category}
+>
+  <p class="diagnostic-card__category">{entry.category}</p>
+  <h3>{entry.title}</h3>
+
+  <p class="diagnostic-card__problem">{entry.observedProblem}</p>
+
+  <p class="diagnostic-card__formula">
+    <span>Minimal formula</span>
+    {entry.minimalFormula}
+  </p>
+
+  <div class="diagnostic-card__details">
+    <details>
+      <summary>Possible Structural Patterns</summary>
+      <ul>
+        {entry.possibleStructures.map((structure) => <li>{structure}</li>)}
+      </ul>
+    </details>
+
+    <details>
+      <summary>Read Next</summary>
+      <ul>
+        {
+          entry.readNext.map((item) => {
+            const href = diagnosticReadNextLinks[item];
+
+            return (
+              <li>
+                {href ? <a href={href}>{item}</a> : <span>{item}</span>}
+              </li>
+            );
+          })
+        }
+      </ul>
+    </details>
+
+    <details>
+      <summary>Boundary Reminder</summary>
+      <p class="diagnostic-card__boundary">{entry.boundaryReminder}</p>
+    </details>
+  </div>
+</article>

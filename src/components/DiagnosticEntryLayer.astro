@@ -1,0 +1,112 @@
+---
+import DiagnosticEntryCard from "./DiagnosticEntryCard.astro";
+import type { DiagnosticEntry } from "../data/diagnosticEntries";
+
+interface Props {
+  entries: DiagnosticEntry[];
+  compact?: boolean;
+  limit?: number;
+  showControls?: boolean;
+}
+
+const {
+  entries,
+  compact = false,
+  limit,
+  showControls = !compact,
+} = Astro.props;
+const visibleEntries =
+  typeof limit === "number" ? entries.slice(0, limit) : entries;
+const categories = Array.from(new Set(entries.map((entry) => entry.category)));
+---
+
+<section
+  class:list={["diagnostic-layer", { "diagnostic-layer--compact": compact }]}
+  data-diagnostic-layer={showControls ? "true" : undefined}
+>
+  {
+    showControls && (
+      <div class="diagnostic-layer__controls" aria-label="Diagnostic entry controls">
+        <div class="diagnostic-layer__filters" aria-label="Filter by category">
+          <button
+            class="diagnostic-layer__filter is-active"
+            type="button"
+            data-filter="all"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          {categories.map((category) => (
+            <button
+              class="diagnostic-layer__filter"
+              type="button"
+              data-filter={category}
+              aria-pressed="false"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <button class="diagnostic-layer__shuffle" type="button" data-shuffle>
+          Shuffle entries
+        </button>
+      </div>
+    )
+  }
+
+  <div class="diagnostic-layer__grid" data-diagnostic-list>
+    {
+      visibleEntries.map((entry) => (
+        <DiagnosticEntryCard entry={entry} compact={compact} />
+      ))
+    }
+  </div>
+
+  <script is:inline>
+    for (const layer of document.querySelectorAll("[data-diagnostic-layer]")) {
+      const list = layer.querySelector("[data-diagnostic-list]");
+      const filterButtons = layer.querySelectorAll("[data-filter]");
+      const shuffleButton = layer.querySelector("[data-shuffle]");
+
+      if (!list) {
+        continue;
+      }
+
+      for (const button of filterButtons) {
+        button.addEventListener("click", () => {
+          const filter = button.getAttribute("data-filter");
+
+          for (const item of filterButtons) {
+            const isActive = item === button;
+            item.classList.toggle("is-active", isActive);
+            item.setAttribute("aria-pressed", String(isActive));
+          }
+
+          for (const card of list.querySelectorAll("[data-category]")) {
+            const matches =
+              filter === "all" || card.getAttribute("data-category") === filter;
+            card.hidden = !matches;
+          }
+        });
+      }
+
+      if (shuffleButton) {
+        shuffleButton.addEventListener("click", () => {
+          const cards = Array.from(list.children);
+
+          for (let index = cards.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            const current = cards[index];
+            cards[index] = cards[swapIndex];
+            cards[swapIndex] = current;
+          }
+
+          for (const card of cards) {
+            list.appendChild(card);
+          }
+        });
+      }
+    }
+  </script>
+</section>
