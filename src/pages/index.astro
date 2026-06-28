@@ -1,4 +1,6 @@
 ---
+import DiagnosticEntryLayer from "../components/DiagnosticEntryLayer.astro";
+import { diagnosticEntries } from "../data/diagnosticEntries";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
@@ -50,6 +52,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <li><a href="/publications/">Publications and DOI Records</a></li>
       <li><a href="/platforms/">Platforms</a></li>
     </ul>
+  </section>
+
+  <section>
+    <h2>Diagnostic Entry Layer</h2>
+
+    <p>
+      A low-commitment entry layer for readers asking whether a problem they
+      are seeing may fall within the descriptive range of Meta-Writing Ecology.
+    </p>
+
+    <p>
+      This is not a solution layer, audit, policy recommendation, or complete
+      diagnosis. Each entry moves from an observed problem surface to possible
+      structural patterns, related documents, and boundary reminders.
+    </p>
+
+    <p>
+      <a class="diagnostic-entry-link" href="/diagnostic-entry-layer/">
+        Explore diagnostic entries
+      </a>
+    </p>
+
+    <DiagnosticEntryLayer
+      entries={diagnosticEntries}
+      compact={true}
+      limit={3}
+      showControls={false}
+    />
   </section>
 
   <section>
