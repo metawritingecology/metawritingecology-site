@@ -28,7 +28,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     possibleStructures: [
       "source-summary boundary collapse",
       "citation surface confusion",
-      "AI-readable != AI-understood",
+      "AI-readable ≠ AI-understood",
       "premature circulation",
       "false legibility",
     ],
@@ -51,7 +51,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "This does not mean all summaries are invalid. The issue is whether a summary has been structurally repositioned as source, evidence, or authority.",
-    minimalFormula: "summary access != source authority",
+    minimalFormula: "summary access ≠ source authority",
   },
   {
     id: "readable-but-mislocated",
@@ -83,7 +83,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "Readability does not prove correct positioning. This entry concerns cases where surface clarity hides structural mislocation.",
-    minimalFormula: "readable != correctly positioned",
+    minimalFormula: "readable ≠ correctly positioned",
   },
   {
     id: "movement-before-recognition",
@@ -116,7 +116,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "Circulation is not inherently harmful. This applies when movement begins before recognition, accountability, or verification conditions are mature enough.",
-    minimalFormula: "movement != recognition",
+    minimalFormula: "movement ≠ recognition",
   },
   {
     id: "responsibility-visible-node",
@@ -125,9 +125,9 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     observedProblem:
       "The person who sees, reviews, fixes, signs, or catches the issue becomes treated as responsible for the whole condition.",
     possibleStructures: [
-      "visibility != responsibility",
-      "capacity != ownership",
-      "assistance != transfer",
+      "visibility ≠ responsibility",
+      "capacity ≠ ownership",
+      "assistance ≠ transfer",
       "burden absorption",
     ],
     readNext: [
@@ -149,7 +149,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "This does not deny that responsibility can shift. It asks whether the shift is structurally aligned with authority, ownership, capacity, and burden.",
-    minimalFormula: "visibility != responsibility",
+    minimalFormula: "visibility ≠ responsibility",
   },
   {
     id: "cost-visible-wrong-place",
@@ -158,7 +158,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     observedProblem:
       "A system appears efficient because visible cost decreased, while verification, repair, coordination, or maintenance burden moved elsewhere.",
     possibleStructures: [
-      "perceived cost != total cost",
+      "perceived cost ≠ total cost",
       "cost redistribution",
       "downstream burden",
       "hidden concentration",
@@ -182,7 +182,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "The issue is not whether a tool or system saves effort. The issue is where remaining cost becomes visible, hidden, displaced, or absorbed.",
-    minimalFormula: "visible cost != total cost",
+    minimalFormula: "visible cost ≠ total cost",
   },
   {
     id: "description-cannot-carry-pressure",
@@ -194,7 +194,7 @@ export const diagnosticEntries: DiagnosticEntry[] = [
       "descriptive carrying failure",
       "framework strain",
       "interpretive load",
-      "visible continuity != functional adequacy",
+      "visible continuity ≠ functional adequacy",
     ],
     readNext: [
       { label: "Descriptive Carrying Failure" },
@@ -211,6 +211,6 @@ export const diagnosticEntries: DiagnosticEntry[] = [
     ],
     boundaryReminder:
       "This does not mean every old term is obsolete. It applies when a descriptive framework remains recognizable while losing carrying capacity under new structural load.",
-    minimalFormula: "visible continuity != functional adequacy",
+    minimalFormula: "visible continuity ≠ functional adequacy",
   },
 ];
