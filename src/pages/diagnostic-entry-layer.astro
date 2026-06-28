@@ -1,0 +1,35 @@
+---
+import DiagnosticEntryLayer from "../components/DiagnosticEntryLayer.astro";
+import { diagnosticEntries } from "../data/diagnosticEntries";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Diagnostic Entry Layer"
+  description="Problem surfaces, possible structures, reading paths, and boundary reminders."
+>
+  <section class="diagnostic-layer__header">
+    <h1>Diagnostic Entry Layer</h1>
+
+    <p class="lede">
+      Problem surfaces, possible structures, reading paths, and boundary
+      reminders.
+    </p>
+
+    <p>
+      This layer helps readers ask whether a problem they are seeing may belong
+      to the descriptive range of Meta-Writing Ecology. It does not provide
+      solutions, audits, policy recommendations, or complete diagnoses. Each
+      entry starts from a visible problem surface and points toward possible
+      structures, related documents, and boundary reminders.
+    </p>
+
+    <p class="note">
+      These entries are provisional routing surfaces. They do not replace
+      canonical models, OSF documents, or source texts. A card indicates
+      possible structural relevance, not final classification.
+    </p>
+  </section>
+
+  <DiagnosticEntryLayer entries={diagnosticEntries} showControls={true} />
+</BaseLayout>
