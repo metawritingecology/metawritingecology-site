@@ -47,6 +47,10 @@ Only source-visible materials are represented here. This is not the full working
 - [Proxy Substitution](https://github.com/metawritingecology/meta-writing-ecology/blob/main/proxy-substitution.md) · [DOI](https://doi.org/10.17605/OSF.IO/HYXFC)
 - [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) · [DOI](https://doi.org/10.17605/OSF.IO/QC6GN)
 
+### Cross Structures
+
+- [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
+
 ### Semantic Field / System Architecture
 
 - [Cultural Curvature Unified Field](https://github.com/metawritingecology/meta-writing-ecology/blob/main/cultural-curvature-unified-field.md) · [DOI](https://doi.org/10.17605/OSF.IO/JSW8T)
@@ -69,9 +73,3 @@ These source-navigation surfaces support public traversal without replacing the 
 - [Relation Map](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/RELATION_MAP.md)
 - [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
 - [Site Atlas Surface](/atlas/)
-
-## Source Navigation Placement
-
-- [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
-
-This record is source-visible and now placed in the canonical source navigation layer, including the source README, MODEL_ATLAS, RELATION_MAP, and READING_PATHS.
