@@ -30,8 +30,8 @@ This is a public navigation surface. It does not replace the canonical source fi
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
 - [Source repository](https://github.com/metawritingecology/meta-writing-ecology)
 
-## Placement Notes
+## Source Navigation Placement
 
 - [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
 
-This record is source-visible but not currently placed in the source README, MODEL_ATLAS, RELATION_MAP, or READING_PATHS navigation layer.
+This record is source-visible and now placed in the canonical source navigation layer, including the source README, MODEL_ATLAS, RELATION_MAP, and READING_PATHS.

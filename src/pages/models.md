@@ -70,10 +70,8 @@ These source-navigation surfaces support public traversal without replacing the 
 - [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
 - [Site Atlas Surface](/atlas/)
 
-## Unplaced Source-Visible Record
+## Source Navigation Placement
 
 - [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
 
-This file is visible in the public source repository but is not currently placed in the source README, MODEL_ATLAS, RELATION_MAP, or READING_PATHS navigation layer.
-
-It is therefore listed separately rather than converted into a site-invented category or relation path.
+This record is source-visible and now placed in the canonical source navigation layer, including the source README, MODEL_ATLAS, RELATION_MAP, and READING_PATHS.
