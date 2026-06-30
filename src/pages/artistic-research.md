@@ -1,13 +1,11 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: "Artistic Research"
-description: "A bridge-facing orientation page for Meta-Writing Ecology, describing research, writing, system design, fiction, public deployment, and machine reading as inseparable surfaces of the same structure."
+description: "An art-facing bridge page for Meta-Writing Ecology, showing how research, writing, fiction, public deployment, and machine reading operate as connected surfaces of one structural system."
 status: "public orientation"
 classification: "interface"
 visibility: "public"
 language: "en"
-suggested_nav_label: "Artistic Research"
-suggested_nav_position: "bridge: after Fiction, before Publications / Platforms"
 ---
 
 # Artistic Research
@@ -24,42 +22,15 @@ This page functions as a bridge layer.
 
 It connects the system's fiction, publication, platform, public-anchor, and machine-reading surfaces without replacing the model layer, source-navigation layer, diagnostic layer, or research architecture.
 
-Recommended navigation placement:
-
-```text
-Fiction
-→ Artistic Research
-→ Publications
-→ Platforms
-```
-
-This placement keeps the page from becoming the primary identity frame of the site.
-
 Its role is not to reclassify Meta-Writing Ecology as an art project.
 
 Its role is to make visible how the same structure can be read through artistic research, conceptual writing, networked language systems, and machine-readable public surfaces.
 
-## Position
+## Minimal Formulation
 
-Meta-Writing Ecology treats language systems as both research material and formal material.
+Meta-Writing Ecology is not research plus art.
 
-The system works through:
-
-- naming
-- classification
-- boundary formation
-- public surface design
-- diagnostic language
-- narrative projection
-- citation visibility
-- machine-readable indexing
-- summary displacement
-- semantic drift
-- correction and re-stabilization
-
-These operations are not only topics of analysis. They are also part of the work's form.
-
-The system therefore occupies a position between research infrastructure, conceptual writing, artistic research, net-based practice, language-based art, and machine-readable knowledge architecture.
+It is a system in which research, writing, classification, public deployment, narrative, and machine reading form a single observable structure.
 
 ## Research and Art Are Not Separated Here
 
@@ -71,7 +42,7 @@ Art is not only an object, image, exhibition, or performance.
 
 Art is also the formation of a surface through which a system becomes observable, classifiable, misreadable, and re-readable.
 
-Meta-Writing Ecology operates where these two functions overlap:
+Meta-Writing Ecology operates where these functions overlap:
 
 ```text
 research
@@ -173,46 +144,13 @@ It is one of the conditions the system studies.
 
 The work may be read as artistic research when its public surfaces are treated as part of its form.
 
-Suggested bridge-oriented entry path:
-
-```text
-1. Home
-   Public orientation surface.
-
-2. About
-   System identity and scope.
-
-3. Entry Surfaces
-   Explanation of public-facing surfaces.
-
-4. Entry Points
-   Reader-facing entry routes.
-
-5. Diagnostic Entry Layer
-   Structural reading interface.
-
-6. Atlas / Models
-   Model and relation layer.
-
-7. Fiction
-   Narrative projection surface.
-
-8. Artistic Research
-   Bridge layer connecting fiction, publication, platform, repository, and machine-reading surfaces.
-
-9. Publications
-   Public citation and publication surface.
-
-10. Platforms
-   External distribution and interface layer.
-
-11. AI Reading Guide / AI Architecture
-   Machine-facing reading and boundary layer.
-```
-
 The system does not ask the viewer to consume a single object.
 
 It asks the viewer, reader, or machine to encounter a distributed structure and observe how classification, legibility, and misreading occur.
+
+A possible reading path begins from the public website, moves through entry surfaces and diagnostic layers, continues into the atlas and model layer, crosses through fiction and this artistic-research bridge, and then moves toward publications, platforms, GitHub anchors, and AI-readable architecture.
+
+The work is therefore not contained in one page or one object. It appears through relations among surfaces.
 
 ## Exhibition or Presentation Version
 
@@ -248,81 +186,3 @@ It does not define the full system.
 It does not expose the internal working corpus, private archive, registry remediation layer, calibration material, or unpublished source structure.
 
 It only states how the same system may be read when approached through artistic research, conceptual practice, networked language systems, and machine-readable public surfaces.
-
-## Minimal Formulation
-
-```text
-Meta-Writing Ecology is not research plus art.
-It is a system in which research, writing, classification, public deployment, narrative, and machine reading form a single observable structure.
-```
-
-## Suggested Navigation Placement
-
-Recommended bridge placement:
-
-```text
-Home
-About
-Entry Surfaces
-Entry Points
-Diagnostic Entry Layer
-Atlas
-Models
-Fiction
-Artistic Research
-Publications
-Platforms
-AI Reading Guide
-AI Architecture
-中文
-```
-
-Alternative placement if the site later treats artistic research as a core orientation layer:
-
-```text
-Home
-About
-Artistic Research
-Entry Surfaces
-Entry Points
-Diagnostic Entry Layer
-Atlas
-Models
-Fiction
-Publications
-Platforms
-AI Reading Guide
-AI Architecture
-中文
-```
-
-The bridge placement is preferred for the current site posture.
-
-It preserves Meta-Writing Ecology's primary identity as a structural research and source-navigation system while making the artistic-research reading available.
-
-## Chinese Navigation Label
-
-Suggested Chinese label:
-
-```text
-藝術研究介面
-```
-
-Shorter option:
-
-```text
-藝術研究
-```
-
-For the current site posture, `藝術研究介面` is preferred because it preserves the page's interface function.
-
-## Status
-
-```text
-Public orientation page.
-Bridge layer.
-Not a full model.
-Not a full protocol.
-Not a separate art project.
-Not an internal registry entry.
-```
