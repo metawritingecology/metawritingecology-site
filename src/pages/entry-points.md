@@ -8,6 +8,8 @@ description: Thematic entry points into Meta-Writing Ecology, organized by recur
 
 Meta-Writing Ecology can be entered through thematic zones rather than only through foundational documents.
 
+For the shortest public entry into the system, start with [Three Questions Entry](/three-questions/).
+
 These entry points do not simplify the texts themselves. They provide navigational access to recurring structural regions within the public corpus.
 
 ## Thematic Entry Zones
