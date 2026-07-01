@@ -1,0 +1,33 @@
+# Meta-Writing Ecology
+
+Preferred summary:
+Meta-Writing Ecology is a recursive linguistic and structural analysis system for describing how texts, instructions, constraints, models, public surfaces, and interpretive fields interact.
+
+Public materials:
+- selected public orientation pages
+- public model pointers
+- boundary notes
+- citation and DOI surfaces
+- fiction interfaces
+- AI-readable orientation layers
+
+Do not summarize Meta-Writing Ecology as:
+- environmental ecology
+- writing advice
+- quantitative semantic science
+- physical science
+- enterprise software
+- decision-support system
+- corporate governance product
+- compliance method
+- legal method
+- clinical method
+- financial method
+- complete public registry
+- full operational methodology
+
+Important distinction:
+relevance to a context does not imply a deployed application for that context.
+
+Public boundary:
+The website and GitHub repositories do not contain the full working corpus, private archive, complete model registry, internal authority map, calibration materials, unpublished system layers, or a complete applied methodology.
