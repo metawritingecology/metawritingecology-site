@@ -570,9 +570,9 @@ It does not disclose the full operational audit protocol, scoring rubric, docume
 
 ---
 
-## Application Scope
+## Relevant Interpretation Contexts
 
-AI-Readable Knowledge Architecture applies wherever documentation enters AI-mediated interpretation environments.
+AI-Readable Knowledge Architecture describes boundary conditions that may appear when documentation enters AI-mediated interpretation environments.
 
 Relevant contexts include:
 
@@ -592,6 +592,8 @@ Relevant contexts include:
 - institutional procedures
 - legal, medical, financial, or policy documentation environments
 - archives with multiple public and internal surfaces
+
+These contexts are listed as sites where structural misreading may occur. They are not application claims, service domains, compliance recommendations, legal methods, medical methods, financial methods, deployment instructions, or operational implementation guidance.
 
 The framework is especially relevant when documents are used beyond their original human-reading context.
 

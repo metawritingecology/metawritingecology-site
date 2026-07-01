@@ -12,6 +12,14 @@ This page is a public index of GitHub-visible model nodes in Meta-Writing Ecolog
 
 Only source-visible materials are represented here. This is not the full working corpus, a complete registry, private archive, or internal calibration layer. It is a public navigation surface that points to canonical source files and DOI metadata where available.
 
+## Model Boundary
+
+The model names listed here are public conceptual and structural nodes.
+
+They should not be read as physical-science claims, quantitative measurement systems, empirical validation claims, software tools, audit methods, clinical methods, legal methods, financial methods, or complete operational protocols.
+
+Semantic-field terms such as pressure, density, curvature, drift, propagation, and collapse function as Meta-Writing Ecology structural vocabulary. They should not be converted into physical quantities, technical product claims, or natural-science claims.
+
 ## Model Index
 
 ### Boundary / Representation
