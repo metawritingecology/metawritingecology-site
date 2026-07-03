@@ -90,13 +90,32 @@ li {
   font-size: 0.95rem;
 }
 
-.site-nav a {
+.site-nav a,
+.site-search-trigger {
   text-decoration: none;
   color: var(--muted);
 }
 
-.site-nav a:hover {
+.site-search-trigger {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #201d18;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  padding: 0 0.55rem;
+}
+
+.site-nav a:hover,
+.site-search-trigger:hover,
+.site-search-trigger:focus-visible {
   color: var(--text);
+}
+
+.site-search-trigger:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
 }
 
 .lede {
