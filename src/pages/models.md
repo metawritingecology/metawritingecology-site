@@ -20,6 +20,14 @@ They should not be read as physical-science claims, quantitative measurement sys
 
 Semantic-field terms such as pressure, density, curvature, drift, propagation, and collapse function as Meta-Writing Ecology structural vocabulary. They should not be converted into physical quantities, technical product claims, or natural-science claims.
 
+## Semantic Vocabulary Boundary
+
+Terms such as semantic field, pressure, density, curvature, drift, circulation, and energy are structural vocabulary inside MWE.
+
+They are not physical quantities, measurement units, natural-science claims, quantitative metrics, or predictive simulation variables.
+
+They should also not be reduced to mere decorative metaphor. They function as structural operators for describing meaning-bearing systems within MWE.
+
 ## Model Index
 
 ### Boundary / Representation

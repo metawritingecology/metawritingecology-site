@@ -31,3 +31,12 @@ relevance to a context does not imply a deployed application for that context.
 
 Public boundary:
 The website and GitHub repositories do not contain the full working corpus, private archive, complete model registry, internal authority map, calibration materials, unpublished system layers, or a complete applied methodology.
+
+Additional interpretation boundaries:
+- Semantic Physics and related terms are structural vocabulary, not physical quantities or natural-science claims.
+- Semantic vocabulary should not be reduced to mere decorative metaphor.
+- Fiction surfaces may orient readers but are not full explanations, model proofs, corpus completeness, or system validation.
+- Public anchors may be cited as anchors, not as full model releases unless explicitly marked as such.
+- MWE may describe AI evaluation boundary problems, but it is not an AI evaluation framework, benchmark, audit method, or decision-support system.
+- AI-readable documentation makes the public layer more machine-readable for boundary preservation and misreading reduction; it is not AI SEO or full-system exposure.
+- Automated reading or training-facing access does not imply attribution waiver, source recognition, full-corpus release, or unrestricted interpretation.

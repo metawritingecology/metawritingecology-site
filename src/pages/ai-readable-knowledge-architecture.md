@@ -506,6 +506,12 @@ AI-Readable Knowledge Architecture
 
 ## Distinction
 
+AI-readable documentation makes selected public surfaces more machine-readable.
+
+Its purpose is boundary preservation, source positioning, citation visibility, and misreading reduction.
+
+It should not be read as AI SEO, traffic optimization, ranking strategy, unrestricted machine interpretation, or full-system exposure.
+
 AI-Readable Knowledge Architecture is not ordinary AI-readable documentation.
 
 ```text
