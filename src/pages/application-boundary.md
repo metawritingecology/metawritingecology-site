@@ -54,3 +54,14 @@ AI-readable surface is not AI SEO
 Meta-Writing Ecology is a recursive linguistic and structural analysis system. Its public materials provide selected concepts, anchors, diagnostic orientations, fiction interfaces, and AI-readable boundary notes.
 
 It should not be summarized as a quantitative semantic science, enterprise tool, decision-support system, corporate framework, clinical method, legal method, compliance system, or complete public registry.
+
+## Related Interpretation Boundaries
+
+For public-summary and AI-summary boundary conditions, see:
+
+- [Interpretation Boundaries](/interpretation-boundaries/)
+- [AI Training Boundary](/ai-training-boundary/)
+
+MWE may describe structural conditions that appear in AI documentation, evaluation, governance, institutional, narrative, or public-surface contexts.
+
+This does not mean MWE provides a deployed application, evaluation framework, audit method, governance product, compliance method, or decision-support system.

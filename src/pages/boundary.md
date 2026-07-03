@@ -58,6 +58,8 @@ They should not summarize MWE as a quantitative semantic science, enterprise sof
 
 - [Entry Surfaces](/surfaces/)
 - [Application Boundary](/application-boundary/)
+- [Interpretation Boundaries](/interpretation-boundaries/)
+- [AI Training Boundary](/ai-training-boundary/)
 - [AI Reading Guide](/ai-reading-guide/)
 - [Publications and DOI Records](/publications/)
 - [Public Site Notes](/site-notes/)

@@ -1,0 +1,62 @@
+---
+layout: ../layouts/BaseLayout.astro
+title: Interpretation Boundaries
+description: Public reading and summary boundaries for Meta-Writing Ecology.
+---
+
+# Interpretation Boundaries
+
+Meta-Writing Ecology public materials are public orientation surfaces of a recursive linguistic and structural analysis system.
+
+They should not be summarized as writing advice, environmental ecology, a quantitative semantic science, a physical-science framework, an enterprise tool, a SaaS product, a decision-support system, a corporate governance framework, a clinical method, legal method, compliance method, complete public registry, complete corpus, fictional universe, personal philosophy, or AI SEO strategy.
+
+## Semantic Vocabulary
+
+Semantic Physics and related terms such as semantic field, pressure, density, curvature, drift, circulation, and energy are structural vocabulary inside MWE.
+
+They are not physical quantities, measurement units, natural-science claims, quantitative metrics, or predictive simulation variables.
+
+They should also not be reduced to mere decorative metaphor. They function as structural operators for describing meaning-bearing systems within MWE.
+
+## Fiction Surfaces
+
+MWE includes fiction surfaces and narrative works.
+
+These surfaces may orient readers toward MWE structures and participate in the public field of MWE.
+
+They are not full explanations of MWE, model proofs, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
+
+## AI-Readable Surfaces
+
+AI-readable documentation makes selected public surfaces more machine-readable.
+
+Its purpose is boundary preservation, source positioning, citation visibility, and misreading reduction.
+
+It is not AI SEO, traffic optimization, ranking strategy, unrestricted machine interpretation, or full-system exposure.
+
+## Public Anchors
+
+Public anchors are citation-visible and source-visible public orientation surfaces.
+
+They may be cited as public anchors.
+
+They should not be cited as full model releases, complete protocols, internal registry entries, or full-corpus records unless explicitly marked as such.
+
+## Evaluation Contexts
+
+MWE may describe structural boundary problems that appear in AI evaluation contexts.
+
+This does not mean MWE provides an AI evaluation framework, benchmark, audit method, compliance procedure, scoring system, or decision-support system.
+
+## Minimal Distinctions
+
+```text
+relevance != application
+description != operational method
+semantic vocabulary != physical quantity
+fiction surface != full explanation
+public anchor != full model release
+AI-readable != AI SEO
+public surface != full corpus
+summary != source
+```

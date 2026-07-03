@@ -22,6 +22,10 @@ For public model pages or machine-readable documents hosted on GitHub, cite the 
 
 GitHub is a public traversal and citation surface. It should not be treated as the complete system, complete validation layer, or full internal method.
 
+Public anchors may be cited as public anchors or public orientation surfaces.
+
+They should not be cited as full model releases, complete protocols, internal registry entries, or full-corpus records unless explicitly marked as such.
+
 ## Website pages
 
 For orientation, boundary, surface-map, or document-type pages, cite the specific website page.

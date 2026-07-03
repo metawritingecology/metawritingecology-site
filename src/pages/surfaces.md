@@ -20,6 +20,10 @@ These public surfaces do not expose the full internal corpus, private archive, r
 
 The fiction works are readable as fiction. They are not explanations of Meta-Writing Ecology, but narrative overflows from the same structural field.
 
+Fiction surfaces may orient readers toward MWE structures and participate in the public field of MWE.
+
+They should not be treated as full explanations of MWE, model proofs, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
+
 ## System surface
 
 For readers entering through theory or structural analysis, begin with the OSF and GitHub materials on recursive language systems, Semantic Physics, Cultural Curvature, semantic pressure, structural diagnosis, and AI-mediated interpretation.
