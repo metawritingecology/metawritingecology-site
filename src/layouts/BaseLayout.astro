@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import PublicSearchModal from "../components/PublicSearchModal.astro";
 
 const {
   title = "Meta-Writing Ecology",
@@ -13,10 +14,6 @@ const {
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <script
-      type="module"
-      src="https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"
-    ></script>
   </head>
 
   <body>
@@ -46,18 +43,7 @@ const {
         <a href="/ai-readable-knowledge-architecture/">AI Architecture</a>
         <a href="/zh/">中文</a>
       </nav>
-      <search-modal-snippet
-        id="public-mwe-search"
-        api-url="https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudflare.com/"
-        placeholder="Search public MWE surfaces…"
-        max-results="10"
-        max-render-results="10"
-        show-url="true"
-        hide-thumbnails="true"
-        theme="auto"
-        shortcut="k"
-        use-meta-key="true"
-      ></search-modal-snippet>
+      <PublicSearchModal />
     </header>
 
     <main>
@@ -71,28 +57,5 @@ const {
         full working corpus or a complete applied methodology.
       </p>
     </footer>
-    <script is:inline>
-      (() => {
-        const openSearchModal = async () => {
-          if (!("customElements" in window)) return;
-
-          const modal = document.getElementById("public-mwe-search");
-          if (!modal) return;
-
-          await customElements.whenDefined("search-modal-snippet");
-          modal.open();
-        };
-
-        document.addEventListener("click", (event) => {
-          const target = event.target;
-          if (!(target instanceof Element)) return;
-
-          const trigger = target.closest("[data-search-modal-trigger]");
-          if (!trigger) return;
-
-          openSearchModal();
-        });
-      })();
-    </script>
   </body>
 </html>

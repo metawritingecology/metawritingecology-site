@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Entry Surfaces
-description: Public entry surfaces for Meta-Writing Ecology.
+description: Public entry surfaces for navigating MWE without exposing the full internal corpus, private archive, or calibration layers.
 ---
 
 # Entry Surfaces

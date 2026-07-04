@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: AI Training Boundary
-description: Boundary conditions for automated reading, crawler access, and training-facing ingestion of public MWE surfaces.
+description: Boundary conditions for automated reading, crawler access, and training-facing ingestion of public MWE surfaces without source replacement.
 ---
 
 # AI Training Boundary

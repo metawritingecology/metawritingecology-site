@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Interpretation Boundaries
-description: Public reading and summary boundaries for Meta-Writing Ecology.
+description: Public reading and summary boundaries for MWE, including AI SEO, Semantic Physics, fiction-surface, corpus, and evaluation-context distinctions.
 ---
 
 # Interpretation Boundaries
