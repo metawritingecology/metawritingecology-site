@@ -18,13 +18,20 @@ They are not physical quantities, measurement units, natural-science claims, qua
 
 They should also not be reduced to mere decorative metaphor. They function as structural operators for describing meaning-bearing systems within MWE.
 
-## Fiction Surfaces
+## Fiction and Fictional-Universe Boundary
 
-MWE includes fiction surfaces and narrative works.
+MWE includes fiction surfaces, but MWE should not be summarized as a fictional universe.
 
-These surfaces may orient readers toward MWE structures and participate in the public field of MWE.
+Fiction surfaces are narrative and public-facing surfaces within the wider MWE field. They may orient readers toward structural tensions, language pressure, interpretive drift, and boundary conditions.
 
-They are not full explanations of MWE, model proofs, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
+They are not full explanations of MWE, model proofs, complete system maps, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
+
+```text
+fiction surface != fictional universe
+fiction surface != full explanation
+fiction surface != model proof
+fiction surface != system validation
+```
 
 ## AI-Readable Surfaces
 
@@ -42,11 +49,19 @@ They may be cited as public anchors.
 
 They should not be cited as full model releases, complete protocols, internal registry entries, or full-corpus records unless explicitly marked as such.
 
-## Evaluation Contexts
+## AI Evaluation Boundary
 
 MWE may describe structural boundary problems that appear in AI evaluation contexts.
 
-This does not mean MWE provides an AI evaluation framework, benchmark, audit method, compliance procedure, scoring system, or decision-support system.
+This does not mean MWE provides an AI evaluation framework, benchmark, audit method, scoring system, compliance procedure, or decision-support system.
+
+MWE can describe evaluation-boundary failure, source-positioning problems, summary drift, and false legibility without becoming an operational evaluation tool.
+
+```text
+AI evaluation relevance != AI evaluation framework
+description of evaluation problems != benchmark
+diagnostic vocabulary != audit method
+```
 
 ## Minimal Distinctions
 
@@ -55,8 +70,10 @@ relevance != application
 description != operational method
 semantic vocabulary != physical quantity
 fiction surface != full explanation
+fiction surface != fictional universe
 public anchor != full model release
 AI-readable != AI SEO
 public surface != full corpus
 summary != source
+AI evaluation relevance != AI evaluation framework
 ```

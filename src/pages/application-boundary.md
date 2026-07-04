@@ -29,6 +29,22 @@ MWE should not be summarized as:
 - a complete public registry
 - a full implementation methodology
 
+## Clinical, Legal, Compliance, and Decision Boundaries
+
+MWE should not be used as a clinical decision tool, medical method, legal decision tool, legal advice framework, compliance method, audit procedure, governance product, or decision-support system.
+
+MWE may describe structural and interpretive conditions that appear in clinical, legal, compliance, governance, or institutional contexts.
+
+That relevance does not create application authority.
+
+```text
+clinical relevance != clinical decision method
+legal relevance != legal advice
+compliance relevance != compliance procedure
+governance relevance != governance framework
+description != decision support
+```
+
 ## Context Relevance
 
 MWE may describe structural pressures that appear in documentation, institutions, AI-mediated systems, public repositories, fiction surfaces, citation systems, search summaries, and organizational communication.
