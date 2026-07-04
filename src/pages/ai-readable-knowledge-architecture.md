@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: AI-Readable Knowledge Architecture
-description: A structural orientation for preventing AI-mediated misreading through documentation boundaries and machine-facing interpretation constraints.
+description: Boundary-oriented documentation architecture for preventing AI-mediated misreading across retrieval, citation, summary, and reuse.
 ---
 
 # AI-Readable Knowledge Architecture

@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Three Questions Entry
-description: A short public entry surface for Meta-Writing Ecology.
+description: Short public entry surface that routes readers toward MWE structural regions without acting as a full model or diagnostic authority.
 ---
 
 # Three Questions Entry

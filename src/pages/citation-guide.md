@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Citation Guide
-description: Boundary-preserving citation guidance for public Meta-Writing Ecology surfaces.
+description: Boundary-preserving citation guidance for public MWE surfaces, DOI records, source links, and public anchor references.
 ---
 
 # Citation Guide

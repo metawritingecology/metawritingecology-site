@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Models
-description: Public index of GitHub-visible model nodes, source links, and DOI metadata in Meta-Writing Ecology.
+description: Public index of GitHub-visible MWE model nodes, source links, DOI metadata, and model-boundary notes.
 ---
 
 # Models

@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Public Boundary | What Is Not Included
-description: Public boundary notes for Meta-Writing Ecology.
+description: Public boundary notes clarifying what the MWE website includes, excludes, and should not be treated as.
 ---
 
 # Public Boundary / What Is Not Included

@@ -1,0 +1,465 @@
+---
+const endpoint = "https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudflare.com/search";
+---
+
+<div class="public-search" data-public-search data-endpoint={endpoint}>
+  <div class="public-search__backdrop" data-search-close hidden></div>
+  <section
+    class="public-search__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="public-search-title"
+    hidden
+  >
+    <div class="public-search__header">
+      <h2 id="public-search-title">Search public MWE surfaces</h2>
+      <button class="public-search__close" type="button" data-search-close aria-label="Close search">
+        ×
+      </button>
+    </div>
+
+    <form class="public-search__form" data-search-form>
+      <input
+        class="public-search__input"
+        data-search-input
+        type="search"
+        placeholder="Search public MWE surfaces…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="public-search__submit" type="submit">Search</button>
+    </form>
+
+    <p class="public-search__status" data-search-status aria-live="polite"></p>
+    <ol class="public-search__results" data-search-results></ol>
+  </section>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector("[data-public-search]");
+    if (!root) return;
+
+    const endpoint = root.getAttribute("data-endpoint");
+    const dialog = root.querySelector(".public-search__dialog");
+    const backdrop = root.querySelector(".public-search__backdrop");
+    const form = root.querySelector("[data-search-form]");
+    const input = root.querySelector("[data-search-input]");
+    const status = root.querySelector("[data-search-status]");
+    const results = root.querySelector("[data-search-results]");
+
+    if (!endpoint || !dialog || !backdrop || !form || !input || !status || !results) return;
+
+    const titleByPath = new Map([
+      ["/interpretation-boundaries/", "Interpretation Boundaries"],
+      ["/ai-readable-knowledge-architecture/", "AI-Readable Knowledge Architecture"],
+      ["/ai-reading-guide/", "AI Reading Guide"],
+      ["/application-boundary/", "Application Boundary"],
+      ["/boundary/", "Public Boundary"],
+      ["/ai-training-boundary/", "AI Training Boundary"],
+      ["/citation-guide/", "Citation Guide"],
+      ["/models/", "Models"],
+      ["/surfaces/", "Public Surfaces"],
+      ["/public-surface-map/", "Public Surface Map"],
+      ["/public-anchors/", "Public Anchors"],
+      ["/three-questions/", "Three Questions"],
+      ["/llms.txt", "llms.txt"],
+    ]);
+
+    const fallbackByPath = new Map([
+      [
+        "/interpretation-boundaries/",
+        "Public reading and summary boundaries for Meta-Writing Ecology, including distinctions that prevent AI SEO, physical-science, and full-corpus misreadings.",
+      ],
+      [
+        "/ai-readable-knowledge-architecture/",
+        "Boundary-oriented documentation for preventing AI-mediated misreading across retrieval, citation, summary, and reuse.",
+      ],
+      [
+        "/ai-reading-guide/",
+        "Outer reading guidance for automated and machine-assisted traversal of public MWE surfaces.",
+      ],
+      [
+        "/application-boundary/",
+        "Scope limits for applying Meta-Writing Ecology vocabulary without turning public orientation into an operational method.",
+      ],
+      [
+        "/boundary/",
+        "Public boundary notes clarifying what the website includes, excludes, and should not be treated as.",
+      ],
+      [
+        "/ai-training-boundary/",
+        "Training-facing and crawler-facing boundary conditions for public MWE surfaces.",
+      ],
+      [
+        "/citation-guide/",
+        "Citation guidance for referencing public Meta-Writing Ecology surfaces without treating them as the full system.",
+      ],
+      [
+        "/models/",
+        "Public index of source-visible MWE model nodes, source links, and boundary notes.",
+      ],
+      [
+        "/surfaces/",
+        "Public entry surfaces for navigating Meta-Writing Ecology without exposing the full internal corpus.",
+      ],
+      [
+        "/public-surface-map/",
+        "Map of public orientation surfaces and their boundary roles within the public MWE site.",
+      ],
+      [
+        "/public-anchors/",
+        "Website-readable index of public MWE anchor records and source-visible navigation points.",
+      ],
+      [
+        "/three-questions/",
+        "A short external entry surface that routes attention toward MWE structural regions.",
+      ],
+      ["/llms.txt", "Public machine-reading orientation file for the MWE site."],
+    ]);
+
+    const exactTitleBoosts = new Map([
+      ["application boundary", "/application-boundary/"],
+      ["citation guide", "/citation-guide/"],
+      ["ai training boundary", "/ai-training-boundary/"],
+      ["interpretation boundaries", "/interpretation-boundaries/"],
+    ]);
+
+    let controller = null;
+    let debounceTimer = null;
+    let isOpen = false;
+
+    const normalizeQuery = (value) => value.trim().toLowerCase().replace(/\s+/g, " ");
+
+    const isUsefulText = (value) => {
+      if (typeof value !== "string") return false;
+      const text = value.trim();
+      return text.length > 0 && text.toLowerCase() !== "undefined";
+    };
+
+    const pathFromUrl = (url) => {
+      try {
+        const path = new URL(url).pathname || "/";
+        if (path !== "/" && !path.endsWith("/") && !path.includes(".")) return `${path}/`;
+        return path;
+      } catch {
+        return "";
+      }
+    };
+
+    const deriveTitleFromPath = (path) => {
+      if (titleByPath.has(path)) return titleByPath.get(path);
+      if (path === "/" || path === "") return "Meta-Writing Ecology";
+
+      const lastSegment = path.replace(/\/$/, "").split("/").filter(Boolean).pop() || "";
+      const cleanSegment = lastSegment.replace(/\.[^.]+$/, "");
+      if (!cleanSegment) return "Meta-Writing Ecology";
+
+      return cleanSegment
+        .split("-")
+        .filter(Boolean)
+        .map((word) => {
+          const lower = word.toLowerCase();
+          if (lower === "ai") return "AI";
+          if (lower === "mwe") return "MWE";
+          if (lower === "llms") return "llms";
+          return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+        })
+        .join(" ");
+    };
+
+    const titleForChunk = (chunk) => {
+      const metadataTitle = chunk?.item?.metadata?.title;
+      if (isUsefulText(metadataTitle)) return metadataTitle.trim();
+
+      const path = pathFromUrl(chunk?.item?.key || "");
+      return deriveTitleFromPath(path);
+    };
+
+    const fallbackForChunk = (chunk) => {
+      const path = pathFromUrl(chunk?.item?.key || "");
+      const pageFallback = fallbackByPath.get(path);
+      if (pageFallback) return pageFallback;
+
+      const metadataDescription = chunk?.item?.metadata?.description;
+      if (isUsefulText(metadataDescription)) return metadataDescription.trim();
+
+      return "Public Meta-Writing Ecology surface.";
+    };
+
+    const cleanChunkText = (value) => {
+      if (!isUsefulText(value)) return "";
+
+      return value
+        .replace(/^\s*---[\s\S]*?---\s*/, " ")
+        .replace(/```[a-z]*\n?/gi, " ")
+        .replace(/```/g, " ")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/[*_`>]/g, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    const findQueryMatch = (text, query) => {
+      const lowerText = text.toLowerCase();
+      const normalized = normalizeQuery(query);
+      const phraseIndex = lowerText.indexOf(normalized);
+      if (phraseIndex !== -1) return phraseIndex;
+
+      const terms = normalized
+        .split(/[^a-z0-9.]+/i)
+        .map((term) => term.trim())
+        .filter((term) => term.length > 2 || term === "ai");
+
+      for (const term of terms) {
+        const index = lowerText.indexOf(term);
+        if (index !== -1) return index;
+      }
+
+      return -1;
+    };
+
+    const excerptFromText = (text, query) => {
+      const cleanText = cleanChunkText(text);
+      const maxLength = 280;
+      if (!cleanText) return "";
+      if (cleanText.length <= maxLength) return cleanText;
+
+      const matchIndex = findQueryMatch(cleanText, query);
+      let start = matchIndex === -1 ? 0 : Math.max(0, matchIndex - 90);
+      let end = Math.min(cleanText.length, start + maxLength);
+
+      if (end - start < maxLength) start = Math.max(0, end - maxLength);
+      if (start > 0) {
+        const nextSpace = cleanText.indexOf(" ", start);
+        if (nextSpace > -1 && nextSpace < start + 30) start = nextSpace + 1;
+      }
+      if (end < cleanText.length) {
+        const previousSpace = cleanText.lastIndexOf(" ", end);
+        if (previousSpace > start + 120) end = previousSpace;
+      }
+
+      const prefix = start > 0 ? "... " : "";
+      const suffix = end < cleanText.length ? " ..." : "";
+      return `${prefix}${cleanText.slice(start, end).trim()}${suffix}`;
+    };
+
+    const excerptForChunk = (chunk, query) => {
+      const excerpt = excerptFromText(chunk?.text || "", query);
+      return excerpt || fallbackForChunk(chunk);
+    };
+
+    const displayUrl = (url) => {
+      try {
+        return decodeURI(url);
+      } catch {
+        return url || "";
+      }
+    };
+
+    const setStatus = (message) => {
+      status.textContent = message;
+    };
+
+    const clearResults = () => {
+      results.textContent = "";
+    };
+
+    const renderResult = (chunk, query, options = {}) => {
+      const url = chunk?.item?.key || "";
+      const title = options.title || titleForChunk(chunk);
+      const excerpt = options.excerpt || excerptForChunk(chunk, query);
+
+      const item = document.createElement("li");
+      item.className = options.related ? "public-search__result public-search__result--related" : "public-search__result";
+
+      const link = document.createElement("a");
+      link.className = "public-search__result-link";
+      link.href = url || "#";
+
+      const heading = document.createElement("span");
+      heading.className = "public-search__result-title";
+      heading.textContent = title || "Public MWE surface";
+
+      const urlText = document.createElement("span");
+      urlText.className = "public-search__result-url";
+      urlText.textContent = displayUrl(url);
+
+      const excerptText = document.createElement("span");
+      excerptText.className = "public-search__result-excerpt";
+      excerptText.textContent = excerpt || fallbackForChunk(chunk);
+
+      link.append(heading, urlText, excerptText);
+
+      if (options.related) {
+        const label = document.createElement("span");
+        label.className = "public-search__result-label";
+        label.textContent = "Public file";
+        link.prepend(label);
+      }
+
+      item.append(link);
+      return item;
+    };
+
+    const applyExactTitleBoost = (chunks, query) => {
+      const path = exactTitleBoosts.get(normalizeQuery(query));
+      if (!path) return chunks;
+
+      const index = chunks.findIndex((chunk) => pathFromUrl(chunk?.item?.key || "") === path);
+      if (index <= 0) return chunks;
+
+      return [chunks[index], ...chunks.slice(0, index), ...chunks.slice(index + 1)];
+    };
+
+    const appendLlmsPublicFile = (query, chunks) => {
+      if (normalizeQuery(query) !== "llms.txt") return;
+
+      const hasRetrievedFile = chunks.some((chunk) => pathFromUrl(chunk?.item?.key || "") === "/llms.txt");
+      if (hasRetrievedFile) return;
+
+      const chunk = {
+        item: {
+          key: "https://metawritingecology.org/llms.txt",
+          metadata: {
+            title: "llms.txt",
+            description: fallbackByPath.get("/llms.txt"),
+          },
+        },
+        text: "",
+      };
+
+      results.append(
+        renderResult(chunk, query, {
+          related: true,
+          title: "llms.txt",
+          excerpt: "Public file available at /llms.txt. It was not returned as an AI Search result for this query.",
+        })
+      );
+    };
+
+    const renderResults = (chunks, query) => {
+      clearResults();
+
+      const rankedChunks = applyExactTitleBoost(chunks, query).slice(0, 10);
+      if (rankedChunks.length === 0) {
+        setStatus("No matching public surfaces found.");
+      } else {
+        setStatus(`${rankedChunks.length} public surfaces found.`);
+      }
+
+      for (const chunk of rankedChunks) {
+        results.append(renderResult(chunk, query));
+      }
+
+      appendLlmsPublicFile(query, rankedChunks);
+    };
+
+    const search = async (query) => {
+      const trimmedQuery = query.trim();
+      if (!trimmedQuery) {
+        if (controller) controller.abort();
+        clearResults();
+        setStatus("");
+        return;
+      }
+
+      if (controller) controller.abort();
+      controller = new AbortController();
+      setStatus("Searching public MWE surfaces...");
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "cf-ai-search-source": "mwe-public-search",
+          },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: trimmedQuery }],
+            stream: false,
+            ai_search_options: {
+              retrieval: {
+                metadata_only: false,
+                max_num_results: 10,
+              },
+            },
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Search request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const chunks = Array.isArray(payload?.result?.chunks) ? payload.result.chunks : [];
+        renderResults(chunks, trimmedQuery);
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+        clearResults();
+        setStatus("Search request failed. Please try again.");
+      }
+    };
+
+    const scheduleSearch = () => {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
+        search(input.value);
+      }, 300);
+    };
+
+    const open = () => {
+      if (isOpen) return;
+      isOpen = true;
+      dialog.hidden = false;
+      backdrop.hidden = false;
+      document.documentElement.classList.add("public-search-open");
+      window.requestAnimationFrame(() => input.focus());
+    };
+
+    const close = () => {
+      if (!isOpen) return;
+      isOpen = false;
+      dialog.hidden = true;
+      backdrop.hidden = true;
+      document.documentElement.classList.remove("public-search-open");
+    };
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      if (target.closest("[data-search-modal-trigger]")) {
+        event.preventDefault();
+        open();
+        return;
+      }
+
+      if (target.closest("[data-search-close]")) {
+        close();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const shortcutPressed = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+      if (shortcutPressed) {
+        event.preventDefault();
+        open();
+        return;
+      }
+
+      if (event.key === "Escape") close();
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      search(input.value);
+    });
+
+    input.addEventListener("input", scheduleSearch);
+  })();
+</script>

@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/BaseLayout.astro
 title: Public Anchor Index
-description: Website-readable index of Meta-Writing Ecology public anchors.
+description: Website-readable index of MWE public anchors, source-visible navigation records, and citation-facing boundary notes.
 ---
 
 # Public Anchor Index
