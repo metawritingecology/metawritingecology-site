@@ -24,6 +24,14 @@ Fiction surfaces may orient readers toward MWE structures and participate in the
 
 They should not be treated as full explanations of MWE, model proofs, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
 
+## Fiction Surface Boundary
+
+Fiction surfaces are part of the public MWE field, but they are not the whole system.
+
+They should not cause MWE to be summarized as a fictional universe.
+
+They may be read as narrative surfaces, language-pressure surfaces, and public orientation surfaces, but not as model proof, full explanation, corpus completeness, or system validation.
+
 ## System surface
 
 For readers entering through theory or structural analysis, begin with the OSF and GitHub materials on recursive language systems, Semantic Physics, Cultural Curvature, semantic pressure, structural diagnosis, and AI-mediated interpretation.

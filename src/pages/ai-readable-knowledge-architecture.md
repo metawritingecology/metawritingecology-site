@@ -67,6 +67,18 @@ The goal is for AI not to mistake what it has found.
 
 ---
 
+## llms.txt Boundary
+
+The site-level `llms.txt` file belongs to MWE's AI-readable boundary layer.
+
+It is a compact machine-readable orientation file for public summary boundaries, source positioning, citation visibility, and misreading reduction.
+
+It should not be read as AI SEO, search-ranking optimization, chatbot behavior design, full-corpus exposure, or unrestricted machine interpretation.
+
+For the HTML-readable boundary page, see [llms.txt Boundary](/llms-boundary/).
+
+---
+
 ## Core Definition
 
 AI-Readable Knowledge Architecture for Structural Misreading Prevention is a structural orientation for examining how documentation systems become readable, retrievable, summarized, indexed, cited, or operationalized by AI systems before their conceptual boundaries, source relations, responsibility positions, version status, and interpretation constraints are adequately preserved.
