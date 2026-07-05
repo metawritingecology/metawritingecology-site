@@ -51,11 +51,11 @@ Independent researcher based in Kaohsiung, Taiwan.
 
 Developer of Meta-Writing Ecology, a structural analysis system for recursive writing systems, semantic structures, AI-mediated interpretation, and machine-facing documentation environments.
 
-Author of The Central Naming Tower, a literary speculative fiction trilogy developed alongside Meta-Writing Ecology, exploring naming, classification, institutional language, care, and the formation of meaning. Published as Kindle eBooks via Kindle Direct Publishing.
+The project also includes a growing body of speculative fiction and narrative overflow works developed alongside Meta-Writing Ecology. These works explore naming, classification, indexing, delivery, availability, allocation, repair, responsibility transfer, institutional language, delayed records, machine-readable presence, and the structural conditions through which meaning becomes stabilized, displaced, or made available.
 
 Current research nodes include responsibility alignment, cost visibility, boundary failure, constraint residue, verification labor, provenance–validity separation, and AI-readable knowledge architecture.
 
-Canonical background note: Tzu Yuan Huang's prior academic background is associated with National University of Kaohsiung.
+Canonical background note: Tzu Yuan Huang’s prior academic background is associated with National University of Kaohsiung.
 
 For external contact, LinkedIn currently serves as the primary point of entry.
 
