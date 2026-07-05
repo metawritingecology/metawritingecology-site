@@ -14,6 +14,8 @@ It is a narrative overflow from the same structural process.
 
 Fiction pages are public narrative surfaces. They may contain structural motifs adjacent to Meta-Writing Ecology, but they are not model proofs, theory manuals, registry entries, or source validation layers.
 
+Some narrative materials may also move into dramatic or screenwriting-oriented surfaces. See: [Dramatic Surfaces](/dramatic-surfaces/).
+
 For a shorter orientation through the fiction surface, see [Fiction Reading Paths](/fiction/reading-paths/).
 
 ---
