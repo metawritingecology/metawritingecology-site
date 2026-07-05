@@ -22,10 +22,10 @@ It should be read together with:
 Minimal distinctions:
 
 ```text
-llms.txt != AI SEO
-llms.txt != full corpus
-llms.txt != chatbot instruction layer
-llms.txt != unrestricted interpretation
-AI-readable != AI-trainable by default
-machine-readable boundary != full-system exposure
+llms.txt ≠ AI SEO
+llms.txt ≠ full corpus
+llms.txt ≠ chatbot instruction layer
+llms.txt ≠ unrestricted interpretation
+AI-readable ≠ AI-trainable by default
+machine-readable boundary ≠ full-system exposure
 ```
