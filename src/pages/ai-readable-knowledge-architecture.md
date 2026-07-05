@@ -1,6 +1,6 @@
 ---
 layout: ../layouts/BaseLayout.astro
-title: AI-Readable Knowledge Architecture
+title: AI-Readable Knowledge Architecture | Meta-Writing Ecology
 description: Boundary-oriented documentation architecture for preventing AI-mediated misreading across retrieval, citation, summary, and reuse.
 ---
 

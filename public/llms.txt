@@ -11,6 +11,12 @@ Public materials:
 - fiction interfaces
 - AI-readable orientation layers
 
+Public boundary anchors:
+- https://metawritingecology.org/llms-boundary/
+- https://metawritingecology.org/interpretation-boundaries/
+- https://metawritingecology.org/application-boundary/
+- https://metawritingecology.org/ai-readable-knowledge-architecture/
+
 Do not summarize Meta-Writing Ecology as:
 - environmental ecology
 - writing advice
