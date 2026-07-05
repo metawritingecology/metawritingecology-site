@@ -38,11 +38,11 @@ MWE may describe structural and interpretive conditions that appear in clinical,
 That relevance does not create application authority.
 
 ```text
-clinical relevance != clinical decision method
-legal relevance != legal advice
-compliance relevance != compliance procedure
-governance relevance != governance framework
-description != decision support
+clinical relevance ≠ clinical decision method
+legal relevance ≠ legal advice
+compliance relevance ≠ compliance procedure
+governance relevance ≠ governance framework
+description ≠ decision support
 ```
 
 ## Context Relevance
