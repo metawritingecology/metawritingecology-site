@@ -22,9 +22,9 @@ For a shorter orientation through the fiction surface, see [Fiction Reading Path
 
 ## The Central Naming Tower
 
-[**The Central Naming Tower**](https://amazon.com/author/metawritingecology) is a literary speculative fiction trilogy developed alongside Meta-Writing Ecology.
+[**The Central Naming Tower**](https://www.amazon.com/dp/B0H2BN41HJ) is a literary speculative fiction trilogy developed alongside Meta-Writing Ecology.
 
-Links: [Series landing page](/fiction/the-central-naming-tower/) · [Book One](https://www.amazon.com/dp/B0H2JFVJ6R) · [Book Two](https://www.amazon.com/dp/B0H27831ZV) · [Book Three](https://www.amazon.com/dp/B0H2BGZNQD)
+Links: [Book One](https://www.amazon.com/dp/B0H2JFVJ6R) · [Book Two](https://www.amazon.com/dp/B0H27831ZV) · [Book Three](https://www.amazon.com/dp/B0H2BGZNQD)
 
 It is readable on its own as fiction.
 
@@ -38,9 +38,9 @@ The trilogy is published as Kindle eBooks through Amazon Kindle Direct Publishin
 
 ## The Field Below the Index
 
-[**The Field Below the Index**](https://amazon.com/author/metawritingecology) is a seven-part speculative fiction cycle developed alongside Meta-Writing Ecology.
+[**The Field Below the Index**](https://www.amazon.com/dp/B0H2N5771M) is a seven-part speculative fiction cycle developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-field-below-the-index/) · [Kindle page](https://www.amazon.com/dp/B0H2N5771M)
+Links: [Kindle page](https://www.amazon.com/dp/B0H2N5771M)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -58,7 +58,7 @@ Publication status: Kindle eBook / first edition.
 
 [**Delivery Not Established**](https://www.amazon.com/dp/B0H277BWRY) is a speculative novella developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/delivery-not-established/) · [Kindle page](https://www.amazon.com/dp/B0H277BWRY)
+Links: [Kindle page](https://www.amazon.com/dp/B0H277BWRY)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -76,7 +76,7 @@ Publication status: Kindle eBook / first edition.
 
 [**The Available Edition**](https://www.amazon.com/dp/B0GZCQXWNH) is a fictional external-document cycle developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-available-edition/) · [Kindle page](https://www.amazon.com/dp/B0GZCQXWNH)
+Links: [Kindle page](https://www.amazon.com/dp/B0GZCQXWNH)
 
 It belongs to the narrative interface layer of the system.
 
@@ -96,7 +96,7 @@ Publication status: Kindle eBook / first edition.
 
 [The Office of Allocated Meaning: A Speculative Novel](https://www.amazon.com/dp/B0H2RXS9LS) is a speculative novel developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-office-of-allocated-meaning/) · [Kindle page](https://www.amazon.com/dp/B0H2RXS9LS)
+Links: [Kindle page](https://www.amazon.com/dp/B0H2RXS9LS)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -118,7 +118,7 @@ Publication status: Kindle eBook / first edition.
 
 [**The City of the Residual Miracle**](https://www.amazon.com/dp/B0H34NDSN7) is a speculative novel developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-city-of-the-residual-miracle/) · [Kindle page](https://www.amazon.com/dp/B0H34NDSN7)
+Links: [Kindle page](https://www.amazon.com/dp/B0H34NDSN7)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -140,7 +140,7 @@ Publication status: Kindle eBook / first edition.
 
 [**The Repair of Neglected Wings**](https://www.amazon.com/dp/B0H3F1VR55) is a literary speculative novel developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-repair-of-neglected-wings/) · [Kindle page](https://www.amazon.com/dp/B0H3F1VR55)
+Links: [Kindle page](https://www.amazon.com/dp/B0H3F1VR55)
 
 It belongs to the narrative simulation layer of the system.
 
@@ -160,7 +160,7 @@ Publication status: Kindle eBook / first edition.
 
 [**The House Without Evidence**](https://www.amazon.com/dp/B0H3W3NSZH) is a literary novel developed alongside Meta-Writing Ecology.
 
-Links: [Fiction landing page](/fiction/the-house-without-evidence/) · [Kindle page](https://www.amazon.com/dp/B0H3W3NSZH)
+Links: [Kindle page](https://www.amazon.com/dp/B0H3W3NSZH)
 
 It belongs to the narrative simulation layer of the system.
 
