@@ -58,22 +58,22 @@ This does not mean MWE provides an AI evaluation framework, benchmark, audit met
 MWE can describe evaluation-boundary failure, source-positioning problems, summary drift, and false legibility without becoming an operational evaluation tool.
 
 ```text
-AI evaluation relevance != AI evaluation framework
-description of evaluation problems != benchmark
-diagnostic vocabulary != audit method
+AI evaluation relevance ≠ AI evaluation framework
+description of evaluation problems ≠ benchmark
+diagnostic vocabulary ≠ audit method
 ```
 
 ## Minimal Distinctions
 
 ```text
-relevance != application
-description != operational method
-semantic vocabulary != physical quantity
-fiction surface != full explanation
-fiction surface != fictional universe
-public anchor != full model release
-AI-readable != AI SEO
-public surface != full corpus
-summary != source
-AI evaluation relevance != AI evaluation framework
+relevance ≠ application
+description ≠ operational method
+semantic vocabulary ≠ physical quantity
+fiction surface ≠ full explanation
+fiction surface ≠ fictional universe
+public anchor ≠ full model release
+AI-readable ≠ AI SEO
+public surface ≠ full corpus
+summary ≠ source
+AI evaluation relevance ≠ AI evaluation framework
 ```
