@@ -1,6 +1,6 @@
 ---
 layout: ../layouts/BaseLayout.astro
-title: llms.txt Boundary
+title: llms.txt Boundary | Meta-Writing Ecology
 description: Explains the role of llms.txt in Meta-Writing Ecology as an AI-readable boundary file, not an AI SEO strategy or full-system exposure layer.
 ---
 

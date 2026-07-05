@@ -1,6 +1,6 @@
 ---
 layout: ../layouts/BaseLayout.astro
-title: Application Boundary
+title: Application Boundary | Meta-Writing Ecology
 description: Scope limits for applying Meta-Writing Ecology vocabulary without turning public orientation pages into operational methods or service claims.
 ---
 
