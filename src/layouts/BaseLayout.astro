@@ -1,11 +1,91 @@
 ---
 import "../styles/global.css";
 import PublicSearchModal from "../components/PublicSearchModal.astro";
+import SchemaJsonLd from "../components/SchemaJsonLd.astro";
 
 const {
   title = "Meta-Writing Ecology",
-  description = "A recursive linguistic system and structural diagnostic framework."
+  description = "A recursive linguistic system and structural diagnostic framework.",
+  schemaDescription,
+  schemaGenre
 } = Astro.props;
+
+const SITE_URL = "https://metawritingecology.org/";
+const siteUrl = new URL("/", Astro.site ?? SITE_URL).toString();
+const pathname = Astro.url.pathname;
+const normalizedPathname =
+  pathname === "/" || pathname.endsWith("/") || pathname.includes(".")
+    ? pathname
+    : `${pathname}/`;
+const currentUrl = new URL(normalizedPathname, siteUrl).toString();
+
+type PageSchemaSummary = {
+  description: string;
+  genre: string;
+};
+
+const schemaOverrides: Record<string, PageSchemaSummary> = {
+  "/": {
+    description:
+      "Public orientation surface for Meta-Writing Ecology, a recursive linguistic and structural analysis system.",
+    genre: "Public orientation surface"
+  },
+  "/ai-readable-knowledge-architecture/": {
+    description:
+      "AI-readable boundary page for public documentation surfaces in Meta-Writing Ecology.",
+    genre: "AI-readable boundary page"
+  },
+  "/application-boundary/": {
+    description:
+      "Public boundary page for scope limits and non-operational positioning of Meta-Writing Ecology public materials.",
+    genre: "Public boundary page"
+  },
+  "/interpretation-boundaries/": {
+    description:
+      "Public boundary page for reading, summary, and interpretation limits around Meta-Writing Ecology.",
+    genre: "Public boundary page"
+  },
+  "/llms-boundary/": {
+    description:
+      "AI-readable boundary page describing the public llms.txt orientation file for Meta-Writing Ecology.",
+    genre: "AI-readable boundary page"
+  },
+  "/surfaces/": {
+    description:
+      "Public orientation surface for navigating Meta-Writing Ecology entry surfaces without exposing non-public working layers.",
+    genre: "Public orientation surface"
+  }
+};
+
+const pageSchema = schemaOverrides[normalizedPathname] ?? {
+  description: "Public orientation surface for Meta-Writing Ecology.",
+  genre: "Public orientation surface"
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      name: "Meta-Writing Ecology",
+      url: siteUrl,
+      description:
+        "Public orientation surfaces for Meta-Writing Ecology, a recursive linguistic and structural analysis system."
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${currentUrl}#webpage`,
+      name: title,
+      url: currentUrl,
+      description: schemaDescription ?? pageSchema.description,
+      genre: schemaGenre ?? pageSchema.genre,
+      isPartOf: {
+        "@id": `${siteUrl}#website`
+      }
+    }
+  ]
+};
 ---
 
 <html lang="en">
@@ -18,6 +98,7 @@ const {
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <SchemaJsonLd data={jsonLd} />
   </head>
 
   <body>
