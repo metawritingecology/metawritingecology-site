@@ -42,7 +42,7 @@ This zone focuses on decision-making, role calibration, responsibility, boundary
 
 For GitHub-facing source traversal, use the canonical [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md).
 
-Current public corpus additions include:
+Selected public corpus additions include:
 
 - [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) for the Evaluation / boundary robustness path.
 - [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) for verification labor, provenance-validity, boundary, governance residue, and responsibility paths.

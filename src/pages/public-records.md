@@ -20,6 +20,8 @@ They help readers, citation systems, crawlers, and archives find public material
   - [Reality Consistency Model](https://doi.org/10.17605/OSF.IO/76ZJ2)
   - [Origin Control and Validity Burden](https://doi.org/10.17605/OSF.IO/28HNK)
   - [Policy Continuity Evidence Mapping](https://doi.org/10.17605/OSF.IO/QC6GN)
+  - [AI-Readable Knowledge Architecture](https://doi.org/10.17605/OSF.IO/7X3YF)
+  - [External Lifeline Collapse under Residual Infrastructure Cross](https://doi.org/10.17605/OSF.IO/6ZX9H)
 - The source-aligned [GitHub-visible model and navigation index](/models/)
 - The source-aligned [atlas, relation map, and reading paths surface](/atlas/)
 - Figshare and Zenodo mirrors already listed on the publications page
