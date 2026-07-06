@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import PublicSearchModal from "../components/PublicSearchModal.astro";
+
 import SchemaJsonLd from "../components/SchemaJsonLd.astro";
 
 const {
@@ -11,12 +12,16 @@ const {
 } = Astro.props;
 
 const SITE_URL = "https://metawritingecology.org/";
+
 const siteUrl = new URL("/", Astro.site ?? SITE_URL).toString();
+
 const pathname = Astro.url.pathname;
+
 const normalizedPathname =
   pathname === "/" || pathname.endsWith("/") || pathname.includes(".")
     ? pathname
     : `${pathname}/`;
+
 const currentUrl = new URL(normalizedPathname, siteUrl).toString();
 
 type PageSchemaSummary = {
@@ -35,21 +40,25 @@ const schemaOverrides: Record<string, PageSchemaSummary> = {
       "AI-readable boundary page for public documentation surfaces in Meta-Writing Ecology.",
     genre: "AI-readable boundary page"
   },
+
   "/application-boundary/": {
     description:
       "Public boundary page for scope limits and non-operational positioning of Meta-Writing Ecology public materials.",
     genre: "Public boundary page"
   },
+
   "/interpretation-boundaries/": {
     description:
       "Public boundary page for reading, summary, and interpretation limits around Meta-Writing Ecology.",
     genre: "Public boundary page"
   },
+
   "/llms-boundary/": {
     description:
       "AI-readable boundary page describing the public llms.txt orientation file for Meta-Writing Ecology.",
     genre: "AI-readable boundary page"
   },
+
   "/surfaces/": {
     description:
       "Public orientation surface for navigating Meta-Writing Ecology entry surfaces without exposing non-public working layers.",
@@ -93,11 +102,17 @@ const jsonLd = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
+
     <meta name="description" content={description} />
+
     <link rel="icon" type="image/png" href="/favicon.png" />
+
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
     <SchemaJsonLd data={jsonLd} />
   </head>
 
@@ -113,21 +128,26 @@ const jsonLd = {
         >
           Search public MWE surfaces
         </button>
+
         <a href="/about/">About</a>
-        <a href="/surfaces/">Entry Surfaces</a>
-        <a href="/entry-points/">Entry Points</a>
-        <a href="/application-boundary/">Application Boundary</a>
-        <a href="/diagnostic-entry-layer/">Diagnostic Entry Layer</a>
+
+        <a href="/surfaces/">Entry</a>
+
         <a href="/atlas/">Atlas</a>
+
         <a href="/models/">Models</a>
+
         <a href="/fiction/">Fiction</a>
+
         <a href="/artistic-research/">Artistic Research</a>
+
         <a href="/publications/">Publications</a>
-        <a href="/platforms/">Platforms</a>
-        <a href="/ai-reading-guide/">AI Reading Guide</a>
+
         <a href="/ai-readable-knowledge-architecture/">AI Architecture</a>
+
         <a href="/zh/">中文</a>
       </nav>
+
       <PublicSearchModal />
     </header>
 
