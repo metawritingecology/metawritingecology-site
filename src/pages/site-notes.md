@@ -10,6 +10,14 @@ This page records public-facing website updates for Meta-Writing Ecology.
 
 It is not a development log, private archive record, registry queue, decision log, or operational workflow.
 
+## 2026-07 Public Navigation Surface Update
+
+- Top-level navigation was compressed to reduce public-surface flattening across the site.
+- Entry-related pages remain accessible through the homepage, Atlas, and public orientation routes.
+- The navigation now foregrounds the primary public surfaces: Home, Search, About, Entry, Atlas, Models, Fiction, Artistic Research, Publications, AI Architecture, and 中文.
+- No public pages were removed.
+- This update changes navigation prominence only. It does not change the authority, classification, source status, or public/private boundary of any document surface.
+
 ## 2026-06 Public Surface Update
 
 - Fiction landing pages clarified.
