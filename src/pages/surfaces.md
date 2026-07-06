@@ -43,6 +43,8 @@ Selected public source additions include:
 - [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md)
 - [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md)
 - [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md)
+- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md) and [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md)
+- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md), [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md), and [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md)
 
 They should be read through their declared classifications and canonical source navigation, not as full system maps.
 
