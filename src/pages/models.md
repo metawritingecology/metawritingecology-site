@@ -39,6 +39,9 @@ They should also not be reduced to mere decorative metaphor. They function as st
 - [Boundary Integration Failure](https://github.com/metawritingecology/meta-writing-ecology/blob/main/boundary-integration-failure.md) · [DOI](https://doi.org/10.17605/OSF.IO/R4Z5B)
 - [Boundary-Role Segmentation Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/boundary-role-segmentation-model.md) · [DOI](https://doi.org/10.17605/OSF.IO/QGK6W)
 - [Observer-Representation Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/observer-representation-boundary.md) · [DOI](https://doi.org/10.17605/OSF.IO/TQVAM)
+- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md) · [DOI](https://doi.org/10.17605/OSF.IO/BHMA8)
+- [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md) · [DOI](https://doi.org/10.17605/OSF.IO/U2AK6)
+- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md) · [DOI](https://doi.org/10.17605/OSF.IO/7MTNX)
 
 ### AI-Mediated Interpretation / Verification
 
@@ -50,6 +53,7 @@ They should also not be reduced to mere decorative metaphor. They function as st
 - [Reality Consistency Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/reality-consistency.md) · [DOI](https://doi.org/10.17605/OSF.IO/76ZJ2)
 - [Verification Labor Compression](https://github.com/metawritingecology/meta-writing-ecology/blob/main/verification-labor-compression.md) · [DOI](https://doi.org/10.17605/OSF.IO/VCPSJ)
 - [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) · [DOI](https://doi.org/10.17605/OSF.IO/28HNK)
+- [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md) · [DOI](https://doi.org/10.17605/OSF.IO/GN5RW)
 
 ### Governance / Responsibility / Cost
 
@@ -66,6 +70,7 @@ They should also not be reduced to mere decorative metaphor. They function as st
 ### Cross Structures
 
 - [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
+- [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/KMREA)
 
 ### Semantic Field / System Architecture
 

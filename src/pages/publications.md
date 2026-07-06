@@ -21,6 +21,21 @@ Canonical source DOI record means that the public DOI and source file are recogn
 - [AI-Readable Knowledge Architecture](https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md) - [https://doi.org/10.17605/OSF.IO/7X3YF](https://doi.org/10.17605/OSF.IO/7X3YF)
 - [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) - [https://doi.org/10.17605/OSF.IO/6ZX9H](https://doi.org/10.17605/OSF.IO/6ZX9H)
 
+- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md)
+- [https://doi.org/10.17605/OSF.IO/BHMA8](https://doi.org/10.17605/OSF.IO/BHMA8)
+
+- [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md)
+- [https://doi.org/10.17605/OSF.IO/U2AK6](https://doi.org/10.17605/OSF.IO/U2AK6)
+
+- [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md)
+- [https://doi.org/10.17605/OSF.IO/KMREA](https://doi.org/10.17605/OSF.IO/KMREA)
+
+- [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md)
+- [https://doi.org/10.17605/OSF.IO/GN5RW](https://doi.org/10.17605/OSF.IO/GN5RW)
+
+- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md)
+- [https://doi.org/10.17605/OSF.IO/7MTNX](https://doi.org/10.17605/OSF.IO/7MTNX)
+
 ## Model and Diagnostic DOI Records
 
 - [False Legibility Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md) - [https://doi.org/10.17605/OSF.IO/2AGJP](https://doi.org/10.17605/OSF.IO/2AGJP)

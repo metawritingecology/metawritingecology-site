@@ -37,3 +37,20 @@ Build / tests run: None — wording/link-list edits only to existing Markdown pa
 Result: Requested wording and placement cleanup applied exactly as specified. No conceptual text rewritten beyond the exact requested wording. No navigation/layout files changed. No source repo (GitHub) content or links modified.
 Unresolved questions: None.
 Risks or assumptions: None — edits were limited strictly to the five allowed files and the exact wording specified in the task.
+
+### 2026-07-06 — Claude Code — sync-five-osf-source-entries
+
+Agent: Claude Code
+Task: Sync five new source-visible OSF-linked entries from the canonical meta-writing-ecology repository into the website's public navigation surfaces, using an exact mapping supplied by the user (Text-Conditioned Semantic Rendering, Surface-Bounded Semantic Rendering, Generation-Condition Disclosure–Reproducibility Cross, Model-Use Reporting Boundary Protocol, Source/Summary/Citation Boundary Packet).
+Files changed:
+- src/pages/models.md — added entries to Model Index under existing categories: Boundary / Representation (Text-Conditioned Semantic Rendering, Surface-Bounded Semantic Rendering, Source Summary and Citation Boundary Packet), AI-Mediated Interpretation / Verification (Model-Use Reporting Boundary Protocol), Cross Structures (Generation-Condition Disclosure–Reproducibility Cross). No new categories created.
+- src/pages/publications.md — added five title/DOI pairs under "Current Canonical Source DOI Records"; existing entries left in place, none moved.
+- src/pages/public-records.md — added five DOI links under "Current source DOI records including"; existing entries retained.
+- src/pages/entry-points.md — added two grouped orientation bullets under "Selected public corpus additions include" (not five separate bullets).
+- src/pages/surfaces.md — added two grouped bullets under "Selected public source additions include"; kept the existing "declared classifications and canonical source navigation" sentence.
+- atlas.md — intentionally not changed, per task instructions.
+- No navigation layout or homepage changes made.
+Build / tests run: None — link-list/content edits only to existing Markdown pages; no build or test tooling was run.
+Result: Five canonical source entries synced into the five allowed public-facing pages exactly per the supplied mapping. No classification, naming, or public-boundary decisions made by Claude Code; the mapping and category placement were fully specified by the user.
+Unresolved questions: None.
+Risks or assumptions: None — edits limited strictly to the six allowed files (five page files plus this worklog); no push or PR made.
