@@ -38,7 +38,7 @@ For readers entering through theory or structural analysis, begin with the OSF a
 
 This surface treats writing as a dynamic linguistic environment rather than a static product.
 
-Current public source additions include:
+Selected public source additions include:
 
 - [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md)
 - [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md)

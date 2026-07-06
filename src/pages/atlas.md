@@ -30,6 +30,6 @@ This is a public navigation surface. It does not replace the canonical source fi
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
 - [Source repository](https://github.com/metawritingecology/meta-writing-ecology)
 
-## Source Navigation Placement
+## Individual Source Records
 
-- [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
+For individual public source records and DOI anchors, see [Models](/models/) and [Publications](/publications/). This Atlas page remains a navigation-layer surface rather than an individual-record promotion surface.
