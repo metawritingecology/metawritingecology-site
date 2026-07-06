@@ -5,11 +5,21 @@ import PublicSearchModal from "../components/PublicSearchModal.astro";
 import SchemaJsonLd from "../components/SchemaJsonLd.astro";
 
 const {
-  title = "Meta-Writing Ecology",
-  description = "A recursive linguistic system and structural diagnostic framework.",
-  schemaDescription,
-  schemaGenre
+  title: propTitle,
+  description: propDescription,
+  schemaDescription: propSchemaDescription,
+  schemaGenre: propSchemaGenre
 } = Astro.props;
+
+const frontmatter = Astro.props.frontmatter ?? {};
+
+const title = propTitle ?? frontmatter.title ?? "Meta-Writing Ecology";
+const description =
+  propDescription ??
+  frontmatter.description ??
+  "A recursive linguistic system and structural diagnostic framework.";
+const schemaDescription = propSchemaDescription ?? frontmatter.schemaDescription;
+const schemaGenre = propSchemaGenre ?? frontmatter.schemaGenre;
 
 const SITE_URL = "https://metawritingecology.org/";
 
