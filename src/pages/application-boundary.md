@@ -77,6 +77,8 @@ For public-summary and AI-summary boundary conditions, see:
 
 - [Interpretation Boundaries](/interpretation-boundaries/)
 - [AI Training Boundary](/ai-training-boundary/)
+- [llms.txt Boundary](/llms-boundary/)
+- [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
 
 MWE may describe structural conditions that appear in AI documentation, evaluation, governance, institutional, narrative, or public-surface contexts.
 
