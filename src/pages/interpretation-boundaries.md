@@ -85,3 +85,5 @@ Related boundary pages:
 - [Application Boundary](/application-boundary/)
 - [llms.txt Boundary](/llms-boundary/)
 - [Entry Surfaces](/surfaces/)
+
+Related boundary note: [Boundary-Preserving Use Conditions](/boundary-preserving-use-conditions) clarifies when external reading, citation, discussion, or use remains boundary-preserving rather than collapsing into false legibility.
