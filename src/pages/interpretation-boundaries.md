@@ -27,10 +27,10 @@ Fiction surfaces are narrative and public-facing surfaces within the wider MWE f
 They are not full explanations of MWE, model proofs, complete system maps, corpus completeness, system validation, or replacements for model pages, boundary notes, or public anchors.
 
 ```text
-fiction surface != fictional universe
-fiction surface != full explanation
-fiction surface != model proof
-fiction surface != system validation
+fiction surface ≠ fictional universe
+fiction surface ≠ full explanation
+fiction surface ≠ model proof
+fiction surface ≠ system validation
 ```
 
 ## AI-Readable Surfaces
