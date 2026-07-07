@@ -177,7 +177,7 @@ It is readable independently as fiction. Its motifs are adjacent to Meta-Writing
 Publication status: Kindle eBook / first edition.
 
 ---
-# Kindle Publications
+## Kindle Publications
 
 The following Kindle eBooks are fictional works developed alongside Meta-Writing Ecology.
 
