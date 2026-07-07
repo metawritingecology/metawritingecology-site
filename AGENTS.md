@@ -8,16 +8,17 @@ Agents may perform approved technical work only.
 
 ## Role Allocation
 
-### GPT Conversation
-Use GPT conversation for:
-- structural reasoning
-- conceptual boundary judgment
-- public/private boundary review
-- naming judgment
-- OSF / GitHub / website positioning
-- deciding whether a page should exist
-- deciding whether navigation prominence is appropriate
-- deciding whether wording changes alter MWE meaning
+### User-Led Conceptual Review
+
+Use this review layer for conceptual decisions that require authorial judgment, including structural reasoning, naming decisions, classification decisions, public/private boundary review, OSF / GitHub / website positioning, and relation-status decisions.
+
+This layer may include AI-assisted discussion, but AI-generated output is not repository authority.
+
+Conceptual decisions become actionable only when explicitly approved by the user / repository owner and translated into concrete implementation instructions.
+
+AI agents must not treat prior AI-assisted discussion as independent authorship, source authority, or standing permission to modify conceptual files.
+
+Final authority remains with the user / repository owner.
 
 ### Claude Code
 Use Claude Code for routine engineering:
