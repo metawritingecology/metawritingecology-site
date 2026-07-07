@@ -26,6 +26,20 @@ This page does not index the Medium archive. It does not list all posts and does
 
 For the platform surface itself, see the [Medium profile](https://metawritingecology.medium.com).
 
+## Status categories
+
+The Medium archive is not indexed here in full. Public surfacing is handled by category and boundary status.
+
+- **Reading path legacy surfaces** — earlier Medium reading-path experiments. These are not the current reading-path authority; source-level traversal now points to the public GitHub / OSF source layer.
+- **Earlier PUB companion versions** — lower-authority public companion surfaces for concepts that later stabilized elsewhere. These remain deferred unless explicitly approved for public linking.
+- **Poetic / pre-model writing surfaces** — earlier field-writing and motif-bearing texts that may have contributed to later model extraction. These are candidate surfaces, not canonical model records.
+- **Narrative expansion-adjacent surfaces** — writings adjacent to later narrative or fiction expansion, but not fiction entries by default.
+- **Archive-only logs** — system, anomaly, meta, mirror, or process logs. These are not surfaced without separate boundary review.
+- **Authority-review required items** — concept-titled, corpus self-descriptive, duplicate, unresolved-chain, or title-overlap items that require user authority review before public linking.
+- **Drafts / not linkable items** — unpublished or non-public Medium items. These are not linked.
+
+This status list is categorical. It is not a full Medium archive index and does not assign canonical status to any Medium post.
+
 ## Current source layer
 
 Readers looking for current source-level traversal should use:

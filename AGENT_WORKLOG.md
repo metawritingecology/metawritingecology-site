@@ -102,3 +102,15 @@ Build / tests run: Bundled Node Astro build command (`node.exe .\node_modules\as
 Result: Local wording cleanup applied only to the allowed page. No Medium profile link change and no individual Medium post links added.
 Unresolved questions: None.
 Risks or assumptions: None.
+
+### 2026-07-08 - Codex - pre-model-writing-status-categories
+
+Agent: Codex
+Task: PR47 adds status categories to the pre-model writing page.
+Files changed:
+- src/pages/pre-model-writing.md - added a categorical status list for Medium materials without adding counts, individual links, or a full archive index.
+- AGENT_WORKLOG.md - this entry.
+Build / tests run: Bundled Node Astro build command (`node.exe .\node_modules\astro\astro.js build`) completed successfully.
+Result: No individual Medium post links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified.
+Unresolved questions: None.
+Risks or assumptions: Status categories remain review categories only and do not decide final public status for individual posts.
