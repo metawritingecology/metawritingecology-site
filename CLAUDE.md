@@ -14,6 +14,15 @@ Do not change navigation, route structure, public positioning, or boundary state
 
 If a task requires naming, classification, public/private judgment, relation confirmation, OSF judgment, or conceptual architecture decisions, stop and ask for user review.
 
+## Symbol hygiene
+
+Follow the canonical symbol hygiene rule in `AGENTS.md`.
+
+Operational reminder:
+- prose/content: use `≠`
+- code/operators: preserve `!=` and `!==`
+- before committing prose edits, scan touched content files for literal `!=`
+
 Before finishing, report:
 - files changed
 - what was implemented
