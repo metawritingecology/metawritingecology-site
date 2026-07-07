@@ -80,6 +80,8 @@ For public-summary and AI-summary boundary conditions, see:
 - [llms.txt Boundary](/llms-boundary/)
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
 
+Related boundary note: [Boundary-Preserving Use Conditions](/boundary-preserving-use-conditions) clarifies external-use conditions for preserving Meta-Writing Ecology's structural boundaries without converting application into user eligibility, authorization, or plug-and-play method use.
+
 MWE may describe structural conditions that appear in AI documentation, evaluation, governance, institutional, narrative, or public-surface contexts.
 
 This does not mean MWE provides a deployed application, evaluation framework, audit method, governance product, compliance method, or decision-support system.
