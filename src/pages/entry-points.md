@@ -63,3 +63,18 @@ Selected public corpus additions include:
 ### Path 3 — Starting from platforms, AI, and machine-mediated conditions
 
 **Post-Human Syntax / AI / Algorithmic Language** → **Observation / Error / Legibility** → **Decision / Boundary / Risk** → **Systems / Exchange / Burden Transfer** → **Field / Topology / Pressure** → **Drift / Reconstruction / Repositioning**
+
+## Medium Companion Reading Paths
+
+Earlier companion reading paths for the six thematic entry zones were also published on Medium. They are restored here as external companion links.
+
+Medium companion reading paths are external orientation surfaces. They are not canonical source records, model registry entries, or replacements for GitHub / OSF source navigation. Titles mentioned inside these Medium posts may share names with canonical MWE models; the reading chains inside the posts are Medium-side orientation only and do not function as canonical source navigation.
+
+For canonical source traversal, use the [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md) in the source repository.
+
+- [Field / Topology / Pressure — Reading Path](https://medium.com/@metawritingecology/field-topology-pressure-reading-path-c954cdc0e81f) — companion to thematic zone 1, Field / Topology / Pressure
+- [Observation / Error / Legibility — Reading Path](https://medium.com/@metawritingecology/observation-error-legibility-reading-path-fb3f8960c59e) — companion to thematic zone 2, Observation / Error / Legibility
+- [Systems / Exchange / Burden Transfer — Reading Path](https://medium.com/@metawritingecology/systems-exchange-burden-transfer-reading-path-c1964100001c) — companion to thematic zone 3, Systems / Exchange / Burden Transfer
+- [Drift / Reconstruction / Repositioning — Reading Path](https://medium.com/@metawritingecology/drift-reconstruction-repositioning-reading-path-6cb022ad2434) — companion to thematic zone 4, Drift / Reconstruction / Repositioning
+- [Post-Human Syntax / AI / Algorithmic Language — Reading Path](https://medium.com/@metawritingecology/post-human-syntax-ai-algorithmic-language-reading-path-8c5eb0c3d73d) — companion to thematic zone 5, Post-Human Syntax / AI / Algorithmic Language
+- [Decision / Boundary / Risk — Reading Path](https://medium.com/@metawritingecology/decision-boundary-risk-reading-path-5ee772b1d38b) — companion to thematic zone 6, Decision / Boundary / Risk
