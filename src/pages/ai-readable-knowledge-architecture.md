@@ -6,7 +6,7 @@ description: Boundary-oriented documentation architecture for preventing AI-medi
 
 # AI-Readable Knowledge Architecture
 
-### Structural Misreading Prevention through Documentation Boundaries and Machine-Facing Interpretation Constraints
+## Structural Misreading Prevention through Documentation Boundaries and Machine-Facing Interpretation Constraints
 **Full title:** AI-Readable Knowledge Architecture for Structural Misreading Prevention: Documentation Boundaries and Machine-Facing Interpretation Constraints
 
 - **Author:** Tzu Yuan Huang
