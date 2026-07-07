@@ -114,3 +114,15 @@ Build / tests run: Bundled Node Astro build command (`node.exe .\node_modules\as
 Result: No individual Medium post links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified.
 Unresolved questions: None.
 Risks or assumptions: Status categories remain review categories only and do not decide final public status for individual posts.
+
+### 2026-07-08 - Codex - link-pre-model-writing-from-platforms
+
+Agent: Codex
+Task: PR48 links the pre-model writing boundary page from `/platforms/`.
+Files changed:
+- src/pages/platforms.md - added one low-authority link to `/pre-model-writing/` near the Medium platform reference.
+- AGENT_WORKLOG.md - this entry.
+Build / tests run: Bundled Node Astro build command (`node.exe .\node_modules\astro\astro.js build`) completed successfully.
+Result: No individual Medium post links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified. No top navigation or homepage changes were made.
+Unresolved questions: None.
+Risks or assumptions: The link is platform-context reachability only and does not change Medium authority status.

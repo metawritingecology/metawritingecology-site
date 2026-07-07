@@ -14,6 +14,9 @@ These platforms are public surfaces and do not represent the full internal corpu
 - [**GitHub**](https://github.com/metawritingecology) — DOI-linked concept index and structural pages
 - [**LinkedIn**](https://www.linkedin.com/in/tzuyuanhuang/) — public observations and discourse
 - [**Medium**](https://metawritingecology.medium.com) — conceptual articles and fragments
+
+For the boundary role of earlier Medium writings as poetic, pre-model, and legacy public writing surfaces, see [Pre-Model Writing](/pre-model-writing/).
+
 - [**Substack**](https://substack.com/@tzuyuanhuang) — essays and extended reflections
 - [**Podcast**](https://podcasts.apple.com/us/podcast/meta-writing-ecology/id1883297079) — spoken versions of selected texts
 - [**YouTube**](https://www.youtube.com/@MetaWritingEcology)  — video and audio distribution
