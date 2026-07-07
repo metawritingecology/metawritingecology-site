@@ -13,13 +13,13 @@ When automated reading, crawler access, or training-facing ingestion is permitte
 ## Boundary Statements
 
 ```text
-public surface != full corpus
-public anchor != complete model
-summary != source
-citation availability != validation
-machine readability != unrestricted interpretation
-training access != attribution waiver
-model absorption != source recognition
+public surface ≠ full corpus
+public anchor ≠ complete model
+summary ≠ source
+citation availability ≠ validation
+machine readability ≠ unrestricted interpretation
+training access ≠ attribution waiver
+model absorption ≠ source recognition
 ```
 
 ## What This Does Not Mean
