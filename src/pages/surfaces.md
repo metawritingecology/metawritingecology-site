@@ -59,3 +59,11 @@ Meta-Writing Ecology is not a single theory manual. It is a distributed corpus w
 The fiction, theory, corpus, and platform layers should not be collapsed into one format.
 
 They share a structural pressure field, but each layer has a different function, density, and reading protocol.
+
+## Related boundary pages
+
+Related boundary pages:
+
+- [Interpretation Boundaries](/interpretation-boundaries/)
+- [llms.txt Boundary](/llms-boundary/)
+- [Application Boundary](/application-boundary/)

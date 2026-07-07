@@ -77,3 +77,11 @@ public surface ≠ full corpus
 summary ≠ source
 AI evaluation relevance ≠ AI evaluation framework
 ```
+
+## Related boundary pages
+
+Related boundary pages:
+
+- [Application Boundary](/application-boundary/)
+- [llms.txt Boundary](/llms-boundary/)
+- [Entry Surfaces](/surfaces/)
