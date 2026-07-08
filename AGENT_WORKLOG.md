@@ -138,3 +138,14 @@ Build / tests run: `pnpm run build` (Astro build).
 Result: Only the 12 approved poetic Medium links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified. No homepage, top navigation, model, publication, fiction, surface, entry-point, platform, or llms.txt changes were made.
 Unresolved questions: None.
 Risks or assumptions: The selected links are low-authority public writing traces only and do not decide final public status for any other Medium post.
+
+### 2026-07-08 - Claude Code - audit-schema-jsonld
+
+Agent: Claude Code
+Task: Audit the existing minimal schema.org JSON-LD implementation for website identity and routing metadata. Inspected src/components/SchemaJsonLd.astro, src/layouts/BaseLayout.astro, src/pages/index.astro, src/pages/platforms.md, package.json, and astro.config.mjs.
+Files changed:
+- AGENT_WORKLOG.md - this entry only. No code patch was necessary.
+Build / tests run: `pnpm run build` (Astro build) — completed successfully. JSON-LD output verified by rendering `/`, `/platforms/`, `/surfaces/`, and `/about/` through the dev server and parsing each embedded ld+json block with JSON.parse — all valid.
+Result: Existing JSON-LD is already present and safe. BaseLayout renders one graph per page through SchemaJsonLd containing exactly two nodes: a WebSite node with stable @id `https://metawritingecology.org/#website` and a per-page WebPage node with stable @id `<canonical-url>#webpage`, linked via isPartOf. Only identity/routing metadata (name, url, description, genre) is emitted. No ontology, model graph, relation graph, reading-path graph, registry graph, source-authority hierarchy, or public/private boundary logic is encoded as structured data. No Dataset, ScholarlyArticle, ResearchProject, DefinedTermSet, Collection, CreativeWorkSeries, or ItemList types are used. No sameAs links are emitted. No canonical source files, homepage prose, navigation, models, publications, fiction, surfaces, entry-points, platforms, pre-model-writing, or llms.txt files were modified. No PR opened.
+Unresolved questions: None.
+Risks or assumptions: None — audit-only change; the existing implementation already met the minimal-schema requirements, so no refinement patch was applied.
