@@ -126,3 +126,15 @@ Build / tests run: Bundled Node Astro build command (`node.exe .\node_modules\as
 Result: No individual Medium post links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified. No top navigation or homepage changes were made.
 Unresolved questions: None.
 Risks or assumptions: The link is platform-context reachability only and does not change Medium authority status.
+
+### 2026-07-08 - Claude Code - pre-model-writing-selected-poetic-links
+
+Agent: Claude Code
+Task: PR49 adds a selected poetic surfaces section to the pre-model writing page.
+Files changed:
+- src/pages/pre-model-writing.md - added a "Selected poetic surfaces" section after "Status categories" and before "Current source layer", containing only the 12 approved poetic Medium links.
+- AGENT_WORKLOG.md - this entry.
+Build / tests run: `pnpm run build` (Astro build).
+Result: Only the 12 approved poetic Medium links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified. No homepage, top navigation, model, publication, fiction, surface, entry-point, platform, or llms.txt changes were made.
+Unresolved questions: None.
+Risks or assumptions: The selected links are low-authority public writing traces only and do not decide final public status for any other Medium post.
