@@ -40,6 +40,25 @@ The Medium archive is not indexed here in full. Public surfacing is handled by c
 
 This status list is categorical. It is not a full Medium archive index and does not assign canonical status to any Medium post.
 
+## Selected poetic surfaces
+
+The following links are selected examples of earlier poetic / pre-model public writing surfaces. They are included as low-authority public writing traces, not as canonical source records, model entries, fiction entries, registry items, or current reading-path targets.
+
+These selections do not represent the full Medium archive.
+
+- [Hall of Mirrors](https://medium.com/@metawritingecology/hall-of-mirrors-518609e15c1e) — poetic reflection fragment / Reflection and Identity
+- [The Basket You Trust](https://medium.com/@metawritingecology/the-basket-you-trust-2b65b7582b34) — poetic structure-risk fragment / Reflection and Identity
+- [Forbidden Spell](https://medium.com/@metawritingecology/forbidden-spell-3bf95bcf7613) — poetic knowledge-boundary fragment / Observation and Error
+- [Ocean and Sky](https://medium.com/@metawritingecology/ocean-and-sky-ef33ee5b0ded) — poetic perception-drift fragment / Observation and Error
+- [All Exile Begins in Drift](https://medium.com/@metawritingecology/all-exile-begins-in-drift-13c542b3236e) — poetic drift fragment / Drift and Reconstruction
+- [Kalachakra](https://medium.com/@metawritingecology/kalachakra-6dfc75115584) — poetic time-cycle fragment / Drift and Reconstruction
+- [Before the Nifl Enters](https://medium.com/@metawritingecology/before-the-nifl-enters-479bbe11207f) — poetic fracture-containment fragment / Drift and Reconstruction
+- [Mare Tranquillitatis](https://medium.com/@metawritingecology/mare-tranquillitatis-fadf435c93f2) — poetic resonance fragment / Resonance and Infinity
+- [Aion Listening](https://medium.com/@metawritingecology/aion-listening-564de41159e9) — poetic silence-time fragment / Resonance and Infinity
+- [Feathers of Worlds](https://medium.com/@metawritingecology/feathers-of-worlds-7ef432e69ace) — poetic return/reflection fragment / Return and Reflection
+- [The Golden Trace](https://medium.com/@metawritingecology/the-golden-trace-1f9c1e9fd82c) — poetic presence-memory fragment / Resonance and Infinity
+- [The Silent Invocation](https://medium.com/@metawritingecology/the-silent-invocation-bfd55569fe14) — poetic language-ritual fragment / Resonance and Infinity
+
 ## Current source layer
 
 Readers looking for current source-level traversal should use:
