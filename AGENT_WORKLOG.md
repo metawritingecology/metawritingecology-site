@@ -138,3 +138,15 @@ Build / tests run: `pnpm run build` (Astro build).
 Result: Only the 12 approved poetic Medium links were added. No full Medium archive index was added. No Medium post was classified as a Model, Cross, Log, Protocol, or Draft. No canonical repo files were modified. No homepage, top navigation, model, publication, fiction, surface, entry-point, platform, or llms.txt changes were made.
 Unresolved questions: None.
 Risks or assumptions: The selected links are low-authority public writing traces only and do not decide final public status for any other Medium post.
+
+### 2026-07-08 - Claude Code - sitemap-lastmod-freshness-signal
+
+Agent: Claude Code
+Task: Add `<lastmod>` freshness signals to generated sitemap entries.
+Files changed:
+- astro.config.mjs - added a sitemap `serialize` function that maps each public route back to its source page file and sets `lastmod` from git commit time, falling back to file mtime. The existing filter excluding `language-pressure-test-lab-prototype` is preserved unchanged.
+- AGENT_WORKLOG.md - this entry.
+Build / tests run: `pnpm run build` (Astro build) completed successfully. Verified `sitemap-index.xml` and `sitemap-0.xml` still generate, all 40 public URLs carry a `<lastmod>`, and the prototype page remains excluded.
+Result: Engineering-only freshness signal. No canonical URLs, page content, navigation, boundary wording, JSON-LD, BaseLayout metadata, search modal behavior, robots.txt, or llms.txt were changed. No search-result URLs are produced by the sitemap.
+Unresolved questions: None.
+Risks or assumptions: `lastmod` derives from git history at build time; in a shallow or history-less checkout it falls back to file mtime, which is still a valid freshness signal.
