@@ -507,3 +507,41 @@ blockquote {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.fiction-fragment {
+  margin: 1.75rem 0 2.25rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--line), var(--accent) 18%);
+  border-radius: 8px;
+  background: #171510;
+}
+
+.fiction-fragment__label {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.fiction-fragment__quote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--line);
+  color: var(--text);
+}
+
+.fiction-fragment__quote p {
+  margin: 0 0 0.9rem;
+}
+
+.fiction-fragment__quote p:last-child {
+  margin-bottom: 0;
+}
+
+.fiction-fragment__source {
+  margin: 0.9rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
