@@ -10,6 +10,14 @@ This page maps public orientation surfaces for Meta-Writing Ecology.
 
 It is a guide to publicly available entry points. It is not a full archive, complete corpus map, validation layer, or internal workflow record.
 
+## Interactive public-surface view
+
+Explore selected public-document roles, source functions, public-surface status, and declared authority ceilings.
+
+This view uses selected public metadata only. It is not the internal Registry, a complete archive, an ontology, or a confirmed conceptual relation graph.
+
+[Open the interactive map](/public-surface-map/interactive/)
+
 ## Public orientation surfaces
 
 - [About the System](/about/) gives a concise identity and scope note.

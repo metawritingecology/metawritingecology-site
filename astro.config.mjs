@@ -53,7 +53,9 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => !page.includes("/language-pressure-test-lab-prototype/"),
+      filter: (page) =>
+        !page.includes("/language-pressure-test-lab-prototype/") &&
+        !page.includes("/public-surface-map/interactive/"),
       serialize(item) {
         try {
           const { pathname } = new URL(item.url);

@@ -1,0 +1,895 @@
+---
+// Public Surface and Authority-Ceiling Map — Phase 1 preview component.
+//
+// Server-renders a review-first, boundary-preserving interface around one
+// audited, bundled PR #20 snapshot. All interactivity is progressive
+// enhancement layered on top of a complete no-JavaScript fallback (the record
+// table and every boundary statement render without scripts).
+//
+// Validation runs at build time on the RAW snapshot bytes (imported as text via
+// Vite `?raw`, so no runtime fetch and no filesystem path is exposed):
+// byte-length -> SHA-256 -> Git blob SHA -> JSON parse -> strict structural
+// validation. The route is prerendered, so any violation fails the build rather
+// than rendering unverified bytes or partially valid data. The page renders only
+// the object produced from the identity-validated bytes; the displayed SHA-256
+// comes from the fixed SNAPSHOT_SHA256 identity constant.
+
+import rawSnapshotText from "../data/public-surface-authority-map/last-known-good.json?raw";
+import {
+  assertSnapshotFromRawText,
+  SOURCE_REPOSITORY,
+  SNAPSHOT_SOURCE_COMMIT,
+  SNAPSHOT_SOURCE_PATH,
+  SNAPSHOT_COMMIT_URL,
+  SNAPSHOT_SHA256,
+  SNAPSHOT_STATUS_LABEL,
+  SOURCE_LINK_PREFIX,
+  EXPECTED_COUNTS,
+} from "../lib/public-surface-authority-map/contract.ts";
+
+const snapshot = await assertSnapshotFromRawText(rawSnapshotText);
+
+const APPROVED_TITLE = "Public Surface and Authority-Ceiling Map";
+const APPROVED_SUBTITLE =
+  "An interactive view of selected public-document roles, source functions, and declared public authority ceilings.";
+
+// Deterministic, boundary-neutral display order for the fallback table.
+const tableNodes = [...snapshot.nodes].sort(
+  (a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id),
+);
+
+type FilterField =
+  | "surface_role"
+  | "authority_ceiling"
+  | "public_surface_status"
+  | "classification_evidence";
+
+const distinctValues = (field: FilterField): string[] =>
+  Array.from(new Set(snapshot.nodes.map((node) => node[field]))).sort((a, b) =>
+    a.localeCompare(b),
+  );
+
+const surfaceRoles = distinctValues("surface_role");
+const authorityCeilings = distinctValues("authority_ceiling");
+const publicStatuses = distinctValues("public_surface_status");
+const classificationEvidence = distinctValues("classification_evidence");
+
+const isSafeSourceUrl = (url: string): boolean =>
+  url.startsWith(SOURCE_LINK_PREFIX);
+
+// Embed the validated snapshot for the client without any runtime request.
+// Escape "<" so the JSON can never break out of the script element.
+const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
+---
+
+<section class="psam" data-psam aria-labelledby="psam-title">
+  <!-- Persistent scope banner: all five boundary statements, always visible. -->
+  <div class="psam__scope" role="note" aria-label="Scope and boundary statements">
+    <p class="psam__scope-lead">Selected public surface only.</p>
+    <ul class="psam__scope-list">
+      <li>Visual position does not indicate conceptual importance or internal authority.</li>
+      <li>Reference routing does not establish a confirmed conceptual relation.</li>
+      <li>Omission does not imply nonexistence.</li>
+      <li>The public surface is not the internal Registry or a complete archive.</li>
+    </ul>
+  </div>
+
+  <header class="psam__header">
+    <h1 id="psam-title">{APPROVED_TITLE}</h1>
+    <p class="psam__subtitle">{APPROVED_SUBTITLE}</p>
+  </header>
+
+  <!-- Snapshot / data-status block. -->
+  <section class="psam__panel psam__status" aria-label="Snapshot status">
+    <h2>Snapshot status</h2>
+    <dl class="psam__status-list">
+      <div class="psam__status-row">
+        <dt>Source repository</dt>
+        <dd><code>{SOURCE_REPOSITORY}</code></dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Source path</dt>
+        <dd><code>{SNAPSHOT_SOURCE_PATH}</code></dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Source commit</dt>
+        <dd>
+          <a
+            href={SNAPSHOT_COMMIT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="psam__commit-link"><code>{SNAPSHOT_SOURCE_COMMIT}</code></a>
+        </dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Snapshot status</dt>
+        <dd>{SNAPSHOT_STATUS_LABEL}</dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>SHA-256</dt>
+        <dd>
+          <code class="psam__hash" tabindex="0" aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
+            >{SNAPSHOT_SHA256}</code>
+        </dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Schema version</dt>
+        <dd>{snapshot.schema_version}</dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Record count</dt>
+        <dd>{snapshot.nodes.length}</dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Edge count</dt>
+        <dd>
+          {snapshot.edges.length} ({EXPECTED_COUNTS.boundary_reference} boundary
+          reference, {EXPECTED_COUNTS.source_use_reference} source-use reference)
+        </dd>
+      </div>
+      <div class="psam__status-row">
+        <dt>Scope</dt>
+        <dd><code>{snapshot.scope}</code></dd>
+      </div>
+    </dl>
+    <p class="psam__status-note">
+      This is a bundled last-known-good preview snapshot. It reflects the source
+      commit shown above and is not claimed to be current beyond that commit.
+      Self-references are omitted from routing (declared omitted count:
+      {snapshot.self_references_omitted_count}).
+    </p>
+  </section>
+
+  <noscript>
+    <p class="psam__panel psam__noscript">
+      The visual map, grouping, filtering, and routing controls require
+      JavaScript. Every boundary statement, the snapshot status, and all
+      {snapshot.nodes.length} records remain available in the record table below without
+      JavaScript.
+    </p>
+  </noscript>
+
+  <!-- Grouping, filter, and metadata controls. -->
+  <div class="psam__panel psam__controls" data-psam-controls>
+    <fieldset class="psam__group">
+      <legend>Group nodes by</legend>
+      <label class="psam__radio">
+        <input type="radio" name="psam-group" value="surface_role" checked />
+        <span>Surface role</span>
+      </label>
+      <label class="psam__radio">
+        <input type="radio" name="psam-group" value="authority_ceiling" />
+        <span>Authority ceiling</span>
+      </label>
+      <label class="psam__radio">
+        <input type="radio" name="psam-group" value="public_surface_status" />
+        <span>Public-surface status</span>
+      </label>
+    </fieldset>
+
+    <div class="psam__field psam__field--wide">
+      <label for="psam-filter-text">Filter by document name or repository path</label>
+      <input
+        type="search"
+        id="psam-filter-text"
+        data-psam-filter-text
+        autocomplete="off"
+        placeholder="Type to filter this dataset"
+      />
+    </div>
+
+    <div class="psam__field">
+      <label for="psam-filter-surface_role">Surface role</label>
+      <select id="psam-filter-surface_role" data-psam-filter="surface_role">
+        <option value="">All surface roles</option>
+        {surfaceRoles.map((value) => <option value={value}>{value}</option>)}
+      </select>
+    </div>
+
+    <div class="psam__field">
+      <label for="psam-filter-authority_ceiling">Authority ceiling</label>
+      <select id="psam-filter-authority_ceiling" data-psam-filter="authority_ceiling">
+        <option value="">All authority ceilings</option>
+        {authorityCeilings.map((value) => <option value={value}>{value}</option>)}
+      </select>
+    </div>
+
+    <div class="psam__field">
+      <label for="psam-filter-public_surface_status">Public-surface status</label>
+      <select
+        id="psam-filter-public_surface_status"
+        data-psam-filter="public_surface_status"
+      >
+        <option value="">All public-surface statuses</option>
+        {publicStatuses.map((value) => <option value={value}>{value}</option>)}
+      </select>
+    </div>
+
+    <div class="psam__field">
+      <label for="psam-filter-classification_evidence">Classification evidence</label>
+      <select
+        id="psam-filter-classification_evidence"
+        data-psam-filter="classification_evidence"
+      >
+        <option value="">All classification evidence</option>
+        {classificationEvidence.map((value) => <option value={value}>{value}</option>)}
+      </select>
+    </div>
+
+    <div class="psam__field psam__field--action">
+      <button type="button" class="psam__button" data-psam-reset>Reset view</button>
+    </div>
+  </div>
+
+  <!-- Routing controls. Routing is off by default. -->
+  <div class="psam__panel psam__routing" role="group" aria-label="Routing controls">
+    <p class="psam__routing-lead">
+      Routing is off by default. All routing is navigation only and does not
+      establish a confirmed conceptual relation.
+    </p>
+    <label class="psam__check">
+      <input type="checkbox" data-psam-route-selected />
+      <span>Show navigation-only routing for the selected node</span>
+    </label>
+    <label class="psam__check">
+      <input type="checkbox" data-psam-route-global />
+      <span>Show all navigation-only routing (global)</span>
+    </label>
+  </div>
+
+  <!-- Persistent global-routing density warning. -->
+  <div
+    class="psam__density-warning"
+    data-psam-density-warning
+    role="note"
+    hidden
+  >
+    Global navigation-only routing is shown. Routing density, edge count, line
+    crossings, layout position, and color do not indicate importance, authority,
+    or a confirmed conceptual relation. All routing is navigation only.
+  </div>
+
+  <p class="psam__live" data-psam-status role="status" aria-live="polite">
+    Showing all {snapshot.nodes.length} records.
+  </p>
+
+  <div class="psam__stage">
+    <div class="psam__map-region">
+      <h2 class="psam__region-title">Categorical map</h2>
+      <div class="psam__map-scroll">
+        <div class="psam__map" data-psam-map>
+          <svg
+            class="psam__edges"
+            data-psam-edges
+            aria-hidden="true"
+            focusable="false"></svg>
+          <p class="psam__map-fallback" data-psam-map-fallback>
+            The interactive categorical map requires JavaScript. Every record
+            remains available in the record table below. No records are omitted
+            from that table.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <aside class="psam__detail" data-psam-detail aria-label="Selected node detail">
+      <h2 class="psam__region-title">Node detail</h2>
+      <p class="psam__detail-empty" data-psam-detail-empty>
+        Select a node to see its selected public metadata. Selection and routing
+        are navigation only.
+      </p>
+      <div class="psam__detail-body" data-psam-detail-body hidden></div>
+    </aside>
+  </div>
+
+  <!-- Legend. Color is always paired with glyph and text. -->
+  <div class="psam__panel psam__legend" aria-label="Legend">
+    <h2 class="psam__region-title">Legend</h2>
+    <ul class="psam__legend-list">
+      <li>
+        <span class="psam__legend-node" aria-hidden="true">●</span>
+        <span
+          >Node — one selected public document. All nodes share equal size;
+          position and grouping carry no ranking, importance, or authority.</span
+        >
+      </li>
+      <li>
+        <span class="psam__legend-line psam__legend-line--boundary" aria-hidden="true"></span>
+        <span
+          >Boundary reference (navigation only). Line style: solid.</span
+        >
+      </li>
+      <li>
+        <span class="psam__legend-line psam__legend-line--source" aria-hidden="true"></span>
+        <span
+          >Source-use reference (navigation only). Line style: dashed.</span
+        >
+      </li>
+    </ul>
+  </div>
+
+  <!-- Server-rendered fallback: all records, always present without JavaScript. -->
+  <section class="psam__table-section" aria-label="All records table">
+    <h2 class="psam__region-title">
+      All {snapshot.nodes.length} records
+    </h2>
+    <p class="psam__table-note">
+      This table lists every record in the bundled preview snapshot. Filtering
+      the map above never removes a record from this table; filtered records are
+      filtered from the current map view only, not absent from Meta-Writing
+      Ecology.
+    </p>
+    <div class="psam__table-wrap" tabindex="0" role="region" aria-label="Records table, scrollable">
+      <table class="psam__table">
+        <caption class="psam__table-caption">
+          Selected public-surface records. Row order is alphabetical by name and
+          does not imply hierarchy.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Repository path</th>
+            <th scope="col">Surface role</th>
+            <th scope="col">Public-surface status</th>
+            <th scope="col">Authority ceiling</th>
+            <th scope="col">Classification evidence</th>
+            <th scope="col">Relation default</th>
+            <th scope="col">Declared classification</th>
+            <th scope="col">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            tableNodes.map((node) => (
+              <tr>
+                <th scope="row">{node.name}</th>
+                <td><code>{node.repository_path}</code></td>
+                <td>{node.surface_role}</td>
+                <td>{node.public_surface_status}</td>
+                <td>{node.authority_ceiling}</td>
+                <td>{node.classification_evidence}</td>
+                <td>{node.relation_default}</td>
+                <td>{node.publicly_declared_classification ?? "—"}</td>
+                <td>
+                  {isSafeSourceUrl(node.canonical_public_url) ? (
+                    <a
+                      href={node.canonical_public_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Source file
+                    </a>
+                  ) : (
+                    <span>{node.canonical_public_url}</span>
+                  )}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="psam__boundary-footer">
+    <p>
+      This preview shows a bundled last-known-good snapshot of a selected public
+      surface. It is not the internal Registry, a complete archive, a complete
+      public corpus, an ontology, an authority graph or network, a model-family
+      structure, or a confirmed conceptual-relation graph. Reference routing is
+      navigation only and does not establish formal dependency or semantic
+      supersession. Omission does not imply nonexistence.
+    </p>
+  </footer>
+
+  <script type="application/json" id="psam-data" is:inline set:html={dataJson} />
+</section>
+
+<script>
+  import "./publicSurfaceAuthorityMap.client.ts";
+</script>
+
+<style is:global>
+  .psam {
+    /* Local palette derived from the site theme; meaning is never carried by
+       color alone (glyphs, text, and line styles accompany every encoding). */
+    --psam-panel: #15130f;
+    --psam-elevated: #201d18;
+    --psam-text: var(--text, #e8e1d4);
+    --psam-muted: var(--muted, #a79f91);
+    --psam-line: var(--line, #332f28);
+    --psam-accent: var(--accent, #f0d9a8);
+    --psam-link: var(--link, #d6b16f);
+    --psam-focus: var(--link, #d6b16f);
+    --psam-node-bg: #201d18;
+    --psam-node-border: #4a4436;
+    --psam-node-selected: #3a3324;
+    --psam-edge-boundary: #cbb083;
+    --psam-edge-source: #86b3b8;
+
+    display: block;
+    color: var(--psam-text);
+  }
+
+  .psam * {
+    box-sizing: border-box;
+  }
+
+  .psam h1,
+  .psam h2 {
+    color: var(--psam-accent);
+  }
+
+  .psam__region-title {
+    font-size: 1.05rem;
+    margin: 0 0 0.75rem;
+  }
+
+  /* Scope banner */
+  .psam__scope {
+    border: 1px solid color-mix(in srgb, var(--psam-line), var(--psam-accent) 24%);
+    border-radius: 8px;
+    background: var(--psam-elevated);
+    padding: 1rem 1.15rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .psam__scope-lead {
+    margin: 0 0 0.5rem;
+    color: var(--psam-accent);
+    font-weight: 700;
+  }
+
+  .psam__scope-list {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+
+  .psam__scope-list li {
+    margin: 0.3rem 0;
+  }
+
+  .psam__header {
+    margin: 0 0 1.5rem;
+  }
+
+  .psam__subtitle {
+    color: var(--psam-muted);
+    font-size: 1.05rem;
+    margin: 0.35rem 0 0;
+  }
+
+  /* Panels */
+  .psam__panel {
+    border: 1px solid var(--psam-line);
+    border-radius: 8px;
+    background: var(--psam-panel);
+    padding: 1rem 1.1rem;
+    margin: 0 0 1.25rem;
+  }
+
+  .psam__status-list {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+  }
+
+  .psam__status-row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) 1fr;
+    gap: 0.5rem 1rem;
+    align-items: baseline;
+  }
+
+  .psam__status-row dt {
+    color: var(--psam-muted);
+    font-size: 0.85rem;
+  }
+
+  .psam__status-row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psam__hash {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    font-size: 0.82rem;
+  }
+
+  .psam__commit-link {
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .psam__status-note,
+  .psam__routing-lead,
+  .psam__table-note {
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+    margin: 0.85rem 0 0;
+  }
+
+  .psam__noscript {
+    color: var(--psam-text);
+  }
+
+  /* Controls */
+  .psam__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .psam__group {
+    border: 1px solid var(--psam-line);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem 0.75rem;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .psam__group legend {
+    color: var(--psam-muted);
+    font-size: 0.8rem;
+    padding: 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .psam__radio,
+  .psam__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+  }
+
+  .psam__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 12rem;
+  }
+
+  .psam__field--wide {
+    flex: 1 1 16rem;
+  }
+
+  .psam__field--action {
+    min-width: auto;
+    justify-content: flex-end;
+  }
+
+  .psam__field label {
+    color: var(--psam-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .psam input[type="search"],
+  .psam select {
+    min-height: 2.5rem;
+    border: 1px solid var(--psam-line);
+    border-radius: 6px;
+    background: var(--psam-elevated);
+    color: var(--psam-text);
+    font: inherit;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .psam__button {
+    min-height: 2.5rem;
+    border: 1px solid var(--psam-line);
+    border-radius: 6px;
+    background: var(--psam-elevated);
+    color: var(--psam-accent);
+    cursor: pointer;
+    font: inherit;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .psam__button:hover {
+    border-color: var(--psam-link);
+    color: var(--psam-link);
+  }
+
+  /* Routing */
+  .psam__routing {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .psam__density-warning {
+    border: 1px solid color-mix(in srgb, var(--psam-line), var(--psam-accent) 40%);
+    border-left-width: 4px;
+    border-radius: 6px;
+    background: var(--psam-elevated);
+    color: var(--psam-text);
+    padding: 0.85rem 1rem;
+    margin: 0 0 1.25rem;
+  }
+
+  .psam__live {
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+    margin: 0 0 1rem;
+  }
+
+  /* Stage: map + detail */
+  .psam__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .psam__map-region {
+    min-width: 0;
+  }
+
+  .psam__map-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid var(--psam-line);
+    border-radius: 8px;
+    background: var(--psam-panel);
+  }
+
+  .psam__map {
+    position: relative;
+    min-height: 18rem;
+    min-width: 100%;
+  }
+
+  .psam__edges {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .psam__edge {
+    fill: none;
+    stroke-width: 1.4;
+  }
+
+  .psam__edge--boundary_reference {
+    stroke: var(--psam-edge-boundary);
+  }
+
+  .psam__edge--source_use_reference {
+    stroke: var(--psam-edge-source);
+    stroke-dasharray: 6 4;
+  }
+
+  .psam__col-label {
+    position: absolute;
+    color: var(--psam-muted);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    overflow-wrap: anywhere;
+  }
+
+  .psam__node {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--psam-node-border);
+    border-radius: 6px;
+    background: var(--psam-node-bg);
+    color: var(--psam-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    text-align: left;
+    padding: 0.4rem 0.5rem;
+    overflow: hidden;
+  }
+
+  .psam__node-glyph {
+    flex: 0 0 auto;
+    color: var(--psam-accent);
+  }
+
+  .psam__node-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .psam__node[aria-pressed="true"] {
+    border-color: var(--psam-accent);
+    background: var(--psam-node-selected);
+    box-shadow: 0 0 0 1px var(--psam-accent);
+  }
+
+  .psam__node:hover {
+    border-color: var(--psam-link);
+  }
+
+  /* Detail */
+  .psam__detail {
+    border: 1px solid var(--psam-line);
+    border-radius: 8px;
+    background: var(--psam-panel);
+    padding: 1rem 1.1rem;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .psam__detail-empty {
+    color: var(--psam-muted);
+  }
+
+  .psam__detail-dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .psam__detail-dl dt {
+    color: var(--psam-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .psam__detail-dl dd {
+    margin: 0.1rem 0 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psam__detail-dl ul {
+    margin: 0.1rem 0 0;
+    padding-left: 1.1rem;
+  }
+
+  /* Legend */
+  .psam__legend-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .psam__legend-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .psam__legend-node {
+    flex: 0 0 auto;
+    width: 1.4rem;
+    text-align: center;
+    color: var(--psam-accent);
+  }
+
+  .psam__legend-line {
+    flex: 0 0 auto;
+    width: 2.4rem;
+    height: 0;
+    border-top-width: 2px;
+  }
+
+  .psam__legend-line--boundary {
+    border-top-style: solid;
+    border-top-color: var(--psam-edge-boundary);
+  }
+
+  .psam__legend-line--source {
+    border-top-style: dashed;
+    border-top-color: var(--psam-edge-source);
+  }
+
+  /* Table */
+  .psam__table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--psam-line);
+    border-radius: 8px;
+  }
+
+  .psam__table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 60rem;
+    font-size: 0.88rem;
+  }
+
+  .psam__table caption {
+    text-align: left;
+    color: var(--psam-muted);
+    font-size: 0.82rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .psam__table th,
+  .psam__table td {
+    border-bottom: 1px solid var(--psam-line);
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .psam__table thead th {
+    color: var(--psam-accent);
+    position: sticky;
+    top: 0;
+    background: var(--psam-panel);
+  }
+
+  .psam__table tbody th {
+    font-weight: 600;
+    color: var(--psam-text);
+  }
+
+  .psam__table tbody tr:hover {
+    background: var(--psam-elevated);
+  }
+
+  .psam__boundary-footer {
+    margin: 1.5rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--psam-line);
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+  }
+
+  /* Focus visibility inside the visualization only. */
+  .psam :focus-visible {
+    outline: 2px solid var(--psam-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Responsive: stack map and detail, drop sticky, keep table scrollable. */
+  @media (max-width: 780px) {
+    .psam__stage {
+      grid-template-columns: 1fr;
+    }
+
+    .psam__detail {
+      position: static;
+    }
+
+    .psam__field {
+      min-width: 100%;
+    }
+
+    /* Snapshot status: single column so labels sit above values and long
+       hashes/URLs wrap across the full width in readable segments rather than a
+       character-by-character column in a narrow value cell. */
+    .psam__status-row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem 0;
+    }
+
+    .psam__hash,
+    .psam__commit-link {
+      word-break: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .psam__node {
+      transition: none;
+    }
+  }
+</style>

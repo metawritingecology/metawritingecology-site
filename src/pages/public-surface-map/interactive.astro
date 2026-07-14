@@ -1,0 +1,35 @@
+---
+// Child preview route: /public-surface-map/interactive/
+//
+// Prerendered so the snapshot contract runs at build time (a contract failure
+// fails the build). The parent /public-surface-map/ page remains the primary
+// interpretive and boundary layer; this route is an exploratory preview over
+// one audited, bundled PR #20 snapshot.
+export const prerender = true;
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PublicSurfaceAuthorityMap from "../../components/PublicSurfaceAuthorityMap.astro";
+
+const title = "Public Surface and Authority-Ceiling Map";
+const description =
+  "An interactive view of selected public-document roles, source functions, and declared public authority ceilings.";
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  robots="noindex, nofollow"
+  mainClass="main--psam-preview"
+>
+  <PublicSurfaceAuthorityMap />
+</BaseLayout>
+
+<style is:global>
+  /* Route-specific width/padding only. Applies solely to this child route
+     because no other route renders <main class="main--psam-preview">. */
+  main.main--psam-preview {
+    max-width: 1200px;
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
+  }
+</style>
