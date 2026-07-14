@@ -28,10 +28,12 @@
     "astro": "astro",
     "build": "astro build",
     "cf-typegen": "wrangler types",
-    "check": "astro build && tsc && wrangler deploy --dry-run",
+    "check": "astro build && tsc && wrangler deploy --dry-run && pnpm run test:contracts && pnpm run verify:public-surface-map",
     "deploy": "wrangler deploy",
     "dev": "astro dev",
-    "preview": "astro build && wrangler dev"
+    "preview": "astro build && wrangler dev",
+    "test:contracts": "node --test tests/public-surface-authority-map/contracts.test.ts",
+    "verify:public-surface-map": "node scripts/verify-public-surface-map-build.mjs"
   },
   "type": "module"
 }
