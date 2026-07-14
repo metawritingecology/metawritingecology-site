@@ -225,23 +225,55 @@ await check("17 Phase 1 boundary statements remain", () => {
   return `${REQUIRED_HTML_BOUNDARY_STATEMENTS.length} statements present`;
 });
 
-await check("18 no Phase 2B loader marker in browser bundle", () => {
-  const offenders = [];
-  const markers = [
-    "runtimeLoader",
-    "runtime-manifest",
-    "assertRuntimeManifest",
-    "snapshotPathForId",
+await check("18 Phase 2B runtime loader is same-origin, bounded, no storage/retry/telemetry", () => {
+  // Phase 2B REQUIRES the browser bundle to reference the fixed same-origin
+  // manifest route and snapshot prefix (the loader fetch targets). It must NOT
+  // introduce off-origin data sources, arbitrary URLs, storage, retry/polling,
+  // service workers, telemetry, or remote dynamic imports.
+  const files = clientJsFiles();
+  const combined = files.map((file) => readFileSync(file, "utf8")).join("\n");
+
+  // (a) Required same-origin loader routes must be present.
+  const required = [
     "/public-surface-map/data/manifest.json",
     "/public-surface-map/data/snapshots/",
   ];
-  for (const file of clientJsFiles()) {
+  const missing = required.filter((needle) => !combined.includes(needle));
+  if (missing.length) {
+    throw new Error(`required same-origin loader route(s) missing: ${missing.join(", ")}`);
+  }
+
+  // (b) Forbidden runtime behaviors that Phase 2B must never introduce.
+  //     `setTimeout` / `AbortController` remain allowed (bounded shared budget).
+  const forbidden = [
+    // off-origin data sources
+    "raw.githubusercontent.com",
+    "githubusercontent.com",
+    "objects.githubusercontent",
+    "api.github.com",
+    // storage APIs
+    "localStorage",
+    "sessionStorage",
+    "indexedDB",
+    "document.cookie",
+    // service worker
+    "serviceWorker",
+    // retry / polling
+    "setInterval",
+    // telemetry
+    "sendBeacon",
+    // remote dynamic import
+    "import(",
+  ];
+  const offenders = [];
+  for (const file of files) {
     const text = readFileSync(file, "utf8");
-    for (const marker of markers) {
+    for (const marker of forbidden) {
       if (text.includes(marker)) offenders.push(`${marker} in ${file}`);
     }
   }
   if (offenders.length) throw new Error(offenders.join("; "));
+  return "same-origin manifest + snapshot routes present; no storage/retry/telemetry/off-origin";
 });
 
 for (const line of results) console.log(line);
