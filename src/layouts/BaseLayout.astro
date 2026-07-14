@@ -8,10 +8,17 @@ const {
   title: propTitle,
   description: propDescription,
   schemaDescription: propSchemaDescription,
-  schemaGenre: propSchemaGenre
+  schemaGenre: propSchemaGenre,
+  robots: propRobots,
+  mainClass: propMainClass
 } = Astro.props;
 
 const frontmatter = Astro.props.frontmatter ?? {};
+
+// Optional, backward-compatible route hooks. Routes that pass neither prop are
+// rendered exactly as before: no robots meta, and a bare <main>.
+const robots = propRobots ?? frontmatter.robots;
+const mainClass = propMainClass ?? frontmatter.mainClass;
 
 const title = propTitle ?? frontmatter.title ?? "Meta-Writing Ecology";
 const description =
@@ -115,6 +122,8 @@ const jsonLd = {
 
     <meta name="description" content={description} />
 
+    {robots && <meta name="robots" content={robots} />}
+
     <link rel="canonical" href={currentUrl} />
 
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -163,7 +172,7 @@ const jsonLd = {
       <PublicSearchModal />
     </header>
 
-    <main>
+    <main class={mainClass}>
       <slot />
     </main>
 
