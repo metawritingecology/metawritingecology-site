@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "map_id": "public-surface-authority-map",
+  "selected_snapshot": {
+    "id": "18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e",
+    "source_commit": "18491105f0bc0451e0bf99eaa78c39f69c7cb57c",
+    "snapshot_schema_version": "1.0",
+    "path": "/public-surface-map/data/snapshots/18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json",
+    "byte_length": 83727,
+    "sha256": "82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e",
+    "git_blob": "aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b"
+  },
+  "currentness_claim": "none"
+}

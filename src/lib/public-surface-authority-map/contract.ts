@@ -1,27 +1,22 @@
-// Public Surface and Authority-Ceiling Map — Phase 1 preview contract.
+// Public Surface and Authority-Ceiling Map — shared strict snapshot contract.
 //
-// This module is the single build-time gate for the bundled last-known-good
-// preview snapshot. Phase 1 provenance constants live here, NOT inside the
-// audited snapshot: the snapshot file must stay byte-identical to the audited
-// source (see src/data/public-surface-authority-map/last-known-good.json).
+// This module is the reusable, browser-safe AND build-safe strict semantic
+// validator for any Public Surface Authority Map snapshot. It enforces the
+// public vocabulary, exact key schemas, authority-ceiling invariants, boundary
+// semantics, and INTERNAL count consistency — but it does NOT hard-code the
+// Phase 1 instance counts (27 nodes / 146 edges / 120 / 26 / 7). A generalized
+// future snapshot may carry different, internally-consistent counts.
 //
-// Build-time validation runs in two stages, in this exact order:
+// Phase 1 provenance, fixed byte identity, and the exact Phase 1 instance counts
+// live in `./fallback.ts`. For backward compatibility the Phase 1 provenance
+// constants and the `assertSnapshotFromRawText` entry point are re-exported from
+// here (see the compatibility re-exports at the bottom) so existing Phase 1
+// components keep importing them from `contract.ts` unchanged.
 //
-//   raw snapshot bytes
-//     -> byte-length validation
-//     -> SHA-256 validation
-//     -> Git blob SHA validation      (assertRawIdentity)
-//     -> JSON parse
-//     -> strict structural validation (assertSnapshot)
-//     -> render
-//
-// The interactive route is prerendered, so this runs during the Astro build.
-// Any violation throws and fails the build; the map is never rendered from
-// unverified bytes or partially valid data. Identity is checked on the RAW
-// bytes, so a mutation that preserves node/edge counts and field structure but
-// changes even one byte still fails (the SHA-256 / Git blob SHA will not match).
+// Raw byte-identity primitives (SHA-256, Git blob id, UTF-8 handling) live in
+// `./byteIdentity.ts` and are shared across the data surface.
 
-// --- Provenance constants (Phase 1) -----------------------------------------
+// --- Shared approved-source constants ---------------------------------------
 
 export const SOURCE_REPOSITORY = "metawritingecology/meta-writing-ecology";
 export const SOURCE_REPOSITORY_URL =
@@ -29,37 +24,9 @@ export const SOURCE_REPOSITORY_URL =
 export const SOURCE_LINK_HOST = "github.com";
 export const APPROVED_REPOSITORY_PATH = "/metawritingecology/meta-writing-ecology/";
 
-// PR #20 merge commit — the immutable snapshot source commit.
-export const SNAPSHOT_SOURCE_COMMIT =
-  "18491105f0bc0451e0bf99eaa78c39f69c7cb57c";
-export const SNAPSHOT_SOURCE_PATH =
-  "visualizations/public-surface-authority-map/data.json";
-export const SNAPSHOT_COMMIT_URL = `${SOURCE_REPOSITORY_URL}/commit/${SNAPSHOT_SOURCE_COMMIT}`;
-
-// Fixed identity of the audited raw bytes. The displayed SHA-256 must come from
-// SNAPSHOT_SHA256 (the same value assertRawIdentity verifies), never recomputed
-// from live input for display.
-export const SNAPSHOT_SHA256 =
-  "82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
-export const SNAPSHOT_GIT_BLOB_SHA = "aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b";
-export const SNAPSHOT_BYTE_LENGTH = 83727;
-
-export const SNAPSHOT_STATUS = "bundled_last_known_good_preview_snapshot";
-export const SNAPSHOT_STATUS_LABEL = "Bundled last-known-good preview snapshot";
-
 // The only host/prefix source links are allowed to point at (used for display
 // helpers; canonical URLs are additionally parsed and validated below).
 export const SOURCE_LINK_PREFIX = `${SOURCE_REPOSITORY_URL}/`;
-
-// --- Expected counts --------------------------------------------------------
-
-export const EXPECTED_COUNTS = {
-  nodes: 27,
-  edges: 146,
-  boundary_reference: 120,
-  source_use_reference: 26,
-  self_references_omitted: 7,
-} as const;
 
 // --- Allowed vocabularies (derived verbatim from the audited snapshot) ------
 
@@ -77,6 +44,16 @@ export const ALLOWED_EDGE_TYPES = [
 export const NAVIGATION_ONLY = "navigation_only";
 export const REQUIRED_SCOPE = "selected_public_surface_only";
 export const REQUIRED_SCHEMA_VERSION = "1.0";
+
+// Boundary statements that every snapshot MUST carry verbatim. These are
+// universal authority-ceiling boundary invariants, not Phase 1 instance counts,
+// so they belong in the shared contract. Altering or dropping any one fails.
+export const REQUIRED_BOUNDARY_STATEMENTS = [
+  "Selected public surface only.",
+  "Visual position does not indicate conceptual importance or internal authority.",
+  "Reference routing does not establish a confirmed conceptual relation.",
+  "Omission does not imply nonexistence.",
+] as const;
 
 const SURFACE_ROLES = [
   "boundary_document",
@@ -251,6 +228,21 @@ export interface PublicSurfaceAuthoritySnapshot {
   readonly transform_notes: TransformNotes;
 }
 
+// Fixed Phase 1 (or any specific snapshot's) instance counts. When supplied to
+// `assertSnapshot`, these exact values are enforced; when omitted the validator
+// only enforces internal count consistency.
+export interface ExpectedInstanceCounts {
+  readonly nodes: number;
+  readonly edges: number;
+  readonly boundary_reference: number;
+  readonly source_use_reference: number;
+  readonly self_references_omitted: number;
+}
+
+export interface SnapshotValidationOptions {
+  readonly expectedCounts?: ExpectedInstanceCounts;
+}
+
 // --- Error ------------------------------------------------------------------
 
 export class SnapshotContractError extends Error {
@@ -264,85 +256,6 @@ export class SnapshotContractError extends Error {
 
 function fail(invariant: string, detail: string): never {
   throw new SnapshotContractError(invariant, detail);
-}
-
-// --- Raw identity validation (runs before JSON.parse) -----------------------
-
-function toHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  return toHex(await crypto.subtle.digest("SHA-256", bytes as BufferSource));
-}
-
-// Git blob SHA-1: SHA-1 of `blob <byte-length>\0<raw-bytes>`, where \0 is a
-// single NUL separator byte. The NUL is assembled as a byte (not embedded in
-// source) so this file stays plain text.
-async function gitBlobSha1Hex(bytes: Uint8Array): Promise<string> {
-  const header = new TextEncoder().encode(`blob ${bytes.length}`);
-  const combined = new Uint8Array(header.length + 1 + bytes.length);
-  combined.set(header, 0);
-  combined[header.length] = 0; // NUL separator
-  combined.set(bytes, header.length + 1);
-  return toHex(await crypto.subtle.digest("SHA-1", combined));
-}
-
-/**
- * Validate the exact raw UTF-8 bytes of the snapshot against the fixed Phase 1
- * identity: byte length, SHA-256, and Git blob SHA — in that order. Any
- * single-byte difference fails.
- */
-export async function assertRawIdentity(rawText: string): Promise<void> {
-  const bytes = new TextEncoder().encode(rawText);
-
-  if (bytes.length !== SNAPSHOT_BYTE_LENGTH) {
-    fail(
-      "raw_byte_length",
-      `expected ${SNAPSHOT_BYTE_LENGTH} UTF-8 bytes, received ${bytes.length}`,
-    );
-  }
-
-  const sha256 = await sha256Hex(bytes);
-  if (sha256 !== SNAPSHOT_SHA256) {
-    fail(
-      "raw_sha256",
-      `expected SHA-256 ${SNAPSHOT_SHA256}, computed ${sha256}`,
-    );
-  }
-
-  const blob = await gitBlobSha1Hex(bytes);
-  if (blob !== SNAPSHOT_GIT_BLOB_SHA) {
-    fail(
-      "raw_git_blob_sha",
-      `expected Git blob SHA ${SNAPSHOT_GIT_BLOB_SHA}, computed ${blob}`,
-    );
-  }
-}
-
-/**
- * Full build-time gate: identity-validate the raw bytes, parse, then strictly
- * validate the parsed object. Returns the typed snapshot produced only from the
- * identity-validated bytes.
- */
-export async function assertSnapshotFromRawText(
-  rawText: string,
-): Promise<PublicSurfaceAuthoritySnapshot> {
-  await assertRawIdentity(rawText);
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(rawText);
-  } catch (error) {
-    fail(
-      "json_parse",
-      `snapshot bytes are not valid JSON: ${(error as Error).message}`,
-    );
-  }
-
-  return assertSnapshot(parsed);
 }
 
 // --- Plain-data / prototype guards ------------------------------------------
@@ -618,12 +531,19 @@ function assertEdge(
   value: unknown,
   index: number,
   nodeIds: Set<string>,
+  seenEdgeIds: Set<string>,
 ): PublicSurfaceEdge {
   const where = `edges[${index}]`;
   if (!isPlainObject(value)) {
     fail("edge_shape", `${where} must be a plain object`);
   }
   assertAllowedKeys(value, EDGE_ALLOWED_KEYS, where);
+
+  const id = requireNonEmptyString(value.id, "edge_shape", `${where}.id`);
+  if (seenEdgeIds.has(id)) {
+    fail("edge_id_unique", `duplicate edge id "${id}" at ${where}`);
+  }
+  seenEdgeIds.add(id);
 
   const source = requireNonEmptyString(value.source, "edge_shape", `${where}.source`);
   const target = requireNonEmptyString(value.target, "edge_shape", `${where}.target`);
@@ -663,7 +583,7 @@ function assertEdge(
   }
 
   return {
-    id: requireNonEmptyString(value.id, "edge_shape", `${where}.id`),
+    id,
     source,
     target,
     relation_type: relationType as EdgeType,
@@ -683,8 +603,18 @@ function assertEdge(
  * Strictly validate a parsed snapshot object and return a typed snapshot.
  * Throws SnapshotContractError on the first violated invariant. Does not coerce
  * or repair values.
+ *
+ * When `options.expectedCounts` is supplied the exact instance counts are
+ * enforced (Phase 1 uses this). When omitted, only INTERNAL count consistency
+ * is enforced, so a generalized future snapshot with different but consistent
+ * counts is accepted without weakening any semantic rule.
  */
-export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
+export function assertSnapshot(
+  input: unknown,
+  options: SnapshotValidationOptions = {},
+): PublicSurfaceAuthoritySnapshot {
+  const expected = options.expectedCounts;
+
   // Reject prototype-bearing / non-JSON data anywhere in the tree first.
   assertPlainData(input, "snapshot");
   if (!isPlainObject(input)) {
@@ -734,6 +664,16 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
       `snapshot.boundary_statements[${index}]`,
     ),
   );
+  // Every required boundary statement must be present verbatim.
+  const boundaryStatementSet = new Set(boundaryStatements);
+  for (const required of REQUIRED_BOUNDARY_STATEMENTS) {
+    if (!boundaryStatementSet.has(required)) {
+      fail(
+        "boundary_statements",
+        `required boundary statement is missing or altered: ${JSON.stringify(required)}`,
+      );
+    }
+  }
 
   // grouping_fields: exactly the approved grouping fields, unique, no unknowns.
   if (!Array.isArray(input.grouping_fields)) {
@@ -792,8 +732,11 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
   if (!Array.isArray(input.nodes)) {
     fail("nodes_present", "nodes must be an array");
   }
-  if (input.nodes.length !== EXPECTED_COUNTS.nodes) {
-    fail("node_count", `expected ${EXPECTED_COUNTS.nodes} nodes, received ${input.nodes.length}`);
+  if (input.nodes.length === 0) {
+    fail("node_count", "nodes must be a non-empty array");
+  }
+  if (expected && input.nodes.length !== expected.nodes) {
+    fail("node_count", `expected ${expected.nodes} nodes, received ${input.nodes.length}`);
   }
   const seenIds = new Set<string>();
   const nodes = input.nodes.map((node, index) => assertNode(node, index, seenIds));
@@ -815,13 +758,14 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
   if (!Array.isArray(input.edges)) {
     fail("edges_present", "edges must be an array");
   }
-  if (input.edges.length !== EXPECTED_COUNTS.edges) {
-    fail("edge_count", `expected ${EXPECTED_COUNTS.edges} edges, received ${input.edges.length}`);
+  if (expected && input.edges.length !== expected.edges) {
+    fail("edge_count", `expected ${expected.edges} edges, received ${input.edges.length}`);
   }
   let boundaryReferenceCount = 0;
   let sourceUseReferenceCount = 0;
+  const seenEdgeIds = new Set<string>();
   const edges = input.edges.map((edge, index) => {
-    const parsed = assertEdge(edge, index, seenIds);
+    const parsed = assertEdge(edge, index, seenIds, seenEdgeIds);
     if (parsed.relation_type === "boundary_reference") {
       boundaryReferenceCount += 1;
     } else {
@@ -830,20 +774,21 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
     return parsed;
   });
 
-  if (boundaryReferenceCount !== EXPECTED_COUNTS.boundary_reference) {
+  if (expected && boundaryReferenceCount !== expected.boundary_reference) {
     fail(
       "boundary_reference_count",
-      `expected ${EXPECTED_COUNTS.boundary_reference} boundary_reference edges, received ${boundaryReferenceCount}`,
+      `expected ${expected.boundary_reference} boundary_reference edges, received ${boundaryReferenceCount}`,
     );
   }
-  if (sourceUseReferenceCount !== EXPECTED_COUNTS.source_use_reference) {
+  if (expected && sourceUseReferenceCount !== expected.source_use_reference) {
     fail(
       "source_use_reference_count",
-      `expected ${EXPECTED_COUNTS.source_use_reference} source_use_reference edges, received ${sourceUseReferenceCount}`,
+      `expected ${expected.source_use_reference} source_use_reference edges, received ${sourceUseReferenceCount}`,
     );
   }
 
-  // edge_counts must be strict integers agreeing with the actual edge counts.
+  // edge_counts must be strict integers agreeing with the actual edge counts
+  // (internal consistency, enforced for every snapshot).
   if (!isPlainObject(input.edge_counts)) {
     fail("edge_counts", "edge_counts must be a plain object");
   }
@@ -868,16 +813,23 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
     );
   }
 
-  // self_references_omitted_count
+  // self_references_omitted_count: non-negative integer (internal), exact when
+  // expected counts are supplied.
   const omitted = requireInteger(
     input.self_references_omitted_count,
     "self_references_omitted_count",
     "snapshot.self_references_omitted_count",
   );
-  if (omitted !== EXPECTED_COUNTS.self_references_omitted) {
+  if (omitted < 0) {
     fail(
       "self_references_omitted_count",
-      `expected ${EXPECTED_COUNTS.self_references_omitted}, received ${omitted}`,
+      `self_references_omitted_count must be non-negative, received ${omitted}`,
+    );
+  }
+  if (expected && omitted !== expected.self_references_omitted) {
+    fail(
+      "self_references_omitted_count",
+      `expected ${expected.self_references_omitted}, received ${omitted}`,
     );
   }
 
@@ -900,3 +852,25 @@ export function assertSnapshot(input: unknown): PublicSurfaceAuthoritySnapshot {
     transform_notes: transformNotes,
   };
 }
+
+// --- Phase 1 compatibility re-exports ---------------------------------------
+//
+// Existing Phase 1 components import these Phase-1-specific names FROM
+// `contract.ts`. They now physically live in `./fallback.ts`; re-exporting them
+// here preserves the existing import surface without editing any component. The
+// re-exported bindings are used only at call time, so the contract <-> fallback
+// module cycle initialises safely.
+
+export {
+  SNAPSHOT_SOURCE_COMMIT,
+  SNAPSHOT_SOURCE_PATH,
+  SNAPSHOT_COMMIT_URL,
+  SNAPSHOT_SHA256,
+  SNAPSHOT_GIT_BLOB_SHA,
+  SNAPSHOT_BYTE_LENGTH,
+  SNAPSHOT_STATUS,
+  SNAPSHOT_STATUS_LABEL,
+  EXPECTED_COUNTS,
+  assertRawIdentity,
+  assertSnapshotFromRawText,
+} from "./fallback.ts";
