@@ -1,0 +1,180 @@
+name: Public-surface candidate generation
+
+on:
+  workflow_dispatch:
+    inputs:
+      SOURCE_COMMIT_APPROVED_FOR_GENERATION:
+        description: Exact approved source commit (40 lowercase hexadecimal characters)
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: public-surface-candidate-generation
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Read-only generation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out workflow website commit without credentials
+        # actions/checkout v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          path: website
+          persist-credentials: false
+          token: ""
+
+      - name: Set up Node.js
+        # actions/setup-node v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+
+      - name: Validate manual dispatch boundary
+        shell: bash
+        env:
+          WORKFLOW_REPOSITORY: ${{ github.repository }}
+          WORKFLOW_REF: ${{ github.ref }}
+          APPROVED_SOURCE_COMMIT: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+        run: |
+          set -euo pipefail
+          node website/scripts/public-surface-candidate-workflow.mjs validate-dispatch \
+            --repository "$WORKFLOW_REPOSITORY" \
+            --ref "$WORKFLOW_REF" \
+            --source-commit "$APPROVED_SOURCE_COMMIT"
+
+      - name: Verify website checkout identity
+        shell: bash
+        env:
+          WEBSITE_BASE_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          actual="$(git -C website rev-parse HEAD)"
+          if [[ "$actual" != "$WEBSITE_BASE_COMMIT" ]]; then
+            echo "WEBSITE_CHECKOUT_IDENTITY_MISMATCH" >&2
+            exit 1
+          fi
+
+      - name: Check out exact public source commit without credentials
+        id: source_checkout
+        continue-on-error: true
+        # actions/checkout v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: metawritingecology/meta-writing-ecology
+          ref: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+          path: source
+          persist-credentials: false
+          token: ""
+
+      - name: Reject unavailable source commit
+        if: steps.source_checkout.outcome != 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "APPROVED_SOURCE_COMMIT_NOT_FOUND" >&2
+          exit 1
+
+      - name: Verify source checkout identity
+        shell: bash
+        env:
+          APPROVED_SOURCE_COMMIT: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+        run: |
+          set -euo pipefail
+          actual="$(git -C source rev-parse HEAD)"
+          if [[ "$actual" != "$APPROVED_SOURCE_COMMIT" ]]; then
+            echo "SOURCE_CHECKOUT_IDENTITY_MISMATCH" >&2
+            exit 1
+          fi
+
+      - name: Generate and validate candidate mechanically
+        shell: bash
+        env:
+          APPROVED_SOURCE_COMMIT: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+        run: |
+          set -euo pipefail
+          node website/scripts/run-public-surface-candidate-orchestration.mjs \
+            --source-repository "$(pwd)/source" \
+            --SOURCE_COMMIT_APPROVED_FOR_GENERATION "$APPROVED_SOURCE_COMMIT" \
+            --generator-identity "$APPROVED_SOURCE_COMMIT" \
+            --website-repository "$(pwd)/website" \
+            --python-executable "$(command -v python3)" \
+            > candidate-generation-record.json || {
+              echo "ORCHESTRATION_FAILURE" >&2
+              exit 1
+            }
+          if [[ -n "$(git -C source status --porcelain=v1 --untracked-files=all)" ]]; then
+            echo "SOURCE_REPOSITORY_MUTATION" >&2
+            exit 1
+          fi
+
+      - name: Package non-executable candidate artifact
+        shell: bash
+        env:
+          APPROVED_SOURCE_COMMIT: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+        run: |
+          set -euo pipefail
+          node website/scripts/public-surface-candidate-workflow.mjs package-artifact \
+            --record "$(pwd)/candidate-generation-record.json" \
+            --website-repository "$(pwd)/website" \
+            --artifact-directory "$(pwd)/candidate-artifact" \
+            --source-commit "$APPROVED_SOURCE_COMMIT"
+
+      - name: Upload candidate data only
+        # actions/upload-artifact v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-surface-candidate-data
+          path: candidate-artifact
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 1
+
+  publish:
+    name: Controlled candidate publishing
+    needs: generate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out exact workflow website commit
+        # actions/checkout v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          path: website
+          persist-credentials: true
+
+      - name: Set up Node.js
+        # actions/setup-node v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+
+      - name: Download candidate data
+        # actions/download-artifact v4.3.0
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: public-surface-candidate-data
+          path: candidate-artifact
+
+      - name: Revalidate, retain, branch, and create Draft PR
+        shell: bash
+        env:
+          APPROVED_SOURCE_COMMIT: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
+          WEBSITE_BASE_COMMIT: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node website/scripts/public-surface-candidate-workflow.mjs publish \
+            --artifact-directory "$(pwd)/candidate-artifact" \
+            --website-repository "$(pwd)/website" \
+            --source-commit "$APPROVED_SOURCE_COMMIT" \
+            --website-base-commit "$WEBSITE_BASE_COMMIT"
