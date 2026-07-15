@@ -320,3 +320,89 @@ Boundary:
 Phase 3B-2 closure records implementation and validation completion only.
 It does not authorize Phase 3B-3, Phase 3C, Phase 3D, candidate adoption,
 production pointer movement, or publication.
+
+### 2026-07-15 — Codex — phase3b3-cross-repository-orchestration
+
+Agent: Codex
+
+Task: Phase 3B-3 — implement the local, deterministic, fail-closed bridge from
+the source-owned Phase 3B-1 isolated generator to the website-owned Phase 3B-2
+immutable retention layer. Local implementation and validation only.
+
+Baselines: fresh fetches verified source `origin/main` at
+`97631bc0a36f39331a6950d1498400213208afb6` and website `origin/main` at
+`339adeb1ef4206ea338111b4b251e2a34107842b`. Website branch
+`codex/phase3b3-cross-repository-orchestration` was created at the exact website
+baseline. Source repository remained on `main`, clean and read-only.
+
+Boundary assessment: the canonical generator sequence is the Phase 3B-1
+`validate_public_metadata.py` preflight, isolated
+`build_public_surface_authority_map.py`, and dependency-inventory verification.
+Generator identity is the exact immutable commit containing the executed
+builder, validator, and inventory schema; Phase 3B-1 intentionally adds no
+generator field to map or inventory data. Website validation and retention use
+the existing `assertSnapshot` contract through
+`retainPublicSurfaceSnapshot`. Snapshot identity remains
+`<source-commit>-<exact-byte-sha256>.json` under the fixed website root.
+
+Files added: `scripts/public-surface-candidate-orchestration.mjs`,
+`scripts/run-public-surface-candidate-orchestration.mjs`,
+`tests/public-surface-authority-map/candidateOrchestration.test.ts`,
+`docs/public-surface-candidate-orchestration.md`.
+
+Files modified: `package.json`, `AGENT_WORKLOG.md`.
+
+Implementation: the exact `SOURCE_COMMIT_APPROVED_FOR_GENERATION` gate and an
+exact matching generator commit are mandatory. The source origin and commit
+object are verified. Separate source and generator roots are materialized with
+`git archive`; generation runs with argument arrays, no shell, isolated Python
+environment, and outputs outside both roots. Exact output-set and pre/post
+byte identities are checked. Candidate bytes receive fatal UTF-8 decoding,
+JSON parsing, the shared website contract, and exact-byte SHA-256 before the
+existing retention entry point is called. Protected pointers, pre-existing
+snapshots, and source bytes/refs are audited. Temporary state is removed on
+success and failure. The deterministic result contains mechanical facts only.
+
+Tests: 29 synthetic orchestration tests pass with 0 failures, 0 errors, and 0
+skips. Together with existing contract (48), runtime-loader (55), and retention
+(16) suites, 148 tests pass. Coverage includes the exact gate, absent commit,
+HEAD and dirty-worktree isolation, generator identity and exits, missing and
+ambiguous output, inventory verification, UTF-8, JSON, map contract, candidate
+SHA mutation, exact SHA identity, first/idempotent/conflicting retention,
+pointer and source preservation, deterministic records, forbidden volatile or
+authority fields, no external actions, and success/failure cleanup.
+
+Validation: Astro build passed; TypeScript `tsc --noEmit` passed; generated
+public-surface verification passed 18/18; `git diff --check` and repository
+audits passed. `pnpm install --frozen-lockfile` resolved the exact lockfile but
+the managed wrapper returned `ERR_PNPM_IGNORED_BUILDS` for esbuild, sharp,
+and workerd and briefly created an unauthorized `pnpm-workspace.yaml`; that
+file was removed immediately and the lockfile remained unchanged. Tests and
+build were then run directly with the bundled Node runtime against the exact
+installed dependency tree.
+
+Wrangler: version 4.88.0 dry-run was attempted only after the successful Astro
+build. It was blocked by the Windows sandbox: Wrangler could not write its
+AppData log (`EPERM`) and esbuild could not read filesystem ancestors (`Access
+is denied`), followed by failure to resolve `dist/_worker.js/index.js`. No broad
+filesystem request was made and no code or configuration was changed to bypass
+the environment.
+
+Protected identities: `runtime-manifest.json` remains 685 bytes, SHA-256
+`a534d8885b7fe7aff87b161202ca57460b28b3fd374800469de07d33ca12249b`,
+Git blob `03910040496c663ff49381f76c1bf6ccc7c5a8a1`;
+`last-known-good.json` and the existing production snapshot each remain 83727
+bytes, SHA-256
+`82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`,
+Git blob `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`. The fresh Windows clone initially
+smudged these files and `public/_headers` to CRLF despite clean Git status; the
+exact baseline blob bytes were re-materialized from `HEAD` by `git archive`
+before final validation. No semantic or tracked diff resulted.
+
+Unresolved questions: None.
+
+Risks or assumptions: Wrangler remains environment-blocked as described. No
+real candidate snapshot, runtime-pointer movement, last-known-good change,
+production pointer, source-repository change, network or GitHub action,
+workflow, commit, push, PR, review, merge, deployment, Phase 3B-4, Phase 3C, or
+Phase 3D action occurred.
