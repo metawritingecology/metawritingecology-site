@@ -280,3 +280,43 @@ Result: The fixed-root tool validates repository-relative paths, exact-byte SHA-
 Unresolved validation state: WRANGLER_DRY_RUN_BLOCKED_BY_WINDOWS_SANDBOX
 Unresolved questions: The required Wrangler 4.88 dry-run is blocked on this Windows host because its native esbuild resolver receives access denied while scanning filesystem ancestors, including after read-only permission grants and a system-temp validation copy. Candidate authority, generator authority, production status, Registry status, ontology status, and pointer adoption remain outside this phase.
 Risks or assumptions: The tool intentionally exposes no deletion, overwrite, rename, replacement, pointer-adoption, workflow, orchestration, publication, or deployment operation. Its deterministic output is mechanical identity evidence only and is not semantic authority. The local commit is validation-pending; no push or PR was made.
+
+### 2026-07-15 — Phase 3B-2 post-merge closure
+
+Closure update:
+
+- The earlier `WRANGLER_DRY_RUN_BLOCKED_BY_WINDOWS_SANDBOX` result was
+  environment-specific historical context.
+- A read-only Linux validation was completed against exact PR head commit
+  `48ddb092038b574a78232434d4a54689ad216abc`.
+- Wrangler 4.88.0 dry-run completed successfully with exit code 0.
+- Contract tests: 48 passed.
+- Runtime-loader tests: 55 passed.
+- Snapshot-retention tests: 16 passed.
+- Total tests: 119 passed, 0 failures, 0 errors, 0 skips.
+- Generated-build verification: 18/18 passed.
+- TypeScript and Astro build passed.
+- PR #55 was merged using the merge-commit method.
+- Merge commit:
+  `399dbd78ec52a2345a76ed8de6e34179396efe78`
+- Merge tree:
+  `83555477d1568b9437917fb7390448e2b3a27244`
+- `main` advanced to the merge commit.
+- The active runtime manifest, last-known-good file, and existing production
+  snapshot remained unchanged.
+- No real candidate snapshot, pointer adoption, workflow, cross-repository
+  orchestration, manual deployment, Registry promotion, ontology promotion,
+  or authority promotion occurred.
+
+Recorded closure state:
+
+`PHASE3B2_MERGED`
+`PHASE3B2_CLOSED`
+`PHASE3B3_NEXT`
+`PHASE3B3_NOT_STARTED`
+
+Boundary:
+
+Phase 3B-2 closure records implementation and validation completion only.
+It does not authorize Phase 3B-3, Phase 3C, Phase 3D, candidate adoption,
+production pointer movement, or publication.
