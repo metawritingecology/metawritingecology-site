@@ -79,6 +79,12 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     <p class="psam__subtitle">{APPROVED_SUBTITLE}</p>
   </header>
 
+  <!-- Single snapshot-dependent runtime root. Everything inside may be replaced
+       together on a verified runtime activation. The five persistent boundary
+       statements (scope banner) and the boundary footer live OUTSIDE this root
+       and are never sourced from the runtime manifest or snapshot. -->
+  <div class="psam__runtime" data-psam-runtime-root>
+
   <!-- Snapshot / data-status block. -->
   <section class="psam__panel psam__status" aria-label="Snapshot status">
     <h2>Snapshot status</h2>
@@ -98,31 +104,35 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
             href={SNAPSHOT_COMMIT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            class="psam__commit-link"><code>{SNAPSHOT_SOURCE_COMMIT}</code></a>
+            class="psam__commit-link"
+            data-psam-source-commit-link><code data-psam-source-commit>{SNAPSHOT_SOURCE_COMMIT}</code></a>
         </dd>
       </div>
       <div class="psam__status-row">
         <dt>Snapshot status</dt>
-        <dd>{SNAPSHOT_STATUS_LABEL}</dd>
+        <dd data-psam-runtime-status>{SNAPSHOT_STATUS_LABEL}</dd>
       </div>
       <div class="psam__status-row">
         <dt>SHA-256</dt>
         <dd>
-          <code class="psam__hash" tabindex="0" aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
-            >{SNAPSHOT_SHA256}</code>
+          <code
+            class="psam__hash"
+            tabindex="0"
+            aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
+            data-psam-sha256>{SNAPSHOT_SHA256}</code>
         </dd>
       </div>
       <div class="psam__status-row">
         <dt>Schema version</dt>
-        <dd>{snapshot.schema_version}</dd>
+        <dd data-psam-schema-version>{snapshot.schema_version}</dd>
       </div>
       <div class="psam__status-row">
         <dt>Record count</dt>
-        <dd>{snapshot.nodes.length}</dd>
+        <dd data-psam-record-count>{snapshot.nodes.length}</dd>
       </div>
       <div class="psam__status-row">
         <dt>Edge count</dt>
-        <dd>
+        <dd data-psam-edge-count>
           {snapshot.edges.length} ({EXPECTED_COUNTS.boundary_reference} boundary
           reference, {EXPECTED_COUNTS.source_use_reference} source-use reference)
         </dd>
@@ -133,10 +143,10 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
       </div>
     </dl>
     <p class="psam__status-note">
-      This is a bundled last-known-good preview snapshot. It reflects the source
+      The active snapshot status is shown below. It reflects the source
       commit shown above and is not claimed to be current beyond that commit.
       Self-references are omitted from routing (declared omitted count:
-      {snapshot.self_references_omitted_count}).
+      <span data-psam-omitted-count>{snapshot.self_references_omitted_count}</span>).
     </p>
   </section>
 
@@ -310,11 +320,11 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
 
   <!-- Server-rendered fallback: all records, always present without JavaScript. -->
   <section class="psam__table-section" aria-label="All records table">
-    <h2 class="psam__region-title">
+    <h2 class="psam__region-title" data-psam-table-heading>
       All {snapshot.nodes.length} records
     </h2>
     <p class="psam__table-note">
-      This table lists every record in the bundled preview snapshot. Filtering
+      This table lists every record in the active snapshot. Filtering
       the map above never removes a record from this table; filtered records are
       filtered from the current map view only, not absent from Meta-Writing
       Ecology.
@@ -338,7 +348,7 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
             <th scope="col">Source</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody data-psam-table-body>
           {
             tableNodes.map((node) => (
               <tr>
@@ -371,9 +381,11 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     </div>
   </section>
 
+  </div><!-- /.psam__runtime -->
+
   <footer class="psam__boundary-footer">
     <p>
-      This preview shows a bundled last-known-good snapshot of a selected public
+      This view shows the active snapshot of a selected public
       surface. It is not the internal Registry, a complete archive, a complete
       public corpus, an ontology, an authority graph or network, a model-family
       structure, or a confirmed conceptual-relation graph. Reference routing is
