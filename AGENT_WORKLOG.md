@@ -464,3 +464,57 @@ Checks run: Exact source and website baseline fetch/verification; official actio
 Result: Local mechanism implemented with manual approval-input validation, public-source credential isolation, exact artifact validation, immutable retention reuse, deterministic branch identity, fail-closed branch and Draft-PR state handling, main-drift protection, protected-path audit, and no pointer, adoption, merge, or deployment mechanism. No workflow was dispatched and no real source-corpus orchestration was run.
 Unresolved questions: GITHUB_ACTIONS_PR_CREATION_PREREQUISITE_UNVERIFIED; the repository setting allowing GitHub Actions to create pull requests was not readable through the available unauthenticated settings interface.
 Risks or assumptions: Both repositories were publicly cloneable without credentials at the verified baselines. Official action pins were verified against their release tags. Branch protection or rulesets may safely reject mutation. GitHub-hosted runners, official action runtime dependencies, and repository administrators remain platform trust boundaries. Phase 3C and Phase 3D were not started.
+
+### 2026-07-16 — Phase 3B-4 post-merge closure
+
+Closure update:
+
+- The earlier Windows-specific Astro, TypeScript, generated-build, and
+  Wrangler limitations remain historical context.
+- Read-only Linux validation completed successfully against exact PR #59 head
+  commit `e674456a02ce1405f15d7686a30c6187bd2572b8`.
+- All 190 tests passed with 0 failures, 0 errors, and 0 skips.
+- YAML parsing, workflow structural/security tests, Astro sync, TypeScript,
+  Astro build, generated-build verification, and Wrangler 4.88.0 dry-run
+  passed.
+- PR #59 was merged using the merge-commit method.
+- Merge commit:
+  `30b27a09666cdcc0e82a87588e33e358fb2c6365`
+- Merge tree:
+  `eaa173fdebc77a8699d166cd8c569894239de3a0`
+- First parent:
+  `5a315130a1d24041412d01f30891a3cb91e6d67d`
+- Second parent:
+  `e674456a02ce1405f15d7686a30c6187bd2572b8`
+- `main` advanced to the merge commit.
+- Automatic Cloudflare preview/build activity was observed as platform
+  integration activity only.
+- No manual deployment or production adoption occurred.
+- The candidate-generation workflow has zero workflow_dispatch runs.
+- No source commit was approved and no real candidate, workflow-generated
+  candidate branch, or candidate PR was created.
+- Runtime snapshot count remains one.
+- `runtime-manifest.json` and `last-known-good.json` remain unchanged.
+- The user directly verified that the repository setting
+  “Allow GitHub Actions to create and approve pull requests” is currently
+  disabled.
+- No repository setting was changed.
+- Phase 3C workflow dispatch remains blocked pending an explicit user decision
+  to enable this repository setting or redesign the Draft-PR publication path.
+- Phase 3C and Phase 3D were not started.
+
+Recorded closure state:
+
+`PHASE3B4_MERGED`
+`PHASE3B4_CLOSED`
+`PHASE3C_NEXT`
+`PHASE3C_NOT_STARTED`
+`GITHUB_ACTIONS_PR_CREATION_PREREQUISITE_VERIFIED_DISABLED`
+`PHASE3C_BLOCKED_PENDING_REPOSITORY_SETTING_DECISION`
+
+Boundary:
+
+Phase 3B-4 closure records implementation, validation, and merge completion
+only. It does not approve a source commit, dispatch the workflow, generate or
+adopt a candidate, move a pointer, publish, deploy, change repository settings,
+or authorize Phase 3D.
