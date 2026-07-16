@@ -109,10 +109,12 @@ test("publishing permissions contain only the two authorized writes", () => {
   assert.equal(permission.trim(), "contents: write\n      pull-requests: write");
 });
 
-test("generation checkouts never persist or receive credentials", () => {
+test("generation checkouts use the job token without persisting credentials", () => {
   const block = workflow.match(/  generate:[\s\S]*?  publish:/)?.[0] ?? "";
-  assert.equal((block.match(/persist-credentials: false/g) ?? []).length, 2);
-  assert.equal((block.match(/token: ""/g) ?? []).length, 2);
+  const checkoutSteps = [...block.matchAll(/      - name: [^\n]+\n[\s\S]*?uses: actions\/checkout@[0-9a-f]{40}\n[\s\S]*?(?=\n      - name: |\n  publish:)/g)].map((match) => match[0]);
+  assert.equal(checkoutSteps.length, 2);
+  for (const checkout of checkoutSteps) assert.match(checkout, /persist-credentials: false/);
+  assert.doesNotMatch(workflow, /^\s*token:\s*(["'])\1\s*$/m);
 });
 
 test("publishing job never checks out the source repository", () => {
