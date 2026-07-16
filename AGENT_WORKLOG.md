@@ -850,3 +850,127 @@ not effective on main or production until separately reviewed and merged.
 Merge authority must separately acknowledge potentially automatic Cloudflare
 production behavior. Manual deployment and public announcement remain
 unauthorized.
+
+### 2026-07-16 — Phase 3D post-merge closure (OPTION_B)
+
+This block records the final post-merge state of OPTION_B. It supersedes the
+pre-merge status tokens in the preceding Phase 3D implementation entry, which
+remains preserved as historical context.
+
+Post-merge disposition:
+
+- User selection:
+  `OPTION_B_SELECT_RETAINED_PROVENANCE_SNAPSHOT`.
+- PR #66 was transitioned from Draft to Ready for review without changing its
+  title, body, implementation commit, tree, or five-path scope.
+- The user explicitly authorized merging PR #66 using the merge-commit method
+  and explicitly acknowledged that merging to main could trigger existing
+  automatic Cloudflare build or deployment behavior.
+- PR #66 was merged and closed using the merge-commit method.
+- Merge commit:
+  `99023e0dfb1efb90092a6644236bb20a0e3d3f36`.
+- Merge tree:
+  `bf8dd18977abb6e9e2c680559d1d4f232d39cc99`.
+- First parent:
+  `e710fccc2711bf93bfb7383e6b35ef98e2d14122`.
+- Second parent:
+  `ffdc5b70ecfc962c5e8f32d2f31a197d5a160c4b`.
+- The merge contains exactly five changed paths, 144 insertions, and 7
+  deletions, with no sixth path and no complete-file deletion:
+  - `src/data/public-surface-authority-map/runtime-manifest.json`
+    → `bedc30bbcf4e353b8f51e680821847b2583cdd39`
+  - `src/pages/public-surface-map/data/snapshots/[snapshotId].json.ts`
+    → `1954e0ad50dd4ecb6ac8650f77ba3c9a6642fe86`
+  - `scripts/verify-public-surface-map-build.mjs`
+    → `0d0559aa6a5debea3a7e860859d4c443ba944d76`
+  - `tests/public-surface-authority-map/contracts.test.ts`
+    → `8cbe3278faf43baaa86c40b988c282092b59341f`
+  - `AGENT_WORKLOG.md`
+    → append-only in the implementation commit.
+
+Active state on main after merge:
+
+- Selected runtime source changed from
+  `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`
+  to
+  `97631bc0a36f39331a6950d1498400213208afb6`
+  and is active on main.
+- Active `runtime-manifest.json` is 685 bytes with SHA-256
+  `4c077bf31ef0988128f36f6d64e6201e24d4e03e25fafb959010e837fa279ee3`
+  and Git blob
+  `bedc30bbcf4e353b8f51e680821847b2583cdd39`.
+- Runtime content remains byte-identical and unchanged:
+  83727 bytes, SHA-256
+  `82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`,
+  Git blob
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`,
+  27 records, and 146 edges.
+- Runtime snapshot count remains two.
+- Both immutable snapshots remain unchanged with Git blob
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`.
+- `last-known-good.json` remains unchanged:
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`.
+- `fallback.ts` remains unchanged:
+  `4d4fb827ee1aee26834cd373b25dbabb5481517c`.
+- Fallback and no-JS/failure attribution remain:
+  `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`.
+- `currentness_claim` remains `none`.
+
+Automatic platform activity:
+
+- Merge-triggered Cloudflare check:
+  `Workers Builds: metawritingecology-site`.
+- Check run ID:
+  `87602641453`.
+- Build ID:
+  `f940aa5c-2c47-4101-af6e-a0d3a90c263c`.
+- Version ID:
+  `79e00fc8-d60c-4245-aa3d-d5c3c350ae5e`.
+- Target:
+  `main` at
+  `99023e0dfb1efb90092a6644236bb20a0e3d3f36`.
+- Terminal conclusion:
+  success.
+- Available evidence establishes successful automatic platform activity but
+  does not explicitly establish that the generated version became the live
+  production deployment.
+- Classification:
+  `AUTOMATIC_PLATFORM_EFFECT_AMBIGUOUS`.
+
+Authority audit:
+
+- Workflow-dispatch count remains exactly two.
+- Run `29468064598` remains completed with failure at attempt 1 and was not
+  rerun.
+- Run `29482253609` remains completed successfully at attempt 1.
+- No third dispatch, retry, or rerun occurred.
+- No approval review was submitted.
+- Auto-merge was not enabled.
+- No repository setting changed.
+- No branch was deleted.
+- No manual or manual-Wrangler deployment occurred.
+- No public announcement occurred.
+- No fallback reattribution occurred.
+- No currentness change occurred.
+- No rollback commit was created.
+
+Recorded final Phase 3D state:
+
+`PHASE3D_OPTION_B_MERGED`
+`PHASE3D_CONTENT_PRESERVING_PROVENANCE_SELECTION_ACTIVE_ON_MAIN`
+`PHASE3D_RUNTIME_CONTENT_UNCHANGED`
+`PHASE3D_FALLBACK_PROVENANCE_UNCHANGED`
+`PHASE3D_CURRENTNESS_UNCHANGED`
+`PHASE3D_AUTOMATIC_PLATFORM_EFFECT_AMBIGUOUS`
+`PHASE3D_POSTMERGE_CLOSURE_RECORDED`
+`PHASE3D_COMPLETE`
+
+Boundary:
+
+Phase 3D changed runtime provenance selection without changing runtime content.
+`last-known-good.json`, fallback provenance, and `currentness_claim` remained
+unchanged. Automatic platform activity is classified only to the level
+supported by available evidence: ambiguous, not verified production. No manual
+deployment or public announcement occurred. Phase 3D completion does not
+authorize any subsequent phase, publication, fallback reattribution,
+currentness change, additional deployment, or repository mutation.
