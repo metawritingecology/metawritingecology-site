@@ -651,3 +651,65 @@ Boundary:
 This block closes the successful controlled-run record only. It does not select
 a candidate disposition, mark PR #63 ready, approve, merge, close, adopt,
 publish, move a protected pointer, deploy manually, or authorize Phase 3D.
+
+### 2026-07-16 — Phase 3C provenance-retention disposition closure
+
+Disposition:
+
+- The user selected:
+  `OPTION_A_MERGE_AS_IMMUTABLE_PROVENANCE_RETENTION`
+- Candidate PR #63 was marked Ready for review without changing its title,
+  body, commit, branch, or candidate-only boundary.
+- PR #63 was merged using the merge-commit method as immutable provenance
+  retention only.
+- Merge commit:
+  `e9804b846fbd31a9861e9d5084b2713864fc4bde`
+- Merge tree:
+  `aeb227ae9f55140682fe69d07c4f3edc448e3ec1`
+- First parent:
+  `9e50ea93de69ee3ee58bb71deea1581094743213`
+- Second parent:
+  `97d5750a919c8edc917dab87c046243053427b38`
+- The merge adds only:
+  `src/data/public-surface-authority-map/runtime-snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json`
+- The retained snapshot is 83727 bytes, 27 records, and 146 edges, with
+  SHA-256:
+  `82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`
+- Snapshot Git blob:
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`
+- Runtime snapshot count changed exactly from one to two.
+- `runtime-manifest.json` remains:
+  `03910040496c663ff49381f76c1bf6ccc7c5a8a1`
+- `last-known-good.json` remains:
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`
+- Selected production source remains:
+  `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`
+- The selected production snapshot and runtime pointer remain unchanged.
+- `currentness_claim` remains `none`.
+- The retained candidate bytes are identical to the existing production
+  snapshot and `last-known-good.json`.
+- Workflow-dispatch count remains exactly two. Run `29468064598` remains
+  completed with failure at attempt 1 and was not rerun. Run `29482253609`
+  remains completed successfully at attempt 1.
+- Automatic platform preview/build activity completed successfully. No manual
+  deployment or production adoption occurred.
+- The controlled run and provenance-retention disposition are complete.
+- Phase 3D has not started and requires a separate user decision and
+  authorization.
+
+Recorded final Phase 3C state:
+
+`PHASE3C_CONTROLLED_RUN_PASS`
+`PHASE3C_PROVENANCE_RETENTION_MERGED`
+`PHASE3C_PROVENANCE_RETENTION_CLOSED`
+`PHASE3C_COMPLETE`
+`PHASE3D_NEXT`
+`PHASE3D_NOT_STARTED`
+
+Boundary:
+
+Retaining the snapshot in repository history preserves immutable provenance; it
+is not candidate adoption. Protected production pointers and the selected
+production source remain unchanged. Phase 3C completion does not authorize
+runtime selection, publication, deployment, or Phase 3D execution. Phase 3D
+requires a separate user decision and explicit authorization.
