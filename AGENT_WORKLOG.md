@@ -713,3 +713,140 @@ is not candidate adoption. Protected production pointers and the selected
 production source remain unchanged. Phase 3C completion does not authorize
 runtime selection, publication, deployment, or Phase 3D execution. Phase 3D
 requires a separate user decision and explicit authorization.
+
+### 2026-07-16 — Claude Code — Phase 3D Linux implementation validation (OPTION_B)
+
+Agent: Claude Code
+
+Task: Phase 3D — Linux implementation validation and local commit for the
+pre-approved, boundary-fixed five-path change under selected option
+`OPTION_B_SELECT_RETAINED_PROVENANCE_SNAPSHOT`. Reproduce the exact four
+implementation changes, perform full Linux validation, append this worklog
+entry only after validation, and create exactly one local commit. No push,
+remote branch, PR, merge, pointer activation, or deployment authorized.
+
+Selected option:
+
+- `OPTION_B_SELECT_RETAINED_PROVENANCE_SNAPSHOT`
+
+Baseline:
+
+- `origin/main` verified exactly:
+  `e710fccc2711bf93bfb7383e6b35ef98e2d14122`
+- Implementation performed from a clean detached checkout of that commit.
+
+Selected source substitution:
+
+- Old selected source commit:
+  `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`
+- Proposed selected source commit:
+  `97631bc0a36f39331a6950d1498400213208afb6`
+
+Exact three `runtime-manifest.json` field substitutions (all other fields
+unchanged):
+
+- `selected_snapshot.id`
+  from `18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`
+  to `97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`
+- `selected_snapshot.source_commit`
+  from `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`
+  to `97631bc0a36f39331a6950d1498400213208afb6`
+- `selected_snapshot.path`
+  from `/public-surface-map/data/snapshots/18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json`
+  to `/public-surface-map/data/snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json`
+
+Resulting `runtime-manifest.json` identity:
+
+- bytes: 685
+- SHA-256:
+  `4c077bf31ef0988128f36f6d64e6201e24d4e03e25fafb959010e837fa279ee3`
+- Git blob:
+  `bedc30bbcf4e353b8f51e680821847b2583cdd39`
+
+Exact five changed paths (four implementation + this worklog):
+
+- `src/data/public-surface-authority-map/runtime-manifest.json`
+  → `bedc30bbcf4e353b8f51e680821847b2583cdd39`
+- `src/pages/public-surface-map/data/snapshots/[snapshotId].json.ts`
+  → `1954e0ad50dd4ecb6ac8650f77ba3c9a6642fe86`
+- `scripts/verify-public-surface-map-build.mjs`
+  → `0d0559aa6a5debea3a7e860859d4c443ba944d76`
+- `tests/public-surface-authority-map/contracts.test.ts`
+  → `8cbe3278faf43baaa86c40b988c282092b59341f`
+- `AGENT_WORKLOG.md` (append-only)
+
+Protected-state preservation evidence:
+
+- Both immutable runtime snapshots remain byte-identical, each 83727 bytes,
+  SHA-256 `82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`,
+  Git blob `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`.
+- Runtime snapshot count remains exactly two.
+- Runtime data remains 83727 bytes, 27 records, and 146 edges.
+- `last-known-good.json` remains unchanged:
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`.
+- `fallback.ts` remains byte-identical
+  (`4d4fb827ee1aee26834cd373b25dbabb5481517c`) and still attributes source
+  `18491105f0bc0451e0bf99eaa78c39f69c7cb57c`.
+- `currentness_claim` remains `none`.
+- Runtime provenance selection changes without any content update; the
+  selected snapshot bytes are unchanged.
+- The no-JS/failure fallback provenance is unchanged.
+
+Linux validation results:
+
+- Node: v22.22.2; pnpm: 10.33.0; Python: 3.11.15; Wrangler: 4.88.0.
+- `pnpm install --frozen-lockfile`: exit 0; `pnpm-lock.yaml` unchanged.
+  Ignored build scripts reported: esbuild@0.25.12, esbuild@0.25.4,
+  esbuild@0.27.3, sharp@0.33.5, sharp@0.34.5, workerd@1.20251118.0,
+  workerd@1.20260504.1.
+- Tests (Linux, symlink test executed): contracts 48 passed; runtimeLoader 55
+  passed; snapshotRetention 16 passed; candidateOrchestration 29 passed;
+  candidateWorkflow 42 passed; total 190 passed; 0 failed; 0 errors; 0 skipped.
+- Astro sync: pass (exit 0).
+- TypeScript (`tsc`): pass (exit 0).
+- Astro build: pass (exit 0); generated selected snapshot route
+  `97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json`.
+- Generated-build verifier: all 18 checks passed (exit 0).
+- `wrangler deploy --dry-run`: exit 0; 94 assets read; total upload
+  1210.67 KiB / gzip 239.52 KiB; no real deployment performed.
+
+Generated-output identities:
+
+- Generated active manifest: 685 bytes, SHA-256
+  `4c077bf31ef0988128f36f6d64e6201e24d4e03e25fafb959010e837fa279ee3`, Git blob
+  `bedc30bbcf4e353b8f51e680821847b2583cdd39`.
+- Generated selected snapshot: 83727 bytes, SHA-256
+  `82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`, Git blob
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`, 27 records, 146 edges.
+
+Local commit state:
+
+- Exactly one local commit created on local branch
+  `codex/phase3d-runtime-provenance-selection`, parent
+  `e710fccc2711bf93bfb7383e6b35ef98e2d14122`.
+- No remote Draft PR created.
+- No merge authorization.
+- No production-deployment authorization.
+- No manual deployment performed.
+- No public announcement.
+
+Recorded Phase 3D state:
+
+`PHASE3D_OPTION_B_IMPLEMENTATION_PASS`
+`PHASE3D_CONTENT_PRESERVING_PROVENANCE_SELECTION_PROPOSED`
+`PHASE3D_VALIDATION_COMPLETE`
+`PHASE3D_LOCAL_COMMIT_CREATED`
+`PHASE3D_REMOTE_DRAFT_PR_NOT_CREATED`
+`PHASE3D_MERGE_NOT_AUTHORIZED`
+`PHASE3D_DEPLOYMENT_NOT_AUTHORIZED`
+`PHASE3D_NOT_COMPLETE`
+
+Boundary:
+
+This is a proposed content-preserving runtime provenance selection, not a
+content update. It does not modify fallback provenance, currentness, Registry,
+ontology, relation, classification, completeness, or authority status. It is
+not effective on main or production until separately reviewed and merged.
+Merge authority must separately acknowledge potentially automatic Cloudflare
+production behavior. Manual deployment and public announcement remain
+unauthorized.
