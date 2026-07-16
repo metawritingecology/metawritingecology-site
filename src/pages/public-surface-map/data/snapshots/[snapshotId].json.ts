@@ -12,7 +12,7 @@
 
 export const prerender = true;
 
-import rawSnapshotText from "../../../../data/public-surface-authority-map/runtime-snapshots/18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json?raw";
+import rawSnapshotText from "../../../../data/public-surface-authority-map/runtime-snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json?raw";
 import rawManifestText from "../../../../data/public-surface-authority-map/runtime-manifest.json?raw";
 import {
   toUtf8Bytes,
@@ -28,7 +28,7 @@ import {
 
 // The one approved snapshot id (also the filename stem).
 const APPROVED_SNAPSHOT_ID =
-  "18491105f0bc0451e0bf99eaa78c39f69c7cb57c-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
+  "97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
 
 // --- Build-time validation --------------------------------------------------
 // Runs once during the Astro build (prerender). Any failure fails the build.
