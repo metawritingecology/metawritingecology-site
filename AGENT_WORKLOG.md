@@ -537,3 +537,60 @@ authorization after this repair is validated and merged.
 `PHASE3C_WORKFLOW_REPAIR_IN_PROGRESS`
 `PHASE3C_RETRY_NOT_AUTHORIZED`
 `PHASE3D_NOT_STARTED`
+
+### 2026-07-16 — Phase 3C checkout-token repair post-merge closure
+
+Closure update:
+
+- The original single Phase 3C dispatch authorization was consumed by run
+  `29468064598`.
+- Run `29468064598` remains completed with failure at attempt 1. Explicit empty
+  `token: ""` checkout inputs caused the first checkout to fail before candidate
+  generation. Publishing was skipped.
+- No retry, rerun, second controlled dispatch, candidate artifact, candidate
+  branch, candidate commit, candidate PR, or new runtime snapshot was created.
+- PR #61 repaired the checkout-token defect while retaining both
+  `persist-credentials: false` boundaries, read-only generation permissions,
+  publishing-job isolation, and the manual-only trigger.
+- Read-only Linux validation completed against exact repair head
+  `9f225ebb603b79f128c2e4d734a7309e65d2c845` with classification
+  `REVIEW_PASS_VALIDATION_COMPLETE`.
+- All 190 tests passed with 0 failures, 0 errors, and 0 skips. YAML parsing,
+  42 workflow structural/security tests, and `git diff --check` passed.
+- PR #61 was merged using the merge-commit method.
+- Merge commit:
+  `c4b5ad33c49710e07d9229af611f7d0958e46d1f`
+- Merge tree:
+  `47fd78e92085c515435a88bcc9fa8195385b0ba2`
+- First parent:
+  `a2021d2e58103415e14a670c394dd692a8b91782`
+- Second parent:
+  `9f225ebb603b79f128c2e4d734a7309e65d2c845`
+- The merged workflow blob is:
+  `a2ab2a45920ba4cb9b52b8147ecf925305741abb`
+- Automatic Cloudflare Workers build activity completed successfully as
+  platform integration activity only. No manual deployment or production
+  adoption occurred.
+- Runtime snapshot count remains one. `runtime-manifest.json` and
+  `last-known-good.json` remain unchanged.
+- The repair merge does not authorize a rerun. Any future controlled dispatch
+  requires new explicit user authorization.
+- Phase 3C candidate generation remains incomplete, and Phase 3D has not
+  started.
+
+Recorded closure state:
+
+`PHASE3C_FIRST_CONTROLLED_RUN_FAILED_SAFELY`
+`PHASE3C_WORKFLOW_REPAIR_MERGED`
+`PHASE3C_WORKFLOW_REPAIR_CLOSED`
+`PHASE3C_NEW_DISPATCH_AUTHORIZATION_REQUIRED`
+`PHASE3C_CONTROLLED_RUN_NOT_COMPLETED`
+`PHASE3D_NOT_STARTED`
+
+Boundary:
+
+The original dispatch authorization remains consumed, and the repair merge does
+not authorize a rerun. A new dispatch requires new explicit user authorization.
+No candidate was generated or adopted, no production pointer moved, and no
+production publication or manual deployment occurred. Phase 3D is not
+authorized.
