@@ -594,3 +594,60 @@ not authorize a rerun. A new dispatch requires new explicit user authorization.
 No candidate was generated or adopted, no production pointer moved, and no
 production publication or manual deployment occurred. Phase 3D is not
 authorized.
+
+### 2026-07-16 — Phase 3C successful controlled-run closure
+
+Closure update:
+
+- Workflow-dispatch count advanced exactly from 1 to 2 under one new explicit
+  authorization.
+- Earlier run `29468064598` remains completed with failure at attempt 1 and was
+  not retried or rerun.
+- Controlled run `29482253609` completed successfully at attempt 1 using
+  website commit `c5e5b21ed0dec674de38b5badae9979513ee2ed1` and authorized source
+  commit `97631bc0a36f39331a6950d1498400213208afb6`.
+- Read-only generation and controlled candidate publishing both succeeded.
+- Artifact `8368955545`, `public-surface-candidate-data`, was created with
+  archive digest
+  `sha256:d430597b2367e844e567ee4d90bfd39e81128fa1ce0ae3e0870182a7c3c0bc37`.
+- Candidate identity is 83727 bytes, 27 records, 146 edges, SHA-256
+  `82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`.
+- Deterministic branch:
+  `candidate/public-surface/97631bc0a36f39331a6950d1498400213208afb6/82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e`
+- Candidate commit:
+  `97d5750a919c8edc917dab87c046243053427b38`
+- Candidate tree:
+  `3f33dc6db07a7636a94a58e1aa2788223a7e7dee`
+- Candidate parent:
+  `c5e5b21ed0dec674de38b5badae9979513ee2ed1`
+- The commit adds only:
+  `src/data/public-surface-authority-map/runtime-snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json`
+- Snapshot Git blob:
+  `aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b`
+- GitHub Actions successfully created PR #63 as an open Draft candidate PR.
+- PR #63 remains Draft, unapproved, unmerged, candidate-only, and explicitly
+  not adopted.
+- Candidate bytes are identical to the existing production snapshot and
+  `last-known-good.json`; no content update occurred.
+- Runtime snapshot count on main remains one. `runtime-manifest.json` and
+  `last-known-good.json` remain unchanged.
+- Automatic Cloudflare preview/build activity succeeded as platform integration
+  activity only. No manual deployment or production adoption occurred.
+- Candidate disposition remains a separate user decision. No merge or close
+  authorization is recorded here.
+- Phase 3D has not started.
+
+Recorded closure state:
+
+`PHASE3C_CONTROLLED_RUN_PASS`
+`PHASE3C_CANDIDATE_PR63_DRAFT`
+`PHASE3C_CANDIDATE_NOT_ADOPTED`
+`PHASE3C_POINTERS_UNCHANGED`
+`PHASE3C_CANDIDATE_DISPOSITION_DECISION_REQUIRED`
+`PHASE3D_NOT_STARTED`
+
+Boundary:
+
+This block closes the successful controlled-run record only. It does not select
+a candidate disposition, mark PR #63 ready, approve, merge, close, adopt,
+publish, move a protected pointer, deploy manually, or authorize Phase 3D.
