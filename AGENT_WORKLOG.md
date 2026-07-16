@@ -518,3 +518,22 @@ Phase 3B-4 closure records implementation, validation, and merge completion
 only. It does not approve a source commit, dispatch the workflow, generate or
 adopt a candidate, move a pointer, publish, deploy, change repository settings,
 or authorize Phase 3D.
+
+### 2026-07-16 — Phase 3C checkout-token repair
+
+The single authorized Phase 3C dispatch was consumed by run `29468064598`,
+which failed before candidate generation because explicit `token: ""` inputs
+caused `actions/checkout` to reject the first checkout step. Publishing was
+skipped; no artifact, candidate branch, candidate commit, retained snapshot, or
+Draft PR was created. The protected production identities and single runtime
+snapshot remained unchanged, and no retry was authorized or performed.
+
+This repair removes only the invalid empty-token inputs while retaining
+`persist-credentials: false`, read-only generation permissions, and the
+existing publishing-job isolation. A new dispatch requires separate user
+authorization after this repair is validated and merged.
+
+`PHASE3C_CONTROLLED_RUN_FAILED_NO_RETRY_AUTHORIZED`
+`PHASE3C_WORKFLOW_REPAIR_IN_PROGRESS`
+`PHASE3C_RETRY_NOT_AUTHORIZED`
+`PHASE3D_NOT_STARTED`
