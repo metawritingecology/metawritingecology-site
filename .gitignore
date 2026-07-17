@@ -3,3 +3,11 @@ dist/
 .astro/
 .wrangler/
 .DS_Store
+
+# OSF batch-export: large QA render assets are reproducible from the pipeline
+# and shipped in the pipeline ZIP; keep them out of the repo.
+osf-export/qa-renders/
+
+# Python bytecode
+__pycache__/
+*.pyc

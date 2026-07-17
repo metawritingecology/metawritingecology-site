@@ -1,0 +1,191 @@
+# reference-style.yaml
+#
+# Shared style specification for the OSF Markdown -> DOCX/PDF batch pipeline.
+#
+# Every value below is DERIVED from the reference PDF corpus (REFERENCE_ZIP,
+# 22 PDFs) by measuring page geometry, embedded font names/sizes, paragraph
+# left edges, baseline-to-baseline leading, and heading gaps with PyMuPDF.
+# The pipeline in tools/batch_export_documents.py reads this file; it does not
+# hardcode these numbers.
+#
+# Measurement provenance:
+#   - page size          : first-page CropBox of all 22 PDFs (identical)
+#   - fonts / sizes       : span font+size histogram over every page of all PDFs
+#   - margins             : min/median text-box insets on body pages
+#   - body leading        : modal baseline delta of consecutive 12pt body lines
+#   - first-line indent   : delta between the two dominant body left-edge clusters
+#   - heading gaps        : bbox gap before/after 16pt and 14pt bold heading lines
+#
+# NOTE ON FONT SUBSTITUTION (section C boundary):
+#   The reference corpus is typeset in Georgia (Georgia, Georgia-Bold,
+#   Georgia-BoldItalic). Georgia is NOT installed on this execution system.
+#   Per the Font boundary, the pipeline was NOT permitted to silently install or
+#   substitute a font. The repository owner explicitly approved the metric-
+#   compatible open substitute "Gelasio" (SIL OFL 1.1). Gelasio shares Georgia's
+#   metrics, so line breaks and page geometry match closely; individual glyph
+#   outlines differ slightly. This substitution is recorded in
+#   `fonts.substitution` and re-emitted in every conversion report.
+
+meta:
+  spec_version: 1
+  derived_from_reference_pdfs: 22
+  measurement_tool: PyMuPDF (fitz)
+  units: point  # 1 pt = 1/72 inch
+
+page:
+  size: A4
+  width_pt: 595.32
+  height_pt: 841.92
+  orientation: portrait
+
+margins:
+  # Reference body pages cluster tightly at 70.9 pt (= 2.5 cm) on the left;
+  # top/right/bottom fall within the 70.9-72 pt band. We adopt 70.9 pt (2.5 cm)
+  # on all sides to reproduce the reference text measure exactly.
+  top_pt: 70.9
+  bottom_pt: 70.9
+  left_pt: 70.9
+  right_pt: 70.9
+  observed_range_pt: [70.9, 72.0]
+
+fonts:
+  # Intended (reference) font. Used verbatim when installed and legally available.
+  primary_family: Georgia
+  primary_installed: false
+  # Explicitly owner-approved substitute actually used on this system.
+  substitution:
+    approved_by_user: true
+    substitute_family: Gelasio
+    reason: "Georgia unavailable on execution system; Gelasio is a metric-compatible OFL substitute; owner approved fallback."
+    license: "SIL Open Font License 1.1"
+    metric_compatible_with: Georgia
+  # Effective family the pipeline applies to all named styles.
+  effective_family: Gelasio
+  # Auxiliary fonts observed in the reference corpus, used only for glyphs the
+  # primary family does not cover (bullets, arrows, math, CJK). The pipeline
+  # does NOT alter any symbol; it relies on the renderer's font substitution for
+  # code points outside the primary family. Georgia/Gelasio DOES cover every
+  # symbol present in the current INPUT corpus (verified: U+2192 -> ,
+  # U+2260 , U+2013 , U+2014 , U+2019 , U+00D7 , U+2193 , U+201C/D
+  # ).
+  auxiliary_symbol_fonts_in_reference:
+    - ArialMT           # list bullets in some references
+    - Wingdings-Regular # decorative bullets in some references
+    - SymbolMT          # occasional math symbols
+    - CambriaMath       # occasional math symbols
+    - MicrosoftJhengHeiLight  # occasional CJK glyphs
+
+styles:
+  title:
+    size_pt: 22
+    bold: true
+    italic: false
+    align: left
+  subtitle:
+    size_pt: 16
+    bold: true
+    italic: true
+    align: left
+  meta_line:           # version / date / status / context / document type
+    size_pt: 12
+    bold: true
+    italic: true
+    align: left
+  author:
+    size_pt: 12
+    bold: true
+    italic: false
+    align: left
+  affiliation:
+    size_pt: 12
+    bold: true
+    italic: false
+    align: left
+  body:
+    size_pt: 12
+    bold: false
+    italic: false
+    align: left
+    line_spacing_pt: 27      # exact baseline-to-baseline leading (modal, n=326)
+    first_line_indent_pt: 24 # 94.9 - 70.9 pt, observed indent cluster
+    space_before_pt: 0
+    space_after_pt: 0
+  heading_section:     # markdown '##' in body (top-level section, e.g. "Abstract", "1. Introduction")
+    word_style: Heading 2
+    size_pt: 16
+    bold: true
+    italic: false
+    align: left
+    space_before_pt: 18
+    space_after_pt: 12
+    observed_gap_before_pt: 33.5
+    observed_gap_after_pt: 25.7
+  heading_subsection:  # markdown '###'
+    word_style: Heading 3
+    size_pt: 14
+    bold: true
+    italic: false
+    align: left
+    space_before_pt: 12
+    space_after_pt: 6
+    observed_gap_before_pt: 12.1
+  heading_subsubsection:  # markdown '####'
+    word_style: Heading 4
+    size_pt: 12.5
+    bold: true
+    italic: false
+    align: left
+    space_before_pt: 10
+    space_after_pt: 4
+  heading_top:         # markdown '#' if it appears inside a body (rare; title is consumed)
+    word_style: Heading 1
+    size_pt: 16
+    bold: true
+    italic: false
+    align: left
+    space_before_pt: 18
+    space_after_pt: 12
+  list:
+    size_pt: 12
+    left_indent_pt: 24
+  blockquote:
+    size_pt: 12
+    left_indent_pt: 24
+    italic: false
+  code:
+    # code blocks / inline code; monospace, symbols preserved verbatim
+    family: "DejaVu Sans Mono"
+    size_pt: 10.5
+    left_indent_pt: 12
+  caption:
+    size_pt: 10.5
+    italic: true
+    align: left
+  references:
+    # References / Bibliography section: preserve entries and order; visual
+    # formatting only (hanging indent). No citation-style rewriting.
+    size_pt: 12
+    hanging_indent_pt: 24
+    line_spacing_pt: 27
+
+title_page:
+  # Reproduced from reference first pages: large upper whitespace, title block in
+  # the lower-middle, author block near the bottom. Page break follows.
+  title_top_offset_pt: 275   # blank space above the title block (title lands ~y=346)
+  gap_title_to_subtitle_pt: 6
+  gap_subtitle_to_meta_pt: 18
+  author_block_from_bottom_pt: 140  # author lands ~y=702 on an 841.92 pt page
+  gap_author_to_affiliation_pt: 12
+
+headers_footers:
+  header: none      # no running header observed in the reference corpus
+  footer: none      # no running footer observed
+  page_numbers: none  # no page numbers observed on any reference page
+
+corpus_variation:
+  # Differences detected across the 22 reference PDFs.
+  page_size: "uniform (595.32 x 841.92 on all 22)"
+  primary_font: "uniform Georgia family on all 22"
+  left_margin: "uniform 70.9 pt on body pages"
+  auxiliary_fonts: "present in a subset only, for bullets/symbols/CJK/math"
+  title_metadata_line: "some references merge version+date on one line; input corpus keeps them on separate authored lines, preserved as authored"

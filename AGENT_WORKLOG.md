@@ -974,3 +974,29 @@ supported by available evidence: ambiguous, not verified production. No manual
 deployment or public announcement occurred. Phase 3D completion does not
 authorize any subsequent phase, publication, fallback reattribution,
 currentness change, additional deployment, or repository mutation.
+
+### 2026-07-17 — Claude Code — osf-markdown-to-docx-pdf-batch-pipeline
+
+Agent: Claude Code
+Task: Build a repeatable, layout-only batch pipeline converting every OSF Markdown source into one editable DOCX and one visually matching PDF, using the reference PDF corpus (701.zip) only to derive a shared style spec. No conceptual, naming, classification, or public/private decisions were made. No OSF upload. Source Markdown was not modified.
+Files changed:
+  - tools/batch_export_documents.py (new; reusable pipeline: Markdown -> Pandoc -> DOCX(ref styles) -> python-docx post-processing/title page -> LibreOffice PDF -> semantic + visual QA -> manifest/summary)
+  - config/reference-style.yaml (new; every measurement derived from the 22 reference PDFs: A4 595.32x841.92pt, 70.9pt margins, Georgia 12pt body, 27pt leading, 24pt first-line indent, 16/14pt bold headings, title-page geometry, font-substitution record)
+  - reference/reference.docx (new; named Word styles the pipeline uses)
+  - osf-export/docx/*.docx, osf-export/pdf/*.pdf (14 deliverables each)
+  - osf-export/reports/conversion-manifest.csv, conversion-summary.md
+  - osf-export/config/, osf-export/reference/ (copies for the export bundle)
+  - .gitignore (exclude osf-export/qa-renders/ heavy render assets)
+Build / tests run:
+  - Installed tooling (not fonts): pandoc 3.1.3, libreoffice-writer (core lacked the Writer module), python-docx, pymupdf, pillow, fonttools.
+  - Full pipeline run over 14 sources: 14/14 DOCX PASS, 14/14 PDF PASS, 14/14 semantic-equivalence PASS, 0 layout warnings. Classification: BATCH_EXPORT_COMPLETE.
+  - Negative test confirmed the semantic check flags deletions, symbol changes, and word changes.
+  - Visual QA: title pages, body pages, code blocks (monospace), Unicode symbols (arrow/not-equal render, no tofu), and ordered-list numbering verified against the reference layout.
+Result: All 14 documents converted and validated. Two ZIPs produced (final DOCX+PDF deliverables; scripts+config+reports+QA assets).
+Unresolved questions:
+  - Georgia is not installed and could not be installed licensed on this host; the repository owner explicitly approved the metric-compatible OFL substitute "Gelasio" (recorded in config/reference-style.yaml and every report). Georgia may be swapped back in on a host where it is licensed/installed with no code change.
+  - No affiliation field exists in the sources; it is left blank (not invented) and shown empty in the manifest.
+Risks or assumptions:
+  - Metadata is parsed by a deterministic rule (H1 title, first H2 subtitle, contiguous **Key:** value lines, one closing ---); this matches all 14 sources uniformly.
+  - Markdown horizontal rules (---) are preserved as faint thematic breaks; the reference corpus renders section breaks as whitespace, so this is a minor, content-preserving visual deviation.
+  - LibreOffice list-label numbers are not present in the PDF text layer; the semantic check strips enumerators on both sides and list numbering is confirmed visually in the QA renders instead.
