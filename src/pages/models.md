@@ -1,24 +1,22 @@
 ---
 layout: ../layouts/BaseLayout.astro
-title: Models
-description: Public index of GitHub-visible MWE model nodes, source links, DOI metadata, and model-boundary notes.
+title: Models and Framework Documents
+description: Public classification-aware index of GitHub-visible MWE models and adjacent framework documents, with source links and DOI metadata.
 ---
 
-# Models
+# Models and Framework Documents
 
-This page is a public index of GitHub-visible model nodes in Meta-Writing Ecology.
+This page is a classification-aware public index of GitHub-visible Models and adjacent framework documents in Meta-Writing Ecology.
 
-## Scope Note
+Only source-visible materials are represented here. This is not the full working corpus, complete Registry, private archive, or internal calibration layer.
 
-Only source-visible materials are represented here. This is not the full working corpus, a complete registry, private archive, or internal calibration layer. It is a public navigation surface that points to canonical source files and DOI metadata where available.
+## Classification and Model Boundary
 
-## Model Boundary
+Thematic placement on this page supports navigation and does not override the classification declared in a source file.
 
-The model names listed here are public conceptual and structural nodes.
+Items declared as Models are public conceptual and structural nodes. Other entries retain their published classifications, including Cross, diagnostic, boundary-note, protocol-facing, and architecture-oriented documents.
 
-They should not be read as physical-science claims, quantitative measurement systems, empirical validation claims, software tools, audit methods, clinical methods, legal methods, financial methods, or complete operational protocols.
-
-Semantic-field terms such as pressure, density, curvature, drift, propagation, and collapse function as Meta-Writing Ecology structural vocabulary. They should not be converted into physical quantities, technical product claims, or natural-science claims.
+These materials should not be read as physical-science claims, quantitative measurement systems, empirical validation claims, software tools, audit methods, clinical methods, legal methods, financial methods, or complete operational protocols.
 
 ## Semantic Vocabulary Boundary
 
@@ -28,7 +26,7 @@ They are not physical quantities, measurement units, natural-science claims, qua
 
 They should also not be reduced to mere decorative metaphor. They function as structural operators for describing meaning-bearing systems within MWE.
 
-## Model Index
+## Classification-Aware Framework Index
 
 ### Boundary / Representation
 
@@ -71,6 +69,14 @@ They should also not be reduced to mere decorative metaphor. They function as st
 
 - [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/6ZX9H)
 - [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md) · [DOI](https://doi.org/10.17605/OSF.IO/KMREA)
+
+### Selected Boundary Notes / Protocol-Facing Notes
+
+These entries retain their source-file classifications. Placement here does not classify them as Models or establish formal relations, priority, hierarchy, or Registry status.
+
+- [Delegated Execution / Retained Answerability](https://github.com/metawritingecology/meta-writing-ecology/blob/main/delegated-execution-retained-answerability.md) · Cross-Supporting Boundary Note · [DOI](https://doi.org/10.17605/OSF.IO/6M95U)
+- [Structural Fidelity / Use-Validity Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/structural-fidelity-use-validity-boundary.md) · Cross-Supporting Boundary Note · [DOI](https://doi.org/10.17605/OSF.IO/BU4KT)
+- [LLM-Condition / Research-Result Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/llm-condition-research-result-boundary.md) · Protocol-Facing Boundary Note · [DOI](https://doi.org/10.17605/OSF.IO/47PXB)
 
 ### Semantic Field / System Architecture
 

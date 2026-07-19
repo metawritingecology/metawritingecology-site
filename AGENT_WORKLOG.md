@@ -974,3 +974,67 @@ supported by available evidence: ambiguous, not verified production. No manual
 deployment or public announcement occurred. Phase 3D completion does not
 authorize any subsequent phase, publication, fallback reattribution,
 currentness change, additional deployment, or repository mutation.
+
+### 2026-07-19 — Claude Code — semantic-flow-corrections-and-three-source-entries
+
+Agent: Claude Code
+Task: Implement approved Phase A semantic/reading-flow corrections and Phase B
+selective placement of three public source entries (Delegated Execution /
+Retained Answerability; Structural Fidelity / Use-Validity Boundary;
+LLM-Condition / Research-Result Boundary) across public surface pages. Bounded
+website implementation task; no conceptual-repo, classification, relation,
+Registry, ontology, or authority decisions.
+Files changed:
+- src/pages/models.md (classification-aware title/boundary/index heading;
+  new "Selected Boundary Notes / Protocol-Facing Notes" section)
+- src/pages/publications.md (source-linked DOI record wording; heading rename;
+  normalized split pairs to one record per bullet; three entries appended)
+- src/pages/entry-points.md (removed manual "Selected public corpus additions"
+  list; new "Source Reading Paths" + "Boundary-Oriented Source Routes";
+  site-path orientation note; compressed Medium boundary)
+- src/pages/surfaces.md (compressed fiction-boundary sections; removed manual
+  document list, replaced with Model Atlas / Reading Paths navigation;
+  added Platform surface after Corpus surface — /platforms/ verified present)
+- src/pages/public-records.md (replaced individual DOI enumeration with two
+  category-level anchor bullets)
+- src/layouts/BaseLayout.astro (added route-specific schemaOverrides for
+  /models/, /publications/, /entry-points/, /public-records/;
+  /surfaces/ override preserved)
+- package.json (added test:semantic-flow script; wired into check)
+- tests/semantic-flow-source-entries.test.ts (new: semantic, placement, and
+  LLM-Condition guardrail tests; Node built-in runner, no new dependency)
+Build / tests run: pnpm install --frozen-lockfile (lockfile unchanged);
+pnpm run build (pass); pnpm run check (pass, incl. 21 new tests + 18
+public-surface-map checks); git diff --check (clean); rendered-page review via
+astro dev of /models/, /publications/, /entry-points/, /surfaces/,
+/public-records/ (JSON-LD genres correct; blob/main links; exact DOIs; three
+entries absent from /surfaces/ and /public-records/).
+Result: All Phase A + Phase B edits applied and verified. No commit, push,
+merge, PR, deploy, or publish performed.
+Unresolved questions: None.
+Risks or assumptions: Ran a frozen (no-write) install to restore node_modules
+for build/test; pnpm-lock.yaml unchanged. Worklog updated per AGENTS.md.
+
+Codex independent-review correction note:
+- Restored the explicit Models-page limitation covering the full working
+  corpus, complete Registry, private archive, and internal calibration layer.
+- Replaced the broadened "professional methods" phrase with the prior
+  clinical, legal, and financial method boundaries.
+- Integrated the Medium boundary sentence into Source Reading Paths and
+  removed the near-duplicate one-sentence Source-Based Reading Paths section.
+- Merged the duplicate Publications bullets on Public Record Anchors.
+- Restored the fictional-universe guardrail, aligned the closing surface names
+  with Fiction/System/Corpus/Platform, and removed the repeated Related
+  boundary pages label.
+- Normalized the selected source-linked publication records to one continuous
+  list with consistent em-dash separators.
+- Strengthened the semantic-flow tests so placement is verified inside the
+  approved sections, LLM-Condition guardrails cover each containing section,
+  duplicate source-path/publication structures are rejected, and `.mdx` is an
+  accepted Astro route source for `/platforms/`.
+Independent validation: the corrected semantic-flow suite passed 21/21 with
+zero failures or skips; `git diff --check` was clean before the Windows sandbox
+helper stopped accepting shell commands. A full independent Astro build and
+`pnpm run check` remain required before commit authorization because the review
+environment blocked parent-directory enumeration used by esbuild. No commit,
+push, merge, PR, deploy, or publish occurred.
