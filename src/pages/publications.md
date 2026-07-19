@@ -10,31 +10,24 @@ This page gathers public record anchors for Meta-Writing Ecology, including OSF 
 
 DOI and archive records support persistence, discovery, and citation. They do not replace the complete corpus, private archive, non-public working layers, or canonical source files.
 
-Canonical source DOI record means that the public DOI and source file are recognized as public record anchors. It does not necessarily mean that the entry has been fully placed in the GitHub-visible navigation ontology.
+A source-linked DOI record presents a public source file and DOI together as citation and traversal anchors. It does not establish internal Registry status, conceptual priority, formal relation status, or complete placement in the source-navigation layers.
 
-## Current Canonical Source DOI Records
+## Selected Source-Linked DOI Records
 
-- [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) - [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
-- [Reality Consistency Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/reality-consistency.md) - [https://doi.org/10.17605/OSF.IO/76ZJ2](https://doi.org/10.17605/OSF.IO/76ZJ2)
-- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) - [https://doi.org/10.17605/OSF.IO/28HNK](https://doi.org/10.17605/OSF.IO/28HNK)
-- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) - [https://doi.org/10.17605/OSF.IO/QC6GN](https://doi.org/10.17605/OSF.IO/QC6GN)
-- [AI-Readable Knowledge Architecture](https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md) - [https://doi.org/10.17605/OSF.IO/7X3YF](https://doi.org/10.17605/OSF.IO/7X3YF)
-- [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) - [https://doi.org/10.17605/OSF.IO/6ZX9H](https://doi.org/10.17605/OSF.IO/6ZX9H)
-
-- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md)
-- [https://doi.org/10.17605/OSF.IO/BHMA8](https://doi.org/10.17605/OSF.IO/BHMA8)
-
-- [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md)
-- [https://doi.org/10.17605/OSF.IO/U2AK6](https://doi.org/10.17605/OSF.IO/U2AK6)
-
-- [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md)
-- [https://doi.org/10.17605/OSF.IO/KMREA](https://doi.org/10.17605/OSF.IO/KMREA)
-
-- [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md)
-- [https://doi.org/10.17605/OSF.IO/GN5RW](https://doi.org/10.17605/OSF.IO/GN5RW)
-
-- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md)
-- [https://doi.org/10.17605/OSF.IO/7MTNX](https://doi.org/10.17605/OSF.IO/7MTNX)
+- [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) — [https://doi.org/10.17605/OSF.IO/ZH2EQ](https://doi.org/10.17605/OSF.IO/ZH2EQ)
+- [Reality Consistency Model](https://github.com/metawritingecology/meta-writing-ecology/blob/main/reality-consistency.md) — [https://doi.org/10.17605/OSF.IO/76ZJ2](https://doi.org/10.17605/OSF.IO/76ZJ2)
+- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) — [https://doi.org/10.17605/OSF.IO/28HNK](https://doi.org/10.17605/OSF.IO/28HNK)
+- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) — [https://doi.org/10.17605/OSF.IO/QC6GN](https://doi.org/10.17605/OSF.IO/QC6GN)
+- [AI-Readable Knowledge Architecture](https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md) — [https://doi.org/10.17605/OSF.IO/7X3YF](https://doi.org/10.17605/OSF.IO/7X3YF)
+- [External Lifeline Collapse under Residual Infrastructure Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/external-lifeline-collapse-under-residual-infrastructure-cross.md) — [https://doi.org/10.17605/OSF.IO/6ZX9H](https://doi.org/10.17605/OSF.IO/6ZX9H)
+- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md) — [https://doi.org/10.17605/OSF.IO/BHMA8](https://doi.org/10.17605/OSF.IO/BHMA8)
+- [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md) — [https://doi.org/10.17605/OSF.IO/U2AK6](https://doi.org/10.17605/OSF.IO/U2AK6)
+- [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md) — [https://doi.org/10.17605/OSF.IO/KMREA](https://doi.org/10.17605/OSF.IO/KMREA)
+- [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md) — [https://doi.org/10.17605/OSF.IO/GN5RW](https://doi.org/10.17605/OSF.IO/GN5RW)
+- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md) — [https://doi.org/10.17605/OSF.IO/7MTNX](https://doi.org/10.17605/OSF.IO/7MTNX)
+- [Delegated Execution / Retained Answerability](https://github.com/metawritingecology/meta-writing-ecology/blob/main/delegated-execution-retained-answerability.md) — Cross-Supporting Boundary Note — [https://doi.org/10.17605/OSF.IO/6M95U](https://doi.org/10.17605/OSF.IO/6M95U)
+- [Structural Fidelity / Use-Validity Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/structural-fidelity-use-validity-boundary.md) — Cross-Supporting Boundary Note — [https://doi.org/10.17605/OSF.IO/BU4KT](https://doi.org/10.17605/OSF.IO/BU4KT)
+- [LLM-Condition / Research-Result Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/llm-condition-research-result-boundary.md) — Protocol-Facing Boundary Note — [https://doi.org/10.17605/OSF.IO/47PXB](https://doi.org/10.17605/OSF.IO/47PXB)
 
 ## Model and Diagnostic DOI Records
 

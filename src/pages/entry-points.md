@@ -38,19 +38,23 @@ This zone examines language under platform, model, and AI-mediated conditions, i
 
 This zone focuses on decision-making, role calibration, responsibility, boundary logic, and unequal distribution of risk.
 
-## Cross-Theme Reading Paths
+## Source Reading Paths
 
-For GitHub-facing source traversal, use the canonical [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md).
+For document-level source traversal, use the canonical [Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md).
 
-Selected public corpus additions include:
+Those paths are public navigation only. They do not establish formal conceptual relations, ontology, priority, hierarchy, or Registry status.
 
-- [Evaluation Boundary Failure under Permitted Surface Variation](https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md) for the Evaluation / boundary robustness path.
-- [Origin Control and Validity Burden in Accelerated Submission Systems](https://github.com/metawritingecology/meta-writing-ecology/blob/main/origin-control-validity-burden-accelerated-submission-systems.md) for verification labor, provenance-validity, boundary, governance residue, and responsibility paths.
-- [Policy Continuity Evidence Mapping](https://github.com/metawritingecology/meta-writing-ecology/blob/main/policy-continuity-evidence-mapping.md) for AI-assisted evidence traceability, source-boundary control, human judgment boundary, and planning-transition paths.
-- [Text-Conditioned Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/text-conditioned-semantic-rendering.md) and [Surface-Bounded Semantic Rendering](https://github.com/metawritingecology/meta-writing-ecology/blob/main/surface-bounded-semantic-rendering.md) for semantic surface formation, boundary-limited readability, and non-equivalence paths.
-- [Source, Summary, and Citation Boundary Packet](https://github.com/metawritingecology/meta-writing-ecology/blob/main/source-summary-citation-boundary-packet.md), [Model-Use Reporting Boundary Protocol](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-use-reporting-boundary-protocol.md), and [Generation-Condition Disclosure–Reproducibility Cross](https://github.com/metawritingecology/meta-writing-ecology/blob/main/generation-condition-disclosure-reproducibility-cross.md) for source custody, model-use reporting, generation-condition disclosure, and reproducibility-boundary paths.
+Earlier Medium companion texts remain legacy public surfaces rather than the current source-reading layer.
+
+### Boundary-Oriented Source Routes
+
+- [Delegated Execution / Retained Answerability](https://github.com/metawritingecology/meta-writing-ecology/blob/main/delegated-execution-retained-answerability.md) — Cross-Supporting Boundary Note; included in the canonical Responsibility / burden path.
+- [Structural Fidelity / Use-Validity Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/structural-fidelity-use-validity-boundary.md) — Cross-Supporting Boundary Note; included in the canonical Boundary / representation, Evaluation / boundary robustness, and Provenance / validity paths.
+- [LLM-Condition / Research-Result Boundary](https://github.com/metawritingecology/meta-writing-ecology/blob/main/llm-condition-research-result-boundary.md) — Protocol-Facing Boundary Note; included in the canonical Protocols / method orientations and Source / reporting / reproducibility boundary paths.
 
 ## Public Site Reading Paths
+
+The site paths below remain thematic orientation routes across six recurring zones. They do not replace the document-level sequence maintained in the canonical Reading Paths.
 
 ### Path 1 — Starting from everyday structural experience
 
@@ -63,15 +67,3 @@ Selected public corpus additions include:
 ### Path 3 — Starting from platforms, AI, and machine-mediated conditions
 
 **Post-Human Syntax / AI / Algorithmic Language** → **Observation / Error / Legibility** → **Decision / Boundary / Risk** → **Systems / Exchange / Burden Transfer** → **Field / Topology / Pressure** → **Drift / Reconstruction / Repositioning**
-
-## Source-Based Reading Paths
-
-The reading paths on this page should be followed through the public GitHub / OSF source layer rather than through earlier Medium companion texts.
-
-Earlier Medium writings may preserve poetic, pre-model, or legacy public surfaces, but they are not the current source-reading layer and may not contain complete internal reading chains.
-
-For source-level traversal, use the canonical reading paths in the public source repository:
-
-- [Canonical Reading Paths](https://github.com/metawritingecology/meta-writing-ecology/blob/main/model-atlas/READING_PATHS.md)
-
-The public site paths above remain orientation routes across the six thematic entry zones. The GitHub source repository provides the current source-node traversal beneath those routes.
