@@ -1,0 +1,49 @@
+version: 2
+
+updates:
+  # Application and tooling npm dependencies.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Cloudflare / Wrangler deployment surface. Declared before the Astro
+      # group so the Astro Cloudflare adapter is grouped with Wrangler rather
+      # than with the general Astro packages.
+      cloudflare-wrangler:
+        applies-to: version-updates
+        patterns:
+          - "wrangler"
+          - "@cloudflare/*"
+          - "@astrojs/cloudflare"
+        update-types:
+          - "minor"
+          - "patch"
+      # Astro framework and remaining first-party Astro integrations.
+      astro:
+        applies-to: version-updates
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # General development tooling (everything not already grouped above).
+      dev-tooling:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Major updates are intentionally left outside every group so each one is
+    # raised as an individual pull request and its compatibility boundary stays
+    # separately visible.
+
+  # GitHub Actions used by repository workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

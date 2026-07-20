@@ -1038,3 +1038,68 @@ helper stopped accepting shell commands. A full independent Astro build and
 `pnpm run check` remain required before commit authorization because the review
 environment blocked parent-directory enumeration used by esbuild. No commit,
 push, merge, PR, deploy, or publish occurred.
+
+### 2026-07-20 — Claude Code — package-1-deterministic-toolchain-ci
+
+Agent: Claude Code
+Task: Implement Package 1 only — deterministic PR/main CI, Astro-aware type
+checking, retained explicit TypeScript checking, a pinned pnpm version, and a
+grouped Dependabot configuration. Local implementation and validation only.
+Baseline: origin/main verified at
+d9014742d03a61297d97d1e3392f207590e1165b (matches the recorded baseline; no
+drift). Work done in a dedicated clean worktree
+(/home/user/mwe-site-package-1-ci) on branch
+claude/site-ci-deterministic-toolchain created from the verified base. The
+primary checkout was left untouched (it was already clean).
+Files changed:
+- package.json — added "packageManager": "pnpm@10.34.5" (Node ">=22" floor
+  retained, unchanged); added devDependency "@astrojs/check": "0.9.9"; added
+  scripts "check:astro" (astro check) and "check:ts" (tsc --noEmit); rewired
+  the full "check" script so the bare tsc step became
+  "pnpm run check:astro && pnpm run check:ts", leaving every existing step
+  (astro build, wrangler deploy --dry-run, test:contracts, test:runtime,
+  test:retention, test:orchestration, test:workflow, test:semantic-flow,
+  verify:public-surface-map) in place and in order.
+- pnpm-lock.yaml — regenerated with pnpm 10.34.5 to resolve @astrojs/check@0.9.9
+  and its subtree; existing packages were re-keyed only to carry the new
+  yaml@2.9.0 peer context. No existing dependency was downgraded, removed, or
+  version-changed.
+- .github/workflows/ci.yml (new) — "Site CI"; triggers pull_request and push to
+  main; top-level permissions contents: read; one job with stable display name
+  site-ci on ubuntu-latest; Node 22 via actions/setup-node (v4.4.0, full SHA);
+  checkout via actions/checkout (v4.2.2, full SHA, persist-credentials false),
+  both SHAs reused verbatim from the existing repository workflow; pnpm 10.34.5
+  activated with corepack enable + corepack prepare pnpm@10.34.5 --activate;
+  runs pnpm install --frozen-lockfile then pnpm run check. Concurrency cancels
+  superseded runs for pull requests only (cancel-in-progress gated on
+  event_name == 'pull_request'), so an in-flight main validation is never
+  cancelled by a later main commit. No secrets, no real Wrangler deploy, no
+  Cloudflare mutation, no publication, no cache (deterministic first version).
+- .github/dependabot.yml (new) — version 2; npm ecosystem (dir /, weekly, limit
+  5) with ordered minor/patch groups cloudflare-wrangler, astro, dev-tooling
+  (majors intentionally left ungrouped so each surfaces as its own PR);
+  github-actions ecosystem (dir /, weekly, limit 5). No auto-merge, no
+  credentials, no ruleset.
+- AGENT_WORKLOG.md — this entry (required by AGENTS.md).
+Build / tests run: corepack pnpm 10.34.5 / Node v22.22.2. pnpm install
+--frozen-lockfile (consistent); pnpm run check:astro (0 errors, 0 warnings, 1
+pre-existing hint on SchemaJsonLd.astro); pnpm run check:ts (tsc --noEmit,
+exit 0); pnpm run build (exit 0); pnpm run check end-to-end (exit 0):
+astro check clean, tsc clean, wrangler 4.88.0 deploy --dry-run succeeded
+("--dry-run: exiting now.", Total Upload 1208.57 KiB, no real deploy),
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21
+(211 tests, 0 failures, 0 skipped), verify:public-surface-map 18/18.
+git diff --check clean. YAML for both new files parsed and structurally
+verified with the already-present yaml parser (no dependency added for
+validation).
+Result: Package 1 implemented locally. The existing public-surface
+candidate-generation workflow was not modified. No content page, metadata,
+crawler policy, header, 404, RSS, sitemap, link, GitHub setting, Cloudflare
+setting, or deployment configuration changed. No commit, push, PR, merge,
+deploy, or publish performed; review artifacts (patch + manifest) exported
+outside the repository.
+Unresolved questions: None.
+Risks or assumptions: The lockfile change is the reviewed resolution of
+@astrojs/check@0.9.9 only. Action SHAs were reused from the existing repository
+workflow rather than newly sourced. Packages 2–5 were not implemented.
