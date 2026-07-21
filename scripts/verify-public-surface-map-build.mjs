@@ -152,23 +152,101 @@ await check("12 dist/_headers exists", () => {
 
 await check("13 _headers contains exact manifest + snapshot rules", () => {
   const headers = readFileSync(DIST_HEADERS, "utf8");
-  const manifestBlock = [
-    "/public-surface-map/data/manifest.json",
-    "  Content-Type: application/json; charset=utf-8",
-    "  Cache-Control: no-cache, must-revalidate",
-    "  X-Content-Type-Options: nosniff",
-    "  X-Robots-Tag: noindex, nofollow, nosnippet",
-  ].join("\n");
-  const snapshotBlock = [
-    "/public-surface-map/data/snapshots/*",
-    "  Content-Type: application/json; charset=utf-8",
-    "  Cache-Control: public, max-age=31536000, immutable",
-    "  X-Content-Type-Options: nosniff",
-    "  X-Robots-Tag: noindex, nofollow, nosnippet",
-  ].join("\n");
-  if (!headers.includes(manifestBlock)) throw new Error("manifest header block missing/altered");
-  if (!headers.includes(snapshotBlock)) throw new Error("snapshot header block missing/altered");
-  if (headers.indexOf(manifestBlock) > headers.indexOf(snapshotBlock)) {
+
+  // Bounded parser over the ACTUAL dist/_headers text. It normalizes CRLF/CR to
+  // LF, then discovers EVERY rule block: each non-indented, non-empty line is a
+  // path rule, and the indented, non-empty lines that follow are its ordered
+  // directives. Blank lines are tolerated as separators; a block ends at the
+  // next path rule or end of file (including the final block at EOF). Path
+  // matching downstream is exact string equality, never prefix matching. Because
+  // it enumerates all occurrences, a second block with a duplicate path is
+  // visible (and rejected) rather than silently ignored as with a
+  // first-occurrence-only lookup.
+  const parseBlocks = (text) => {
+    const lines = text.replace(/\r\n?/g, "\n").split("\n");
+    const blocks = [];
+    let current = null;
+    for (const raw of lines) {
+      if (raw.trim() === "") continue; // tolerate blank separator lines
+      if (/^\s/.test(raw)) {
+        if (current) current.body.push(raw.trim()); // indented directive
+        continue;
+      }
+      current = { path: raw.trim(), body: [] }; // non-indented path rule
+      blocks.push(current);
+    }
+    return blocks;
+  };
+
+  const requireUnique = (blocks, pathLine) => {
+    const matches = blocks.filter((block) => block.path === pathLine);
+    if (matches.length === 0) throw new Error(`missing required rule: ${pathLine}`);
+    if (matches.length > 1) {
+      throw new Error(`duplicate rule not allowed: ${pathLine} (found ${matches.length})`);
+    }
+    return matches[0];
+  };
+
+  const sameLines = (actual, expected) =>
+    actual.length === expected.length && actual.every((line, i) => line === expected[i]);
+
+  // Package 2A: the security-response headers are provided once by the /*
+  // catch-all rule. X-Content-Type-Options is no longer repeated in the
+  // path-specific blocks so matching Cloudflare rules cannot comma-join the
+  // value. The path-specific blocks retain only their unique Content-Type,
+  // Cache-Control, and X-Robots-Tag behavior.
+  const EXPECTED_CATCH_ALL = [
+    "X-Content-Type-Options: nosniff",
+    "Referrer-Policy: strict-origin-when-cross-origin",
+    "Permissions-Policy: camera=(), geolocation=(), microphone=()",
+    "Content-Security-Policy: frame-ancestors 'self';",
+    "Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudflare.com; form-action 'self'; upgrade-insecure-requests;",
+  ];
+  const EXPECTED_MANIFEST = [
+    "Content-Type: application/json; charset=utf-8",
+    "Cache-Control: no-cache, must-revalidate",
+    "X-Robots-Tag: noindex, nofollow, nosnippet",
+  ];
+  const EXPECTED_SNAPSHOT = [
+    "Content-Type: application/json; charset=utf-8",
+    "Cache-Control: public, max-age=31536000, immutable",
+    "X-Robots-Tag: noindex, nofollow, nosnippet",
+  ];
+
+  const blocks = parseBlocks(headers);
+
+  // Each target rule must occur exactly once. Zero or more-than-one fails before
+  // any body comparison, so a file whose first /* block is correct but whose
+  // second /* block conflicts is rejected on the duplicate, not accepted on the
+  // first match.
+  const catchAll = requireUnique(blocks, "/*");
+  const manifest = requireUnique(blocks, "/public-surface-map/data/manifest.json");
+  const snapshot = requireUnique(blocks, "/public-surface-map/data/snapshots/*");
+
+  // 1. Actual catch-all block carries exactly the approved Package 2A policy.
+  if (!sameLines(catchAll.body, EXPECTED_CATCH_ALL)) {
+    throw new Error("catch-all block does not match the exact Package 2A policy values");
+  }
+
+  // 2 & 3. Actual path-specific blocks carry exactly their approved directives.
+  if (!sameLines(manifest.body, EXPECTED_MANIFEST)) {
+    throw new Error("manifest block does not match its exact Content-Type/Cache-Control/X-Robots-Tag");
+  }
+  if (!sameLines(snapshot.body, EXPECTED_SNAPSHOT)) {
+    throw new Error("snapshot block does not match its exact Content-Type/Cache-Control/X-Robots-Tag");
+  }
+
+  // 4. Neither actual path-specific block may repeat X-Content-Type-Options; the
+  // catch-all rule is its sole source, preventing a comma-joined duplicate.
+  if (manifest.body.some((line) => /^X-Content-Type-Options:/i.test(line))) {
+    throw new Error("manifest block must not repeat X-Content-Type-Options");
+  }
+  if (snapshot.body.some((line) => /^X-Content-Type-Options:/i.test(line))) {
+    throw new Error("snapshot block must not repeat X-Content-Type-Options");
+  }
+
+  // 5. Manifest exact rule must precede the snapshot glob rule.
+  if (blocks.indexOf(manifest) > blocks.indexOf(snapshot)) {
     throw new Error("manifest exact rule must precede snapshot glob rule");
   }
 });
