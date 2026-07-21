@@ -1103,3 +1103,165 @@ Unresolved questions: None.
 Risks or assumptions: The lockfile change is the reviewed resolution of
 @astrojs/check@0.9.9 only. Action SHAs were reused from the existing repository
 workflow rather than newly sourced. Packages 2–5 were not implemented.
+
+### 2026-07-20 — Claude Code — package-2a-custom-404-and-response-headers
+
+Agent: Claude Code
+Task: Implement Package 2A only — custom HTTP 404 surface and the response-header
+architecture (SSR middleware + static _headers) with an enforced frame-ancestors
+CSP and a broader Report-Only CSP. Implementation-only: local and uncommitted.
+Scope is Package 2A exclusively. No SECURITY.md, no security.txt, and no
+observability document were created. No commit, push, PR, preview deployment,
+production deployment, GitHub setting, Cloudflare setting, or Email Routing
+change occurred. No Package 2B work was performed.
+
+Baseline: origin/main verified at
+fb1a2c6a7c21b5164fb0a3cfee5d6d96242df3a5 (matches the recorded baseline; no
+drift). Work was done on branch claude/package-2a-security-headers-404-uqcj32,
+which the harness had already checked out at the exact verified base SHA (an
+isolated feature-branch checkout equivalent to the requested clean worktree);
+no separate main checkout exists to protect.
+
+Files changed:
+- src/pages/404.astro (new) — standalone Astro 404 route. Preserves a real HTTP
+  404, imports the existing global stylesheet, does not use the shared layout,
+  emits no canonical URL and no JSON-LD, and includes
+  <meta name="robots" content="noindex, follow">. Bounded English title
+  ("Page not found — Meta-Writing Ecology"); heading "Page not found"; body
+  "The requested public page could not be found. Continue from Home, About,
+  Entry Surfaces, or Thematic Entry Points."; stable links only to /, /about/,
+  /surfaces/, /entry-points/. No wording implies the missing route is private,
+  hidden, unpublished, suppressed, an internal archive, or a Registry entry.
+  No search, diagnostics, map code, or new navigation.
+- src/middleware.ts (new) — SSR middleware (defineMiddleware / onRequest) that
+  awaits next() and then sets each Package 2A header exactly once on the
+  returned response. It mutates only headers, so body, status, statusText, and
+  existing headers are preserved verbatim (no Response rebuild, no 404→200, no
+  redirect/route rewriting, no platform-error capture). No logging of request
+  URLs, query strings, or bodies. Enforced: X-Content-Type-Options: nosniff;
+  Referrer-Policy: strict-origin-when-cross-origin; Permissions-Policy:
+  camera=(), geolocation=(), microphone=(); Content-Security-Policy:
+  frame-ancestors 'self';. Report-Only: default-src 'self'; base-uri 'self';
+  object-src 'none'; frame-ancestors 'self'; script-src 'self'; style-src
+  'self'; img-src 'self'; font-src 'self'; connect-src 'self'
+  https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudflare.com;
+  form-action 'self'; upgrade-insecure-requests;. No unsafe-inline/eval,
+  nonce, hash, report-uri/report-to/Reporting-Endpoints, X-Frame-Options,
+  HSTS, COOP, CORP, or COEP.
+- public/_headers (edit) — added a /* catch-all rule carrying the same five
+  Package 2A policy headers (four enforced + the Report-Only CSP). Preserved
+  the manifest and snapshot rules' Content-Type, Cache-Control, and
+  X-Robots-Tag. Removed the now-duplicate X-Content-Type-Options declarations
+  from both path-specific blocks so the catch-all is its sole source and
+  Cloudflare rule composition cannot produce a comma-joined value. No
+  security.txt rule was added.
+- scripts/verify-public-surface-map-build.mjs (edit; user-authorized as one
+  additional in-scope file) — updated check 13 to the new header architecture
+  without weakening verification: it now asserts the /* catch-all block
+  contains exactly the four enforced headers plus the approved Report-Only CSP;
+  asserts the manifest and snapshot path-specific blocks still contain their
+  exact Content-Type, Cache-Control, and X-Robots-Tag; and asserts
+  X-Content-Type-Options is not repeated in either path-specific block. Every
+  other public-surface-map check is unchanged.
+- tests/security-resilience.test.ts (new) — 26 deterministic Node built-in
+  (node:test + assert) source-contract tests: 404 contract, middleware
+  contract, _headers contract, and cross-layer consistency. No test framework
+  or dependency added. Source-only, so Report-Only violations from known inline
+  scripts cannot make them fail.
+- package.json (edit) — added script test:security-resilience (node --test
+  tests/security-resilience.test.ts) and inserted it into the full "check"
+  chain immediately before verify:public-surface-map. No existing step removed,
+  weakened, renamed, or reordered incompatibly. No dependency change.
+- AGENT_WORKLOG.md — this entry.
+
+No pnpm-lock.yaml change (verified byte-identical before/after
+pnpm install --frozen-lockfile).
+
+Build / tests run: corepack pnpm 10.34.5 / Node v22.22.2.
+pnpm install --frozen-lockfile (consistent; lockfile unchanged);
+pnpm run test:security-resilience 26/26; pnpm run check:astro (0 errors,
+0 warnings, 1 pre-existing hint on SchemaJsonLd.astro); pnpm run check:ts
+(tsc --noEmit exit 0); pnpm run build (exit 0, 404 route built);
+pnpm run check end-to-end (exit 0): astro build, astro check, tsc,
+wrangler 4.88.0 deploy --dry-run (dry-run only, no real deploy),
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 31/31 (242 tests, 0 failures, 0 skipped; totals
+updated by the correction note below — superseding the original 26/26 and 237),
+verify:public-surface-map 18/18. git diff --check clean.
+
+Local response probes (wrangler dev, no deployment; "Parsed 3 valid header
+rules"): / and /about/ (SSR HTML) → 200 with all five policy headers;
+/public-surface-map/interactive/ (prerendered HTML) → 200 with all five;
+/robots.txt, /llms.txt, /sitemap-index.xml (static) → 200 with all five;
+/public-surface-map/data/manifest.json → 200 retaining application/json
+Content-Type, no-cache Cache-Control, and noindex/nofollow/nosnippet X-Robots-Tag
+plus the five policy headers, with X-Content-Type-Options and the enforced CSP
+each appearing exactly once (no comma-join); a nonexistent route → 404 carrying
+the custom body (heading "Page not found", noindex/follow, no canonical, the
+four approved links) and all five headers. No redirect route exists in this
+build to exercise; the middleware mutates only headers, so any redirect status
+would be preserved.
+
+CSP Report-Only observation: browser automation (Playwright/Puppeteer) is not
+installed and adding a dependency is prohibited, so live console-report capture
+is deferred to a preview stage. Static evidence: pages carrying the public
+search modal include one inlined <script> (~14.4 KB) which, under Report-Only
+script-src 'self', is an expected non-blocking Report-Only violation and
+evidence for later work — not resolved here (no unsafe-inline, nonce, or hash
+added). JSON-LD is emitted as non-executed application/ld+json data (not subject
+to script-src). The only external data endpoint (the Cloudflare AI search
+domain) is already covered by connect-src, so no unexpected external dependency
+was found.
+
+Result: Package 2A implemented locally and validated. Review artifacts (patch +
+manifest) exported outside the repository. Nothing committed, staged, pushed, or
+deployed.
+
+Unresolved questions: None outstanding. One conflict was surfaced and resolved
+by the user: the pre-existing verify:public-surface-map check 13 required
+X-Content-Type-Options inside the path-specific _headers blocks, contradicting
+the instruction to remove that duplicate; the user authorized
+scripts/verify-public-surface-map-build.mjs as one additional in-scope file and
+specified the new assertions, applied above.
+
+Risks or assumptions: Expected inline-script Report-Only violations are recorded
+as evidence for later work and were deliberately not silenced. Static header
+delivery in production is governed by Cloudflare's _headers processing; wrangler
+dev parsed and applied the rules locally, but final composition should be
+reconfirmed at preview. Only Package 2A was implemented; Package 2B was not.
+
+Correction note (Codex pre-commit review — same uncommitted Package 2A entry):
+Codex identified that both the build verifier (check 13) and the security
+tests relied on first-occurrence-only lookups (Array.indexOf on a path line)
+and on substring/self-referential assertions, so a second, conflicting rule
+block with a duplicate path — or a header value that appeared under the wrong
+key — could pass undetected. Only scripts/verify-public-surface-map-build.mjs,
+tests/security-resilience.test.ts, and this worklog entry were changed; no
+runtime header value, middleware, 404 page, public/_headers, package.json,
+dependency, or pnpm-lock.yaml changed, and the seven-file Package 2A scope is
+unchanged. Corrections: (1) check 13 now normalizes CRLF/CR to LF, discovers
+every rule block, and requires exactly one occurrence of /*,
+/public-surface-map/data/manifest.json, and /public-surface-map/data/snapshots/*
+(rejecting zero or more than one) before comparing exact ordered directive
+bodies, so a correct first block followed by a conflicting duplicate is
+rejected. (2) The middleware tests now parse the actual ENFORCED_HEADERS object
+into a key→value mapping (exactly four entries, deep-equal to the approved
+mapping), parse the actual REPORT_ONLY_CSP assignment, and assert the explicit
+response.headers.set("Content-Security-Policy-Report-Only", REPORT_ONLY_CSP)
+binding and the Object.entries(ENFORCED_HEADERS) set loop — no self-comparison
+and no unrelated substring matching. (3) The _headers tests now parse the actual
+public/_headers into unique rule blocks with exact bodies, confirm
+X-Content-Type-Options / enforced CSP / Report-Only CSP live only in the
+catch-all, retain the manifest and snapshot MIME/cache/robots contracts, and
+confirm no security.txt rule. (4) Added deterministic in-memory fixtures that
+reject a duplicate /*, a duplicate manifest rule, and a duplicate snapshot rule
+(each a correct first block plus a conflicting second block), plus a CRLF
+fixture confirming a valid CRLF-terminated file is accepted; fixtures never
+mutate the real public/_headers or dist/_headers and do not depend on build
+output. Cross-layer consistency now compares the parsed middleware mapping with
+the parsed catch-all directive mapping. The broader CSP remains Report-Only and
+Package 2B remains out of scope. Final validation after the correction:
+test:security-resilience 31/31; full suite 242 tests, 0 failures, 0 skipped;
+verify:public-surface-map 18/18; pnpm run check exit 0; wrangler deploy
+--dry-run only; pnpm-lock.yaml unchanged; nothing staged.

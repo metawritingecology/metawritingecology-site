@@ -30,7 +30,7 @@
     "astro": "astro",
     "build": "astro build",
     "cf-typegen": "wrangler types",
-    "check": "astro build && pnpm run check:astro && pnpm run check:ts && wrangler deploy --dry-run && pnpm run test:contracts && pnpm run test:runtime && pnpm run test:retention && pnpm run test:orchestration && pnpm run test:workflow && pnpm run test:semantic-flow && pnpm run verify:public-surface-map",
+    "check": "astro build && pnpm run check:astro && pnpm run check:ts && wrangler deploy --dry-run && pnpm run test:contracts && pnpm run test:runtime && pnpm run test:retention && pnpm run test:orchestration && pnpm run test:workflow && pnpm run test:semantic-flow && pnpm run test:security-resilience && pnpm run verify:public-surface-map",
     "check:astro": "astro check",
     "check:ts": "tsc --noEmit",
     "deploy": "wrangler deploy",
@@ -40,6 +40,7 @@
     "test:orchestration": "node --test tests/public-surface-authority-map/candidateOrchestration.test.ts",
     "test:retention": "node --test tests/public-surface-authority-map/snapshotRetention.test.ts",
     "test:runtime": "node --test tests/public-surface-authority-map/runtimeLoader.test.ts",
+    "test:security-resilience": "node --test tests/security-resilience.test.ts",
     "test:semantic-flow": "node --test tests/semantic-flow-source-entries.test.ts",
     "test:workflow": "node --test tests/public-surface-authority-map/candidateWorkflow.test.ts",
     "verify:public-surface-map": "node scripts/verify-public-surface-map-build.mjs"
