@@ -1,0 +1,3 @@
+Contact: mailto:security@metawritingecology.org
+Expires: 2027-06-30T23:59:59Z
+Canonical: https://metawritingecology.org/.well-known/security.txt

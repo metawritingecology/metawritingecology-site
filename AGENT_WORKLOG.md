@@ -1265,3 +1265,467 @@ Package 2B remains out of scope. Final validation after the correction:
 test:security-resilience 31/31; full suite 242 tests, 0 failures, 0 skipped;
 verify:public-surface-map 18/18; pnpm run check exit 0; wrangler deploy
 --dry-run only; pnpm-lock.yaml unchanged; nothing staged.
+
+### 2026-07-21 — Claude Code — package-2b-public-security-contact-and-observability
+
+Agent: Claude Code
+Task: Implement Package 2B only — public security contact and repository-side
+security / observability boundary documentation. Implementation-only: local and
+uncommitted. This adds SECURITY.md, public/.well-known/security.txt, and
+SECURITY_OBSERVABILITY.md; adds one path-specific static-response rule for
+security.txt to public/_headers; and extends the deterministic
+security-resilience tests. Scope is Package 2B exclusively. No Package 2A
+correction, no broader CSP enforcement, no CSP nonce/hash, no CSP reporting
+collector, no GitHub Security Advisory / ruleset change, no Cloudflare / NEL /
+Email Routing change, no search-service CORS change, no preview-origin
+allowlist change, no crawler-policy redesign, no monitoring / log-shipping /
+alerting integration, and no MWE classification, Registry, relation, or
+authority change occurred.
+
+Baseline: origin/main verified at the exact current SHA
+5fa73e2088423527962c267f2f7f8b6e30fd7094 (Package 2B base). Package 2A merge
+was confirmed present: commit 7491bc2b4d79c50c2b5dd380dfea59906f77b67b is an
+ancestor of origin/main (git merge-base --is-ancestor succeeded). Work was done
+in a clean, dedicated worktree at
+/home/user/mwe-site-package-2b-security-policy on branch
+claude/package-2b-security-policy, created from the verified base SHA; the
+primary checkout was not modified.
+
+Public contact and expiry: the sole public security contact is
+security@metawritingecology.org and the security.txt Expires value is
+2027-06-30T23:59:59Z, with Canonical
+https://metawritingecology.org/.well-known/security.txt. The user confirmed
+that an external delivery test to security@metawritingecology.org succeeded;
+that confirmation is treated as sufficient. No private forwarding/mailbox
+detail was accessed, inferred, or recorded; no Email Routing setting was
+changed; no second test email was sent.
+
+Files changed (six-file Package 2B scope):
+- SECURITY.md (new) — public security policy. Scope limited to the public site
+  (https://metawritingecology.org) and this public website repository, with the
+  explicit boundary that it does not represent the full MWE archive, Registry,
+  working corpus, or authority structure. Reporting via a mailto link to the
+  approved public contact; bounded "please include" and "please avoid" guidance;
+  bounded appropriate-report and out-of-scope lists (out-of-scope excludes
+  conceptual, classification, Cross/Log/Protocol/Draft/Registry status, relation
+  confirmation, OSF priority, editorial, publish/hide/rename/reclassify, ordinary
+  non-security content edits, full-archive disputes, preview-only platform
+  behavior, and marketing/scanning offers). "No unsupported commitments" states
+  that receipt of a report does not create a response-time, resolution-time,
+  confidentiality, compensation, bounty, or disclosure commitment; no
+  legal-safe-harbor language added. No private forwarding address appears.
+- public/.well-known/security.txt (new) — UTF-8 plain text, LF line endings,
+  one final newline (145 bytes). Exactly three fields, in order: Contact:
+  mailto:security@metawritingecology.org / Expires: 2027-06-30T23:59:59Z /
+  Canonical: https://metawritingecology.org/.well-known/security.txt. No
+  comments, no phone, no encryption key, no acknowledgement URL, no hiring
+  field, no bounty/response-time statement, no Policy field, no
+  Preferred-Languages field, no private forwarding address. Canonical points at
+  production, not the workers.dev preview origin.
+- SECURITY_OBSERVABILITY.md (new) — "Security and Observability Boundaries",
+  separating (A) repository-enforced controls (deterministic CI; build/Astro/TS/
+  contract checks; Wrangler dry-run; custom 404 contract; SSR + static
+  response-header architecture; enforced same-origin framing; broader CSP in
+  Report-Only mode; security-resilience tests; public-surface-map verification;
+  security.txt source/response contract), (B) externally observed platform
+  signals (GitHub checks; Cloudflare Workers build/deploy records; prod/preview
+  HTTP inspection; browser console/network; Cloudflare-generated NEL Report-To
+  header classified as platform-generated; preview X-Robots-Tag noindex overlay
+  classified as a preview-origin overlay; preview search CORS classified as an
+  external-service/origin limitation; each requiring reverification when
+  platforms change), and (C) controls not asserted (uptime monitoring, incident
+  paging, SOC, SIEM/centralized logs, log-retention duration, complete
+  request-log access, automatic incident response, vulnerability-response SLAs,
+  guaranteed report confidentiality, bug bounty, Cloudflare-account config,
+  GitHub-org config, Email Routing internals, private mailbox identity, and a
+  complete MWE archive/Registry/authority map). A review-boundary section states
+  neither the repository nor platform records replace user authority over
+  publication, classification, Registry status, public/private boundaries, or
+  final release. No credentials, mailbox details, account IDs, tokens, or
+  dashboard exports appear.
+- public/_headers (edited) — added exactly one path-specific rule for
+  /.well-known/security.txt with only Content-Type: text/plain; charset=utf-8
+  and Cache-Control: public, max-age=3600, must-revalidate. The rule does not
+  repeat any Package 2A catch-all header (X-Content-Type-Options,
+  Referrer-Policy, Permissions-Policy, CSP, CSP-Report-Only) and carries no
+  X-Robots-Tag. The existing catch-all /*, manifest, and snapshot rules and
+  their exact directive bodies/ordering are unchanged; no CSP value changed.
+- tests/security-resilience.test.ts (edited) — retained all Package 2A tests;
+  the shared validateHeadersContract now requires exactly one
+  /.well-known/security.txt rule with its exact ordered two-directive body and
+  asserts that rule repeats no Package 2A catch-all header and carries no
+  X-Robots-Tag; the synthetic VALID_FIXTURE now includes the security.txt block,
+  and a new fixture rejects a conflicting duplicate security.txt rule. Added
+  deterministic Package 2B tests for: the security.txt source (exact three
+  fields/order, exact Contact/Expires/Canonical, LF-only, single final newline,
+  no duplicate fields, no comments, no forbidden/unrelated fields, only the
+  approved email present, no response-time/bounty/confidentiality/compensation
+  promise); the SECURITY.md structural contract (approved contact + mailto,
+  scope limited to public site and this public repo, MWE archive/Registry/
+  authority boundary present, conceptual/classification/Registry/editorial/
+  publication exclusions present, only the approved email present, bounded
+  no-commitments clause present); the SECURITY_OBSERVABILITY.md contract
+  (A/B/C sections in order; NEL classified platform-generated; preview
+  X-Robots-Tag classified as overlay; preview search CORS classified as
+  external-service/origin limitation; broader CSP still Report-Only;
+  monitoring/alerting/SIEM/log-retention/SLA/confidentiality/bounty listed only
+  under controls-not-asserted; no email address present and Email Routing named
+  only as an internal boundary; scripts/signals not described as final MWE
+  authority); and cross-file consistency (SECURITY.md and security.txt share the
+  contact; Canonical matches production and is not a preview origin; expiry
+  matches; observability doc does not contradict the enforced/Report-Only split;
+  no private forwarding address or placeholder in any new Package 2B file).
+- AGENT_WORKLOG.md (this entry).
+
+No package.json or pnpm-lock.yaml change; no dependency added or removed.
+
+Build / tests run (pinned toolchain: pnpm 10.34.5, node v22.22.2;
+pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 64/64 (was 31/31 under Package 2A; +33 Package 2B
+tests), verify:public-surface-map 18/18. Full deterministic total: 275 tests,
+0 failures, 0 skipped. check:astro 0 errors / 0 warnings / 1 pre-existing hint;
+check:ts clean; wrangler deploy --dry-run only ("--dry-run: exiting now"; no
+deploy). git diff --check clean; nothing staged; pnpm-lock.yaml unchanged.
+
+Build-output verification: pnpm run build produced
+dist/.well-known/security.txt; cmp against public/.well-known/security.txt
+reports the bytes identical (145 bytes each).
+
+Local response probes (wrangler dev on the built dist, no deployment;
+"Parsed 4 valid header rules"): GET /.well-known/security.txt → 200, body
+exactly the approved three-field document (145 bytes, no HTML wrapper, no
+redirect), Content-Type text/plain; charset=utf-8, Cache-Control public,
+max-age=3600, must-revalidate, and each Package 2A catch-all security header
+(X-Content-Type-Options, Referrer-Policy, Permissions-Policy, enforced CSP,
+Report-Only CSP) present exactly once with no comma-join and no X-Robots-Tag;
+no private forwarding information present. Package 2A regression probes
+unchanged: GET / → 200 with all five policy headers; a nonexistent route → 404
+carrying the custom body ("Page not found", noindex/follow) and the enforced
+headers; GET /public-surface-map/data/manifest.json → 200 retaining
+application/json Content-Type, no-cache Cache-Control, and
+noindex/nofollow/nosnippet X-Robots-Tag, with the enforced CSP and
+X-Content-Type-Options each once.
+
+Result: Package 2B implemented locally and validated in a dedicated worktree.
+Review artifacts (patch + manifest) exported outside the repository. Nothing
+committed, staged, pushed, or deployed; no PR opened; no preview or production
+deployment; no GitHub, Cloudflare, Email Routing, CORS, NEL, preview-robots,
+mailbox, or Package 2A change occurred.
+
+Unresolved questions: None outstanding.
+
+Risks or assumptions: Static header delivery in production is governed by
+Cloudflare's _headers processing; wrangler dev parsed and applied all four
+rules locally and composed the catch-all plus the security.txt path rule as
+expected, but the exact deployed response composition should be reconfirmed at
+PR preview. The external delivery test to the public contact is recorded only
+as user-confirmed; no mailbox internals were inspected. Only Package 2B was
+implemented.
+
+Correction note (Codex substantive pre-commit review — same uncommitted
+Package 2B entry): Codex found that the Package 2B policy-document tests were
+substring/structural only and could pass even if contradictory affirmative
+promises were appended to an otherwise valid document (e.g. a guaranteed
+response time, guaranteed confidentiality, a bug bounty, coordinated-disclosure
+terms, or legal safe harbor), and that the SECURITY_OBSERVABILITY.md checks used
+whole-file substring searches that did not bind each interpretation to its
+required section or reject a wrong section location, duplicate section, or
+out-of-order section. Only tests/security-resilience.test.ts and this worklog
+entry were changed; no policy document, security.txt, header, runtime,
+middleware, package.json, dependency, or pnpm-lock.yaml changed, and the
+six-file Package 2B scope is unchanged. Package 2A remains unchanged.
+
+Corrections: (1) Added reusable local validators validateSecurityMd(text) and
+validateSecurityObservabilityMd(text) that operate on supplied strings and
+return an array of violation strings; the real repository documents and all
+in-memory mutation fixtures are validated through the same helpers (no shared
+helper file, no dependency). (2) SECURITY.md validation now requires the exact
+first H1 "# Security Policy" (rejecting a missing, different, later, or
+duplicated H1), binds the scope URL / "public website repository" / four-part
+MWE-archive/Registry/working-corpus/authority boundary to the Scope section,
+requires all eleven out-of-scope exclusion classes in the Out-of-scope section,
+requires the bounded no-commitment negation plus "acceptance not guaranteed",
+rejects any email other than the approved public contact, and rejects
+affirmative promises anywhere (guaranteed response/resolution time, guaranteed
+confidentiality, compensation/bounty, coordinated disclosure, legal safe
+harbor, universal acceptance) using clause-level negation-aware analysis that
+distinguishes a negated statement ("does not create a ... commitment") from an
+affirmative promise. (3) SECURITY_OBSERVABILITY.md validation now parses the
+Markdown into sections and requires exactly one ordered occurrence of A.
+Repository-enforced controls, B. Externally observed platform signals, C.
+Controls not asserted, and Review boundary (rejecting missing, duplicate, or
+misordered sections); binds the section-A enforced-control statements and the
+engineering-limitation boundary to section A; binds the NEL platform-generated,
+preview X-Robots-Tag overlay, preview search-CORS, and non-permanence
+interpretations to section B (rejecting NEL-as-repository-generated,
+robots-as-permanent-production-rule, or CORS-as-Package-2A/2B); binds the
+sixteen non-asserted controls to section C; binds the Review-boundary
+statements; and rejects affirmative contradictions (guaranteed monitoring,
+incident paging, SOC/SIEM, centralized log retention, response SLA, guaranteed
+confidentiality, semantic-authority claim) anywhere. (4) Added deterministic
+mutation fixtures that start from the approved real text: nine SECURITY.md
+fixtures (guaranteed 24-hour response, guaranteed resolution time, guaranteed
+confidentiality, bug-bounty/compensation offer, coordinated-disclosure
+commitment, legal safe-harbor promise, universal acceptance, incorrect H1, and
+a removed exclusion) and twelve SECURITY_OBSERVABILITY.md fixtures (NEL, preview
+robots, and search-CORS interpretations moved out of section B; non-permanence
+boundary removed; appended uptime-monitoring, incident-paging, SIEM/log-
+retention, vulnerability-SLA, and confidentiality guarantees; semantic-authority
+claim; a removed Review-boundary section; and a duplicated section C) — every
+malformed variant is rejected. Each document also has a valid-negation fixture
+proving that appended NEGATED non-assertion wording remains accepted. All prior
+Package 2A tests and the existing Package 2B security.txt exact-bytes, field
+order, LF/final-newline, public/_headers parsing/uniqueness, duplicate
+security.txt-rule rejection, Package 2A header, and cross-file consistency tests
+are retained unchanged and remain green; no test was weakened to pass.
+
+Final validation after the correction (pinned toolchain pnpm 10.34.5, node
+v22.22.2; pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 77/77 (was 64/64 before this correction; +13 net),
+verify:public-surface-map 18/18. Full deterministic total: 288 tests, 0
+failures, 0 skipped. check:astro 0 errors / 0 warnings / 1 pre-existing hint;
+check:ts clean; wrangler deploy --dry-run only; git diff --check clean;
+pnpm-lock.yaml unchanged; package.json unchanged; nothing staged. Only
+tests/security-resilience.test.ts and AGENT_WORKLOG.md changed in this
+correction; SECURITY.md, SECURITY_OBSERVABILITY.md, public/.well-known/
+security.txt, public/_headers, and all Package 2A runtime files are byte-for-byte
+unchanged. No commit, stage, push, PR, deployment, GitHub setting, Cloudflare
+setting, Email Routing, CORS, NEL, preview-robots, or mailbox action occurred.
+
+Correction note (Codex negation-scope follow-up — same uncommitted Package 2B
+entry): Codex found one remaining defect in the policy validators. The prior
+affirmativeViolations applied negation at whole-clause scope — it skipped an
+entire clause whenever any negation cue appeared — and clausesOf did not split
+contrastive constructions, so a negated first proposition could shield an
+affirmative, contradictory second proposition ("does not create a response-time
+commitment, but confidentiality is guaranteed"; "does not guarantee uptime, but
+it operates a SIEM"; "does not provide incident paging; however, incidents are
+automatically paged"; "no bounty commitment is created, yet compensation is
+offered"). Only tests/security-resilience.test.ts and this worklog entry were
+changed; no policy document, security.txt, header, runtime file, dependency,
+external setting, or Package 2A file changed, and the six-file Package 2B scope
+is unchanged.
+
+Correction: clausesOf now splits each sentence at contrastive conjunctions and
+transitions (but, however, yet, while, although, nevertheless, except that) via
+splitContrastive, so negation scope is local to the proposition that carries the
+promise; each side is scored for negation independently, and a negated clause no
+longer masks a following affirmative one. No general NLP dependency was added.
+The two approved documents contain two benign contrastive sentences ("They
+verify repository contracts, but they do not prove ...", "... accepted ... while
+workers.dev preview origins are not present ...") whose non-negated side matches
+no promise pattern, so both real documents still validate with zero violations.
+
+Added deterministic contrastive mutation fixtures — four for SECURITY.md
+(negated response commitment BUT guaranteed confidentiality; negated bounty YET
+compensation; negated confidentiality HOWEVER coordinated disclosure; negated
+response time WHILE universal acceptance) and five for SECURITY_OBSERVABILITY.md
+(negated uptime BUT operates a SIEM; negated paging HOWEVER automatic paging;
+negated log-retention BUT fixed retention; negated SLA YET affirmative SLA;
+negated confidentiality WHILE guaranteed confidentiality) — each rejected by the
+same validator used for the real document. Also added a SECURITY.md fixture that
+introduces a second email address, proving the approved public contact must be
+the only email (the private forwarding destination is neither encoded nor
+searched for). Both valid-negation fixtures (SECURITY.md and
+SECURITY_OBSERVABILITY.md) remain accepted with zero violations.
+
+Final validation after this correction (pinned toolchain pnpm 10.34.5, node
+v22.22.2; pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 87/87 (was 77/77; +10 net), verify:public-surface-map
+18/18. Full deterministic total: 298 tests, 0 failures, 0 skipped. check:astro
+0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only; git diff --check clean; pnpm-lock.yaml unchanged; package.json
+unchanged; nothing staged. SECURITY.md, SECURITY_OBSERVABILITY.md,
+public/.well-known/security.txt, and public/_headers verified byte-identical to
+the prior revision (cmp against the prior patch applied to a clean base). No
+commit, stage, push, PR, deployment, GitHub setting, Cloudflare setting, Email
+Routing, CORS, NEL, preview-robots, or mailbox action occurred.
+
+Correction note (Codex leading-contrastive follow-up — same uncommitted Package
+2B entry): Codex found that the proposition splitter handled middle-position
+transitions ("A, but B") but not leading subordinate constructions ("Although A,
+B" / "While A, B" / "Except that A, B"), so a negation inside the leading
+subordinate proposition A could still suppress an affirmative forbidden claim in
+the main proposition B. The earlier claim of complete transition coverage was
+therefore incomplete. Only tests/security-resilience.test.ts and this worklog
+entry were changed; no policy document, security.txt, header, runtime file,
+dependency, external setting, or Package 2A file changed, and the six-file
+Package 2B scope is unchanged.
+
+Correction: added a bounded leading-subordinate parser (LEADING_SUBORDINATE,
+^(?:although|while|except that)\s+([^,]+?)\s*,\s*(.+)$, case-insensitive,
+whitespace/line-wrap tolerant) and a recursive splitPropositions helper.
+splitPropositions first separates a leading subordinate proposition from its
+main proposition at the delimiting comma (preserving both captured fragments),
+then splits every fragment on the middle-position transitions (but, however,
+yet, while, although, nevertheless, except that). Negation is scored per
+proposition, so a leading OR middle negation no longer governs the following
+main proposition. It does not globally split on commas and adds no NLP
+dependency. Both approved documents still validate with zero violations (their
+two benign contrastive sentences are middle-position and their non-negated side
+matches no promise pattern).
+
+Added deterministic fixtures: three leading-form SECURITY.md rejections (leading
+although → guaranteed response; leading while → guaranteed confidentiality;
+leading except that → compensation offered); three leading-form
+SECURITY_OBSERVABILITY.md rejections (leading although → operates a SIEM;
+leading while → guaranteed confidentiality; leading except that → automatic
+paging); a seven-marker transition-coverage suite that DIRECTLY exercises each
+claimed transition (but, however, yet, nevertheless in middle position; while,
+although, except that in leading position) by pairing a negated subordinate with
+an affirmative "confidentiality is guaranteed" main and asserting rejection; and
+valid leading-negation fixtures for both documents whose benign main proposition
+carries no forbidden commitment and which return zero violations. All prior
+Package 2A and Package 2B tests — exact SECURITY.md title, required exclusions,
+unsupported-commitment and universal-acceptance rejection, second-email
+rejection, A/B/C/Review section uniqueness/order, section-A engineering
+limitations, section-B NEL/preview-robots/CORS/non-permanence boundaries,
+section-C non-asserted controls, Review-boundary authority constraints, existing
+middle-position mixed mutations, valid negation, security.txt exact bytes,
+public/_headers parsing, and Package 2A regression contracts — are retained
+unchanged and remain green; no test was weakened.
+
+Final validation after this correction (pinned toolchain pnpm 10.34.5, node
+v22.22.2; pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 102/102 (was 87/87; +15 net), verify:public-surface-map
+18/18. Full deterministic total: 313 tests, 0 failures, 0 skipped. check:astro
+0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only; git diff --check clean; pnpm-lock.yaml unchanged; package.json
+unchanged; nothing staged. SECURITY.md, SECURITY_OBSERVABILITY.md,
+public/.well-known/security.txt, and public/_headers verified byte-identical to
+the prior revision (cmp against the prior patch applied to a clean base). No
+commit, stage, push, PR, deployment, GitHub setting, Cloudflare setting, Email
+Routing, CORS, NEL, preview-robots, or mailbox action occurred.
+
+Correction note (Codex coordinated-claim follow-up — same uncommitted Package 2B
+entry): the prior leading and middle contrastive splitting was correct as far as
+it went, but affirmativeViolations still suppressed a whole fragment whenever any
+negation cue appeared, so a negation in one proposition could shield a forbidden
+affirmative in a later COORDINATED proposition that shared the same fragment
+("No response time is guaranteed, and confidentiality is guaranteed"; "does not
+guarantee uptime, and it operates a SIEM"; "No response SLA is asserted — every
+report receives an SLA"). This corrects any earlier note implying the previous
+splitter closed all negation-scope paths — it did not; coordinated independent
+claims and colon/em-dash-joined claims still escaped. Only
+tests/security-resilience.test.ts and this worklog entry were changed; no policy
+document, security.txt, header, runtime file, dependency, external setting, or
+Package 2A file changed, and the six-file Package 2B scope is unchanged.
+
+Correction (bounded proposition-boundary, no NLP dependency): splitPropositions
+now, in addition to leading-subordinate and middle-position contrastive
+boundaries, splits each proposition at an explicit colon or em/en dash
+(COLON_DASH = /\s*:\s+|\s+[—–]\s+|\s+--\s+/) and at a coordinating "and"
+(COORDINATING = /,?\s+and\s+/) that joins two independent claims. Because each
+coordinated or separator-delimited claim becomes its own fragment, the existing
+per-fragment NEGATION_CUE test is now match-local: a negation only governs the
+proposition that contains it and can no longer reach across a boundary to
+suppress a later affirmative claim. Commas alone and "or" enumerations are
+deliberately NOT split, so valid list-wide negation ("does not create a
+response-time, resolution-time, confidentiality, compensation, bounty, or
+disclosure commitment") is preserved, as are directly negated forms
+("Confidentiality is not guaranteed."; "This repository does not operate a SOC
+or SIEM"). The vulnerability-response-SLA affirmative pattern was broadened
+(reports? receives? and optional "every") to detect the singular affirmative
+"every report receives an SLA"; this only strengthens detection and does not
+match any approved negated text. Both approved documents still validate with
+zero violations (their only affirmative-pattern hits — "semantic authorities"
+and "permanently configured" — remain within their governing negated segment).
+
+Added deterministic coordinated-claim rejection fixtures: six for SECURITY.md
+(comma+and negated response → guaranteed confidentiality; comma+and negated
+bounty → compensation offered; colon negated confidentiality → coordinated
+disclosure; em-dash negated safe harbor → legal safe harbor provided; plain-and
+negated response → universal acceptance; semicolon+nevertheless negated
+compensation → bug bounty offered) and five for SECURITY_OBSERVABILITY.md
+(comma+and negated uptime → operates a SIEM; comma+and negated paging →
+automatic paging; colon negated log retention → fixed retention; em-dash negated
+SLA → affirmative SLA; plain-and negated confidentiality → guaranteed
+confidentiality). Added valid-form fixtures that must NOT be over-rejected:
+SECURITY.md list-wide negation and "Confidentiality is not guaranteed, and
+reporters should avoid unnecessary sensitive data."; SECURITY_OBSERVABILITY.md
+"This repository does not operate a SOC or SIEM and does not provide continuous
+monitoring." and "No log-retention duration is asserted; repository checks may
+still provide review evidence." — each returns zero violations. All prior
+Package 2A and Package 2B tests — leading although/while/except that, middle
+but/however/yet/nevertheless, exact SECURITY.md title, all exclusions,
+acceptance boundary, email uniqueness, A/B/C/Review section parsing,
+section-specific observability contracts, security.txt exact bytes,
+public/_headers parsing, and Package 2A regression contracts — are retained
+unchanged and remain green; no fixture was weakened or removed.
+
+Final validation after this correction (pinned toolchain pnpm 10.34.5, node
+v22.22.2; pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 115/115 (was 102/102; +13 net), verify:public-surface-map
+18/18. Full deterministic total: 326 tests, 0 failures, 0 skipped. check:astro
+0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only; git diff --check clean; pnpm-lock.yaml unchanged; package.json
+unchanged; nothing staged. SECURITY.md, SECURITY_OBSERVABILITY.md,
+public/.well-known/security.txt, and public/_headers verified byte-identical to
+the prior revision (cmp against the prior patch applied to a clean base). No
+commit, stage, push, PR, deployment, GitHub setting, Cloudflare setting, Email
+Routing, CORS, NEL, preview-robots, or mailbox action occurred.
+
+Correction note (Codex Unicode-dash follow-up — same uncommitted Package 2B
+entry): Codex found that the coordinated-claim proposition boundary recognized
+Unicode em/en dashes only when surrounded by whitespace (COLON_DASH used
+\s+[—–]\s+), so an UNSPACED dash ("No safe-harbor commitment exists—legal safe
+harbor is provided.") kept the negated and affirmative propositions in one
+fragment and the whole-fragment negation suppressed the affirmative. This
+corrects the earlier worklog description that implied em/en-dash coverage was
+complete: only spaced dashes were covered. Only tests/security-resilience.test.ts
+and this worklog entry were changed; no policy document, security.txt, header,
+runtime file, dependency, external setting, or Package 2A file changed, and the
+six-file Package 2B scope is unchanged.
+
+Correction (bounded, no dependency): COLON_DASH now matches an em/en dash
+whether or not whitespace surrounds it (\s*[—–]\s*), so "A—B", "A — B", "A–B",
+and "A – B" all split into independent propositions; colon (colon + following
+space) and spaced double-hyphen handling are retained. ASCII "-" is deliberately
+NOT in the dash class and ":" requires a following space, so ordinary hyphenated
+tokens (safe-harbor, response-time, resolution-time, public-surface-map,
+security-resilience, no-cache, max-age, workers.dev-related), the public contact
+security@metawritingecology.org, the ISO expiry 2027-06-30T23:59:59Z, and the
+Canonical URL https://metawritingecology.org/.well-known/security.txt are never
+split — proven by a dedicated parser test asserting each token survives intact
+in a single clause. The approved documents contain no em/en dash, so both real
+documents still validate with zero violations.
+
+Added deterministic unspaced-dash rejection fixtures: three for SECURITY.md
+(em-dash negated safe harbor → legal safe harbor provided; en-dash negated
+confidentiality → guaranteed confidentiality; em-dash negated bounty →
+compensation offered) and three for SECURITY_OBSERVABILITY.md (em-dash negated
+SLA → affirmative SLA; en-dash negated log retention → fixed retention; em-dash
+negated monitoring → operates a SIEM). Added valid unspaced-dash fixtures whose
+benign main proposition returns zero violations (SECURITY.md: "Confidentiality
+is not guaranteed—reporters should avoid unnecessary sensitive data." and "No
+response time is guaranteed–reports may still be submitted by email.";
+SECURITY_OBSERVABILITY.md: "Continuous monitoring is not asserted—repository
+checks may provide review evidence."). All existing spaced-dash, colon,
+semicolon, comma+and, plain-and, leading although/while/except-that, and middle
+but/however/yet/nevertheless fixtures, the seven-marker transition suite, and
+every prior Package 2A and Package 2B contract test are retained unchanged and
+remain green; no fixture was weakened or removed.
+
+Final validation after this correction (pinned toolchain pnpm 10.34.5, node
+v22.22.2; pnpm install --frozen-lockfile): pnpm run check exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 124/124 (was 115/115; +9 net), verify:public-surface-map
+18/18. Full deterministic total: 335 tests, 0 failures, 0 skipped. check:astro
+0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only; git diff --check clean; pnpm-lock.yaml unchanged; package.json
+unchanged; nothing staged. SECURITY.md, SECURITY_OBSERVABILITY.md,
+public/.well-known/security.txt, and public/_headers verified byte-identical to
+the prior revision (cmp against the prior patch applied to a clean base). No
+commit, stage, push, PR, deployment, GitHub setting, Cloudflare setting, Email
+Routing, CORS, NEL, preview-robots, or mailbox action occurred.
