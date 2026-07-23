@@ -1729,3 +1729,1250 @@ public/.well-known/security.txt, and public/_headers verified byte-identical to
 the prior revision (cmp against the prior patch applied to a clean base). No
 commit, stage, push, PR, deployment, GitHub setting, Cloudflare setting, Email
 Routing, CORS, NEL, preview-robots, or mailbox action occurred.
+
+### 2026-07-22 — Claude Code — package-c-indexing-discovery-contracts
+
+Package C — Indexing and Discovery Contracts. Made the existing public route,
+sitemap, robots, canonical, lastmod, feed, and link behavior explicit,
+deterministic, and testable. Bounded website route-engineering only; no
+typed public-page metadata, no JSON-LD migration, no language-metadata change,
+and not a second MWE Registry. Nothing added here is an MWE authority: the
+helper, verifier, and tests generate engineering validation results only and
+make no naming, classification, public/private, relation, OSF, or publication
+judgment.
+
+Base SHA: facbf32f21a6b86a672bba4fb5477293ac299738 (origin/main, verified before
+implementation). Branch: claude/package-c-indexing-discovery-contracts. Isolated
+worktree: /home/user/mwe-site-package-c-indexing-discovery-contracts.
+
+Fixed user decisions (final for Package C):
+- Prototype /language-pressure-test-lab-prototype/: retains noindex,nofollow;
+  excluded from sitemap; no canonical; excluded from feed; no nav prominence;
+  page content unchanged. Source file not modified (direct inspection confirmed
+  it already matches the approved contract).
+- Interactive preview /public-surface-map/interactive/: retains noindex,nofollow;
+  excluded from sitemap; retains its existing self-canonical; excluded from
+  feed; bounded public-preview role preserved; page content unchanged. Source
+  file not modified (direct inspection confirmed the contract).
+- RSS/Atom: no RSS endpoint, no Atom endpoint, no feed-discovery markup, no feed
+  eligibility model. The unused @astrojs/rss dependency was removed; no
+  replacement feed package was added.
+- Sitemap lastmod: derived only from the latest Git commit affecting each
+  route's own direct source file; omitted when usable Git history is
+  unavailable.
+- Link validation: deterministic CI contracts only; external network
+  availability is excluded from required CI.
+
+Explicit sitemap exclusion contract (exact normalized-path matching, never
+broad substring matching): the prototype route, the interactive preview route,
+the unmatched-route representation (/404/), JSON endpoints (manifest + snapshot),
+robots.txt, llms.txt, security.txt, generated sitemap files, any RSS/Atom
+endpoint (which must not exist), assets, and any route whose approved robots
+contract is noindex. A similarly named future route is never excluded by
+accident (proven by mutation fixture).
+
+Direct-source Git lastmod model: readDirectSourceLastmod runs
+`git log -1 --format=%cI -- <direct source>` and returns that ISO 8601 committer
+time, reflecting only the route's own source file (.astro/.md/.mdx, nested
+index, fiction child, and /zh/ Chinese routes supported). Shared layouts,
+components, styles, data, tests, package files, CI files, and unrelated commits
+are intentionally excluded from lastmod propagation (proven by isolated
+temporary-repository tests). When Git is unavailable, the source is untracked,
+history is unreachable, or a shallow checkout lacks the commit, the timestamp is
+omitted and no `<lastmod>` is emitted. The filesystem-mtime fallback that the
+prior astro.config.mjs used was removed; a dedicated untracked-file test asserts
+undefined (not the file's mtime) so any reintroduced mtime fallback fails closed.
+
+Deterministic internal link and syntax contracts (no network): internal route
+existence + normalization across Markdown/MDX/Astro pages, layouts, the search
+modal navigation data, public/llms.txt, and public/robots.txt; internal asset
+existence; fragment/anchor existence where stable heading slugs apply; DOI
+structure (syntax only, no network, no authority); GitHub repository/file link
+syntax against a bounded allowlist with HTTPS + stable-ref policy (feature-branch
+and commit-preview URLs rejected); and forbidden-origin detection (localhost,
+127.0.0.1, workers.dev, pages.dev preview, staging, deploy-preview) that is
+context-aware and does not flag prose merely naming a platform.
+
+External availability is excluded from required CI: no check performs a DOI,
+GitHub, or other network request. .github/workflows/* were not modified; the new
+scripts run through the existing `pnpm run check` path.
+
+Exact file scope. New files:
+- scripts/lib/indexing-discovery-contract.mjs (bounded helper + shared validators)
+- scripts/verify-indexing-discovery-build.mjs (post-build verifier)
+- tests/indexing-discovery.test.ts (source-level + mutation tests)
+Modified files:
+- astro.config.mjs (consumes the helper; mtime fallback removed)
+- package.json (removed @astrojs/rss; added test:indexing-discovery and
+  verify:indexing-discovery-build; both wired into `pnpm run check`)
+- pnpm-lock.yaml (mechanical @astrojs/rss removal only: 66 deletions, its entry
+  plus now-orphaned transitive deps fast-xml-parser and fast-xml-builder; no
+  other version change)
+- AGENT_WORKLOG.md (this entry)
+No page content, BaseLayout, SchemaJsonLd, robots.txt, llms.txt, _headers,
+security.txt, SECURITY*.md, public-surface manifest/snapshot data, workflow,
+wrangler.json, or Package A/B/D/E file was changed.
+
+Validation (pinned toolchain pnpm 10.34.5, node v22.22.2; pnpm install
+--frozen-lockfile passes both before and after the lockfile change). `pnpm run
+check` exit 0. Suite totals — test:contracts 48/48, test:runtime 55/55,
+test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124,
+test:indexing-discovery 47/47 (new). Deterministic total: 382 tests, 0 failures,
+0 skipped (baseline was 335; +47 net, all from the new Package C suite; no
+existing test weakened or removed). verify:public-surface-map 18/18 (Package
+A/B regression intact). verify:indexing-discovery-build 93/93 against a fresh
+build (40 sitemap URLs, all production-origin, normalized, unique, eligible,
+each mapping to a real page source; 40 optional lastmods valid ISO 8601; no feed
+output; interactive preview self-canonical + noindex + excluded confirmed).
+check:astro 0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler
+deploy --dry-run only (no deployment). Two clean builds from identical source
+produced byte-identical sitemap-index.xml, sitemap-0.xml, and verifier output.
+git diff --check clean; nothing staged; no unauthorized tracked or untracked
+file. No GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox, deployment,
+content, metadata-architecture, JSON-LD, language, security-policy, or
+public-boundary change occurred. No Package D or Package E work was started.
+
+Correction (Codex fail-closed hardening follow-up — same uncommitted Package C
+change, base facbf32f21a6b86a672bba4fb5477293ac299738, no commit): Codex found
+the first-pass output was correct (40 routes, correct exclusions, Git-only
+lastmod, no feed, @astrojs/rss removed) but that completeness and several
+fail-closed paths were under-verified. This correction touches only five files
+relative to the first-pass revision — AGENT_WORKLOG.md, astro.config.mjs,
+scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+package.json and pnpm-lock.yaml are byte-identical to the first-pass revision:
+@astrojs/rss stays removed, the indexing-discovery scripts stay wired into
+`pnpm run check`, and no dependency or version changed.
+
+Corrections to earlier overstatement: the first-pass verifier validated only
+the URLs that were present; it did not prove every eligible page was present, so
+"each sitemap URL maps to a real page source" did not by itself guarantee
+sitemap completeness. Forbidden-origin and internal-link coverage in the
+first pass used selective file lists, not one complete functional inventory,
+and the resolver selected the first matching source form rather than failing
+closed on ambiguity. Those gaps are now closed:
+
+- Expected sitemap membership is independently derived (buildExpectedRouteSet in
+  the verifier) from actual page sources (recursive .astro/.md/.mdx enumeration,
+  JSON/data endpoint modules excluded) and their actual robots contracts
+  (literal <meta name="robots">, literal BaseLayout robots="…" prop, literal
+  Markdown/MDX frontmatter robots); it does not consult isSitemapEligible,
+  SITEMAP_EXCLUDED_PATHS, or the generated sitemap. Ambiguous or dynamic robots
+  declarations fail closed with an actionable finding rather than defaulting to
+  indexable. The independently-derived expected set and the generated <loc> set
+  are compared exactly (missing / unexpected / duplicate reported separately);
+  the current tree yields exactly 40 on both sides.
+- Raw page-loc and child-sitemap-loc spelling is validated BEFORE URL
+  normalization (rawSitemapLocViolations / rawChildLocViolations), rejecting
+  userinfo, explicit port, query, fragment, backslash, encoded slash/backslash,
+  encoded or literal dot-traversal, duplicate slashes, non-production origin,
+  and any non-exact serialized spelling; child files must resolve beneath dist
+  and be unique.
+- Route-source resolution is traversal-safe and ambiguity-fatal
+  (assertSafeRoutePath + resolveRouteSource): unsafe input throws a stable
+  RouteResolutionError code, a candidate escaping src/pages throws, and two
+  matching source forms throw ROUTE_AMBIGUOUS_SOURCE instead of selecting the
+  first. astro.config.mjs no longer swallows resolver contract errors — Git
+  absence / unreachable history still omits lastmod, but an unsafe or ambiguous
+  route fails the build. No mtime or other timestamp fallback exists.
+- Generated dist paths are normalized platform-independently (distRelativeRoute
+  handles both `/` and `\`), so prototype and interactive generated-route checks
+  run on POSIX and Windows path forms without being silently skipped.
+- The functional URL inventory now spans src/pages, src/layouts, src/components,
+  src/data, public/llms.txt, and public/robots.txt, extracting Markdown
+  links/images, literal href/src, literal object properties (href/src/url/route/
+  path), route-map tuples, and production/GitHub/DOI autolinks. DOI (48) and
+  GitHub (72) coverage now derives from that complete inventory rather than a
+  hand-picked file subset; all validate. DOI validation additionally rejects
+  query/fragment/userinfo/port/malformed-registrant/missing-suffix/control
+  characters. GitHub validation now ACCEPTS a full 40-hex immutable commit SHA in
+  an approved blob/tree source URL (an immutable source reference, not a
+  commit-preview), while still rejecting mutable feature branches, off-allowlist
+  repositories, non-HTTPS, userinfo, and traversal source paths.
+- Feed absence is now checked by content/MIME signature (findFeedSignatures) in
+  addition to filename: @astrojs/rss imports, application/rss+xml,
+  application/atom+xml, RSS root markup, the Atom namespace, and feed-discovery
+  link markup are detected in source and in generated output regardless of
+  filename (a neutral-name RSS document such as /updates.xml is rejected), while
+  ordinary non-feed XML is not flagged.
+
+The verifier is now a callable function (verifyIndexingDiscoveryBuild) with the
+CLI unchanged, so isolated fixtures exercise the real verifier. Mutation fixtures
+run through the same production helper/verifier paths and reject: missing
+eligible route, noindex source still in sitemap, unexpected route, duplicate
+route, query/fragment/encoded-traversal/encoded-separator/userinfo/explicit-port
+page locs, malformed and duplicate child locs, unsafe and encoded route-source
+traversal, ambiguous route-source candidates, Windows path regression, route-map
+missing route, missing src asset, forbidden preview origin in functional source,
+malformed DOI query/fragment, malformed and feature-branch GitHub URLs, and a
+neutral-name RSS document.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; pnpm install
+--frozen-lockfile passes): `pnpm run check` exit 0. Suite totals — test:contracts
+48/48, test:runtime 55/55, test:retention 16/16, test:orchestration 29/29,
+test:workflow 42/42, test:semantic-flow 21/21, test:security-resilience 124/124,
+test:indexing-discovery 58/58 (was 47/47; +11 net, all in the Package C suite).
+Deterministic total: 393 tests, 0 failures, 0 skipped. verify:public-surface-map
+18/18 (Package A/B regression intact). verify:indexing-discovery-build 187/187
+against a fresh build (40 routes; independent expected set equals generated set).
+check:astro 0 errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler
+deploy --dry-run only. Two clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, and verifier output. git diff --check clean; nothing staged;
+complete Package C scope remains exactly seven files; protected src, layout,
+component, robots.txt, llms.txt, _headers, security.txt, SECURITY*.md, workflow,
+wrangler.json, and public-surface data files are byte-identical to base. No
+content, metadata-architecture, JSON-LD, language, security-policy, GitHub,
+Cloudflare, Email Routing, CORS, NEL, mailbox, deployment, Package D, or
+Package E change occurred; Package C remains uncommitted.
+
+Correction (Codex robots/GitHub/inventory follow-up — same uncommitted Package C
+change, base facbf32f21a6b86a672bba4fb5477293ac299738, no commit): a further
+review found several remaining fail-closed gaps. This correction touches only
+four files relative to the prior revision — AGENT_WORKLOG.md,
+scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+astro.config.mjs, package.json, and pnpm-lock.yaml are byte-identical to the
+prior revision (@astrojs/rss stays removed; scripts stay wired into check; no
+dependency/version change).
+
+Corrections and corrected overstatements:
+
+- Robots meta parsing was NOT order-independent before this correction: it
+  assumed name="robots" immediately preceded content="…". classifyRobots now
+  parses each <meta> tag as a bounded attribute SET, so attribute order and
+  harmless intervening attributes (class, data-*) do not matter; name=robots is
+  matched case-insensitively; literal content is identified independently;
+  single- and double-quoted literal values are supported. name=robots with no
+  literal content is ROBOTS_MALFORMED (fail closed); dynamic name or dynamic
+  content is ROBOTS_DYNAMIC (fail closed); conflicting reordered declarations
+  are ROBOTS_AMBIGUOUS (fail closed); duplicate identical declarations remain a
+  single value. An unrelated meta tag's content is never treated as robots
+  content. Frontmatter robots is now recognized with both LF and CRLF line
+  endings. noindex sources (in any of these forms) remain absent from the
+  independently-derived expected sitemap set.
+
+- Not every malformed GitHub file path was rejected before this correction: a
+  bare blob/<ref> with no source path was accepted. isValidGithubSourceUrl now
+  requires a blob/tree SOURCE link to carry at least one non-empty, safe
+  source-path segment after the ref, and rejects empty path, . or .. segments,
+  encoded traversal/separator, literal backslash, duplicate slash, and any
+  query or fragment. `main` and full 40-hex immutable-commit blob/tree URLs
+  WITH an actual path remain accepted; feature branches, off-allowlist repos,
+  non-HTTPS, and userinfo remain rejected. A bare repository-at-ref value
+  (owner root, repo root, or blob/tree at a stable ref / immutable SHA with no
+  path) is recognized by a new isGithubRepoAtRefBase predicate: this is the
+  form of the diagnosticEntries `sourceRepoBase` concatenation prefix, so the
+  inventory scan recognizes it as a valid base rather than flagging it. Real
+  functional GitHub inventory: 72 references = 71 valid source URLs + 1
+  repository-at-ref base, 0 unrecognized.
+
+- Forbidden-origin validation did NOT previously run end-to-end over the whole
+  functional inventory. A single validateInventory pass now applies internal
+  route/asset validation to same-site destinations AND forbidden-origin
+  validation (localhost, 127.0.0.1, workers.dev, pages.dev, preview, staging,
+  deploy-preview, feature-branch public origins) to external destinations,
+  across Markdown links/images, literal href/src, object properties, route-map
+  tuples (now including absolute-URL tuple elements), and absolute public URLs
+  in navigation/data files. Explanatory prose that merely names such a domain
+  without forming a functional URL is never extracted and never flagged. The
+  real inventory has zero forbidden functional origins.
+
+- Windows resolver tests previously used POSIX-only endsWith("/…") comparisons;
+  they now normalize the native path (or use path-aware comparison) before
+  asserting, so they pass on POSIX and Windows. Explicit Windows-shaped
+  distRelativeRoute assertions (including prototype/interactive routes) and the
+  ambiguity/traversal assertions are retained.
+
+- Child-sitemap containment previously used a string-prefix (startsWith) check,
+  which a sibling directory sharing a prefix (dist vs dist2) could defeat. It
+  now uses a path.relative-based isWithinDir that rejects an empty relative
+  result, an absolute result, or any `..` traversal segment, on POSIX and
+  Windows. The strict child basename contract is preserved.
+
+- Fragment-validation boundary stated precisely: the real repository inventory
+  contains ZERO internal functional fragment references (measured via
+  collectFunctionalFragments over the complete inventory), so
+  repository-integrated fragment validation is NOT exercised; the fragment
+  validator is exercised only against synthetic fixtures, with a future guard
+  that a deterministically checkable fragment introduced later must validate
+  against the target route's stable heading anchors. Earlier wording implying
+  repository-wide fragment coverage is corrected accordingly.
+
+All current 40 sitemap routes are unchanged; expected 40 == generated 40;
+missing 0, unexpected 0, duplicate 0.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 67/67 (was 58/58; +9).
+Deterministic total: 402 tests, 0 failures, 0 skipped. verify:public-surface-map
+18/18. verify:indexing-discovery-build 187/187 against a fresh build (expected
+== generated == 40). Direct-source Git lastmod: this worktree has full history,
+so all 40 optional lastmods are present and valid ISO 8601; under a
+shallow/Gitless checkout the same routes would simply omit <lastmod> (no mtime
+fallback). check:astro 0 errors / 0 warnings / 1 pre-existing hint; check:ts
+clean; wrangler deploy --dry-run only. Two fresh clean builds produced
+byte-identical sitemap-index.xml, sitemap-0.xml, and verifier output. git diff
+--check clean; nothing staged; complete Package C scope remains exactly seven
+files; astro.config.mjs, package.json, and pnpm-lock.yaml are byte-identical to
+the prior revision; all protected src/public-boundary files are byte-identical
+to base. No content, metadata-architecture, JSON-LD, language, security-policy,
+GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox, deployment, Package D, or
+Package E change occurred; Package C remains uncommitted.
+
+Correction (Codex duplicate-attribute + occurrence-context follow-up — same
+uncommitted Package C change, base facbf32f21a6b86a672bba4fb5477293ac299738, no
+commit): a further review demonstrated two remaining fail-closed defects. This
+correction touches only four files relative to the prior revision —
+AGENT_WORKLOG.md, scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+astro.config.mjs, package.json, and pnpm-lock.yaml are byte-identical to the
+prior revision.
+
+Defect 1 — duplicate robots attributes were silently reduced to the first
+value. parseMetaAttributes previously kept only the first occurrence of each
+attribute (`if (!attrs.has(name)) attrs.set(...)`), so a tag such as
+`<meta name="robots" content="index" content="noindex">` was treated as safely
+indexable. The earlier worklog wording calling the attribute map a fail-closed
+"set" was inaccurate. parseMetaAttributes now returns bounded structured
+evidence { attributes, occurrences, duplicateAttributes } preserving EVERY
+attribute occurrence (names compared case-insensitively). classifyRobots now
+fails closed (ROBOTS_MALFORMED) when a robots-relevant tag has a duplicate
+`name` or duplicate `content` attribute — even when the duplicated values are
+identical — and never selects a first or last value, never merges, and never
+silently treats such a tag as non-robots or indexable. A meta tag whose name is
+"description" is still not a robots declaration even when its content contains
+"noindex". Valid behavior retained: name/content in any order, harmless
+attributes before/between/after, single- and double-quoted literals,
+case-insensitive names, duplicate IDENTICAL robots declarations across separate
+valid meta tags, CRLF and LF frontmatter; dynamic name, dynamic content, missing
+content, and conflicting separate declarations still fail closed.
+
+Defect 2 — the repository-at-ref exception lost occurrence context and accepted
+any bare blob/main string. The prior isGithubRepoAtRefBase accepted a bare
+`.../blob/main` by URL string alone, in any context, and the functional
+inventory deduplicated occurrences to unique URL strings before validation. The
+earlier "71 source/root + 1 base" wording described the base as a valid
+standalone source URL and conflated occurrence and unique-value counts.
+extractFunctionalUrls now preserves occurrence records (value, kind, line, and,
+for declarations, identifier) and does NOT deduplicate to unique values before
+validation; it adds a literal variable-declaration kind (`const id = "url"`) and
+range-claims structured occurrences so a declaration's URL is not re-emitted as
+a standalone autolink. isGithubRepoAtRefBase is removed from the generic
+destination-acceptance path and replaced by isApprovedSourceRepoBaseDeclaration:
+the bare base is accepted ONLY as the exact literal declaration named
+`sourceRepoBase`, in exactly src/data/diagnosticEntries.ts, whose value equals
+the approved base exactly, and only when it is not itself a rendered
+destination. classifyGithubOccurrence returns base-declaration only for that
+exact declaration, source for a valid source/root URL, and invalid otherwise;
+validateInventory applies it to every GitHub occurrence, so a bare blob/main
+fails in every destination context (Markdown, autolink, href, src, navigation
+url/href property, route-map tuple, standalone). Composed
+`${sourceRepoBase}/<file>.md` URLs are dynamic (not statically extracted); the
+composition is validated to produce a valid source URL, while a composed empty
+path, traversal, or encoded separator is rejected. Repository allowlist
+unchanged.
+
+Actual GitHub inventory counts (this revision): 201 total functional GitHub
+occurrences = 200 source occurrences + 1 base-declaration occurrence
+(src/data/diagnosticEntries.ts line 19, identifier sourceRepoBase), 0 invalid,
+0 unrecognized; 71 unique validated source/root URL values. The base declaration
+is not a valid standalone source URL — it is accepted only as the bounded
+declaration. Composed diagnostic-entry file URLs remain accepted. DOI inventory:
+48, all valid.
+
+All current 40 sitemap routes unchanged; expected 40 == generated 40; missing 0,
+unexpected 0, duplicate 0. Forbidden-origin validation still runs end-to-end over
+the complete occurrence inventory; feed content/MIME checks, path.relative child
+containment, route-source traversal/ambiguity protection, Windows path handling,
+raw page/child loc checks, and direct-source Git-only lastmod are all retained.
+Real functional fragment count remains 0 (repository-integrated fragment
+validation not exercised; validator exercised synthetically only).
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 74/74 (was 67/67; +7). Deterministic
+total: 409 tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 187/187 against a fresh build (expected ==
+generated == 40). Direct-source Git lastmod: this worktree has full history, so
+all 40 optional lastmods are present and valid ISO 8601; under a shallow/Gitless
+checkout the same routes would omit <lastmod> (no mtime fallback). check:astro 0
+errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only. Two fresh clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, and verifier output. git diff --check clean; nothing staged;
+complete Package C scope remains exactly seven files; astro.config.mjs,
+package.json, and pnpm-lock.yaml byte-identical to the prior revision; all
+protected src/public-boundary files byte-identical to base. No content,
+metadata-architecture, JSON-LD, language, security-policy, GitHub, Cloudflare,
+Email Routing, CORS, NEL, mailbox, deployment, Package D, or Package E change
+occurred; Package C remains uncommitted.
+
+Correction (Codex sourceRepoBase template-composition follow-up — same
+uncommitted Package C change, base facbf32f21a6b86a672bba4fb5477293ac299738, no
+commit): a further review demonstrated that ${sourceRepoBase} template-literal
+destinations (`href: `${sourceRepoBase}/<file>.md``) were outside the functional
+inventory — the extractor ignored interpolated template literals, so the 15
+real composed diagnostic-entry destinations were never extracted or validated,
+and prior "composed URL" coverage was demonstrated only by manually resolving
+strings and calling isValidGithubSourceUrl (not via extraction + inventory).
+This correction touches only three files relative to the prior revision —
+AGENT_WORKLOG.md, scripts/lib/indexing-discovery-contract.mjs,
+tests/indexing-discovery.test.ts. scripts/verify-indexing-discovery-build.mjs is
+byte-identical to the prior revision (no production reporting there consumes the
+composition inventory), as are astro.config.mjs, package.json, and
+pnpm-lock.yaml.
+
+A bounded ${sourceRepoBase} template extractor was added to
+extractFunctionalUrls: it recognizes ONLY the exact single-interpolation form
+`${sourceRepoBase}<literal suffix>` with an empty static prefix, in a
+destination property (href/src/url), and emits a
+`github-template-composition` occurrence preserving value, rawValue, raw suffix,
+file, line, property, and identifier. It evaluates no expression; an additional
+interpolation inside the suffix (e.g. `${sourceRepoBase}/${filename}`) is kept,
+not silently dropped, and fails closed at validation (SUFFIX_DYNAMIC). The
+occurrence range is claimed so a composition is not re-emitted as an autolink,
+literal URL, declaration, or property literal, and it is not deduplicated before
+validation.
+
+The raw literal suffix is validated by validateRepoBaseSuffix BEFORE any URL is
+constructed, rejecting empty, slash-only, no-leading-slash, `.`/`..` segments,
+encoded dot/slash/backslash, literal backslash, duplicate slash, query,
+fragment, userinfo-like `@`, control/NUL characters, malformed percent-encoding,
+and any additional interpolation. Composition binding is bounded to the exact
+approved declaration by a same-file check: a composition resolves only when its
+own file contains the exact approved sourceRepoBase declaration
+(src/data/diagnosticEntries.ts, identifier sourceRepoBase, approved value) and
+that file has no conflicting/duplicate sourceRepoBase declaration. After suffix
+validation the resolved APPROVED_SOURCE_REPO_BASE + suffix is passed through the
+ordinary isValidGithubSourceUrl (no separate weaker validator). The full
+production path is exercised by the tests: source text -> extractFunctionalUrls
+-> composition occurrence -> approved-declaration association -> raw suffix
+validation -> resolved URL -> classifyGithubOccurrence -> validateInventory.
+
+All 15 current compositions and their 9 distinct literal suffixes are extracted
+and validate (0 invalid, 0 unrecognized). End-to-end mutations (via extraction +
+validateInventory) reject: empty, slash-only, traversal, encoded-dot,
+encoded-slash, encoded-backslash, query, fragment, and dynamic-suffix forms; a
+valid-looking composition with a missing declaration, a declaration in an
+unapproved file, a wrong declaration value, or conflicting duplicate
+declarations; and the bare base used directly as a destination. src.data was not
+modified.
+
+Actual GitHub-related occurrence accounting (this revision, separate categories):
+literal GitHub source occurrences 200; unique literal source/root values 71;
+approved base-declaration occurrences 1; bounded template-composition occurrences
+15 (9 distinct suffixes); invalid 0; unrecognized 0; total GitHub-related
+occurrences 216. The base declaration is not counted as a standalone source URL,
+and a composition is not counted as a literal occurrence. DOI inventory: 48, all
+valid. Functional-fragment count: 0.
+
+All current 40 sitemap routes unchanged; expected 40 == generated 40; missing 0,
+unexpected 0, duplicate 0. Forbidden-origin validation still runs end-to-end over
+the complete occurrence inventory (real: 0; mutations reject); feed content/MIME
+checks, path.relative child containment, route-source traversal/ambiguity
+protection, Windows path handling, raw page/child loc checks, duplicate
+robots-attribute fail-closed classification, and direct-source Git-only lastmod
+are all retained.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 81/81 (was 74/74; +7). Deterministic
+total: 416 tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 187/187 against a fresh build (expected ==
+generated == 40). Direct-source Git lastmod: this worktree has full history, so
+all 40 optional lastmods are present and valid ISO 8601; under a shallow/Gitless
+checkout the same routes would omit <lastmod> (no mtime fallback). check:astro 0
+errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only. Two fresh clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, and verifier output. git diff --check clean; nothing staged;
+complete Package C scope remains exactly seven files; astro.config.mjs,
+package.json, pnpm-lock.yaml, and scripts/verify-indexing-discovery-build.mjs
+byte-identical to the prior revision; all protected src/public-boundary files
+byte-identical to base. No content, metadata-architecture, JSON-LD, language,
+security-policy, GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox,
+deployment, Package D, or Package E change occurred; Package C remains
+uncommitted.
+
+Correction (Codex sourceRepoBase declaration-uniqueness follow-up — same
+uncommitted Package C change, base facbf32f21a6b86a672bba4fb5477293ac299738, no
+commit): a further review demonstrated that the composition-binding uniqueness
+check counted DISTINCT declared VALUES (a Set) rather than declaration
+OCCURRENCES, so two identical `const sourceRepoBase = "<approved>"` declarations
+collapsed to a single value and were wrongly treated as an unambiguous approved
+base. Additionally, a dynamic or template-literal redeclaration of sourceRepoBase
+was invisible to the binding because the extractor only recorded quoted-URL
+declarations. This correction touches only three files relative to the prior
+revision — AGENT_WORKLOG.md, scripts/lib/indexing-discovery-contract.mjs,
+tests/indexing-discovery.test.ts. astro.config.mjs, package.json, pnpm-lock.yaml,
+and scripts/verify-indexing-discovery-build.mjs are byte-identical to the prior
+revision.
+
+The bounded extractor now records EVERY sourceRepoBase declaration as
+occurrence-level evidence: a literal http(s)-URL declaration remains a
+`declaration` occurrence (with value), and any non-URL / template / dynamic
+initializer of the exact identifier sourceRepoBase (const/let/var) is emitted as
+a `github-base-declaration-evidence` occurrence classified template or dynamic —
+so an unsupported or dynamic redeclaration stays VISIBLE as ambiguous evidence
+rather than being silently omitted. No JavaScript is evaluated and no symbol
+resolver is used; it is a narrowly bounded scanner for the exact identifier.
+
+The binding (approvedBaseDeclarationFiles) now depends on declaration OCCURRENCE
+COUNT, not distinct value count. A file binds sourceRepoBase compositions only
+when it is exactly src/data/diagnosticEntries.ts AND contains EXACTLY ONE
+sourceRepoBase declaration occurrence (literal + evidence combined) AND that
+single occurrence is the approved literal declaration. Verified fail-closed
+through the real extraction + validateInventory path: zero declarations; two
+identical approved declarations; approved + different literal; approved +
+dynamic; approved + template; approved const + let; approved const + var; and a
+lone dynamic declaration all yield GITHUB_INVALID_COMPOSITION /
+NO_APPROVED_DECLARATION. Exactly one approved literal declaration still binds.
+The exact duplicate case
+`const sourceRepoBase = "<approved>"; const sourceRepoBase = "<approved>"; const
+x = { href: `${sourceRepoBase}/valid.md` };` fails closed and records two
+literal declaration occurrences (not collapsed by a Set).
+
+The fixed template-composition contract is unchanged: exact
+`${sourceRepoBase}<literal suffix>` extraction in href/src/url, raw suffix
+validation before URL construction, additional-interpolation fail-closed,
+ordinary GitHub source validator after composition, no double extraction. Real
+src/data/diagnosticEntries.ts retains 1 approved declaration occurrence, 0
+ambiguous declaration evidence, 15 valid template compositions, 9 distinct
+suffixes, 0 invalid, 0 unrecognized.
+
+Actual GitHub-related accounting (this revision, separate categories):
+declaration occurrences 1; approved declarations 1; ambiguous declaration
+evidence 0; literal GitHub source occurrences 200; unique literal source/root
+values 71; valid template-composition occurrences 15 (9 distinct suffixes);
+invalid composition occurrences 0; unrecognized occurrences 0; total
+GitHub-related occurrences 216. DOI inventory 48 (all valid). Functional-fragment
+count 0.
+
+All current 40 sitemap routes unchanged; expected 40 == generated 40; missing 0,
+unexpected 0, duplicate 0. Duplicate robots-attribute fail-closed classification,
+raw sitemap URL validation, route-source traversal/ambiguity failure, Windows
+path handling, end-to-end forbidden-origin validation, feed content/MIME checks,
+and direct-source Git-only lastmod are all retained.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 89/89 (was 81/81; +8). Deterministic
+total: 424 tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 187/187 against a fresh build (expected ==
+generated == 40). Direct-source Git lastmod: this worktree has full history, so
+all 40 optional lastmods are present and valid ISO 8601; under a shallow/Gitless
+checkout the same routes would omit <lastmod> (no mtime fallback). check:astro 0
+errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only. Two fresh clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, verifier output, and GitHub declaration/composition accounting.
+git diff --check clean; nothing staged; complete Package C scope remains exactly
+seven files; astro.config.mjs, package.json, pnpm-lock.yaml, and
+scripts/verify-indexing-discovery-build.mjs byte-identical to the prior revision;
+all protected src/public-boundary files byte-identical to base. No content,
+metadata-architecture, JSON-LD, language, security-policy, GitHub, Cloudflare,
+Email Routing, CORS, NEL, mailbox, deployment, Package D, or Package E change
+occurred; Package C remains uncommitted.
+
+Correction (Codex occurrence-identity follow-up — same uncommitted Package C
+change, base facbf32f21a6b86a672bba4fb5477293ac299738, no commit): a further
+review demonstrated that extractFunctionalUrls deduplicated occurrences by
+line/value/identifier keys, so two IDENTICAL declarations on the SAME LINE
+(`const sourceRepoBase = "<approved>"; const sourceRepoBase = "<approved>";`)
+collapsed to a single occurrence and the composition was wrongly allowed. This
+correction touches only three files relative to the prior revision —
+AGENT_WORKLOG.md, scripts/lib/indexing-discovery-contract.mjs,
+tests/indexing-discovery.test.ts. astro.config.mjs, package.json, pnpm-lock.yaml,
+and scripts/verify-indexing-discovery-build.mjs are byte-identical to the prior
+revision.
+
+Occurrence identity is now the SOURCE OFFSET, not line/value: the structured
+literal `add` key is `${kind}@${offset}`, the github-template-composition key is
+`github-template-composition@${tm.index}`, and the
+github-base-declaration-evidence key is
+`github-base-declaration-evidence@${em.index}`; each occurrence also carries its
+`offset`. Two distinct source occurrences — even identical text on the same line,
+with the same value, identifier, property, or initializer shape — are recorded as
+two occurrences; only the exact same offset (one regex match) dedupes. Claimed
+ranges still prevent the same textual occurrence from being emitted by multiple
+overlapping extractors (an autolink inside a structured occurrence is not
+re-emitted).
+
+Verified through the real extraction + declaration-evidence +
+approvedBaseDeclarationFiles + validateInventory path: two identical approved
+declarations on one line are recorded as two occurrences and fail closed
+(NO_APPROVED_DECLARATION); same-line approved literal + dynamic redeclaration and
+approved literal + template redeclaration fail closed with the redeclaration
+recorded as ambiguous evidence; two identical declarations on separate lines fail
+closed as two occurrences; exactly one approved declaration still binds; and two
+genuinely separate same-line template-composition destinations remain two
+occurrence records while a single composition remains exactly one (no double
+extraction). Real src/data/diagnosticEntries.ts is unchanged: 1 approved
+declaration occurrence, 0 ambiguous declaration evidence, 15 valid compositions,
+9 distinct suffixes, 0 invalid, 0 unrecognized. GitHub accounting unchanged:
+declaration occurrences 1; literal source occurrences 200; unique source/root
+values 71; valid compositions 15; invalid 0; unrecognized 0; total GitHub-related
+occurrences 216. DOI 48; functional fragments 0.
+
+All current 40 sitemap routes unchanged; expected 40 == generated 40; missing 0,
+unexpected 0, duplicate 0. Duplicate robots-attribute fail-closed classification,
+raw sitemap URL validation, route-source traversal/ambiguity failure, Windows
+path handling, end-to-end forbidden-origin validation, feed content/MIME checks,
+and direct-source Git-only lastmod are all retained.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 94/94 (was 89/89; +5). Deterministic
+total: 433 tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 187/187 against a fresh build (expected ==
+generated == 40). Direct-source Git lastmod: this worktree has full history, so
+all 40 optional lastmods are present and valid ISO 8601; under a shallow/Gitless
+checkout the same routes would omit <lastmod> (no mtime fallback). check:astro 0
+errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only. Two fresh clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, and verifier output. git diff --check clean; nothing staged;
+complete Package C scope remains exactly seven files; astro.config.mjs,
+package.json, pnpm-lock.yaml, and scripts/verify-indexing-discovery-build.mjs
+byte-identical to the prior revision; all protected src/public-boundary files
+byte-identical to base. No content, metadata-architecture, JSON-LD, language,
+security-policy, GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox,
+deployment, Package D, or Package E change occurred; Package C remains
+uncommitted.
+
+Correction (Codex declaration-keyword + uninitialized-redeclaration follow-up —
+same uncommitted Package C change, base facbf32f21a6b86a672bba4fb5477293ac299738,
+no commit): a further review demonstrated that the generic literal-URL extractor
+emitted a keyword-less `declaration` occurrence for sourceRepoBase, discarding
+whether the keyword was const/let/var, so a `let`/`var` approved-value literal
+could bind; and declarations without an initializer (`const sourceRepoBase;`,
+`let sourceRepoBase;`, `var sourceRepoBase;`) were absent from evidence entirely,
+so an uninitialized redeclaration did not prevent binding. A prior claim that
+exact declaration enforcement was complete was inaccurate before keyword and
+missing-initializer evidence existed. This correction touches only three files
+relative to the prior revision — AGENT_WORKLOG.md,
+scripts/lib/indexing-discovery-contract.mjs, tests/indexing-discovery.test.ts.
+astro.config.mjs, package.json, pnpm-lock.yaml, and
+scripts/verify-indexing-discovery-build.mjs are byte-identical to the prior
+revision.
+
+The generic literal declaration extractor now SKIPS sourceRepoBase, and a single
+authoritative bounded scanner records EVERY sourceRepoBase declaration
+(const/let/var, with or WITHOUT an initializer) as a
+`github-base-declaration-evidence` occurrence carrying keyword, identifier,
+initializerKind (approved-literal / other-literal / template / dynamic / missing
+/ unsupported), value (when literal), file, line, and source offset. The
+declaration keyword and initializer kind are load-bearing:
+isApprovedSourceRepoBaseDeclaration now requires kind
+`github-base-declaration-evidence`, keyword exactly `const`, initializerKind
+`approved-literal`, identifier sourceRepoBase, the approved file, and the exact
+approved value. approvedBaseDeclarationFiles binds a file only when it is exactly
+src/data/diagnosticEntries.ts AND has exactly one sourceRepoBase declaration
+occurrence AND that occurrence is the approved const literal. The declaration
+scanner is authoritative and claims its range, so a sourceRepoBase declaration
+containing a literal URL produces one declaration occurrence with its keyword,
+not a declaration plus a generic URL occurrence; non-overlapping separate
+same-line occurrences remain distinct by source offset. validateInventory treats
+declaration evidence as metadata (never a rendered destination) even when its
+literal value is a github.com URL.
+
+Verified end-to-end (extractFunctionalUrls -> declaration evidence ->
+approvedBaseDeclarationFiles -> validateInventory): lone approved-value let and
+lone approved-value var fail closed; approved const + uninitialized let / var /
+const fail closed (two occurrences, one initializerKind missing); approved const
++ dynamic let / var and approved const + template let / var fail closed; two
+identical approved const declarations fail closed; same-line approved const +
+uninitialized let / var fail closed as two occurrences; and exactly one approved
+const literal binds. `let sourceRepoBase = "<approved>";` with a composition
+produces NO approved binding and a stable NO_APPROVED_DECLARATION finding;
+`const sourceRepoBase = "<approved>"; let sourceRepoBase;` with a composition
+produces two declaration occurrences and fails closed.
+
+Real src/data/diagnosticEntries.ts declaration accounting (this revision):
+declaration occurrences 1; approved const literal declarations 1; mutable literal
+declarations 0; uninitialized declarations 0; dynamic/template/unsupported
+declarations 0; ambiguous declaration evidence 0; valid template compositions 15;
+distinct suffixes 9; invalid compositions 0; unrecognized compositions 0.
+Full-inventory GitHub accounting unchanged: literal source occurrences 200;
+unique source/root values 71; total GitHub-related occurrences 216. DOI 48;
+functional fragments 0.
+
+All current 40 sitemap routes unchanged; expected 40 == generated 40; missing 0,
+unexpected 0, duplicate 0. Occurrence offset identity, duplicate robots-attribute
+fail-closed classification, raw sitemap URL validation, route-source
+traversal/ambiguity failure, Windows path handling, end-to-end forbidden-origin
+validation, feed content/MIME checks, and direct-source Git-only lastmod are all
+retained.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; frozen install passes):
+`pnpm run check` exit 0. Suite totals — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124 (Package A + B
+regression intact), test:indexing-discovery 101/101 (was 94/94; +7).
+Deterministic total: 436 tests, 0 failures, 0 skipped. verify:public-surface-map
+18/18. verify:indexing-discovery-build 187/187 against a fresh build (expected ==
+generated == 40). Direct-source Git lastmod: this worktree has full history, so
+all 40 optional lastmods are present and valid ISO 8601; under a shallow/Gitless
+checkout the same routes would omit <lastmod> (no mtime fallback). check:astro 0
+errors / 0 warnings / 1 pre-existing hint; check:ts clean; wrangler deploy
+--dry-run only. Two fresh clean builds produced byte-identical sitemap-index.xml,
+sitemap-0.xml, and verifier output. git diff --check clean; nothing staged;
+complete Package C scope remains exactly seven files; astro.config.mjs,
+package.json, pnpm-lock.yaml, and scripts/verify-indexing-discovery-build.mjs
+byte-identical to the prior revision; all protected src/public-boundary files
+byte-identical to base. No content, metadata-architecture, JSON-LD, language,
+security-policy, GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox,
+deployment, Package D, or Package E change occurred; Package C remains
+uncommitted.
+
+### 2026-07-23 — Claude Code — package-c-premerge-correction (two blocking findings)
+
+Agent: Claude Code
+Task: Correct the two blocking findings from the Codex pre-merge review of PR #81
+(verdict CHANGES REQUIRED BEFORE MERGE) for Package C. Correction only; kept
+local and UNCOMMITTED for a second Codex review. PR #81 not merged, the existing
+commit not amended, no force-push, no push, no new PR, no deploy, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment change.
+Package D and Package E not started. Starting state verified before any edit:
+branch claude/package-c-indexing-discovery-contracts; local HEAD and origin
+branch head both be2482bb6915c398cd808a0f37491ac1fa83d3b4; worktree clean;
+nothing staged; PR #81 open and unmerged (mergeable_state clean). origin/main
+recorded at facbf32f21a6b86a672bba4fb5477293ac299738 (a later origin/main SHA is
+not, by itself, a reason to alter the Package C branch).
+
+Finding A — shallow-history lastmod defect (scripts/lib/indexing-discovery-
+contract.mjs, readDirectSourceLastmod). In a shallow checkout `git log -1 --
+<path>` can report the shallow-boundary (grafted) commit for a path whose true
+last change lies beyond the truncation, so an unchanged page would be stamped
+with the boundary commit's timestamp (e.g. the PR-head time in a depth-one CI
+checkout). This environment's own repository is shallow, so the pre-correction
+build assigned that boundary timestamp to unchanged pages. Correction: the date
+is still derived ONLY from the direct source file's Git history (never mtime,
+build time, current time, package time, or PR time). The helper now obtains the
+candidate commit SHA and committer date together, detects shallowness through
+Git (`git rev-parse --is-shallow-repository`), and in a shallow repository
+resolves the shallow-boundary file THROUGH Git
+(`git rev-parse --path-format=absolute --git-path shallow`, worktree-aware, not
+a fixed .git layout) and OMITS <lastmod> when the candidate commit is a
+shallow-boundary commit. If shallow metadata cannot be read reliably it fails
+closed (omits). Full-history behavior is unchanged (candidate date is
+authoritative). No network or fetch. A separate injectable shallow-file reader
+keeps the omission testable.
+
+Finding B — regex-only XML structure validation (scripts/verify-indexing-
+discovery-build.mjs). Replaced the regex tag-scraping (extractTags and the
+`<url>…</url>` block regex) with a strict XML parser. Evaluated the dependency
+graph first: the only strict parsers present (fast-xml-parser, sax) arrived
+transitively via @astrojs/rss (removed in this PR) or @astrojs/sitemap and are
+not directly importable under pnpm, so exactly one narrowly-scoped dev
+dependency was added — fast-xml-parser 5.9.3 (pure XML parsing/validation; not
+@astrojs/rss and not an RSS/feed/DOM/network dependency). Only package.json and
+pnpm-lock.yaml changed beyond the four expected files. The verifier now enforces,
+via the parser: sitemap-index well-formedness, correct <sitemapindex> root, the
+sitemap namespace, exactly one <loc> per <sitemap> record, at most one <lastmod>
+per record, unique child <loc>, no duplicate referenced child file, no
+query/fragment/forbidden-origin (existing raw-shape validator), production
+origin, and referenced child files exist; and for each child: well-formedness,
+correct <urlset> root, the sitemap namespace, exactly one <loc> per <url>, at
+most one <lastmod> per record, valid <lastmod> syntax, no duplicate raw <loc>
+across records/files, no duplicate normalized URL (existing set validator), and
+no forbidden origin. Every generated dist sitemap-*.xml is enumerated and must
+agree exactly with the index references (unreferenced, missing/absent, and
+duplicate references are rejected; child paths resolve strictly beneath dist;
+even unreferenced stray sitemap files are scanned for forbidden origins; the
+sitemap index is never treated as a child).
+
+Tests (tests/indexing-discovery.test.ts): added a genuine shallow-history
+regression using real depth-limited file:// clones — depth-1 omits the boundary
+timestamp for an unchanged page; depth-2 omits a boundary path while preserving
+a non-boundary tip path; a full clone keeps the true deep timestamp; unreadable
+shallow metadata fails closed. Added real-verifier XML mutation fixtures for
+malformed index/child XML, wrong index/child root, wrong index/child namespace,
+two <loc> per index/url record, two <lastmod> per index/url record, invalid
+<lastmod> syntax, duplicate raw <loc>, forbidden origin inside a child, an
+unreferenced generated child file, an index-referenced child file that is
+absent, and an unreferenced stray child with a forbidden origin; plus a positive
+two-referenced-children exact-match case. All mutation tests run the REAL
+verifier over isolated fixtures.
+
+Preserved behavior: production origin https://metawritingecology.org; the current
+40-route sitemap set; the prototype/interactive exclusions and noindex,nofollow
+contracts; robots policy and Sitemap pointer; trailing-slash normalization; feed
+absence; preview-host prohibition; JSON/asset endpoint exclusions; and the 404
+representation. No approved public indexing/canonical/robots/sitemap/discovery/
+Registry/archive/authority/classification/public-private policy changed.
+astro.config.mjs is byte-identical to be2482bb.
+
+Correction validation (pnpm 10.34.5, node v22.22.2): `pnpm run check` exit 0.
+Suite totals — test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 124/124 (Package A + B regression intact),
+test:indexing-discovery 122/122 (was 101/101; +21: +4 shallow-history, +17 XML
+mutation). Deterministic total: 457 tests, 0 failures, 0 skipped.
+verify:public-surface-map 18/18. verify:indexing-discovery-build 253/253 against
+a fresh build (expected == generated == 40 routes; every generated sitemap-*.xml
+agrees with index references). check:astro 0 errors / 0 warnings / 3 hints (the
+pre-existing SchemaJsonLd is:inline hint plus two non-fatal ts(6385)
+deprecation hints for the intentionally-used in-package XMLValidator; the
+replacement is a separate package deliberately not added under the
+single-dependency constraint). check:ts clean; wrangler deploy --dry-run only.
+In this shallow environment the fresh build now emits 40 <loc> with 18 <lastmod>
+(22 shallow-boundary timestamps correctly omitted rather than stamped).
+
+Correction scope: exactly six files changed vs be2482bb — AGENT_WORKLOG.md,
+package.json, pnpm-lock.yaml, scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+No content, metadata-architecture, JSON-LD, language, security-policy, GitHub,
+Cloudflare, Email Routing, CORS, NEL, mailbox, deployment, Package D, or Package
+E change occurred. Nothing committed, staged, pushed, or merged; PR #81 remains
+open and unmerged for a second Codex review.
+
+### 2026-07-23 — Claude Code — package-c-premerge-correction-round-2
+
+Agent: Claude Code
+Task: Implement the blocking corrections from the SECOND Codex pre-merge review
+of PR #81 (verdict CHANGES REQUIRED BEFORE MERGE). Correction round 2 only; kept
+local and UNCOMMITTED for further review. PR #81 not merged, the existing commit
+not amended, no force-push, no push, no new PR, no deploy, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment/preview
+change. Package D and Package E not started. Starting state verified before any
+edit: branch claude/package-c-indexing-discovery-contracts; local HEAD and
+origin branch head both be2482bb6915c398cd808a0f37491ac1fa83d3b4; nothing
+staged; PR #81 open and unmerged; existing uncommitted correction scope exactly
+the six expected files. origin/main recorded at
+facbf32f21a6b86a672bba4fb5477293ac299738 (a later origin/main SHA is not, by
+itself, a reason to alter the branch).
+
+Seven blocker categories addressed:
+
+1. Shallow-status fail-closed (scripts/lib/indexing-discovery-contract.mjs,
+   readDirectSourceLastmod). Only the exact literal lowercase "false" is treated
+   as full history and only the exact literal "true" enters shallow-boundary
+   handling; empty, unknown, case-variant ("TRUE"), numeric ("1"), "yes",
+   whitespace-only, malformed, or unreadable flag output all omit lastmod. Full
+   history is never inferred from an absent/unreadable flag.
+
+2. Strict Git object-id validation (new normalizeGitObjectId). The candidate
+   commit id must be exactly 40- or 64-character hexadecimal; it is normalized to
+   lowercase; abbreviated, empty, non-hex, and surrounded values are rejected.
+   The candidate SHA and date are parsed from ONE NUL-separated `%H%x00%cI`
+   result requiring exactly two fields; a missing separator, extra fields, empty
+   SHA, or empty date omit. A date is never accepted independently of a valid
+   candidate commit identity.
+
+3. Strict shallow-boundary metadata validation. When Git reports the repository
+   shallow, the boundary file is resolved through
+   `git rev-parse --path-format=absolute --git-path shallow` (linked-worktree and
+   non-default-layout aware, no fixed `.git/shallow` assumption), split on CRLF
+   or LF with a final terminator ignored. EVERY non-empty boundary line must be
+   an exact 40/64-hex object id (normalized to lowercase); at least one valid
+   entry is required; an empty file, any malformed non-empty line, a partially
+   malformed file, or unreadable metadata all omit. An uppercase boundary entry
+   matches a lowercase candidate after normalization; multiple valid boundary
+   SHAs are supported. No diff-tree or root-commit file listing is used.
+
+4. Strict Git date validation (new validateCommitterIsoDate). The exact `%cI`
+   lexical form is required (YYYY-MM-DDTHH:MM:SS, optional fractional seconds, and
+   a Z or numeric ±HH:MM zone) with real calendar (leap-year aware), clock, and
+   timezone (−12:00…+14:00) semantics; impossible dates/times/zones, locale-style
+   dates, and surrounding whitespace are rejected. The original validated `%cI`
+   string is returned rather than a JavaScript Date re-serialization. A shared
+   strict W3C validator (new isValidSitemapLastmod) permits only YYYY-MM-DD or a
+   complete datetime and is applied to BOTH sitemap-index and child URL lastmod
+   in the verifier.
+
+5. Raw XML scalar preservation + strict structural model + entity/DOCTYPE
+   handling (scripts/verify-indexing-discovery-build.mjs). The parser now uses
+   preserveOrder:true, trimValues:false, and processEntities:false; a DOCTYPE
+   declaration is rejected outright before parsing (blocking internal, external,
+   and parameter entity declarations) while ordinary predefined escapes such as
+   &amp; continue to parse. An explicit structural model validates: exactly one
+   correct root with the sitemap namespace and only xmlns / xmlns:* declarations
+   (the approved @astrojs/sitemap news/xhtml/image/video namespace declarations
+   are accepted; any non-namespace root attribute is rejected); no unexpected
+   root attribute, root child element, or non-whitespace root text; each record
+   has exactly one plain-scalar <loc> and at most one plain-scalar <lastmod> with
+   no record attributes, unexpected child elements, non-whitespace record text,
+   or loc/lastmod attributes or child elements. Leading/trailing scalar
+   whitespace reaches the raw validators (no pre-trim) and is rejected. Any
+   record with a structural or value finding is EXCLUDED entirely, so a malformed
+   record contributes no loc, lastmod, URL entry, route, or reference downstream;
+   a fatal root problem yields no records but is still reported.
+
+6. Symlink / regular-file containment. Every sitemap read (sitemap-index.xml,
+   each referenced child, each enumerated sitemap-*.xml) requires lstat to
+   confirm an ordinary regular file (symlinks, directories, and other
+   non-regular entries are rejected) and realpath(file) to remain under
+   realpath(dist) before any content read; a symlink is never followed before the
+   violation is reported. Directory enumeration detects and reports matching
+   symbolic-link and non-regular entries rather than silently skipping them, and
+   walkFiles no longer follows symlinks.
+
+7. Dependency state preserved. fast-xml-parser@5.9.3 remains the single added
+   dev dependency, unchanged; no second XML/validator dependency was added; the
+   in-package XMLValidator deprecation hints are accepted as non-blocking. This
+   round modified only four files; package.json and pnpm-lock.yaml were NOT
+   changed in round 2 (byte-identical to the first uncommitted correction).
+
+Tests (tests/indexing-discovery.test.ts): added strict Git fault-injection
+coverage (shallow flag false/true/empty/unknown/TRUE/numeric/failure; invalid,
+abbreviated, and well-formed candidate SHAs; missing and extra NUL fields; empty,
+malformed, and impossible-calendar dates; uppercase boundary match; empty, fully
+malformed, partially malformed, multiple-valid, and unreadable shallow files;
+shallow-path command failure) plus a genuine linked-worktree shallow test, and
+retained the round-1 file:// shallow-clone tests. Added real-verifier structural
+mutation fixtures (leading/trailing scalar whitespace; loc/lastmod attribute and
+child; unexpected root attribute; accepted xmlns:* declarations; unexpected
+record attribute; unexpected root and record child elements; non-whitespace root
+and record text; malformed-record exclusion from downstream entries; invalid
+index and child lastmod incl. locale/impossible-date/invalid-time/invalid-zone;
+DOCTYPE, internal/external/parameter entity rejection; normal &amp; accepted) and
+containment fixtures (child directory; referenced symlink outside dist;
+unreferenced sitemap symlink; symlinked sitemap-index.xml), with symlink-specific
+tests skipped only where the platform cannot create symlinks.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; `pnpm install
+--frozen-lockfile` passes): `pnpm run check` exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 124/124 (Package A + B regression intact),
+test:indexing-discovery 176/176 (was 122/122; +54). Deterministic total: 511
+tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 152/152 against a fresh build (expected ==
+generated == 40 routes; every generated sitemap-*.xml agrees with index
+references). check:astro 0 errors / 0 warnings / 3 hints (the pre-existing
+SchemaJsonLd is:inline hint plus two accepted ts(6385) XMLValidator deprecation
+notes). check:ts clean; wrangler deploy --dry-run only. Two fresh clean builds
+produced byte-identical sitemap-index.xml, sitemap-0.xml, and verifier output.
+In this shallow environment the fresh build emits 40 <loc> with 18 <lastmod> (22
+shallow-boundary timestamps omitted). git diff --check clean; nothing staged.
+
+Accumulated correction scope vs be2482bb: exactly six files — AGENT_WORKLOG.md,
+package.json, pnpm-lock.yaml, scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+Round 2 edited only four of these (AGENT_WORKLOG.md, the helper, the verifier,
+the tests); package.json and pnpm-lock.yaml were unchanged this round.
+astro.config.mjs remains byte-identical to be2482bb. No route membership,
+indexing, canonical, robots, feed, public/private, Registry, archive, authority,
+classification, or relation policy changed. No content, metadata-architecture,
+JSON-LD, language, security-policy, GitHub, Cloudflare, Email Routing, CORS, NEL,
+mailbox, deployment, Package D, or Package E change occurred. Nothing committed,
+staged, pushed, or merged; PR #81 remains open and unmerged.
+
+### 2026-07-23 — Claude Code — package-c-premerge-correction-round-3
+
+Agent: Claude Code
+Task: Implement the four remaining blocking findings from the THIRD Codex
+pre-merge review of PR #81 (verdict CHANGES REQUIRED BEFORE MERGE). Correction
+round 3 only; kept local and UNCOMMITTED. PR #81 not merged, the existing commit
+not amended, no force-push, no push, no new PR, no deploy, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment/preview
+change. Package D and Package E not started. Starting state verified before any
+edit: branch claude/package-c-indexing-discovery-contracts; local HEAD and
+origin branch head both be2482bb6915c398cd808a0f37491ac1fa83d3b4; nothing
+staged; PR #81 open and unmerged; accumulated diff exactly the six expected
+files. origin/main recorded at facbf32f21a6b86a672bba4fb5477293ac299738 (a later
+origin/main SHA is not, by itself, a reason to alter the branch).
+
+Prior accepted decisions unchanged: fast-xml-parser@5.9.3 remains the single
+added dev dependency (not replaced, removed, upgraded, or supplemented); the
+DOCTYPE/entity policy, record-level XML validation, sitemap lastmod lexical
+rules, and symlink read-before-check protections from round 2 are preserved.
+
+Four blocker categories addressed (scripts/lib/indexing-discovery-contract.mjs
+and scripts/verify-indexing-discovery-build.mjs):
+
+1. Exact shallow-STATUS parsing. readDirectSourceLastmod no longer trims the
+   `git rev-parse --is-shallow-repository` output; it removes at most one
+   terminal line ending (/\r?\n$/). Only exact "false" is full history and only
+   exact "true" enters boundary handling; empty, whitespace-only, " false",
+   "false ", "\tfalse", " true", "true ", "TRUE", "False", "unknown", "1",
+   multiple trailing line endings, and trailing text all omit. Leading spaces,
+   trailing spaces, and tabs are never stripped.
+
+2. Exact shallow-PATH output handling. The
+   `git rev-parse --path-format=absolute --git-path shallow` output is no longer
+   trimmed; only one terminal line ending is removed. Legitimate leading/trailing
+   path spaces are preserved and the exact returned path is read; empty output,
+   embedded NUL, or any unexpected additional line omits lastmod.
+
+3. Strict blank-line rejection in shallow-boundary metadata. The boundary file
+   is split on LF/CRLF; at most the single final empty split element (from one
+   normal terminal line ending) is removed; every remaining line must be an exact
+   40/64-hex object id (normalized to lowercase). A leading blank, interior
+   blank, extra trailing blank(s), whitespace-only line, surrounded SHA, or any
+   malformed line fails the whole file closed; at least one valid id is required.
+   One valid SHA with no newline / one LF / one CRLF, and multiple valid SHAs,
+   are accepted.
+
+4. Root-level XML findings are FATAL to record extraction. parseSitemapDocument
+   now completes ALL root validation first (root type, default namespace,
+   non-namespace root attribute, non-whitespace root text, unexpected root child
+   element, multiple/malformed roots) and returns records: [] when ANY root
+   finding exists; record validation runs only on a structurally clean root. An
+   invalid sitemap-index root therefore contributes no referenced child
+   filenames (no child file is opened from a record of an invalid root), and an
+   invalid urlset root contributes no URL/route/duplicate/lastmod/origin/
+   membership entries. Findings are still returned and fail verification.
+
+5. Recursive sitemap-shaped inventory (part of blocker 4's discovery gap).
+   Generated-child enumeration is now a recursive, symlink-non-following lstat
+   traversal of dist. Every basename matching /^sitemap-\d+\.xml$/i anywhere
+   under dist is inspected. The ONLY valid generated child is a root-level,
+   exact-lowercase sitemap-<n>.xml ordinary regular file whose realpath stays
+   beneath realpath(dist); every other shaped entry (nested, case-variant,
+   symlink, directory, or other non-regular) is reported and never enters the
+   valid generated set. Safe ordinary in-dist regular sitemap-shaped files
+   (including nested/uppercase) are still scanned for forbidden origins and feed
+   signatures — closing the prior false-pass where a nested sitemap containing a
+   workers.dev URL escaped detection. Symbolic links (file or directory) are
+   never followed or read; directory symlinks are not recursed into; traversal
+   cannot escape dist or loop. sitemap-index.xml is never treated as a child.
+
+Preserved (unchanged): production origin; route membership, exclusions, robots,
+canonical, trailing-slash, feed-absence, preview-host, prototype/interactive
+boundaries; generated JSON exclusion; 404 behavior; sitemap namespace policy
+(default xmlns required, standard xmlns:* declarations accepted); parser
+dependency; DOCTYPE/entity policy; record-level XML validation. astro.config.mjs
+byte-identical to be2482bb.
+
+Tests (tests/indexing-discovery.test.ts): added exact shallow-flag output cases
+(false/true success; leading/trailing space, tab, CRLF, multiple newlines,
+empty, whitespace-only, trailing-text variants), exact shallow-path cases (one
+LF/CRLF removed, spaces preserved, extra line, embedded NUL, empty), strict
+boundary blank-line cases (leading/interior/trailing blank, whitespace-only,
+surrounded SHA reject; one-valid no-newline/LF/CRLF and multiple valid accept);
+root-fatal index and child cases (unexpected root attribute, non-whitespace root
+text, unexpected root child, wrong namespace) each proving zero downstream child
+references / URL entries; and recursive-inventory cases (nested lowercase, nested
+forbidden-origin still scanned, nested uppercase, root uppercase, nested
+directory, nested file/dir symlinks reported-not-followed, directory symlink not
+traversed, unrelated nested XML ignored, ordinary valid child passes). Genuine
+file:// shallow-clone and linked-worktree tests retained. All tests call the real
+production helper/verifier.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; `pnpm install
+--frozen-lockfile` passes): `pnpm run check` exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 124/124 (Package A + B regression intact),
+test:indexing-discovery 216/216 (was 176/176; +40). Deterministic total: 551
+tests, 0 failures, 0 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 152/152 against a fresh build (expected ==
+generated == 40 routes). check:astro 0 errors / 0 warnings / 3 hints (the
+pre-existing SchemaJsonLd is:inline hint plus two accepted ts(6385) XMLValidator
+deprecation notes). check:ts clean; wrangler deploy --dry-run only. Two fresh
+clean builds produced byte-identical sitemap-index.xml, sitemap-0.xml, and
+verifier output. In this shallow environment the fresh build emits 40 <loc> with
+18 <lastmod>. git diff --check clean; nothing staged.
+
+Accumulated correction scope vs be2482bb: exactly six files — AGENT_WORKLOG.md,
+package.json, pnpm-lock.yaml, scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+Round 3 edited only four (AGENT_WORKLOG.md, the helper, the verifier, the tests);
+package.json and pnpm-lock.yaml were NOT changed in round 3. No route membership,
+indexing, canonical, robots, feed, public/private, Registry, archive, authority,
+classification, or relation policy changed. No content, metadata-architecture,
+JSON-LD, language, security-policy, GitHub, Cloudflare, Email Routing, CORS, NEL,
+mailbox, deployment, Package D, or Package E change occurred. Nothing committed,
+staged, pushed, or merged; PR #81 remains open and unmerged.
+
+### 2026-07-23 — Claude Code — package-c-premerge-correction-round-4
+
+Agent: Claude Code
+Task: Implement the remaining blocking finding from the FOURTH Codex pre-merge
+review of PR #81 (verdict CHANGES REQUIRED) — the recursive-inventory fail-open
+defect — plus the bounded regression refinements it noted. Correction round 4
+only; kept local and UNCOMMITTED. PR #81 not merged, existing commit not amended,
+no force-push, no push, no new PR, no deploy, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment/preview
+change. Package D and Package E not started. Starting state verified before any
+edit: branch claude/package-c-indexing-discovery-contracts; local HEAD and origin
+branch head both be2482bb6915c398cd808a0f37491ac1fa83d3b4; nothing staged; PR #81
+open and unmerged; accumulated diff exactly the six expected files. origin/main
+recorded at facbf32f21a6b86a672bba4fb5477293ac299738 (a later origin/main SHA is
+not, by itself, a reason to alter the branch).
+
+Remaining defect: the recursive sitemap inventory
+(collectSitemapShapedEntries) silently swallowed directory-read failures
+(`try { readdirSync(...) } catch { return; }`), treating an unreadable directory
+as empty. A sitemap-shaped file (including one carrying a forbidden preview
+origin) hidden beneath an unreadable directory could therefore be represented as
+absent, letting generated/reference equality mask an incomplete scan.
+
+Correction (scripts/verify-indexing-discovery-build.mjs):
+- collectSitemapShapedEntries now returns { entries, traversalFindings }. Every
+  failed directory read (root or nested) produces an explicit
+  SITEMAP_INVENTORY_DIRECTORY_UNREADABLE traversal finding recording the
+  dist-relative path and the stable errno code (no absolute path, no stack
+  trace); traversal stops for that one directory but continues with its
+  siblings.
+- The dist root read uses the same fail-closed path (dist ABSENCE keeps its
+  distinct existing BUILD_MISSING finding; "present but unreadable" is the new
+  finding).
+- At the call site every traversal finding is a failing check, and the
+  generated/reference exact-match check now also requires an
+  inventory-complete condition, so a matching set can never override a traversal
+  failure. Forbidden-origin and feed scans are therefore never represented as
+  complete when a directory could not be read; unreadable content is never read
+  through.
+- A narrowly-scoped internal test seam (testHooks.readDir, defaulting to the
+  real readdirSync) allows deterministic injection of a directory-read failure
+  for one exact directory without environment variables, global monkey-patching,
+  new dependencies, or any change to public indexing behavior; it replaces only
+  the listing step and cannot bypass the lstat/symlink/realpath/containment
+  checks that gate file reads. The verifier result additionally exposes a
+  bounded urlEntryCount so tests can assert zero extraction directly.
+- Comment precision: the traversal documentation now distinguishes directory
+  enumeration via readdirSync/Dirent from the explicit non-following
+  classification and safety checks (lstat via classifyPathKind + realpath
+  containment) performed before any file read; it no longer claims the traversal
+  itself performs an lstat.
+
+Tests (tests/indexing-discovery.test.ts): added deterministic injected-reader
+regressions (unreadable inventory root; unreadable nested directory with
+siblings continuing; hidden forbidden-origin sitemap not read through the
+failure; generated/reference match not masking a traversal failure) — all run
+unconditionally — plus a real chmod 0o000 permission test that is skipped only
+when permission semantics are unenforceable (elevated/root execution), with a
+privilege probe and permission restoration on cleanup. Added the minor Codex
+refinements: Git flag "False\n" omits, exact "true\r\n" enters shallow handling,
+a boundary SHA with surrounding tabs omits, multiple CRLF-separated boundary SHAs
+are accepted; and a root-fatal refinement asserting an invalid child root
+containing a forbidden-origin URL and a valid-looking route extracts zero URL
+entries (urlEntryCount === 0) with no record-derived route/origin/duplicate/
+membership/lastmod finding, only the root-structure finding. No production Git
+helper change was needed; the helper is unchanged in round 4.
+
+Preserved (unchanged): valid root-level sitemap inventory; recursive detection
+of nested/case-variant sitemap files; symlink non-traversal; realpath
+containment; forbidden-origin and feed-signature scanning for readable files;
+generated/reference exact-set comparison; XML structure validation; Git lastmod
+logic; dependencies; route set; indexing policy. The only behavioral change is
+that an unreadable inventory directory now causes explicit verifier failure
+instead of silent omission. astro.config.mjs and the Git helper are byte-
+identical to their v3 state; package.json and pnpm-lock.yaml were NOT changed in
+round 4.
+
+Correction validation (pnpm 10.34.5, node v22.22.2; `pnpm install
+--frozen-lockfile` passes): `pnpm run check` exit 0. Suite totals —
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:semantic-flow 21/21,
+test:security-resilience 124/124 (Package A + B regression intact),
+test:indexing-discovery 225 passed / 0 failed / 1 skipped (was 216/216; +10, of
+which the single skip is the elevated-execution real-permission test). Total 560
+passed, 0 failed, 1 skipped. verify:public-surface-map 18/18.
+verify:indexing-discovery-build 152/152 against a fresh build (expected ==
+generated == 40 routes). check:astro 0 errors / 0 warnings / 3 hints (pre-
+existing SchemaJsonLd is:inline + two accepted ts(6385) XMLValidator deprecation
+notes). check:ts clean; wrangler deploy --dry-run only. Two fresh clean builds
+produced byte-identical sitemap-index.xml, sitemap-0.xml, and verifier output.
+git diff --check clean; nothing staged.
+
+Accumulated correction scope vs be2482bb: exactly six files — AGENT_WORKLOG.md,
+package.json, pnpm-lock.yaml, scripts/lib/indexing-discovery-contract.mjs,
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts.
+Round 4 edited only three (AGENT_WORKLOG.md, the verifier, the tests); the Git
+helper, package.json, and pnpm-lock.yaml were unchanged in round 4. No indexing,
+sitemap membership, robots, canonical, trailing-slash, feed, preview-host,
+public/private, Registry, archive, authority, classification, or relation policy
+changed. No content, metadata-architecture, JSON-LD, language, security-policy,
+GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox, deployment, dependency,
+Package D, or Package E change occurred. Nothing committed, staged, pushed, or
+merged; PR #81 remains open and unmerged.
+
+### 2026-07-23 — Claude Code — package-c-ci-followup-round-5 (walkFiles fail-closed)
+
+Agent: Claude Code
+Task: Fix the CI-exposed fail-open/uncaught traversal path after PR #81's
+required site-ci check failed. Correction round 5 only; kept local and
+UNCOMMITTED for review. No amend/rewrite of ad131d0, no force-push, no push, no
+new PR, no merge, no deploy, no re-run of the failed check via settings, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment/preview
+change. Package D and Package E not started. Starting state verified: branch
+claude/package-c-indexing-discovery-contracts; local HEAD and origin branch head
+both ad131d05fd1f4e7fe2d2b3d99a80c5e2b07d6050; worktree clean; nothing staged; PR
+#81 open, unmerged, two commits. origin/main recorded at
+facbf32f21a6b86a672bba4fb5477293ac299738.
+
+Context: the additive correction commit ad131d0 was pushed normally in the
+preceding run. Its automated checks: Workers Builds:
+metawritingecology-site SUCCEEDED (a build record, not a production deployment);
+the required site-ci check FAILED
+(https://github.com/metawritingecology/metawritingecology-site/actions/runs/30000394137/job/89183955941)
+on the real unreadable-directory test with
+"EACCES: permission denied, scandir '.../dist/hidden/'". CI (unprivileged)
+exposed a SECOND recursive traversal — walkFiles, used by the feed/content
+scan — that still threw an uncaught exception on an unreadable directory. The
+round-4 hardening had covered only the sitemap-inventory traversal; the local
+root environment skipped the capability-gated chmod test, hiding the gap.
+
+Fix (scripts/verify-indexing-discovery-build.mjs): walkFiles now returns
+{ files, traversalFindings } and never lets a directory-read failure escape as an
+uncaught exception. Each failed readdir yields a structured
+DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE finding carrying only a dist-relative
+path ("." for the root) and a bounded errno (a shared normalizeErrno helper
+accepts a short [A-Za-z0-9_]{1,32} code, else "unknown"; no absolute path, no
+stack trace, no file contents). Traversal stops for the failed directory and
+continues with readable siblings; symbolic links remain untraversed. At the call
+site every walkFiles traversal finding is processed through the ordinary failing-
+check mechanism so it contributes to the final failed state and later successful
+checks cannot mask it; the file scan is not represented as complete when a
+directory could not be read. A narrowly-bounded internal seam
+testHooks.walkFilesReadDir (defaulting to readdirSync) allows deterministic
+injection of a single-directory read failure without env vars, global patching,
+new dependencies, or bypassing the readFileSync/lstat/realpath/symlink/
+containment checks. The existing SITEMAP_INVENTORY_DIRECTORY_UNREADABLE finding
+and all other checks (generated/reference exact match, forbidden-origin,
+feed-signature, symlink/realpath, root-fatal XML) are retained; the inventory
+errno is now bounded through the same normalizeErrno helper (closing the
+non-blocking diagnostic-hardening note).
+
+Tests (tests/indexing-discovery.test.ts): the real chmod test now also asserts
+DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE, no longer throws, receives an ordinary
+failed result, and restores permissions on cleanup (its capability-based skip
+remains only where chmod 000 is unenforceable, e.g. root). Added unconditional
+walkFiles fault-injection tests (nested failure with sibling continuation and
+bounded relative-path detail; root failure without exception; hidden feed-
+signature content not read through the failure; readable sibling still scanned;
+sitemap inventory complete while walkFiles independently fails; readable feed-
+signature detection still active). All run under root. Verified the fix under
+real CI permission semantics by running the indexing/discovery suite as the
+unprivileged `nobody` user: 232/232 passed, 0 skipped, including the chmod test
+(no EACCES). (A world read/execute bit was temporarily added to the container
+home/repo directories only to let the unprivileged user traverse to the test
+files; no repository file, ownership, tracked content, or committed artifact was
+affected.)
+
+Validation (pnpm 10.34.5, node v22.22.2; `pnpm install --frozen-lockfile`
+passes): `pnpm run check` exit 0. As root — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124,
+test:indexing-discovery 231 passed / 0 failed / 1 skipped (the capability-gated
+chmod test); total 566 passed, 0 failed, 1 skipped. As unprivileged nobody the
+indexing/discovery suite is 232 passed, 0 skipped. verify:public-surface-map
+18/18; verify:indexing-discovery-build 152/152 on a fresh build (expected ==
+generated == 40 routes). check:astro 0 errors / 0 warnings / 3 hints; check:ts
+clean; wrangler deploy --dry-run only. Two fresh clean builds produced byte-
+identical sitemap-index.xml, sitemap-0.xml, and verifier output. No uncaught
+EACCES remains. git diff --check clean; nothing staged.
+
+Round-5 scope vs ad131d0: exactly three files —
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts,
+AGENT_WORKLOG.md. The Git helper (scripts/lib/indexing-discovery-contract.mjs),
+package.json, pnpm-lock.yaml, and astro.config.mjs are unchanged; no new
+dependency. The only production behavior change is that a directory-read failure
+during the walkFiles feed/content scan now yields a structured failed verifier
+result instead of an uncaught exception. No indexing, sitemap membership, route,
+robots, canonical, trailing-slash, feed-absence (for readable output),
+preview-host, Registry, archive, authority, classification, relation, or
+public/private policy changed. Nothing committed, staged, pushed, or merged; PR
+#81 remains open and unmerged, still blocked by the existing failed site-ci until
+a reviewed follow-up commit is pushed.

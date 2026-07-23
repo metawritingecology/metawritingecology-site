@@ -12,13 +12,13 @@
   "dependencies": {
     "@astrojs/cloudflare": "12.6.12",
     "@astrojs/mdx": "4.3.13",
-    "@astrojs/rss": "4.0.14",
     "@astrojs/sitemap": "3.6.1",
     "astro": "5.16.9",
     "typescript": "5.9.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",
+    "fast-xml-parser": "5.9.3",
     "wrangler": "4.88.0"
   },
   "engines": {
@@ -30,19 +30,21 @@
     "astro": "astro",
     "build": "astro build",
     "cf-typegen": "wrangler types",
-    "check": "astro build && pnpm run check:astro && pnpm run check:ts && wrangler deploy --dry-run && pnpm run test:contracts && pnpm run test:runtime && pnpm run test:retention && pnpm run test:orchestration && pnpm run test:workflow && pnpm run test:semantic-flow && pnpm run test:security-resilience && pnpm run verify:public-surface-map",
+    "check": "astro build && pnpm run check:astro && pnpm run check:ts && wrangler deploy --dry-run && pnpm run test:contracts && pnpm run test:runtime && pnpm run test:retention && pnpm run test:orchestration && pnpm run test:workflow && pnpm run test:semantic-flow && pnpm run test:security-resilience && pnpm run test:indexing-discovery && pnpm run verify:public-surface-map && pnpm run verify:indexing-discovery-build",
     "check:astro": "astro check",
     "check:ts": "tsc --noEmit",
     "deploy": "wrangler deploy",
     "dev": "astro dev",
     "preview": "astro build && wrangler dev",
     "test:contracts": "node --test tests/public-surface-authority-map/contracts.test.ts",
+    "test:indexing-discovery": "node --test tests/indexing-discovery.test.ts",
     "test:orchestration": "node --test tests/public-surface-authority-map/candidateOrchestration.test.ts",
     "test:retention": "node --test tests/public-surface-authority-map/snapshotRetention.test.ts",
     "test:runtime": "node --test tests/public-surface-authority-map/runtimeLoader.test.ts",
     "test:security-resilience": "node --test tests/security-resilience.test.ts",
     "test:semantic-flow": "node --test tests/semantic-flow-source-entries.test.ts",
     "test:workflow": "node --test tests/public-surface-authority-map/candidateWorkflow.test.ts",
+    "verify:indexing-discovery-build": "node scripts/verify-indexing-discovery-build.mjs",
     "verify:public-surface-map": "node scripts/verify-public-surface-map-build.mjs"
   },
   "type": "module"

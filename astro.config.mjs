@@ -2,68 +2,43 @@ import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
-import { execSync } from "node:child_process";
-import { existsSync, statSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import {
+  PRODUCTION_ORIGIN,
+  isSitemapEligible,
+  resolveRouteSource,
+  readDirectSourceLastmod
+} from "./scripts/lib/indexing-discovery-contract.mjs";
 
 const pagesDir = new URL("./src/pages/", import.meta.url);
 
-// Map a public route pathname back to its source page file so we can derive a
-// stable last-modified signal for the sitemap. This does not change routes,
-// canonical URLs, or page content.
-function resolveSourceFile(pathname) {
-  const segment = pathname.replace(/^\/+|\/+$/g, "");
-  const bases = segment === "" ? ["index"] : [segment, `${segment}/index`];
-  const extensions = [".md", ".mdx", ".astro"];
-
-  for (const base of bases) {
-    for (const ext of extensions) {
-      const fileUrl = new URL(`${base}${ext}`, pagesDir);
-      if (existsSync(fileUrl)) return fileURLToPath(fileUrl);
-    }
-  }
-
-  return null;
-}
-
-// Prefer git commit time (most stable across rebuilds and checkouts); fall back
-// to file mtime when git history is unavailable (e.g. untracked file).
-function lastmodFor(file) {
-  try {
-    const committed = execSync(`git log -1 --format=%cI -- "${file}"`, {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"]
-    }).trim();
-    if (committed) return committed;
-  } catch {
-    // ignore and fall back to mtime
-  }
-
-  try {
-    return statSync(file).mtime.toISOString();
-  } catch {
-    return undefined;
-  }
-}
-
 export default defineConfig({
-  site: "https://metawritingecology.org",
+  site: PRODUCTION_ORIGIN,
   output: "server",
   adapter: cloudflare(),
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) =>
-        !page.includes("/language-pressure-test-lab-prototype/") &&
-        !page.includes("/public-surface-map/interactive/"),
+      // Explicit normalized-path sitemap contract (Package C). Excludes the
+      // noindex prototype and interactive-preview routes, the unmatched-route
+      // representation, and any endpoint/asset route. Exact-path matching so a
+      // future, similarly named route is never excluded by accident.
+      filter: (page) => isSitemapEligible(page),
       serialize(item) {
-        try {
-          const { pathname } = new URL(item.url);
-          const file = resolveSourceFile(pathname);
-          const lastmod = file ? lastmodFor(file) : undefined;
+        // Resolver contract violations (unsafe route input, ambiguous source
+        // resolution) are NOT swallowed — they fail the build. Only Git
+        // absence / unreachable history (handled inside readDirectSourceLastmod
+        // as an omitted timestamp) or a null source for an otherwise valid
+        // unsupported route legitimately omits lastmod. No mtime or other
+        // timestamp fallback is ever used.
+        const { pathname } = new URL(item.url);
+        const source = resolveRouteSource(pathname, { pagesDir });
+        if (source) {
+          // lastmod is derived ONLY from the latest Git commit affecting the
+          // route's own direct source file. When no usable Git history exists
+          // the timestamp is omitted — never filesystem mtime, never a
+          // repository-wide or build-time value.
+          const lastmod = readDirectSourceLastmod(source);
           if (lastmod) item.lastmod = lastmod;
-        } catch {
-          // leave the entry unchanged if lastmod cannot be resolved
         }
 
         return item;
