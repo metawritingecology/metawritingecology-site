@@ -19,7 +19,7 @@
 // all run through one shared implementation.
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { sep as pathSep } from "node:path";
 
@@ -330,37 +330,241 @@ function defaultRunGit(args) {
   });
 }
 
+// Default reader for the resolved shallow-boundary file. Isolated so tests can
+// inject a reader without touching the real filesystem. Returns the file
+// contents as a string, or undefined when the file cannot be read.
+function defaultReadShallowFile(shallowPath) {
+  try {
+    return readFileSync(shallowPath, "utf8");
+  } catch {
+    return undefined; // missing / unreadable
+  }
+}
+
+// --- Strict Git object-id and date validation ----------------------------
+
+// Return the lowercase-normalized commit object id when `value` is EXACTLY a
+// 40-character (SHA-1) or 64-character (SHA-256) hexadecimal object id, else
+// null. Rejects abbreviated ids, empty values, non-hex characters, and any
+// surrounding or embedded text.
+export function normalizeGitObjectId(value) {
+  if (typeof value !== "string") return null;
+  if (!/^[0-9a-fA-F]{40}$/.test(value) && !/^[0-9a-fA-F]{64}$/.test(value)) {
+    return null;
+  }
+  return value.toLowerCase();
+}
+
+function isLeapYear(year) {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+// True only for a real calendar date. Rejects month 13, day 0, 2026-02-30,
+// and honors leap years.
+function isRealCalendarDate(year, month, day) {
+  if (month < 1 || month > 12) return false;
+  if (day < 1) return false;
+  const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= monthDays[month - 1];
+}
+
+function isRealClockTime(hour, minute, second) {
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 && second >= 0 && second <= 59;
+}
+
+// Real-world UTC offset: sign HH:MM within [-12:00, +14:00], minute 00-59, and
+// no minutes past the +14:00 / -12:00 extremes. Rejects impossible zones like
+// +25:00 and +15:00.
+function isRealTzOffset(sign, hour, minute) {
+  if (minute < 0 || minute > 59) return false;
+  if (sign === "+") {
+    if (hour > 14) return false;
+    if (hour === 14 && minute > 0) return false;
+    return true;
+  }
+  if (hour > 12) return false;
+  if (hour === 12 && minute > 0) return false;
+  return true;
+}
+
+// Validate a datetime's zone designator: `Z` or a real sign-HH:MM offset.
+function isValidZoneDesignator(zone) {
+  if (zone === "Z") return true;
+  const zm = /^([+-])(\d{2}):(\d{2})$/.exec(zone);
+  if (!zm) return false;
+  return isRealTzOffset(zm[1], Number(zm[2]), Number(zm[3]));
+}
+
+// Strict validation of Git's `%cI` (strict ISO 8601) committer-date form:
+//   YYYY-MM-DDTHH:MM:SS(.fff)?(Z | sign-HH:MM)
+// Returns the ORIGINAL string when valid, else null. Validity is decided
+// lexically and by calendar/clock/zone semantics, NEVER by JavaScript Date
+// normalization (which would silently accept impossible dates).
+export function validateCommitterIsoDate(value) {
+  if (typeof value !== "string") return null;
+  const m =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d{1,9})?(Z|[+-]\d{2}:\d{2})$/.exec(value);
+  if (!m) return null;
+  if (!isRealCalendarDate(Number(m[1]), Number(m[2]), Number(m[3]))) return null;
+  if (!isRealClockTime(Number(m[4]), Number(m[5]), Number(m[6]))) return null;
+  if (!isValidZoneDesignator(m[8])) return null;
+  return value;
+}
+
+// Strict W3C datetime validator for sitemap <lastmod>. Permits ONLY the
+// approved contract forms:
+//   YYYY-MM-DD
+//   YYYY-MM-DDTHH:MM:SS(.fff)?(Z | sign-HH:MM)
+// (the generated sitemap uses the millisecond-Z datetime form). Exact lexical
+// match plus calendar/clock/zone semantics; no JavaScript Date normalization,
+// no locale forms, no date-only value carrying extra time fragments. Shared by
+// the sitemap-index and child-URL lastmod checks in the verifier.
+export function isValidSitemapLastmod(value) {
+  if (typeof value !== "string") return false;
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (dateOnly) {
+    return isRealCalendarDate(Number(dateOnly[1]), Number(dateOnly[2]), Number(dateOnly[3]));
+  }
+  return validateCommitterIsoDate(value) !== null;
+}
+
 // Return the committer date of the latest commit affecting ONLY the given
-// direct source file, as an ISO 8601 string, or undefined.
+// direct source file, as its exact `%cI` string, or undefined.
 //
-// Deterministic omission (never a filesystem-mtime fallback) when:
+// The date is derived ONLY from Git history of the direct source file. There
+// is never a filesystem-mtime, build-time, current-time, package-time, or
+// PR-time fallback. Deterministic omission when:
 // - Git is unavailable;
-// - the source file is untracked;
-// - the direct source has no reachable history;
-// - a shallow checkout lacks the required commit data.
+// - the source file is untracked or has no reachable history;
+// - the NUL-separated `%H%cI` result is malformed (missing separator, wrong
+//   field count, empty SHA, or empty date);
+// - the candidate commit id is not an exact 40/64-hex object id;
+// - the candidate date is not an exact, semantically-valid `%cI` value;
+// - shallow status is anything other than the literal "false" (full) -- an
+//   empty, unknown, case-variant, or unreadable flag fails closed;
+// - the latest reachable commit for the path is a shallow-boundary commit;
+// - shallow-boundary metadata is empty, malformed, or unreadable (fail closed).
+//
+// Shallow-boundary guard
+// -----------------------
+// In a shallow checkout, `git log -1 -- <path>` can report the shallow-boundary
+// commit as the "last" commit touching a path even when the path was NOT
+// changed there: earlier history is truncated at the boundary, so the boundary
+// commit is simply the oldest reachable commit. Assigning that commit date as
+// `lastmod` would silently stamp unchanged pages with the boundary commit's
+// timestamp (e.g. the PR-head time in a depth-one CI checkout). The boundary
+// file is resolved THROUGH Git (worktree-aware, never a fixed `.git` layout),
+// and the candidate is compared against validated boundary object ids. No
+// diff-tree or root-commit file listing is used to prove direct modification.
+// No network or fetch is performed.
 //
 // This intentionally reflects only the route's own source file. Shared
 // layouts, components, styles, data, tests, package files, CI files, and
 // unrelated commits never propagate into a route's lastmod.
-export function readDirectSourceLastmod(file, { runGit = defaultRunGit } = {}) {
+export function readDirectSourceLastmod(
+  file,
+  { runGit = defaultRunGit, readShallowFile = defaultReadShallowFile } = {}
+) {
   if (!file) return undefined;
 
-  let out;
+  // Candidate: SHA + committer date of the latest commit touching ONLY this
+  // direct source file. A NUL separator keeps the two fields unambiguous.
+  let logOut;
   try {
-    out = runGit(["log", "-1", "--format=%cI", "--", file]);
+    logOut = runGit(["log", "-1", "--format=%H%x00%cI", "--", file]);
   } catch {
     return undefined; // git missing, or command failed
   }
+  if (typeof logOut !== "string" || logOut.length === 0) return undefined;
 
-  const trimmed = (out ?? "").trim();
-  if (!trimmed) return undefined; // untracked / no reachable history / shallow
+  // Strip only a single trailing line terminator that Git appends; do NOT trim
+  // the fields themselves, so surrounding whitespace fails strict validation.
+  const raw = logOut.replace(/\r?\n$/, "");
+  const parts = raw.split(String.fromCharCode(0));
+  if (parts.length !== 2) return undefined; // missing NUL or extra fields
+  const candidateSha = normalizeGitObjectId(parts[0]);
+  if (candidateSha === null) return undefined; // empty/abbrev/invalid SHA
+  const candidateDate = validateCommitterIsoDate(parts[1]);
+  if (candidateDate === null) return undefined; // empty/malformed/impossible date
 
-  const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) return undefined;
+  // Shallow status: only the exact documented lowercase literals are trusted.
+  let shallowFlag;
+  try {
+    shallowFlag = runGit(["rev-parse", "--is-shallow-repository"]);
+  } catch {
+    return undefined; // cannot determine shallowness -> fail closed
+  }
+  // Remove ONLY the single terminal line ending Git appends; never .trim().
+  // Any surrounding whitespace, casing difference, extra line, or trailing text
+  // therefore fails the exact-literal comparison and omits lastmod. Leading or
+  // trailing spaces/tabs are NOT stripped, so " false", "false ", and "\tfalse"
+  // do not spuriously match.
+  const flag = String(shallowFlag ?? "").replace(/\r?\n$/, "");
+  if (flag === "false") {
+    // Full-history repository: the candidate commit is authoritative.
+    return candidateDate;
+  }
+  if (flag !== "true") {
+    // Empty, whitespace-only, unknown, case-variant ("TRUE"/"False"), numeric,
+    // multi-line, or trailing-text output: never infer full history.
+    return undefined;
+  }
 
-  return trimmed;
+  // Shallow repository: resolve the shallow-boundary file through Git so this
+  // works in linked worktrees and non-default layouts. Request an absolute
+  // path so the reader does not depend on the current working directory.
+  let shallowPathOut;
+  try {
+    shallowPathOut = runGit([
+      "rev-parse",
+      "--path-format=absolute",
+      "--git-path",
+      "shallow"
+    ]);
+  } catch {
+    return undefined; // cannot locate shallow metadata -> fail closed
+  }
+  // Remove ONLY the single terminal line ending; never .trim(). Leading or
+  // trailing spaces that are legitimately part of a path are preserved. Reject
+  // empty output, embedded NUL, or any unexpected additional line.
+  const shallowPath = String(shallowPathOut ?? "").replace(/\r?\n$/, "");
+  if (shallowPath === "") return undefined; // empty after one terminator -> omit
+  if (shallowPath.includes(String.fromCharCode(0))) return undefined; // embedded NUL
+  if (/[\r\n]/.test(shallowPath)) return undefined; // unexpected additional line(s)
+
+  const shallowContents = readShallowFile(shallowPath);
+  if (typeof shallowContents !== "string") {
+    // Shallow repository but the boundary list is unreadable -> fail closed.
+    return undefined;
+  }
+
+  // Strict boundary parsing. Split on LF/CRLF and remove at most the SINGLE
+  // final empty element produced by one normal terminal line ending. Every
+  // remaining line must be an exact object id: any blank line (leading,
+  // interior, or extra trailing), whitespace-only line, or malformed id fails
+  // closed. At least one valid boundary id is required.
+  const boundaryLines = shallowContents.split(/\r?\n/);
+  if (boundaryLines.length > 0 && boundaryLines[boundaryLines.length - 1] === "") {
+    boundaryLines.pop(); // drop the sole final-terminator split artifact
+  }
+  if (boundaryLines.length === 0) return undefined; // empty file / only a newline
+  const boundary = new Set();
+  for (const line of boundaryLines) {
+    const id = normalizeGitObjectId(line); // rejects "", whitespace, surrounded, non-hex
+    if (id === null) return undefined; // any blank/malformed line -> omit
+    boundary.add(id);
+  }
+  if (boundary.size === 0) return undefined; // defensive: no valid ids -> omit
+
+  if (boundary.has(candidateSha)) {
+    // The path's latest reachable commit is a shallow boundary: the real
+    // last-change commit may lie beyond the truncation, so the boundary
+    // timestamp is unreliable. Omit rather than stamp an unchanged page.
+    return undefined;
+  }
+
+  return candidateDate;
 }
-
 // ---------------------------------------------------------------------------
 // DOI syntax (structure only)
 // ---------------------------------------------------------------------------

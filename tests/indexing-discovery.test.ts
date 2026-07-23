@@ -26,7 +26,9 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
-  writeFileSync
+  writeFileSync,
+  symlinkSync,
+  chmodSync
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
@@ -50,6 +52,9 @@ import {
   assertSafeRoutePath,
   RouteResolutionError,
   readDirectSourceLastmod,
+  normalizeGitObjectId,
+  validateCommitterIsoDate,
+  isValidSitemapLastmod,
   isValidDoi,
   isValidGithubSourceUrl,
   isApprovedSourceRepoBaseDeclaration,
@@ -423,6 +428,387 @@ test("lastmod: null source returns undefined; present output is ISO 8601", () =>
   const abs = writeAndCommit(git, dir, "page.md", "# one\n", "2026-03-04T05:06:07+00:00");
   const result = readDirectSourceLastmod(abs, { runGit: runGitIn(dir) });
   assert.match(result, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/);
+});
+
+// ---------------------------------------------------------------------------
+// Shallow-history regression (genuine depth-limited file:// clones)
+// ---------------------------------------------------------------------------
+
+// Build a multi-commit origin repo whose newest commit does NOT touch page.md,
+// then create REAL shallow clones of it. In a shallow checkout `git log -1 --
+// <path>` reports the shallow-boundary (grafted) commit for a path whose true
+// last change lies beyond the truncation — so the boundary commit's timestamp
+// (here the newest, PR-head-like date) would be wrongly assigned to an unchanged
+// page. The corrected helper must OMIT lastmod for any path whose latest
+// reachable commit is a shallow-boundary commit, while preserving the timestamp
+// of a path whose latest reachable commit is a real (non-boundary) commit and of
+// every path in a full-history clone.
+const PAGE_TRUE_DATE = "2026-01-02T03:04:05+00:00"; // page.md's real last change (deep)
+const TIP_DATE = "2026-06-30T23:59:59+00:00"; // newest commit; boundary in shallow clones
+
+function makeOriginRepo() {
+  const originDir = mkTemp();
+  const git = (args, extraEnv = {}) =>
+    execFileSync("git", ["-C", originDir, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, ...extraEnv }
+    });
+  git(["init", "-q", "-b", "main"]);
+  git(["config", "user.email", "t@example.com"]);
+  git(["config", "user.name", "Test"]);
+  git(["config", "commit.gpgsign", "false"]);
+  writeAndCommit(git, originDir, "page.md", "# one\n", PAGE_TRUE_DATE);
+  writeAndCommit(git, originDir, "other.md", "# other-a\n", "2026-02-02T03:04:05+00:00");
+  // Newest commit: touches other.md only, never page.md.
+  writeAndCommit(git, originDir, "other.md", "# other-b\n", TIP_DATE);
+  return originDir;
+}
+
+function cloneRepo(originDir, depthArgs) {
+  const cloneDir = mkTemp();
+  // A file:// URL (not a local path) uses a real transport, so --depth produces
+  // a genuinely shallow checkout rather than a full local hardlink clone.
+  execFileSync(
+    "git",
+    ["clone", "-q", ...depthArgs, pathToFileURL(originDir).href, cloneDir],
+    { encoding: "utf8" }
+  );
+  return cloneDir;
+}
+
+test("lastmod (shallow depth-1): boundary commit for an unchanged page is omitted, not stamped", () => {
+  const origin = makeOriginRepo();
+  const clone = cloneRepo(origin, ["--depth", "1"]);
+  const runGit = runGitIn(clone);
+  // Sanity: the clone is genuinely shallow and page.md's reported commit is the
+  // shallow boundary carrying the newest (PR-head-like) timestamp.
+  assert.equal(runGit(["rev-parse", "--is-shallow-repository"]).trim(), "true");
+  const reported = runGit(["log", "-1", "--format=%cI", "--", "page.md"]).trim();
+  assert.equal(new Date(reported).getTime(), new Date(TIP_DATE).getTime());
+  // The corrected helper must OMIT rather than assign the boundary timestamp.
+  assert.equal(readDirectSourceLastmod("page.md", { runGit }), undefined);
+});
+
+test("lastmod (shallow depth-2): boundary path omitted, non-boundary tip path preserved", () => {
+  const origin = makeOriginRepo();
+  const clone = cloneRepo(origin, ["--depth", "2"]);
+  const runGit = runGitIn(clone);
+  assert.equal(runGit(["rev-parse", "--is-shallow-repository"]).trim(), "true");
+  // page.md's latest reachable commit is the shallow boundary -> omitted.
+  assert.equal(readDirectSourceLastmod("page.md", { runGit }), undefined);
+  // other.md's latest reachable commit is the tip (a real, non-boundary commit)
+  // -> its timestamp is preserved.
+  const kept = readDirectSourceLastmod("other.md", { runGit });
+  assert.ok(kept !== undefined);
+  assert.equal(new Date(kept).getTime(), new Date(TIP_DATE).getTime());
+});
+
+test("lastmod (full clone): non-shallow history keeps the true deep timestamp", () => {
+  const origin = makeOriginRepo();
+  const clone = cloneRepo(origin, []);
+  const runGit = runGitIn(clone);
+  assert.equal(runGit(["rev-parse", "--is-shallow-repository"]).trim(), "false");
+  const kept = readDirectSourceLastmod("page.md", { runGit });
+  assert.ok(kept !== undefined);
+  assert.equal(new Date(kept).getTime(), new Date(PAGE_TRUE_DATE).getTime());
+});
+
+test("lastmod (shallow): unreadable shallow metadata fails closed (omits)", () => {
+  // A shallow repository whose boundary list cannot be read must omit rather
+  // than trust a possibly-truncated candidate — even for a path whose latest
+  // reachable commit is NOT a boundary (a depth-2 clone: other.md -> tip).
+  const origin = makeOriginRepo();
+  const clone = cloneRepo(origin, ["--depth", "2"]);
+  const runGit = runGitIn(clone);
+  const unreadable = () => undefined; // reader cannot return the shallow list
+  assert.equal(
+    readDirectSourceLastmod("other.md", { runGit, readShallowFile: unreadable }),
+    undefined
+  );
+  // Control: with a working reader, other.md (tip, non-boundary) is preserved.
+  const kept = readDirectSourceLastmod("other.md", { runGit });
+  assert.equal(new Date(kept).getTime(), new Date(TIP_DATE).getTime());
+});
+
+// ---------------------------------------------------------------------------
+// Strict Git object-id / date / shallow-status fault injection
+// ---------------------------------------------------------------------------
+//
+// Fault injection is used ONLY to feed explicit, malformed, or unreadable
+// Git-command outputs to the real helper. Real repository behavior is covered
+// by the genuine file:// shallow-clone and linked-worktree tests.
+
+const VALID_SHA = "0123456789abcdef0123456789abcdef01234567"; // 40 hex
+const VALID_SHA_2 = "89abcdef0123456789abcdef0123456789abcdef";
+const VALID_SHA_3 = "fedcba9876543210fedcba9876543210fedcba98";
+const VALID_SHA_256 = "a".repeat(64);
+const VALID_GIT_DATE = "2026-01-02T03:04:05+00:00";
+const NUL = String.fromCharCode(0);
+const GIT_THROW = Symbol("git-throw");
+
+// Build a runGit stub from explicit per-command stdout. `log` is `git log`
+// stdout, `flag` is `--is-shallow-repository` stdout, `shallowPath` is
+// `--git-path shallow` stdout. GIT_THROW makes that command throw.
+function fakeGit({
+  log = `${VALID_SHA}${NUL}${VALID_GIT_DATE}\n`,
+  flag = "false\n",
+  shallowPath = "/tmp/does-not-matter/shallow\n"
+} = {}) {
+  return (args) => {
+    if (args[0] === "log") {
+      if (log === GIT_THROW) throw new Error("git log failed");
+      return log;
+    }
+    if (args[0] === "rev-parse" && args.includes("--is-shallow-repository")) {
+      if (flag === GIT_THROW) throw new Error("rev-parse failed");
+      return flag;
+    }
+    if (args[0] === "rev-parse" && args.includes("shallow")) {
+      if (shallowPath === GIT_THROW) throw new Error("git-path failed");
+      return shallowPath;
+    }
+    throw new Error(`unexpected git args: ${args.join(" ")}`);
+  };
+}
+const lm = (opts, readShallowFile) =>
+  readDirectSourceLastmod("f.md", { runGit: fakeGit(opts), readShallowFile });
+
+test("lastmod (fault): normalizeGitObjectId accepts 40/64 hex, lowercases, rejects the rest", () => {
+  assert.equal(normalizeGitObjectId(VALID_SHA.toUpperCase()), VALID_SHA);
+  assert.equal(normalizeGitObjectId(VALID_SHA_256), VALID_SHA_256);
+  assert.equal(normalizeGitObjectId("abc1234"), null); // abbreviated
+  assert.equal(normalizeGitObjectId(""), null);
+  assert.equal(normalizeGitObjectId("z".repeat(40)), null); // non-hex
+  assert.equal(normalizeGitObjectId(` ${VALID_SHA}`), null); // surrounding text
+});
+
+test("lastmod (fault): validateCommitterIsoDate enforces exact %cI semantics", () => {
+  assert.equal(validateCommitterIsoDate("2026-01-02T03:04:05+00:00"), "2026-01-02T03:04:05+00:00");
+  assert.equal(validateCommitterIsoDate("2026-07-19T05:00:03.000Z"), "2026-07-19T05:00:03.000Z");
+  assert.equal(validateCommitterIsoDate("2026-02-30T00:00:00Z"), null); // impossible day
+  assert.equal(validateCommitterIsoDate("2026-13-01T00:00:00Z"), null); // impossible month
+  assert.equal(validateCommitterIsoDate("2026-07-23T25:00:00Z"), null); // impossible hour
+  assert.equal(validateCommitterIsoDate("2026-07-23T00:00:00+25:00"), null); // impossible zone
+  assert.equal(validateCommitterIsoDate(" 2026-01-02T03:04:05Z"), null); // whitespace
+  assert.equal(validateCommitterIsoDate("July 23, 2026"), null); // locale
+  assert.equal(validateCommitterIsoDate("2025-02-29T00:00:00Z"), null); // non-leap
+  assert.equal(validateCommitterIsoDate("2024-02-29T00:00:00Z"), "2024-02-29T00:00:00Z"); // leap
+});
+
+test("lastmod (fault): shallow flag 'false' with a valid SHA/date returns the date", () => {
+  assert.equal(lm({ flag: "false\n" }), VALID_GIT_DATE);
+});
+
+test("lastmod (fault): shallow flag 'true' with a non-boundary SHA returns the date", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n`), VALID_GIT_DATE);
+});
+
+test("lastmod (fault): shallow flag 'true' with the candidate as boundary omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA}\n`), undefined);
+});
+
+test("lastmod (fault): empty shallow flag omits (no full-history inference)", () => {
+  assert.equal(lm({ flag: "\n" }), undefined);
+});
+
+test("lastmod (fault): 'unknown' shallow flag omits", () => {
+  assert.equal(lm({ flag: "unknown\n" }), undefined);
+});
+
+test("lastmod (fault): 'TRUE' (case variant) shallow flag omits", () => {
+  assert.equal(lm({ flag: "TRUE\n" }), undefined);
+});
+
+test("lastmod (fault): numeric/malformed shallow flag omits", () => {
+  assert.equal(lm({ flag: "1\n" }), undefined);
+  assert.equal(lm({ flag: "yes\n" }), undefined);
+  assert.equal(lm({ flag: "   \n" }), undefined);
+});
+
+test("lastmod (fault): shallow-status command failure omits", () => {
+  assert.equal(lm({ flag: GIT_THROW }), undefined);
+});
+
+test("lastmod (fault): invalid candidate SHA omits", () => {
+  assert.equal(lm({ log: `${"z".repeat(40)}${NUL}${VALID_GIT_DATE}\n` }), undefined);
+});
+
+test("lastmod (fault): abbreviated candidate SHA omits", () => {
+  assert.equal(lm({ log: `abc1234${NUL}${VALID_GIT_DATE}\n` }), undefined);
+});
+
+test("lastmod (fault): missing NUL separator omits", () => {
+  assert.equal(lm({ log: `${VALID_SHA} ${VALID_GIT_DATE}\n` }), undefined);
+});
+
+test("lastmod (fault): extra NUL-separated fields omit", () => {
+  assert.equal(lm({ log: `${VALID_SHA}${NUL}${VALID_GIT_DATE}${NUL}extra\n` }), undefined);
+});
+
+test("lastmod (fault): empty candidate date omits", () => {
+  assert.equal(lm({ log: `${VALID_SHA}${NUL}\n` }), undefined);
+});
+
+test("lastmod (fault): malformed %cI date omits", () => {
+  assert.equal(lm({ log: `${VALID_SHA}${NUL}not-a-real-date\n` }), undefined);
+});
+
+test("lastmod (fault): impossible calendar date omits", () => {
+  assert.equal(lm({ log: `${VALID_SHA}${NUL}2026-02-30T00:00:00Z\n` }), undefined);
+});
+
+test("lastmod (fault): uppercase boundary SHA matches the lowercase candidate and omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA.toUpperCase()}\n`), undefined);
+});
+
+test("lastmod (fault): empty shallow file omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => ""), undefined);
+});
+
+test("lastmod (fault): fully malformed shallow file omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => "not-a-sha\nalso-bad\n"), undefined);
+});
+
+test("lastmod (fault): partially malformed shallow file omits (even for a non-boundary candidate)", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\ngarbage-line\n`), undefined);
+});
+
+test("lastmod (fault): multiple valid boundary SHAs are supported", () => {
+  const boundary = () => `${VALID_SHA_2}\n${VALID_SHA_3}\n`;
+  // candidate equals the second boundary entry -> omit
+  assert.equal(
+    readDirectSourceLastmod("f.md", {
+      runGit: fakeGit({ log: `${VALID_SHA_3}${NUL}${VALID_GIT_DATE}\n`, flag: "true\n" }),
+      readShallowFile: boundary
+    }),
+    undefined
+  );
+  // candidate not among the boundary entries -> keep
+  assert.equal(
+    readDirectSourceLastmod("f.md", {
+      runGit: fakeGit({ log: `${VALID_SHA}${NUL}${VALID_GIT_DATE}\n`, flag: "true\n" }),
+      readShallowFile: boundary
+    }),
+    VALID_GIT_DATE
+  );
+});
+
+test("lastmod (fault): unreadable shallow file omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => undefined), undefined);
+});
+
+test("lastmod (fault): shallow-path command failure omits", () => {
+  assert.equal(lm({ flag: "true\n", shallowPath: GIT_THROW }, () => `${VALID_SHA_2}\n`), undefined);
+});
+
+test("lastmod (linked worktree): resolves the shared shallow path and omits a boundary page", () => {
+  // A genuine linked worktree of a real depth-one shallow clone. The default
+  // shallow-file reader must resolve the shared shallow path through Git
+  // (worktree-aware) and omit the boundary page's timestamp.
+  const origin = makeOriginRepo();
+  const clone = cloneRepo(origin, ["--depth", "1"]);
+  const worktree = mkTemp();
+  execFileSync("git", ["-C", clone, "worktree", "add", "-q", worktree, "HEAD"], { encoding: "utf8" });
+  const runGit = runGitIn(worktree);
+  assert.equal(runGit(["rev-parse", "--is-shallow-repository"]).trim(), "true");
+  // Uses the DEFAULT readShallowFile, exercising real worktree path resolution.
+  assert.equal(readDirectSourceLastmod("page.md", { runGit }), undefined);
+});
+
+// ---------------------------------------------------------------------------
+// Round-3: EXACT Git command-output interpretation (no .trim())
+// ---------------------------------------------------------------------------
+
+// --- Shallow-status flag: only exact "false"/"true" (one terminator stripped) ---
+test("lastmod (exact flag): 'false\\n' succeeds for a valid full-history candidate", () => {
+  assert.equal(lm({ flag: "false\n" }), VALID_GIT_DATE);
+});
+test("lastmod (exact flag): 'true\\n' enters boundary handling", () => {
+  // Non-boundary reader -> the date is kept, proving boundary handling ran.
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n`), VALID_GIT_DATE);
+  // Boundary reader -> omit, confirming the same path evaluated the boundary set.
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA}\n`), undefined);
+});
+test("lastmod (exact flag): leading/trailing whitespace variants omit", () => {
+  assert.equal(lm({ flag: " false\n" }), undefined);
+  assert.equal(lm({ flag: "false \n" }), undefined);
+  assert.equal(lm({ flag: "\tfalse\n" }), undefined);
+  assert.equal(lm({ flag: " true\n" }, () => `${VALID_SHA_2}\n`), undefined);
+  assert.equal(lm({ flag: "true \n" }, () => `${VALID_SHA_2}\n`), undefined);
+});
+test("lastmod (exact flag): multiple trailing newlines omit", () => {
+  assert.equal(lm({ flag: "false\n\n" }), undefined);
+  assert.equal(lm({ flag: "true\n\n" }, () => `${VALID_SHA_2}\n`), undefined);
+});
+test("lastmod (exact flag): CRLF terminator is stripped for exact values", () => {
+  assert.equal(lm({ flag: "false\r\n" }), VALID_GIT_DATE);
+});
+test("lastmod (exact flag): empty and whitespace-only flag omit", () => {
+  assert.equal(lm({ flag: "" }), undefined);
+  assert.equal(lm({ flag: "\n" }), undefined);
+  assert.equal(lm({ flag: "   \n" }), undefined);
+});
+test("lastmod (exact flag): trailing text after the value omits", () => {
+  assert.equal(lm({ flag: "false is the answer\n" }), undefined);
+  assert.equal(lm({ flag: "true\nextra\n" }, () => `${VALID_SHA_2}\n`), undefined);
+});
+
+// --- Shallow-path output: only one terminator stripped; exact discipline ---
+const lmPath = (shallowPath, reader) =>
+  readDirectSourceLastmod("f.md", {
+    runGit: fakeGit({ flag: "true\n", shallowPath }),
+    readShallowFile: reader
+  });
+// A reader that yields a non-boundary boundary-set ONLY for the exact path.
+const readerFor = (expectedPath) => (p) => (p === expectedPath ? `${VALID_SHA_2}\n` : undefined);
+
+test("lastmod (exact path): one terminal LF is removed", () => {
+  assert.equal(lmPath("/x/shallow\n", readerFor("/x/shallow")), VALID_GIT_DATE);
+});
+test("lastmod (exact path): one terminal CRLF is removed", () => {
+  assert.equal(lmPath("/x/shallow\r\n", readerFor("/x/shallow")), VALID_GIT_DATE);
+});
+test("lastmod (exact path): leading/trailing path spaces are NOT trimmed", () => {
+  assert.equal(lmPath("  /x/ sp ace /shallow \n", readerFor("  /x/ sp ace /shallow ")), VALID_GIT_DATE);
+});
+test("lastmod (exact path): an extra output line omits", () => {
+  assert.equal(lmPath("/x/shallow\nextra\n", () => `${VALID_SHA_2}\n`), undefined);
+});
+test("lastmod (exact path): embedded NUL omits", () => {
+  assert.equal(lmPath(`/x/sh${NUL}allow\n`, () => `${VALID_SHA_2}\n`), undefined);
+});
+test("lastmod (exact path): empty path output omits", () => {
+  assert.equal(lmPath("\n", () => `${VALID_SHA_2}\n`), undefined);
+  assert.equal(lmPath("", () => `${VALID_SHA_2}\n`), undefined);
+});
+
+// --- Shallow-boundary metadata: strict blank-line rejection ---
+test("lastmod (boundary): one valid line without a final newline is accepted", () => {
+  assert.equal(lm({ flag: "true\n" }, () => VALID_SHA_2), VALID_GIT_DATE);
+});
+test("lastmod (boundary): one valid line with exactly one LF is accepted", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n`), VALID_GIT_DATE);
+});
+test("lastmod (boundary): one valid line with exactly one CRLF is accepted", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\r\n`), VALID_GIT_DATE);
+});
+test("lastmod (boundary): multiple valid SHAs are accepted", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n${VALID_SHA_3}\n`), VALID_GIT_DATE);
+});
+test("lastmod (boundary): a leading blank line omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `\n${VALID_SHA_2}\n`), undefined);
+});
+test("lastmod (boundary): an interior blank line omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n\n${VALID_SHA_3}\n`), undefined);
+});
+test("lastmod (boundary): two trailing newlines omit", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n\n`), undefined);
+});
+test("lastmod (boundary): a whitespace-only line omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\n   \n`), undefined);
+});
+test("lastmod (boundary): a SHA with surrounding spaces omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => ` ${VALID_SHA_2} \n`), undefined);
 });
 
 // ===========================================================================
@@ -1429,7 +1815,10 @@ const urlsetXml = (entries) =>
   `</urlset>`;
 
 // Build an isolated { pages, dist } tree and run the REAL verifier over it.
-function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist }) {
+// `mutate({ root, distDir })` runs after files are written and before the
+// verifier runs, so a test can introduce symlinks, directories, or other
+// non-regular entries into the dist tree.
+function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist, mutate, makeReadDir }) {
   const root = mkTemp();
   const pagesDir = join(root, "pages");
   for (const [rel, content] of Object.entries(pages)) {
@@ -1450,12 +1839,56 @@ function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist }
     mkdirSync(dirname(abs), { recursive: true });
     writeFileSync(abs, content);
   }
+  if (mutate) mutate({ root, distDir });
+  // Optional internal test seam: inject a directory reader (e.g. one that throws
+  // for one exact directory) built from the concrete { root, distDir } paths.
+  const testHooks = makeReadDir ? { readDir: makeReadDir({ root, distDir }) } : undefined;
   return verifyIndexingDiscoveryBuild({
     repoRoot: pathToFileURL(root + "/"),
     pagesDir: pathToFileURL(pagesDir + "/"),
-    distDir: pathToFileURL(distDir + "/")
+    distDir: pathToFileURL(distDir + "/"),
+    testHooks
   });
 }
+
+// A directory reader that throws (simulated EACCES) for exactly `targetAbs` and
+// delegates every other directory to the real readdirSync. Trailing path
+// separators are normalized on both sides so the dist root (which the verifier
+// passes with a trailing slash) matches a slash-free target.
+function readDirFailingFor(targetAbs) {
+  const norm = (p) => String(p).replace(/[/\\]+$/, "");
+  const target = norm(targetAbs);
+  return (dir, opts) => {
+    if (norm(dir) === target) {
+      const err = new Error("injected directory-read failure");
+      err.code = "EACCES";
+      throw err;
+    }
+    return readdirSync(dir, opts);
+  };
+}
+
+// Detect whether unreadable-directory permission semantics are actually
+// enforced for this process (root/elevated execution ignores 0o000 read bits).
+const PERMISSION_ENFORCEABLE = (() => {
+  try {
+    const d = mkTemp();
+    const sub = join(d, "noread");
+    mkdirSync(sub);
+    writeFileSync(join(sub, "x"), "1");
+    chmodSync(sub, 0o000);
+    let denied = false;
+    try {
+      readdirSync(sub);
+    } catch {
+      denied = true;
+    }
+    chmodSync(sub, 0o755);
+    return denied;
+  } catch {
+    return false;
+  }
+})();
 
 const BASE_PAGES = {
   "index.astro": "---\nimport BaseLayout from '../layouts/BaseLayout.astro';\n---\n<BaseLayout title='Home'></BaseLayout>",
@@ -1664,6 +2097,889 @@ test("fragment inventory: real functional fragment count is recorded; validator 
     validateInternalLinks(["/guide/#nope"], new Set(["/guide/"]), { knownFragments })[0]?.code,
     "INTERNAL_FRAGMENT_MISSING"
   );
+});
+
+// ===========================================================================
+// The REAL verifier: strict XML structural mutation fixtures
+// ===========================================================================
+//
+// These write raw sitemap documents into an isolated dist and run the REAL
+// verifier, exercising the strict XML parser (not regex tag-scraping). Each
+// asserts that a specific malformed structure produces the expected finding.
+
+const SITEMAP0 = `${PRODUCTION_ORIGIN}/sitemap-0.xml`;
+const SITEMAP1 = `${PRODUCTION_ORIGIN}/sitemap-1.xml`;
+const FORBIDDEN_URL = "https://mwe-preview.pages.dev/x/";
+
+test("verifier XML: malformed (not well-formed) sitemap-index is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    // Unclosed <sitemapindex> — not well-formed.
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}><sitemap><loc>${SITEMAP0}</loc></sitemap>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_MALFORMED_XML"));
+});
+
+test("verifier XML: sitemap-index with the wrong root element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><sitemap><loc>${SITEMAP0}</loc></sitemap></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_ROOT"));
+});
+
+test("verifier XML: sitemap-index with the wrong namespace is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://example.com/wrong"><sitemap><loc>${SITEMAP0}</loc></sitemap></sitemapindex>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_NAMESPACE"));
+});
+
+test("verifier XML: sitemap-index record with two <loc> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}><sitemap><loc>${SITEMAP0}</loc><loc>${SITEMAP1}</loc></sitemap></sitemapindex>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_RECORD_ONE_LOC"));
+});
+
+test("verifier XML: sitemap-index record with two <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}><sitemap><loc>${SITEMAP0}</loc><lastmod>2026-01-01T00:00:00Z</lastmod><lastmod>2026-02-02T00:00:00Z</lastmod></sitemap></sitemapindex>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_RECORD_LASTMOD_COUNT"));
+});
+
+test("verifier XML: malformed (not well-formed) child sitemap is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    // Unclosed <urlset> — not well-formed.
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_MALFORMED_XML"));
+});
+
+test("verifier XML: child sitemap with the wrong root element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url></sitemapindex>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_ROOT"));
+});
+
+test("verifier XML: child sitemap with the wrong namespace is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://example.com/wrong"><url><loc>${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_NAMESPACE"));
+});
+
+test("verifier XML: child <url> record with two <loc> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_ONE_LOC"));
+});
+
+test("verifier XML: child <url> record with two <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc><lastmod>2026-01-01T00:00:00Z</lastmod><lastmod>2026-02-02T00:00:00Z</lastmod></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_LASTMOD_COUNT"));
+});
+
+test("verifier XML: child <lastmod> with invalid syntax is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [
+      { loc: `${PRODUCTION_ORIGIN}/`, lastmod: "not-a-real-date" },
+      { loc: `${PRODUCTION_ORIGIN}/about/` }
+    ]
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LASTMOD_ISO"));
+});
+
+test("verifier XML: duplicate raw <loc> across url records is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_NO_DUPLICATE_LOC"));
+});
+
+test("verifier XML: forbidden origin inside a child sitemap is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [
+      { loc: `${PRODUCTION_ORIGIN}/` },
+      { loc: `${PRODUCTION_ORIGIN}/about/` },
+      { loc: FORBIDDEN_URL }
+    ]
+  });
+  assert.ok(failCodes(r).includes("FORBIDDEN_ORIGIN"));
+});
+
+test("verifier XML: an unreferenced generated sitemap-*.xml file is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    // sitemap-1.xml exists in dist but the index references only sitemap-0.xml.
+    extraDist: { "sitemap-1.xml": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/about/` }]) }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_UNREFERENCED_CHILD_FILE"));
+  assert.ok(codes.includes("SITEMAP_CHILD_FILES_EXACT_MATCH"));
+});
+
+test("verifier XML: an index-referenced child sitemap file that is absent is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    childLocs: [SITEMAP0, SITEMAP1], // sitemap-1.xml is never written to dist
+    pageEntries: GOOD_ENTRIES
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("CHILD_FILE_MISSING"));
+  assert.ok(codes.includes("SITEMAP_REFERENCED_CHILD_ABSENT"));
+});
+
+test("verifier XML: an unreferenced stray child with a forbidden origin is still scanned", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-2.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><url><loc>${FORBIDDEN_URL}</loc></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("FORBIDDEN_ORIGIN"));
+  assert.ok(codes.includes("SITEMAP_UNREFERENCED_CHILD_FILE"));
+});
+
+test("verifier XML: two referenced child sitemaps both present pass exact-match", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    childLocs: [SITEMAP0, SITEMAP1],
+    pageEntries: [{ loc: `${PRODUCTION_ORIGIN}/` }], // sitemap-0.xml
+    extraDist: { "sitemap-1.xml": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/about/` }]) }
+  });
+  assert.equal(r.failed, false, `unexpected failures: ${failCodes(r).join(", ")}`);
+});
+
+// ===========================================================================
+// The REAL verifier: strict structural-model, raw-scalar, entity, and
+// symlink/regular-file mutation fixtures (round-2 hardening)
+// ===========================================================================
+
+const rawChild = (inner) => `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}>${inner}</urlset>`;
+const rawIndex = (inner) => `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}>${inner}</sitemapindex>`;
+const childOverride = (inner) => ({ "sitemap-0.xml": rawChild(inner) });
+
+// Probe whether this platform can create symbolic links; symlink-specific tests
+// skip when it cannot (e.g. unprivileged Windows), but the regular-file /
+// directory containment tests always run.
+const SYMLINKS_SUPPORTED = (() => {
+  try {
+    const d = mkTemp();
+    symlinkSync(join(d, "target"), join(d, "link"));
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+test("verifier XML: shared strict lastmod validator (date-only, ms-Z, and rejections)", () => {
+  assert.equal(isValidSitemapLastmod("2026-07-23"), true);
+  assert.equal(isValidSitemapLastmod("2026-07-19T05:00:03.000Z"), true);
+  assert.equal(isValidSitemapLastmod("2026-07-05T17:49:25+08:00"), true);
+  assert.equal(isValidSitemapLastmod("07/23/2026"), false); // locale
+  assert.equal(isValidSitemapLastmod("2026-02-30"), false); // impossible day
+  assert.equal(isValidSitemapLastmod("2026-13-01"), false); // impossible month
+  assert.equal(isValidSitemapLastmod("2026-07-23T25:00:00Z"), false); // invalid time
+  assert.equal(isValidSitemapLastmod("2026-07-23T00:00:00+25:00"), false); // invalid zone
+  assert.equal(isValidSitemapLastmod(" 2026-07-23"), false); // whitespace
+});
+
+test("verifier XML: leading whitespace in a <loc> scalar is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc> ${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LOC_SHAPE"));
+});
+
+test("verifier XML: trailing whitespace in a <loc> scalar is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/ </loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LOC_SHAPE"));
+});
+
+test("verifier XML: <loc> with an attribute is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc foo="1">${PRODUCTION_ORIGIN}/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_LOC_ATTR"));
+});
+
+test("verifier XML: <loc> with an unexpected child element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc><b>${PRODUCTION_ORIGIN}/</b></loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_LOC_CHILD"));
+});
+
+test("verifier XML: <lastmod> with an attribute is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/</loc><lastmod foo="1">2026-07-23</lastmod></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_LASTMOD_ATTR"));
+});
+
+test("verifier XML: <lastmod> with an unexpected child element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/</loc><lastmod><b>2026-07-23</b></lastmod></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_LASTMOD_CHILD"));
+});
+
+test("verifier XML: unexpected child-sitemap root attribute is rejected (xmlns:* is allowed)", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS} extra="x"><url><loc>${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_ROOT_ATTR"));
+});
+
+test("verifier XML: standard xmlns:* namespace declarations on <urlset> are accepted", () => {
+  const ns =
+    'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"';
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${ns}><url><loc>${PRODUCTION_ORIGIN}/</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url></urlset>`
+    }
+  });
+  assert.ok(!failCodes(r).includes("SITEMAP_CHILD_ROOT_ATTR"));
+  assert.ok(!failCodes(r).includes("SITEMAP_CHILD_NAMESPACE"));
+});
+
+test("verifier XML: unexpected record attribute is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url foo="1"><loc>${PRODUCTION_ORIGIN}/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_RECORD_ATTR"));
+});
+
+test("verifier XML: unexpected root child element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/</loc></url><foo>x</foo>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_ROOT_CHILD"));
+});
+
+test("verifier XML: unexpected record child element is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/</loc><bar>x</bar></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_RECORD_CHILD"));
+});
+
+test("verifier XML: non-whitespace text directly inside the root is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`junk<url><loc>${PRODUCTION_ORIGIN}/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_ROOT_TEXT"));
+});
+
+test("verifier XML: non-whitespace text directly inside a record is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url>junk<loc>${PRODUCTION_ORIGIN}/</loc></url>`)
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_URL_RECORD_TEXT"));
+});
+
+test("verifier XML: a malformed record is EXCLUDED from downstream URL entries", () => {
+  // A malformed extra <url> (unexpected child) carries a /ghost/ loc that has no
+  // page source. If it were included it would trigger SITEMAP_UNEXPECTED_ROUTE.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(
+      `<url><loc>${PRODUCTION_ORIGIN}/</loc></url>` +
+        `<url><loc>${PRODUCTION_ORIGIN}/about/</loc></url>` +
+        `<url><loc>${PRODUCTION_ORIGIN}/ghost/</loc><bar>x</bar></url>`
+    )
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_URL_RECORD_CHILD")); // the record is flagged
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE")); // ghost never entered the set
+  assert.ok(!codes.includes("SITEMAP_SET_EXACT_MATCH")); // /,/about/ still match exactly
+});
+
+test("verifier XML: invalid sitemap-index <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-index.xml": rawIndex(`<sitemap><loc>${SITEMAP0}</loc><lastmod>not-a-date</lastmod></sitemap>`)
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_LASTMOD_SYNTAX"));
+});
+
+test("verifier XML: locale-style child <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [{ loc: `${PRODUCTION_ORIGIN}/`, lastmod: "07/23/2026" }, { loc: `${PRODUCTION_ORIGIN}/about/` }]
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LASTMOD_ISO"));
+});
+
+test("verifier XML: impossible-calendar child <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [{ loc: `${PRODUCTION_ORIGIN}/`, lastmod: "2026-02-30" }, { loc: `${PRODUCTION_ORIGIN}/about/` }]
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LASTMOD_ISO"));
+});
+
+test("verifier XML: invalid-time child <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [{ loc: `${PRODUCTION_ORIGIN}/`, lastmod: "2026-07-23T25:00:00Z" }, { loc: `${PRODUCTION_ORIGIN}/about/` }]
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LASTMOD_ISO"));
+});
+
+test("verifier XML: invalid-timezone child <lastmod> is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: [{ loc: `${PRODUCTION_ORIGIN}/`, lastmod: "2026-07-23T00:00:00+25:00" }, { loc: `${PRODUCTION_ORIGIN}/about/` }]
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_LASTMOD_ISO"));
+});
+
+test("verifier XML: a DOCTYPE declaration is rejected before parsing", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0"?><!DOCTYPE urlset><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_MALFORMED_XML"));
+});
+
+test("verifier XML: an internal entity declaration (DOCTYPE) is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0"?><!DOCTYPE urlset [ <!ENTITY x "y"> ]><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_MALFORMED_XML"));
+});
+
+test("verifier XML: an external entity declaration (DOCTYPE) is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0"?><!DOCTYPE urlset [ <!ENTITY ext SYSTEM "file:///etc/passwd"> ]><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_MALFORMED_XML"));
+});
+
+test("verifier XML: a parameter entity declaration (DOCTYPE) is rejected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0"?><!DOCTYPE urlset [ <!ENTITY % pe "x"> ]><urlset ${SM_NS}><url><loc>${PRODUCTION_ORIGIN}/</loc></url></urlset>`
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_MALFORMED_XML"));
+});
+
+test("verifier XML: a normal &amp; escape is NOT treated as a custom entity / DOCTYPE", () => {
+  // The document is well-formed (predefined escape); the &-bearing URL still
+  // fails the exact-shape check, but the document must NOT be flagged malformed.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: childOverride(`<url><loc>${PRODUCTION_ORIGIN}/?a&amp;b</loc></url><url><loc>${PRODUCTION_ORIGIN}/about/</loc></url>`)
+  });
+  const codes = failCodes(r);
+  assert.ok(!codes.includes("SITEMAP_CHILD_MALFORMED_XML"));
+  assert.ok(codes.includes("SITEMAP_LOC_SHAPE")); // the ?a&b URL fails shape, as expected
+});
+
+test("verifier XML: a child path that is a directory is rejected as non-regular", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    childLocs: [SITEMAP0, SITEMAP1],
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ distDir }) => {
+      mkdirSync(join(distDir, "sitemap-1.xml"), { recursive: true });
+    }
+  });
+  assert.ok(failCodes(r).includes("CHILD_NON_REGULAR"));
+});
+
+test("verifier XML: a referenced child that is a symlink outside dist is rejected (not followed)", { skip: !SYMLINKS_SUPPORTED }, () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    childLocs: [SITEMAP0, SITEMAP1],
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ root, distDir }) => {
+      const outside = join(root, "outside-target.xml");
+      writeFileSync(outside, urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/about/` }]));
+      symlinkSync(outside, join(distDir, "sitemap-1.xml"));
+    }
+  });
+  assert.ok(failCodes(r).includes("CHILD_SYMLINK"));
+});
+
+test("verifier XML: an unreferenced matching sitemap symlink is reported", { skip: !SYMLINKS_SUPPORTED }, () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ root, distDir }) => {
+      const outside = join(root, "stray-target.xml");
+      writeFileSync(outside, urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]));
+      symlinkSync(outside, join(distDir, "sitemap-9.xml"));
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_SYMLINK"));
+});
+
+test("verifier XML: a symlinked sitemap-index.xml is rejected", { skip: !SYMLINKS_SUPPORTED }, () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ root, distDir }) => {
+      const outside = join(root, "real-index.xml");
+      writeFileSync(outside, indexXml([SITEMAP0]));
+      rmSync(join(distDir, "sitemap-index.xml"));
+      symlinkSync(outside, join(distDir, "sitemap-index.xml"));
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_INDEX_UNSAFE_FILE"));
+});
+
+// ===========================================================================
+// Round-3: root-level XML findings are FATAL to record extraction
+// ===========================================================================
+
+const MISSING_CHILD = `${PRODUCTION_ORIGIN}/sitemap-7.xml`; // referenced but never written
+const GHOST = `${PRODUCTION_ORIGIN}/ghost/`; // a route with no page source
+
+// Each invalid sitemap-index ROOT must produce its finding AND extract zero
+// child references (so a referenced-but-missing child is never opened).
+test("verifier root-fatal: index unexpected root attribute yields zero child references", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS} extra="x"><sitemap><loc>${MISSING_CHILD}</loc></sitemap></sitemapindex>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INDEX_ROOT_ATTR"));
+  assert.ok(!codes.includes("CHILD_FILE_MISSING")); // sitemap-7.xml never opened
+  assert.ok(!codes.includes("CHILD_LOC_SHAPE"));
+  assert.ok(!codes.includes("SITEMAP_REFERENCED_CHILD_ABSENT"));
+});
+
+test("verifier root-fatal: index non-whitespace root text yields zero child references", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}>junk<sitemap><loc>${MISSING_CHILD}</loc></sitemap></sitemapindex>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INDEX_ROOT_TEXT"));
+  assert.ok(!codes.includes("CHILD_FILE_MISSING"));
+});
+
+test("verifier root-fatal: index unexpected root child yields zero child references", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex ${SM_NS}><foo>x</foo><sitemap><loc>${MISSING_CHILD}</loc></sitemap></sitemapindex>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INDEX_ROOT_CHILD"));
+  assert.ok(!codes.includes("CHILD_FILE_MISSING"));
+});
+
+test("verifier root-fatal: index wrong namespace yields zero child references", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sitemap-index.xml": `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://example.com/wrong"><sitemap><loc>${MISSING_CHILD}</loc></sitemap></sitemapindex>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INDEX_NAMESPACE"));
+  assert.ok(!codes.includes("CHILD_FILE_MISSING"));
+});
+
+// Each invalid child urlset ROOT must produce its finding AND extract zero URL
+// entries (so the otherwise-valid /ghost/ URL never reaches route / origin /
+// duplicate / membership checks).
+test("verifier root-fatal: child unexpected root attribute yields zero URL entries", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS} extra="x"><url><loc>${GHOST}</loc></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_ROOT_ATTR"));
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE")); // ghost never entered
+});
+
+test("verifier root-fatal: child non-whitespace root text yields zero URL entries", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}>junk<url><loc>${GHOST}</loc></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_ROOT_TEXT"));
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE"));
+});
+
+test("verifier root-fatal: child unexpected root child yields zero URL entries", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS}><foo>x</foo><url><loc>${GHOST}</loc></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_ROOT_CHILD"));
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE"));
+});
+
+test("verifier root-fatal: child wrong namespace yields zero URL entries", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://example.com/wrong"><url><loc>${GHOST}</loc></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_NAMESPACE"));
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE"));
+});
+
+// ===========================================================================
+// Round-3: recursive sitemap-shaped file inventory and enforcement
+// ===========================================================================
+
+test("verifier recursive: a nested lowercase sitemap-9.xml is unexpected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "nested/sitemap-9.xml": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]) }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_UNEXPECTED"));
+  assert.ok(!codes.includes("SITEMAP_UNREFERENCED_CHILD_FILE")); // it never enters the valid set
+});
+
+test("verifier recursive: a nested sitemap with a forbidden origin is still scanned", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "nested/sitemap-9.xml": urlsetXml([{ loc: FORBIDDEN_URL }]) }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_UNEXPECTED"));
+  assert.ok(codes.includes("FORBIDDEN_ORIGIN")); // closes the nested false-pass
+});
+
+test("verifier recursive: a nested UPPERCASE SITEMAP-9.XML is unexpected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "nested/SITEMAP-9.XML": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]) }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_UNEXPECTED"));
+});
+
+test("verifier recursive: a root-level UPPERCASE SITEMAP-9.XML is unexpected", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "SITEMAP-9.XML": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]) }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_UNEXPECTED"));
+  assert.ok(!codes.includes("SITEMAP_UNREFERENCED_CHILD_FILE"));
+});
+
+test("verifier recursive: a nested directory named sitemap-9.xml is non-regular", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ distDir }) => {
+      mkdirSync(join(distDir, "nested", "sitemap-9.xml"), { recursive: true });
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_NON_REGULAR"));
+});
+
+test("verifier recursive: a nested sitemap symlink to an outside file is reported, not followed", { skip: !SYMLINKS_SUPPORTED }, () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ root, distDir }) => {
+      const outside = join(root, "outside-nested.xml");
+      writeFileSync(outside, urlsetXml([{ loc: FORBIDDEN_URL }]));
+      mkdirSync(join(distDir, "nested"), { recursive: true });
+      symlinkSync(outside, join(distDir, "nested", "sitemap-9.xml"));
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_CHILD_SYMLINK"));
+  assert.ok(!codes.includes("FORBIDDEN_ORIGIN")); // symlink target never read
+});
+
+test("verifier recursive: a nested sitemap symlink to an in-dist file is reported", { skip: !SYMLINKS_SUPPORTED }, () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ distDir }) => {
+      mkdirSync(join(distDir, "nested"), { recursive: true });
+      symlinkSync(join(distDir, "sitemap-0.xml"), join(distDir, "nested", "sitemap-9.xml"));
+    }
+  });
+  assert.ok(failCodes(r).includes("SITEMAP_CHILD_SYMLINK"));
+});
+
+test("verifier recursive: a directory symlink is NOT followed during traversal", { skip: !SYMLINKS_SUPPORTED }, () => {
+  // A non-shaped directory symlink pointing at a tree that contains a sitemap
+  // file with a forbidden origin. Traversal must not follow it, so the inner
+  // file is never enumerated or scanned.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ root, distDir }) => {
+      const realDir = join(root, "outside-tree");
+      mkdirSync(realDir, { recursive: true });
+      writeFileSync(join(realDir, "sitemap-9.xml"), urlsetXml([{ loc: FORBIDDEN_URL }]));
+      symlinkSync(realDir, join(distDir, "linkdir")); // not sitemap-shaped
+    }
+  });
+  const codes = failCodes(r);
+  assert.ok(!codes.includes("FORBIDDEN_ORIGIN")); // symlinked dir not followed
+  assert.ok(!codes.includes("SITEMAP_CHILD_UNEXPECTED")); // inner file never seen
+});
+
+test("verifier recursive: an unrelated nested .xml is NOT treated as a child sitemap", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "nested/data.xml": '<?xml version="1.0"?><records><record>1</record></records>' }
+  });
+  assert.equal(r.failed, false, `unexpected failures: ${failCodes(r).join(", ")}`);
+});
+
+test("verifier recursive: the ordinary valid root-level child still passes", () => {
+  const r = runVerifierFixture({ pages: BASE_PAGES, pageEntries: GOOD_ENTRIES });
+  assert.equal(r.failed, false, `unexpected failures: ${failCodes(r).join(", ")}`);
+});
+
+// ===========================================================================
+// Round-4: recursive directory-read failure is FATAL (fail-closed)
+// ===========================================================================
+
+const exactMatchCheck = (r) => r.results.find((x) => x.code === "SITEMAP_CHILD_FILES_EXACT_MATCH");
+
+test("verifier traversal: an unreadable inventory ROOT fails closed (injected)", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    makeReadDir: ({ distDir }) => readDirFailingFor(distDir) // fail the dist root itself
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // Generated/reference agreement cannot be represented as complete.
+  const exact = exactMatchCheck(r);
+  assert.ok(exact && exact.ok === false);
+});
+
+test("verifier traversal: an unreadable NESTED directory fails closed; siblings continue (injected)", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES, // writes root-level sitemap-0.xml (referenced + valid)
+    extraDist: { "hidden/sitemap-9.xml": urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]) },
+    makeReadDir: ({ distDir }) => readDirFailingFor(join(distDir, "hidden"))
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // The hidden sitemap was never enumerated -> not claimed inspected.
+  assert.ok(!r.results.some((x) => x.code === "SITEMAP_CHILD_UNEXPECTED" && String(x.detail).includes("hidden")));
+  // The readable root-level valid child was still processed normally.
+  assert.ok(!codes.includes("SITEMAP_REFERENCED_CHILD_ABSENT"));
+});
+
+test("verifier traversal: a hidden forbidden-origin sitemap is NOT read through the failure (injected)", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "hidden/sitemap-9.xml": urlsetXml([{ loc: FORBIDDEN_URL }]) },
+    makeReadDir: ({ distDir }) => readDirFailingFor(join(distDir, "hidden"))
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // Fail-closed: the unreadable content is never read, so FORBIDDEN_ORIGIN is
+  // NOT derived from it — but verification still fails.
+  assert.ok(!codes.includes("FORBIDDEN_ORIGIN"));
+});
+
+test("verifier traversal: generated/reference match does not mask a traversal failure (injected)", () => {
+  // Root-level inventory is exactly correct (sitemap-0.xml referenced + present),
+  // but an empty nested directory cannot be read: overall must still FAIL.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    mutate: ({ distDir }) => mkdirSync(join(distDir, "empty"), { recursive: true }),
+    makeReadDir: ({ distDir }) => readDirFailingFor(join(distDir, "empty"))
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  const exact = exactMatchCheck(r);
+  assert.ok(exact && exact.ok === false); // equality did not override the failure
+});
+
+test("verifier traversal: a real unreadable nested directory (chmod)", { skip: !PERMISSION_ENFORCEABLE }, () => {
+  const root = mkTemp();
+  const pagesDir = join(root, "pages");
+  for (const [rel, content] of Object.entries(BASE_PAGES)) {
+    const abs = join(pagesDir, rel);
+    mkdirSync(dirname(abs), { recursive: true });
+    writeFileSync(abs, content);
+  }
+  const distDir = join(root, "dist");
+  mkdirSync(distDir, { recursive: true });
+  writeFileSync(join(distDir, "sitemap-index.xml"), indexXml([SITEMAP0]));
+  writeFileSync(join(distDir, "sitemap-0.xml"), urlsetXml(GOOD_ENTRIES));
+  writeFileSync(join(distDir, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${PRODUCTION_ORIGIN}/sitemap-index.xml\n`);
+  const hidden = join(distDir, "hidden");
+  mkdirSync(hidden);
+  writeFileSync(join(hidden, "sitemap-9.xml"), urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]));
+  chmodSync(hidden, 0o000);
+  try {
+    const r = verifyIndexingDiscoveryBuild({
+      repoRoot: pathToFileURL(root + "/"),
+      pagesDir: pathToFileURL(pagesDir + "/"),
+      distDir: pathToFileURL(distDir + "/")
+    });
+    const codes = r.results.filter((x) => !x.ok).map((x) => x.code);
+    assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+    assert.equal(r.failed, true);
+  } finally {
+    chmodSync(hidden, 0o755); // restore so temp cleanup can remove it
+  }
+});
+
+// ===========================================================================
+// Round-4: minor Git parsing and root-fatal regression refinements
+// ===========================================================================
+
+test("lastmod (exact flag): 'False\\n' (capitalized) omits", () => {
+  assert.equal(lm({ flag: "False\n" }), undefined);
+});
+test("lastmod (exact flag): 'true\\r\\n' enters shallow handling", () => {
+  assert.equal(lm({ flag: "true\r\n" }, () => `${VALID_SHA_2}\n`), VALID_GIT_DATE); // non-boundary kept
+  assert.equal(lm({ flag: "true\r\n" }, () => `${VALID_SHA}\n`), undefined); // boundary omit
+});
+test("lastmod (boundary): a SHA with surrounding TABS omits", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `\t${VALID_SHA_2}\t\n`), undefined);
+});
+test("lastmod (boundary): multiple SHAs separated by CRLF are accepted", () => {
+  assert.equal(lm({ flag: "true\n" }, () => `${VALID_SHA_2}\r\n${VALID_SHA_3}\r\n`), VALID_GIT_DATE);
+});
+
+test("verifier root-fatal: invalid child root extracts ZERO URL entries and no record-derived findings", () => {
+  // Invalid urlset root (unexpected attribute) containing a forbidden-origin URL
+  // AND an otherwise valid-looking route. No record-derived downstream finding
+  // may be produced; only the root-structure finding applies.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    extraDist: {
+      "sitemap-0.xml": `<?xml version="1.0" encoding="UTF-8"?><urlset ${SM_NS} extra="x"><url><loc>${FORBIDDEN_URL}</loc></url><url><loc>${PRODUCTION_ORIGIN}/somewhere/</loc><lastmod>not-a-date</lastmod></url></urlset>`
+    }
+  });
+  const codes = failCodes(r);
+  assert.equal(r.urlEntryCount, 0); // zero URL entries extracted from the invalid root
+  assert.ok(codes.includes("SITEMAP_CHILD_ROOT_ATTR")); // the root-structure finding applies
+  // No record-derived downstream finding is produced from the invalid record:
+  assert.ok(!codes.includes("SITEMAP_UNEXPECTED_ROUTE"));
+  assert.ok(!codes.includes("SITEMAP_ROUTE_EXISTS"));
+  assert.ok(!codes.includes("SITEMAP_NO_DUPLICATE_LOC"));
+  assert.ok(!codes.includes("SITEMAP_LOC_SHAPE"));
+  assert.ok(!codes.includes("SITEMAP_URL_SET"));
+  assert.ok(!codes.includes("SITEMAP_LASTMOD_ISO"));
 });
 
 // ===========================================================================
