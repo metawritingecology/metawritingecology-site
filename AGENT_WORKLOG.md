@@ -2887,3 +2887,92 @@ changed. No content, metadata-architecture, JSON-LD, language, security-policy,
 GitHub, Cloudflare, Email Routing, CORS, NEL, mailbox, deployment, dependency,
 Package D, or Package E change occurred. Nothing committed, staged, pushed, or
 merged; PR #81 remains open and unmerged.
+
+### 2026-07-23 — Claude Code — package-c-ci-followup-round-5 (walkFiles fail-closed)
+
+Agent: Claude Code
+Task: Fix the CI-exposed fail-open/uncaught traversal path after PR #81's
+required site-ci check failed. Correction round 5 only; kept local and
+UNCOMMITTED for review. No amend/rewrite of ad131d0, no force-push, no push, no
+new PR, no merge, no deploy, no re-run of the failed check via settings, and no
+GitHub/Cloudflare/DNS/settings/branch-protection/secrets/environment/preview
+change. Package D and Package E not started. Starting state verified: branch
+claude/package-c-indexing-discovery-contracts; local HEAD and origin branch head
+both ad131d05fd1f4e7fe2d2b3d99a80c5e2b07d6050; worktree clean; nothing staged; PR
+#81 open, unmerged, two commits. origin/main recorded at
+facbf32f21a6b86a672bba4fb5477293ac299738.
+
+Context: the additive correction commit ad131d0 was pushed normally in the
+preceding run. Its automated checks: Workers Builds:
+metawritingecology-site SUCCEEDED (a build record, not a production deployment);
+the required site-ci check FAILED
+(https://github.com/metawritingecology/metawritingecology-site/actions/runs/30000394137/job/89183955941)
+on the real unreadable-directory test with
+"EACCES: permission denied, scandir '.../dist/hidden/'". CI (unprivileged)
+exposed a SECOND recursive traversal — walkFiles, used by the feed/content
+scan — that still threw an uncaught exception on an unreadable directory. The
+round-4 hardening had covered only the sitemap-inventory traversal; the local
+root environment skipped the capability-gated chmod test, hiding the gap.
+
+Fix (scripts/verify-indexing-discovery-build.mjs): walkFiles now returns
+{ files, traversalFindings } and never lets a directory-read failure escape as an
+uncaught exception. Each failed readdir yields a structured
+DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE finding carrying only a dist-relative
+path ("." for the root) and a bounded errno (a shared normalizeErrno helper
+accepts a short [A-Za-z0-9_]{1,32} code, else "unknown"; no absolute path, no
+stack trace, no file contents). Traversal stops for the failed directory and
+continues with readable siblings; symbolic links remain untraversed. At the call
+site every walkFiles traversal finding is processed through the ordinary failing-
+check mechanism so it contributes to the final failed state and later successful
+checks cannot mask it; the file scan is not represented as complete when a
+directory could not be read. A narrowly-bounded internal seam
+testHooks.walkFilesReadDir (defaulting to readdirSync) allows deterministic
+injection of a single-directory read failure without env vars, global patching,
+new dependencies, or bypassing the readFileSync/lstat/realpath/symlink/
+containment checks. The existing SITEMAP_INVENTORY_DIRECTORY_UNREADABLE finding
+and all other checks (generated/reference exact match, forbidden-origin,
+feed-signature, symlink/realpath, root-fatal XML) are retained; the inventory
+errno is now bounded through the same normalizeErrno helper (closing the
+non-blocking diagnostic-hardening note).
+
+Tests (tests/indexing-discovery.test.ts): the real chmod test now also asserts
+DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE, no longer throws, receives an ordinary
+failed result, and restores permissions on cleanup (its capability-based skip
+remains only where chmod 000 is unenforceable, e.g. root). Added unconditional
+walkFiles fault-injection tests (nested failure with sibling continuation and
+bounded relative-path detail; root failure without exception; hidden feed-
+signature content not read through the failure; readable sibling still scanned;
+sitemap inventory complete while walkFiles independently fails; readable feed-
+signature detection still active). All run under root. Verified the fix under
+real CI permission semantics by running the indexing/discovery suite as the
+unprivileged `nobody` user: 232/232 passed, 0 skipped, including the chmod test
+(no EACCES). (A world read/execute bit was temporarily added to the container
+home/repo directories only to let the unprivileged user traverse to the test
+files; no repository file, ownership, tracked content, or committed artifact was
+affected.)
+
+Validation (pnpm 10.34.5, node v22.22.2; `pnpm install --frozen-lockfile`
+passes): `pnpm run check` exit 0. As root — test:contracts 48/48, test:runtime
+55/55, test:retention 16/16, test:orchestration 29/29, test:workflow 42/42,
+test:semantic-flow 21/21, test:security-resilience 124/124,
+test:indexing-discovery 231 passed / 0 failed / 1 skipped (the capability-gated
+chmod test); total 566 passed, 0 failed, 1 skipped. As unprivileged nobody the
+indexing/discovery suite is 232 passed, 0 skipped. verify:public-surface-map
+18/18; verify:indexing-discovery-build 152/152 on a fresh build (expected ==
+generated == 40 routes). check:astro 0 errors / 0 warnings / 3 hints; check:ts
+clean; wrangler deploy --dry-run only. Two fresh clean builds produced byte-
+identical sitemap-index.xml, sitemap-0.xml, and verifier output. No uncaught
+EACCES remains. git diff --check clean; nothing staged.
+
+Round-5 scope vs ad131d0: exactly three files —
+scripts/verify-indexing-discovery-build.mjs, tests/indexing-discovery.test.ts,
+AGENT_WORKLOG.md. The Git helper (scripts/lib/indexing-discovery-contract.mjs),
+package.json, pnpm-lock.yaml, and astro.config.mjs are unchanged; no new
+dependency. The only production behavior change is that a directory-read failure
+during the walkFiles feed/content scan now yields a structured failed verifier
+result instead of an uncaught exception. No indexing, sitemap membership, route,
+robots, canonical, trailing-slash, feed-absence (for readable output),
+preview-host, Registry, archive, authority, classification, relation, or
+public/private policy changed. Nothing committed, staged, pushed, or merged; PR
+#81 remains open and unmerged, still blocked by the existing failed site-ci until
+a reviewed follow-up commit is pushed.

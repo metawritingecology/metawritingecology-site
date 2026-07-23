@@ -80,16 +80,50 @@ export function isWithinDir(dir, file) {
   return !rel.split(/[\\/]/).includes(".."); // any traversal segment escapes dir
 }
 
-function walkFiles(dirUrl, acc = []) {
-  for (const entry of readdirSync(dirUrl, { withFileTypes: true })) {
-    // Never descend into or read through symbolic links (a symlink is not
-    // legitimate build output and must not be followed for content reads).
-    if (entry.isSymbolicLink()) continue;
-    const childUrl = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, dirUrl);
-    if (entry.isDirectory()) walkFiles(childUrl, acc);
-    else acc.push(fileURLToPath(childUrl));
-  }
-  return acc;
+// Bounded errno normalization for traversal findings: a short
+// alphanumeric/underscore code (e.g. "EACCES"), else "unknown". Never copies an
+// arbitrary or oversized error string into a finding.
+function normalizeErrno(err) {
+  const code = err && err.code;
+  if (typeof code === "string" && /^[A-Za-z0-9_]{1,32}$/.test(code)) return code;
+  return "unknown";
+}
+
+// Recursively collect regular files under dist for the feed/content scan.
+// A directory whose listing FAILS is never allowed to escape as an uncaught
+// exception: it yields an explicit DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE
+// traversal finding (dist-relative path + bounded errno; no absolute path, no
+// stack trace, no file contents), traversal stops for that one directory, and
+// readable siblings continue. Symbolic links are never followed. `readDir` is an
+// internal seam defaulting to readdirSync; it replaces only the listing step.
+// Returns { files, traversalFindings }.
+function walkFiles(distUrl, readDir = readdirSync) {
+  const files = [];
+  const traversalFindings = [];
+  const walk = (dirUrl, relDir) => {
+    let entries;
+    try {
+      entries = readDir(dirUrl, { withFileTypes: true });
+    } catch (err) {
+      traversalFindings.push({
+        code: "DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE",
+        relPath: relDir === "" ? "." : relDir,
+        errno: normalizeErrno(err)
+      });
+      return; // stop for THIS directory; siblings continue via the parent loop
+    }
+    for (const entry of entries) {
+      // Never descend into or read through symbolic links (a symlink is not
+      // legitimate build output and must not be followed for content reads).
+      if (entry.isSymbolicLink()) continue;
+      const rel = relDir ? `${relDir}/${entry.name}` : entry.name;
+      const childUrl = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, dirUrl);
+      if (entry.isDirectory()) walk(childUrl, rel);
+      else files.push(fileURLToPath(childUrl));
+    }
+  };
+  walk(distUrl, "");
+  return { files, traversalFindings };
 }
 
 // ---------------------------------------------------------------------------
@@ -449,7 +483,7 @@ function collectSitemapShapedEntries(distDirPath, readDir = readdirSync) {
       traversalFindings.push({
         code: "SITEMAP_INVENTORY_DIRECTORY_UNREADABLE",
         relPath: relDir === "" ? "." : relDir,
-        errno: err && typeof err.code === "string" ? err.code : "unknown"
+        errno: normalizeErrno(err)
       });
       return; // stop for THIS directory; siblings continue via the parent loop
     }
@@ -679,11 +713,12 @@ export function verifyIndexingDiscoveryBuild({ repoRoot, pagesDir, distDir, test
   const distDirPath = fileURLToPath(distUrl);
   const distPath = (rel) => fileURLToPath(new URL(rel, distUrl));
 
-  // Internal test seam: replaces ONLY the directory-listing step for the
-  // recursive inventory (see collectSitemapShapedEntries). Defaults to the real
-  // readdirSync in production; never bypasses the lstat/symlink/realpath/
-  // containment checks that gate file reads.
+  // Internal test seams: replace ONLY the directory-listing step for the two
+  // recursive traversals (sitemap inventory and the feed/content file scan).
+  // Both default to the real readdirSync in production; neither bypasses the
+  // lstat/symlink/realpath/containment checks that gate file reads.
   const readDir = testHooks?.readDir ?? readdirSync;
+  const walkFilesReadDir = testHooks?.walkFilesReadDir ?? readdirSync;
 
   const results = [];
   let failed = false;
@@ -1030,7 +1065,19 @@ export function verifyIndexingDiscoveryBuild({ repoRoot, pagesDir, distDir, test
   }
 
   // --- Feed absence: filename + content across all dist text ---------------
-  const allDistFiles = walkFiles(distUrl);
+  // The file scan is a SECOND recursive traversal. A failed directory read is
+  // fail-closed: it becomes an explicit finding (never an uncaught exception),
+  // so an unreadable directory cannot be read through and the scan is not
+  // represented as complete. Readable siblings are still scanned.
+  const { files: allDistFiles, traversalFindings: fileScanFindings } = walkFiles(distUrl, walkFilesReadDir);
+  for (const tf of fileScanFindings) {
+    check(
+      false,
+      "DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE",
+      "dist file-scan directory is readable",
+      `${tf.relPath} (${tf.errno})`
+    );
+  }
   const feedFiles = allDistFiles.filter((f) =>
     /(?:^|[\\/])(?:rss|atom|feed)\.xml$/i.test(f.split("\\").join("/"))
   );

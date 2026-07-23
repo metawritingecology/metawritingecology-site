@@ -1818,7 +1818,7 @@ const urlsetXml = (entries) =>
 // `mutate({ root, distDir })` runs after files are written and before the
 // verifier runs, so a test can introduce symlinks, directories, or other
 // non-regular entries into the dist tree.
-function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist, mutate, makeReadDir }) {
+function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist, mutate, makeReadDir, makeWalkFilesReadDir }) {
   const root = mkTemp();
   const pagesDir = join(root, "pages");
   for (const [rel, content] of Object.entries(pages)) {
@@ -1840,9 +1840,13 @@ function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist, 
     writeFileSync(abs, content);
   }
   if (mutate) mutate({ root, distDir });
-  // Optional internal test seam: inject a directory reader (e.g. one that throws
-  // for one exact directory) built from the concrete { root, distDir } paths.
-  const testHooks = makeReadDir ? { readDir: makeReadDir({ root, distDir }) } : undefined;
+  // Optional internal test seams: inject a directory reader (e.g. one that throws
+  // for one exact directory) for the sitemap inventory and/or the walkFiles
+  // feed/content scan, built from the concrete { root, distDir } paths.
+  const hooks = {};
+  if (makeReadDir) hooks.readDir = makeReadDir({ root, distDir });
+  if (makeWalkFilesReadDir) hooks.walkFilesReadDir = makeWalkFilesReadDir({ root, distDir });
+  const testHooks = Object.keys(hooks).length > 0 ? hooks : undefined;
   return verifyIndexingDiscoveryBuild({
     repoRoot: pathToFileURL(root + "/"),
     pagesDir: pathToFileURL(pagesDir + "/"),
@@ -1851,10 +1855,11 @@ function runVerifierFixture({ pages, childLocs, pageEntries, robots, extraDist, 
   });
 }
 
-// A directory reader that throws (simulated EACCES) for exactly `targetAbs` and
-// delegates every other directory to the real readdirSync. Trailing path
-// separators are normalized on both sides so the dist root (which the verifier
-// passes with a trailing slash) matches a slash-free target.
+// A directory reader (for the sitemap-inventory seam, which receives a path) that
+// throws (simulated EACCES) for exactly `targetAbs` and delegates every other
+// directory to the real readdirSync. Trailing path separators are normalized on
+// both sides so the dist root (passed with a trailing slash) matches a slash-free
+// target.
 function readDirFailingFor(targetAbs) {
   const norm = (p) => String(p).replace(/[/\\]+$/, "");
   const target = norm(targetAbs);
@@ -1865,6 +1870,21 @@ function readDirFailingFor(targetAbs) {
       throw err;
     }
     return readdirSync(dir, opts);
+  };
+}
+
+// A directory reader for the walkFiles seam, which receives a file:// URL. Throws
+// (simulated EACCES) for exactly `targetAbs` and delegates otherwise.
+function walkFilesFailingFor(targetAbs) {
+  const norm = (p) => String(p).replace(/[/\\]+$/, "");
+  const target = norm(targetAbs);
+  return (dirUrl, opts) => {
+    if (norm(fileURLToPath(dirUrl)) === target) {
+      const err = new Error("injected file-scan directory-read failure");
+      err.code = "EACCES";
+      throw err;
+    }
+    return readdirSync(dirUrl, opts);
   };
 }
 
@@ -2929,6 +2949,8 @@ test("verifier traversal: a real unreadable nested directory (chmod)", { skip: !
   writeFileSync(join(hidden, "sitemap-9.xml"), urlsetXml([{ loc: `${PRODUCTION_ORIGIN}/` }]));
   chmodSync(hidden, 0o000);
   try {
+    // Must NOT throw (the CI-exposed EACCES). Both recursive traversals now
+    // fail closed with explicit findings.
     const r = verifyIndexingDiscoveryBuild({
       repoRoot: pathToFileURL(root + "/"),
       pagesDir: pathToFileURL(pagesDir + "/"),
@@ -2936,10 +2958,112 @@ test("verifier traversal: a real unreadable nested directory (chmod)", { skip: !
     });
     const codes = r.results.filter((x) => !x.ok).map((x) => x.code);
     assert.ok(codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+    assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE")); // the round-5 fix
     assert.equal(r.failed, true);
   } finally {
     chmodSync(hidden, 0o755); // restore so temp cleanup can remove it
   }
+});
+
+// ---------------------------------------------------------------------------
+// Round-5: walkFiles (feed/content scan) fails closed on unreadable directories
+// ---------------------------------------------------------------------------
+
+test("walkFiles: an injected unreadable NESTED directory fails closed; siblings continue", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "hidden/note.txt": "plain readable content",
+      "sibling/page.html": "<html><head></head><body>ok</body></html>"
+    },
+    makeWalkFilesReadDir: ({ distDir }) => walkFilesFailingFor(join(distDir, "hidden"))
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // The finding records the dist-relative hidden path (not an absolute path):
+  // detail is of the form "hidden (EACCES)".
+  const f = r.results.find((x) => x.code === "DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE");
+  assert.ok(f && /^hidden \([A-Za-z0-9_]+\)$/.test(String(f.detail)));
+});
+
+test("walkFiles: an injected unreadable ROOT fails closed without an exception", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    makeWalkFilesReadDir: ({ distDir }) => walkFilesFailingFor(distDir)
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // A successful sitemap inventory cannot mask the incomplete file scan.
+  assert.ok(!codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+});
+
+test("walkFiles: hidden feed-signature content is NOT read through the failure", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      // An RSS-signature document hidden inside the unreadable directory.
+      "hidden/updates.xml": '<?xml version="1.0"?><rss version="2.0"><channel><title>x</title></channel></rss>'
+    },
+    makeWalkFilesReadDir: ({ distDir }) => walkFilesFailingFor(join(distDir, "hidden"))
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+  // The unreadable content is never read, so no feed-signature finding is
+  // fabricated from it — but verification still fails because the scan is
+  // incomplete.
+  assert.ok(!codes.includes("FEED_CONTENT_SIGNATURE"));
+});
+
+test("walkFiles: a readable sibling is still scanned when another nested dir fails", () => {
+  // The readable sibling contains a feed signature; it MUST still be detected,
+  // proving sibling traversal continues past the failed directory.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: {
+      "sibling/updates.xml": '<?xml version="1.0"?><rss version="2.0"><channel><title>x</title></channel></rss>'
+    },
+    makeWalkFilesReadDir: ({ distDir }) => walkFilesFailingFor(join(distDir, "hidden")),
+    mutate: ({ distDir }) => mkdirSync(join(distDir, "hidden"), { recursive: true })
+  });
+  const codes = failCodes(r);
+  assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE")); // empty hidden dir fails
+  assert.ok(codes.includes("FEED_CONTENT_SIGNATURE")); // readable sibling still scanned
+  assert.equal(r.failed, true);
+});
+
+test("walkFiles: sitemap inventory may complete while the file scan independently fails", () => {
+  // Otherwise-correct generated/reference agreement (sitemap inventory clean),
+  // but the walkFiles scan cannot read the dist root -> still fails. This is the
+  // exact CI-exposed second-traversal defect.
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    makeWalkFilesReadDir: ({ distDir }) => walkFilesFailingFor(distDir)
+  });
+  const codes = failCodes(r);
+  // sitemap inventory had no traversal finding and matched exactly:
+  assert.ok(!codes.includes("SITEMAP_INVENTORY_DIRECTORY_UNREADABLE"));
+  const exact = r.results.find((x) => x.code === "SITEMAP_CHILD_FILES_EXACT_MATCH");
+  assert.ok(exact && exact.ok === true);
+  // but the file scan failed, so overall verification fails:
+  assert.ok(codes.includes("DISCOVERY_FILE_SCAN_DIRECTORY_UNREADABLE"));
+  assert.equal(r.failed, true);
+});
+
+test("walkFiles: readable output still detects a feed signature (regression intact)", () => {
+  const r = runVerifierFixture({
+    pages: BASE_PAGES,
+    pageEntries: GOOD_ENTRIES,
+    extraDist: { "updates.xml": '<?xml version="1.0"?><rss version="2.0"><channel><title>x</title></channel></rss>' }
+  });
+  assert.ok(failCodes(r).includes("FEED_CONTENT_SIGNATURE"));
 });
 
 // ===========================================================================
