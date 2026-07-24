@@ -2976,3 +2976,264 @@ preview-host, Registry, archive, authority, classification, relation, or
 public/private policy changed. Nothing committed, staged, pushed, or merged; PR
 #81 remains open and unmerged, still blocked by the existing failed site-ci until
 a reviewed follow-up commit is pushed.
+
+### 2026-07-23 — Claude Code — package-d-public-metadata-contracts
+
+Agent: Claude Code
+Task: Implement Package D — Public Metadata and Structured Representation
+Contracts, as a local implementation and review-artifact task only (no stage,
+commit, push, PR, merge, deploy, or external setting change).
+
+User-approved Package D decisions applied verbatim: basic language parity in
+scope; supported page-language values are exactly `en` and `zh`; JSON-LD types
+remain exactly WebSite and WebPage (no Article/Book/CreativeWork/Dataset/
+ScholarlyArticle/publication/archive/Registry/ontology/classification/authority
+type); existing special-route behavior preserved (ordinary pages self-canonical
++ indexable + JSON-LD; interactive preview self-canonical + noindex/nofollow +
+JSON-LD; prototype no-canonical + noindex/nofollow + no JSON-LD; 404 no-canonical
++ noindex/follow + no JSON-LD; JSON endpoints outside the HTML metadata
+contract); Open Graph / Twitter out of scope; hreflang / alternate-language /
+og:locale / translation architecture out of scope; existing title and
+description wording not rewritten; HTML meta description and WebPage JSON-LD
+description resolve from the same page description; existing structured genre
+values preserved exactly (not expanded, renamed, normalized, or interpreted as
+MWE classification); inert authority frontmatter (status/classification/
+visibility/archive/registry/authority/relation/publication) not published; and
+all Package C indexing/sitemap/canonical-origin/robots/lastmod/feed/exclusion/
+preview-origin decisions unchanged.
+
+Base SHA: 63caafcd57c5fd50749969937ba57cdd56a950f7 (Package C merge, PR #81;
+verified as origin/main HEAD and as the branch base). origin/main had not
+advanced past the recorded Package C merge.
+Branch: claude/package-d-public-metadata-contracts (local only; not pushed).
+
+Architecture — hybrid typed metadata contract (new src/lib/publicMetadata.ts):
+page-local title and description remain in Astro props / Markdown frontmatter and
+are NOT duplicated into a central registry; route POLICY (language, canonical
+policy, indexing policy, structured-data enablement, and existing structured
+genre only where already emitted) is centralized in an explicit typed registry
+covering every BaseLayout route (all 40 indexable routes + the interactive
+preview = 41 entries; no unrestricted generic fallback — an unregistered
+BaseLayout route fails closed). Structured data is resolved through one
+resolver (resolvePublicMetadata) from the page title, page description,
+route-policy language, and approved canonical URL. The module has no Node/runtime
+imports so it is safe in the SSR worker bundle. It is an engineering layer only:
+it asserts no Registry/classification/relation/OSF/publication/ontology/authority
+status, and enforces the WebSite/WebPage ceiling through types and fail-closed
+checks, not new page prose.
+
+Local title/description retained: BaseLayout reads only title, description, and
+the presentational mainClass from props/frontmatter; it no longer consumes
+schemaDescription/schemaGenre/robots and never reads a generic frontmatter
+`language` or any inert authority field. Language is driven by the typed route
+policy. The inert fields in artistic-research.md (status/classification/
+visibility/language) remain untouched and unpublished.
+
+Chinese language correction: /zh/ and /zh/boundary/ now render html lang="zh"
+and WebPage inLanguage "zh" (previously incorrectly "en"). No Chinese
+body prose or frontmatter title/description changed; the two Chinese Markdown
+files were not edited (the registry supplies language, so no dedicated
+frontmatter field was required).
+
+HTML/JSON-LD description parity: the WebPage JSON-LD description now equals the
+HTML meta description for every JSON-LD-enabled route, resolved from the single
+existing page description. The prior independently-authored route-local schema
+descriptions and the generic "Public orientation surface for Meta-Writing
+Ecology." default were removed. No new description wording was authored (verified
+route-by-route: 40 WebPage descriptions changed to equal the existing HTML
+description; 0 introduced new wording).
+
+WebPage inLanguage addition: every emitted WebPage now carries inLanguage equal
+to html lang. WebSite node semantics/text preserved exactly (name and
+description unchanged; url is the production origin). Supported JSON-LD types
+remain exactly WebSite and WebPage; existing genre values preserved exactly and
+no genre added/renamed. No author/publisher/sameAs/citation/DOI/datePublished/
+dateModified/mainEntityOfPage or Open Graph / Twitter / hreflang / og:locale
+contract introduced.
+
+Special routes preserved: interactive preview keeps its route, title,
+description, self-canonical, noindex/nofollow, JSON-LD (now with description
+parity + inLanguage, genre preserved). src/pages/404.astro and
+src/pages/language-pressure-test-lab-prototype.astro remain byte-identical
+(confirmed by rendered-output snapshot: prototype and 404 IDENTICAL pre/post).
+The two JSON endpoint classes remain application/json and outside the HTML
+metadata system.
+
+Files changed (7): AGENT_WORKLOG.md; package.json (scripts only — added
+test:metadata-contract and verify:metadata-build and wired both into the full
+`check` chain; no dependency added; pnpm-lock.yaml byte-identical);
+src/layouts/BaseLayout.astro (resolver-driven metadata); tests/
+semantic-flow-source-entries.test.ts (one mechanical source-location update:
+the "baseLayout: route-specific metadata for the four approved routes" subtest
+now verifies the four exact approved route-to-genre bindings in the typed
+publicMetadata registry — exactly once each, absent from BaseLayout.astro —
+instead of in the layout source; genre values and test semantics unchanged);
+new src/lib/publicMetadata.ts; new tests/metadata-contract.test.ts; new
+scripts/verify-metadata-build.mjs. src/components/SchemaJsonLd.astro left
+unchanged (it remains a pure serializer; no serializer change was required).
+
+Build verifier note: the site builds SSR (output: "server", Cloudflare adapter),
+so ordinary indexable routes are not emitted as static HTML in dist; they render
+on demand by the worker. scripts/verify-metadata-build.mjs therefore boots the
+freshly built worker in the local offline Cloudflare runtime (wrangler dev
+--local, workerd — the same engine as production) against the current dist,
+fetches every route class, and applies bounded deterministic <head>/JSON-LD
+extraction (no HTML-parser dependency; fast-xml-parser is not used as an HTML
+parser). It uses a fresh OS-assigned free port per run and reaps the wrangler +
+workerd process subtree on exit. Route membership is derived independently from
+Package C's buildExpectedRouteSet (real page sources + robots), not from the
+Package D registry, so coverage is not self-referential. No deployment and no
+external setting change occur.
+
+Validation (pnpm 10.34.5, node v22.22.2; pnpm install --frozen-lockfile passes):
+pnpm run check exit 0 (51s). Source-level metadata contract: 26/26.
+semantic-flow: 21/21 (previously 20/21 before the authorized one-assertion
+update). verify-metadata-build: 1077/1077 against a fresh build. Package C
+regression unchanged and passing: test:indexing-discovery 231 passed / 0 failed /
+1 skipped (pre-existing capability-gated chmod skip), verify-indexing-discovery-
+build 152/152 (expected == generated == 40 sitemap routes; robots sitemap
+pointer unchanged; interactive/prototype/404/JSON endpoints remain sitemap-
+excluded; no lastmod change), verify-public-surface-map 18/18. Other suites:
+test:contracts 48/48, test:runtime 55/55, test:retention 16/16,
+test:orchestration 29/29, test:workflow 42/42, test:security-resilience 124/124.
+check:astro 0 errors / 0 warnings; check:ts clean; wrangler used dry-run only in
+the check chain. Two fresh clean builds produced byte-identical rendered
+<head>/JSON-LD (all 43 tested route classes), robots.txt, sitemap-index.xml, and
+sitemap-0.xml (SHA-256 match). Untracked pre/post metadata snapshots confirm the
+only rendered changes are the authorized ones (zh lang correction, inLanguage
+addition, HTML/JSON-LD description parity); everything else — titles, HTML meta
+descriptions, canonicals, robots, route membership, WebSite meaning, WebPage
+URLs, structured-data type, genre, block cardinality, special-route enablement —
+is stable. git diff --check clean; nothing staged; no tracked dist output;
+pnpm-lock.yaml unchanged; no dependency added.
+
+Status: all changes are LOCAL, UNSTAGED, UNCOMMITTED, and UNPUSHED. No push, PR,
+merge, deployment, GitHub/Cloudflare/DNS/secret/ruleset/branch-protection change,
+external action, or Package E work was performed. Review artifacts
+(mwe-site-package-d-metadata-contract-v1.patch and its manifest) were exported
+for Codex review.
+
+Unresolved questions: None. The one out-of-scope test edit
+(tests/semantic-flow-source-entries.test.ts) was explicitly user-authorized as a
+mechanical source-location update after the approved migration of route-specific
+metadata from BaseLayout.astro to the typed publicMetadata registry.
+Risks or assumptions: The SSR build means per-route rendered HTML is produced by
+the worker rather than emitted to dist; the metadata verifier and snapshots
+therefore render through the local offline workerd runtime rather than reading
+static dist HTML. Genre preservation assumes the currently-emitted genre for each
+route (the 10 route-specific genres plus the default orientation genre for the
+remaining routes) is the exact "existing" genre to retain.
+
+### 2026-07-23 — Claude Code — package-d-public-metadata-contracts v2 (bounded-request correction)
+
+Agent: Claude Code
+Task: Implement the bounded Package D v2 correction after Codex review returned
+CHANGES REQUIRED. This remains a local implementation and review-artifact task
+only (no stage, commit, push, PR, merge, deploy, or external setting change).
+The v1 entry above is unchanged.
+
+Codex verdict: CHANGES REQUIRED. The sole blocker: scripts/verify-metadata-build.mjs
+performed UNBOUNDED HTTP requests during local-worker readiness probing, rendered-
+route verification, and response-body reading, so a nonresponsive route could
+block verification indefinitely and prevent the Wrangler/workerd cleanup path
+from running. No other blocking finding; the non-blocking duplicate-key
+enhancement was intentionally NOT implemented in this correction.
+
+Correction (bounded requests + verifier lifecycle):
+- Added explicit, finite, deterministic constants: ROUTE_FETCH_TIMEOUT_MS = 10000,
+  READINESS_FETCH_TIMEOUT_MS = 2000, plus READINESS_TOTAL_MS = 60000 and
+  READINESS_INTERVAL_MS = 1000 bounding the readiness loop.
+- One shared bounded-fetch mechanism (boundedFetch) using a native AbortController.
+  A single timer per request spans BOTH the header wait AND the full body read and
+  is cleared only in `finally` (after the body read finishes), so a headers-only
+  response with an unfinished body is also aborted — clearing the timer right
+  after fetch() would leave body reads unbounded. A timeout throws a deterministic
+  VerifierTimeoutError (code VERIFIER_FETCH_TIMEOUT) identifying the phase/route
+  without embedding external response data; ordinary network/rendering errors
+  still propagate (fail closed). No request can continue indefinitely.
+- Route reads: fetchRoute now wraps boundedFetch with ROUTE_FETCH_TIMEOUT_MS; the
+  verifier hands its route loop a bound per-route fetcher so every rendered-route
+  read is covered.
+- Readiness: awaitReady replaces the plain readiness fetch. Each attempt is bounded
+  by READINESS_FETCH_TIMEOUT_MS; the overall loop is bounded by a wall-clock
+  deadline (READINESS_TOTAL_MS). A stalled attempt aborts and the loop continues to
+  the next attempt; the final not-ready result is deterministic and still reaches
+  the cleanup `finally` (killTree). No probe body/connection is left open.
+- On any route timeout the error propagates out of the route loop, killTree reaps
+  the Wrangler/workerd subtree in `finally`, and verifyMetadataBuild rejects
+  deterministically (the CLI catch prints ERROR and exits nonzero).
+- Trusted test hooks: verifyMetadataBuild({ port, testHooks }) accepts an OPTIONAL
+  in-process { fetchImpl, routeFetchTimeoutMs, readinessFetchTimeoutMs,
+  readinessTotalMs, readinessIntervalMs }. Production CLI passes none (defaults are
+  globalThis.fetch and the production constants). Hooks are never read from env
+  vars, CLI args, repository files, HTTP input, or build output, and cannot alter
+  metadata policy, route membership, filesystem safety, or JSON-LD decisions.
+
+Deterministic lifecycle regression tests (new tests/metadata-verifier-lifecycle.test.ts,
+Node built-ins only, every test with an outer timeout so a regression cannot hang
+the runner): A response-header timeout (server never sends headers → real helper
+aborts within the bound with the deterministic error); B response-body timeout
+(headers + partial body, never ended → body read is also aborted within the bound —
+this fails if the timer were cleared after headers alone); C full-verifier route
+timeout (real verifyMetadataBuild against the built local worker with a trusted hook
+that stalls exactly one rendered route → deterministic rejection identifying the
+route, no hang); D cleanup + port closure (explicit free port; after the timeout the
+Wrangler/workerd listener is gone and the port is reusable; unrelated processes are
+not touched); E readiness attempt timeout (a never-completing probe is bounded per
+attempt and overall). All five pass. (A loopback HTTP server with tracked-and-
+destroyed sockets is used for A/B; a known Node test-runner interaction with an
+aborted fetch over a raw silent TCP socket is avoided by using a real HTTP
+connection that is explicitly torn down.)
+
+Body reads remain within the timeout; normal rendered output is unchanged. The
+timeout correction touches only the verifier script and its new test — it alters no
+HTML, JSON-LD, robots, sitemap, route membership, or response bodies.
+
+Package script wiring: added test:metadata-verifier-lifecycle (Node test convention)
+and integrated it into `pnpm run check` after the metadata source tests and before
+the existing suites / Package C verifiers / normal metadata build verifier (order:
+astro build → static checks → metadata source tests → metadata verifier lifecycle
+tests → existing suites → Package C verifiers → normal metadata build verifier).
+No existing check removed or weakened. No dependency added; pnpm-lock.yaml
+byte-identical.
+
+Validation (pnpm 10.34.5, node v22.22.2; pnpm install --frozen-lockfile passes):
+test:metadata-contract 26/26 (unchanged); test:metadata-verifier-lifecycle 5/5;
+test:semantic-flow 21/21; normal verify:metadata-build 1077/1077 on a fresh build
+(no new verifier check added — lifecycle coverage lives in the separate test file —
+so the total is unchanged and normal local routes never time out); check:astro
+0 errors / 0 warnings (45 files); check:ts clean; Package C unchanged and passing
+(test:indexing-discovery 231 passed / 0 failed / 1 skipped, verify-indexing-discovery-
+build 152/152, verify-public-surface-map 18/18); test:contracts 48/48,
+test:runtime 55/55, test:retention 16/16, test:orchestration 29/29, test:workflow
+42/42, test:security-resilience 124/124. Full `pnpm run check` exit 0; no leftover
+Wrangler/workerd afterward. Two fresh clean builds are byte-identical (rendered
+<head>+JSON-LD for all 43 route classes, robots.txt, sitemap-index.xml,
+sitemap-0.xml), and the v2 rendered dump is byte-identical (same SHA-256) to the v1
+rendered dump — confirming the timeout change produced no rendered-output
+difference. Dynamic ports, elapsed times, timeout diagnostics, and process IDs never
+enter rendered output. git diff --check clean; nothing staged; no tracked dist;
+pnpm-lock.yaml unchanged.
+
+Accumulated Package D scope relative to 63caafc is exactly eight files:
+AGENT_WORKLOG.md, package.json, scripts/verify-metadata-build.mjs,
+src/layouts/BaseLayout.astro, src/lib/publicMetadata.ts, tests/metadata-contract.test.ts,
+tests/metadata-verifier-lifecycle.test.ts, tests/semantic-flow-source-entries.test.ts.
+Round-2 edits were limited to exactly four files: AGENT_WORKLOG.md, package.json,
+scripts/verify-metadata-build.mjs, tests/metadata-verifier-lifecycle.test.ts.
+BaseLayout.astro, publicMetadata.ts, metadata-contract.test.ts, and the semantic-flow
+test were not modified in round 2; the typed metadata contract, route policy, titles,
+descriptions, JSON-LD semantics, language/canonical/robots policy, genre values,
+inert-frontmatter protection, special-route behavior, and Package C route membership
+are all preserved.
+
+Status: all changes remain LOCAL, UNSTAGED, UNCOMMITTED, and UNPUSHED. No PR, merge,
+deployment, GitHub/Cloudflare/DNS/secret/ruleset/branch-protection change, external
+action, or Package E work occurred. Superseding v2 review artifacts
+(mwe-site-package-d-metadata-contract-v2.patch and its manifest) were exported.
+
+Unresolved questions: None.
+Risks or assumptions: The lifecycle cleanup/port-closure guarantee is asserted on
+this Linux environment (killTree walks /proc); no cross-platform lifecycle guarantee
+is claimed beyond what is tested. The full-verifier lifecycle tests build the SSR
+dist on demand when absent (the check chain builds first, so no rebuild occurs there).
