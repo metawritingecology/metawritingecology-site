@@ -1,0 +1,3 @@
+src/data/public-surface-authority-map/runtime-manifest.json -text
+src/data/public-surface-authority-map/last-known-good.json -text
+src/data/public-surface-authority-map/runtime-snapshots/*.json -text

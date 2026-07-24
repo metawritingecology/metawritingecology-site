@@ -3237,3 +3237,15 @@ Risks or assumptions: The lifecycle cleanup/port-closure guarantee is asserted o
 this Linux environment (killTree walks /proc); no cross-platform lifecycle guarantee
 is claimed beyond what is tested. The full-verifier lifecycle tests build the SSR
 dist on demand when absent (the check chain builds first, so no rebuild occurs there).
+
+### 2026-07-24 — Claude Code — provenance-governance-changes
+
+Agent: Claude Code
+Task: Apply two approved changes from exact inline content: add narrowly scoped `.gitattributes` line-ending rules for the public-surface runtime artifacts, and add a public deployment-provenance governance document.
+Files changed:
+- .gitattributes (new) — three `-text` rules preserving byte identity for src/data/public-surface-authority-map/runtime-manifest.json, last-known-good.json, and runtime-snapshots/*.json. No matched JSON file was modified or renormalized.
+- docs/deployment-provenance.md (new) — public governance summary of deployment provenance for the public website, status `PARTIALLY VERIFIED`, created verbatim from the approved content.
+Build / tests run: pnpm install --frozen-lockfile (Linux, node v22.22.2, pnpm 10.34.5); full `pnpm run check` passed on both Phase 1 and Phase 2; public-surface byte-identity verifier `pnpm run verify:public-surface-map` passed all 18 checks; git diff --check clean.
+Result: Two separate commits — 1c68e3c (.gitattributes) and 06a344a (docs/deployment-provenance.md) — pushed to branch claude/apply-approved-changes-970d2z. GitHub Actions runs 30106711488 (Phase 1) and 30107106458 (Phase 2) both completed successfully. PR #84 remains open and unmerged. No deployment or production change was claimed or performed.
+Unresolved questions: None.
+Risks or assumptions: Governance status is recorded as-is (`PARTIALLY VERIFIED`) and not reinterpreted; no operational identifiers or private deployment evidence are included; production deployment provenance is not claimed as verified.
