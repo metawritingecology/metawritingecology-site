@@ -175,15 +175,47 @@ test("surfaces: platform surface present only if /platforms/ exists", () => {
 });
 
 test("baseLayout: route-specific metadata for the four approved routes", () => {
-  for (const route of ["/models/", "/publications/", "/entry-points/", "/public-records/"]) {
-    assert.ok(baseLayout.includes(`"${route}":`), `missing schemaOverride for ${route}`);
+  // Package D migrated route-specific structured metadata out of
+  // BaseLayout.astro into the typed publicMetadata registry, which is now the
+  // single source of truth. The four approved route-to-genre associations must
+  // exist there exactly once, with their exact genre values, and must NOT be
+  // duplicated back into BaseLayout.astro. Genre values and this test's
+  // semantic purpose are unchanged; only the source location it inspects moved.
+  const publicMetadata = rd("src/lib/publicMetadata.ts");
+
+  const approvedRouteGenres = {
+    "/models/": "Classification-aware conceptual navigation",
+    "/publications/": "Publication and citation record",
+    "/entry-points/": "Thematic reading orientation",
+    "/public-records/": "Public-record summary"
+  };
+
+  for (const [route, genre] of Object.entries(approvedRouteGenres)) {
+    // The registry binds the route to its exact genre in the intended
+    // structure (`"<route>": en("<genre>")`). A missing, renamed, or changed
+    // genre, or a moved binding, fails here.
+    assert.ok(
+      publicMetadata.includes(`"${route}": en("${genre}")`),
+      `registry does not bind ${route} to its approved genre "${genre}"`,
+    );
+    // Exactly once in the registry: no missing, duplicated, or added definition.
+    assert.equal(
+      countOccurrences(publicMetadata, genre),
+      1,
+      `approved genre "${genre}" must appear exactly once in the registry`,
+    );
+    // Single source of truth: the genre is not re-declared in BaseLayout.astro.
+    assert.ok(
+      !baseLayout.includes(genre),
+      `approved genre "${genre}" must not be duplicated in BaseLayout.astro`,
+    );
   }
-  // Existing /surfaces/ override preserved.
-  assert.ok(baseLayout.includes('"/surfaces/":'), "existing /surfaces/ override removed");
-  assert.match(baseLayout, /Classification-aware conceptual navigation/);
-  assert.match(baseLayout, /Publication and citation record/);
-  assert.match(baseLayout, /Thematic reading orientation/);
-  assert.match(baseLayout, /Public-record summary/);
+
+  // The existing /surfaces/ route remains registered in the same registry.
+  assert.ok(
+    publicMetadata.includes('"/surfaces/":'),
+    "existing /surfaces/ registry entry removed",
+  );
 });
 
 // ---------------------------------------------------------------------------

@@ -3,152 +3,60 @@ import "../styles/global.css";
 import PublicSearchModal from "../components/PublicSearchModal.astro";
 
 import SchemaJsonLd from "../components/SchemaJsonLd.astro";
+import {
+  resolvePublicMetadata,
+  buildJsonLd,
+  APPROVED_PRODUCTION_ORIGIN
+} from "../lib/publicMetadata";
 
 const {
   title: propTitle,
   description: propDescription,
-  schemaDescription: propSchemaDescription,
-  schemaGenre: propSchemaGenre,
-  robots: propRobots,
   mainClass: propMainClass
 } = Astro.props;
 
 const frontmatter = Astro.props.frontmatter ?? {};
 
-// Optional, backward-compatible route hooks. Routes that pass neither prop are
-// rendered exactly as before: no robots meta, and a bare <main>.
-const robots = propRobots ?? frontmatter.robots;
+// Presentational-only layout hook (not metadata). Routes that pass no value
+// render a bare <main>, exactly as before.
 const mainClass = propMainClass ?? frontmatter.mainClass;
 
-const title = propTitle ?? frontmatter.title ?? "Meta-Writing Ecology";
-const description =
-  propDescription ??
-  frontmatter.description ??
-  "A recursive linguistic system and structural diagnostic framework.";
-const schemaDescription = propSchemaDescription ?? frontmatter.schemaDescription;
-const schemaGenre = propSchemaGenre ?? frontmatter.schemaGenre;
+// Page-local title/description remain in explicit props or Markdown/MDX
+// frontmatter and are NOT rewritten here. Route POLICY (language, canonical,
+// indexing, structured data, existing genre) comes from the typed registry.
+// Inert authority frontmatter (status, classification, visibility, archive,
+// registry, authority, relation, publication, language, …) is never consumed.
+const title = propTitle ?? frontmatter.title;
+const description = propDescription ?? frontmatter.description;
 
-const SITE_URL = "https://metawritingecology.org/";
+// Canonical origin comes only from the approved Package C production origin
+// path (Astro.site); an arbitrary/preview origin can never enter metadata.
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
 
-const siteUrl = new URL("/", Astro.site ?? SITE_URL).toString();
+// One resolver produces title, HTML meta description, html lang, canonical,
+// robots, and the structured-data inputs. The HTML meta description and the
+// WebPage JSON-LD description therefore resolve from the same page description.
+const metadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title,
+  description,
+  siteOrigin
+});
 
-const pathname = Astro.url.pathname;
-
-const normalizedPathname =
-  pathname === "/" || pathname.endsWith("/") || pathname.includes(".")
-    ? pathname
-    : `${pathname}/`;
-
-const currentUrl = new URL(normalizedPathname, siteUrl).toString();
-
-type PageSchemaSummary = {
-  description: string;
-  genre: string;
-};
-
-const schemaOverrides: Record<string, PageSchemaSummary> = {
-  "/": {
-    description:
-      "Public orientation surface for Meta-Writing Ecology, a recursive linguistic and structural analysis system.",
-    genre: "Public orientation surface"
-  },
-  "/ai-readable-knowledge-architecture/": {
-    description:
-      "AI-readable boundary page for public documentation surfaces in Meta-Writing Ecology.",
-    genre: "AI-readable boundary page"
-  },
-
-  "/application-boundary/": {
-    description:
-      "Public boundary page for scope limits and non-operational positioning of Meta-Writing Ecology public materials.",
-    genre: "Public boundary page"
-  },
-
-  "/interpretation-boundaries/": {
-    description:
-      "Public boundary page for reading, summary, and interpretation limits around Meta-Writing Ecology.",
-    genre: "Public boundary page"
-  },
-
-  "/llms-boundary/": {
-    description:
-      "AI-readable boundary page describing the public llms.txt orientation file for Meta-Writing Ecology.",
-    genre: "AI-readable boundary page"
-  },
-
-  "/surfaces/": {
-    description:
-      "Public orientation surface for navigating Meta-Writing Ecology entry surfaces without exposing non-public working layers.",
-    genre: "Public orientation surface"
-  },
-
-  "/models/": {
-    description:
-      "Classification-aware public navigation for GitHub-visible MWE models and adjacent framework documents.",
-    genre: "Classification-aware conceptual navigation"
-  },
-
-  "/publications/": {
-    description:
-      "Source-linked publication, DOI, archive, and citation records for Meta-Writing Ecology.",
-    genre: "Publication and citation record"
-  },
-
-  "/entry-points/": {
-    description:
-      "Thematic entry points and source-facing reading orientation for Meta-Writing Ecology.",
-    genre: "Thematic reading orientation"
-  },
-
-  "/public-records/": {
-    description:
-      "High-level persistence, citation, discovery, and traversal anchors for Meta-Writing Ecology.",
-    genre: "Public-record summary"
-  }
-};
-
-const pageSchema = schemaOverrides[normalizedPathname] ?? {
-  description: "Public orientation surface for Meta-Writing Ecology.",
-  genre: "Public orientation surface"
-};
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${siteUrl}#website`,
-      name: "Meta-Writing Ecology",
-      url: siteUrl,
-      description:
-        "Public orientation surfaces for Meta-Writing Ecology, a recursive linguistic and structural analysis system."
-    },
-    {
-      "@type": "WebPage",
-      "@id": `${currentUrl}#webpage`,
-      name: title,
-      url: currentUrl,
-      description: schemaDescription ?? pageSchema.description,
-      genre: schemaGenre ?? pageSchema.genre,
-      isPartOf: {
-        "@id": `${siteUrl}#website`
-      }
-    }
-  ]
-};
+const jsonLd = buildJsonLd(metadata, siteOrigin);
 ---
 
-<html lang="en">
+<html lang={metadata.language}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>{title}</title>
+    <title>{metadata.title}</title>
 
-    <meta name="description" content={description} />
+    <meta name="description" content={metadata.description} />
 
-    {robots && <meta name="robots" content={robots} />}
+    {metadata.robots && <meta name="robots" content={metadata.robots} />}
 
-    <link rel="canonical" href={currentUrl} />
+    {metadata.canonicalUrl && <link rel="canonical" href={metadata.canonicalUrl} />}
 
     <link rel="icon" type="image/png" href="/favicon.png" />
 
@@ -158,7 +66,7 @@ const jsonLd = {
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <SchemaJsonLd data={jsonLd} />
+    {jsonLd && <SchemaJsonLd data={jsonLd} />}
   </head>
 
   <body>
