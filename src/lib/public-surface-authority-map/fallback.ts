@@ -3,7 +3,7 @@
 // This module centralises the Phase-1-SPECIFIC facts about the single bundled
 // last-known-good preview snapshot: its immutable provenance, its fixed raw byte
 // identity (byte length / SHA-256 / Git blob id), and its exact instance counts
-// (27 nodes / 146 edges / 120 boundary_reference / 26 source_use_reference /
+// (30 nodes / 161 edges / 132 boundary_reference / 29 source_use_reference /
 // 7 omitted self-references).
 //
 // These constants live here — NOT inside the audited snapshot file, which must
@@ -40,9 +40,9 @@ export const SOURCE_REPOSITORY = "metawritingecology/meta-writing-ecology";
 export const SOURCE_REPOSITORY_URL =
   "https://github.com/metawritingecology/meta-writing-ecology";
 
-// PR #20 merge commit — the immutable snapshot source commit.
+// Approved retained snapshot's immutable source commit.
 export const SNAPSHOT_SOURCE_COMMIT =
-  "18491105f0bc0451e0bf99eaa78c39f69c7cb57c";
+  "3219fa03149b4bf1a229f059b4912b632028422b";
 export const SNAPSHOT_SOURCE_PATH =
   "visualizations/public-surface-authority-map/data.json";
 export const SNAPSHOT_COMMIT_URL = `${SOURCE_REPOSITORY_URL}/commit/${SNAPSHOT_SOURCE_COMMIT}`;
@@ -51,9 +51,9 @@ export const SNAPSHOT_COMMIT_URL = `${SOURCE_REPOSITORY_URL}/commit/${SNAPSHOT_S
 // SNAPSHOT_SHA256 (the same value assertRawIdentity verifies), never recomputed
 // from live input for display.
 export const SNAPSHOT_SHA256 =
-  "82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
-export const SNAPSHOT_GIT_BLOB_SHA = "aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b";
-export const SNAPSHOT_BYTE_LENGTH = 83727;
+  "3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea";
+export const SNAPSHOT_GIT_BLOB_SHA = "2d59c4fdd07a2a9ddfad94e2e214a2d1c84912af";
+export const SNAPSHOT_BYTE_LENGTH = 92903;
 
 export const SNAPSHOT_STATUS = "bundled_last_known_good_preview_snapshot";
 export const SNAPSHOT_STATUS_LABEL = "Bundled last-known-good preview snapshot";
@@ -61,10 +61,10 @@ export const SNAPSHOT_STATUS_LABEL = "Bundled last-known-good preview snapshot";
 // --- Expected Phase 1 instance counts ---------------------------------------
 
 export const EXPECTED_COUNTS: ExpectedInstanceCounts = {
-  nodes: 27,
-  edges: 146,
-  boundary_reference: 120,
-  source_use_reference: 26,
+  nodes: 30,
+  edges: 161,
+  boundary_reference: 132,
+  source_use_reference: 29,
   self_references_omitted: 7,
 };
 

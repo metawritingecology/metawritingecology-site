@@ -27,11 +27,11 @@ const root = new URL("../", import.meta.url);
 const p = (rel) => fileURLToPath(new URL(rel, root));
 
 const APPROVED_SNAPSHOT_ID =
-  "97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
-const EXPECTED_BYTE_LENGTH = 83727;
+  "3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea";
+const EXPECTED_BYTE_LENGTH = 92903;
 const EXPECTED_SHA256 =
-  "82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
-const EXPECTED_GIT_BLOB = "aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b";
+  "3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea";
+const EXPECTED_GIT_BLOB = "2d59c4fdd07a2a9ddfad94e2e214a2d1c84912af";
 
 const SRC_FALLBACK = p("src/data/public-surface-authority-map/last-known-good.json");
 const SRC_SNAPSHOT = p(
@@ -101,7 +101,7 @@ await check("04 generated manifest bytes == source manifest bytes", () => {
   }
 });
 
-await check("05 generated snapshot byte length is 83727", () => {
+await check("05 generated snapshot byte length is 92903", () => {
   const n = readBytes(DIST_SNAPSHOT).length;
   if (n !== EXPECTED_BYTE_LENGTH) throw new Error(`length ${n}`);
   return `${n} bytes`;
@@ -272,7 +272,7 @@ await check("15 Phase 1 interactive route exists", () => {
   if (!existsSync(DIST_INTERACTIVE)) throw new Error("missing interactive route");
 });
 
-await check("16 Phase 1 fallback table has 27 records", () => {
+await check("16 Phase 1 fallback table has 30 records", () => {
   const html = readFileSync(DIST_INTERACTIVE, "utf8");
   const snapshot = assertSnapshot(JSON.parse(readFileSync(SRC_FALLBACK, "utf8")));
   let present = 0;
@@ -280,8 +280,8 @@ await check("16 Phase 1 fallback table has 27 records", () => {
     // Each node renders its unique canonical URL in the no-JS fallback table.
     if (html.includes(node.canonical_public_url)) present += 1;
   }
-  if (present !== 27) throw new Error(`found ${present} of 27 node records`);
-  return "27 records";
+  if (present !== 30) throw new Error(`found ${present} of 30 node records`);
+  return "30 records";
 });
 
 await check("17 Phase 1 boundary statements remain", () => {

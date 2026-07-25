@@ -39,7 +39,7 @@ const root = new URL("../../", import.meta.url);
 const rd = (rel: string) => readFileSync(fileURLToPath(new URL(rel, root)), "utf8");
 
 const APPROVED_SNAPSHOT_ID =
-  "97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e";
+  "3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea";
 
 const fallbackRaw = rd("src/data/public-surface-authority-map/last-known-good.json");
 const runtimeSnapshotRaw = rd(

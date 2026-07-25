@@ -61,7 +61,7 @@ const PROTOTYPE_ROUTE = "/language-pressure-test-lab-prototype/";
 const NOT_FOUND_PROBE = "/package-d-metadata-verifier-404-probe/";
 const JSON_ENDPOINTS = [
   "/public-surface-map/data/manifest.json",
-  "/public-surface-map/data/snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json"
+  "/public-surface-map/data/snapshots/3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea.json"
 ];
 
 // ---------------------------------------------------------------------------
