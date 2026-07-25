@@ -266,17 +266,30 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
   <div class="psam__stage">
     <div class="psam__map-region">
       <h2 class="psam__region-title">Categorical map</h2>
-      <div class="psam__map-scroll">
+      <p class="psam__map-hint" data-psam-map-hint hidden>
+        Each map node is reachable with Tab and activated with Enter or Space.
+        The map scrolls horizontally when the groups are wider than the view.
+        Node labels are shortened; the full name is in the node detail panel and
+        the record table. Selection and routing are navigation only.
+      </p>
+      <div class="psam__map-scroll" data-psam-map-scroll>
         <div class="psam__map" data-psam-map>
           <svg
-            class="psam__edges"
-            data-psam-edges
-            aria-hidden="true"
-            focusable="false"></svg>
+            class="psam__svg"
+            data-psam-map-svg
+            role="group"
+            aria-label="Categorical map of the selected public surface. Grouping and position carry no ranking, importance, or authority."
+          ></svg>
           <p class="psam__map-fallback" data-psam-map-fallback>
             The interactive categorical map requires JavaScript. Every record
             remains available in the record table below. No records are omitted
             from that table.
+          </p>
+          <p class="psam__map-empty" data-psam-map-empty hidden>
+            No record in this snapshot matches the current filters, so the map
+            view is empty. Filtering never removes a record from the record
+            table below, and omission from this view does not imply
+            nonexistence.
           </p>
         </div>
       </div>
@@ -315,7 +328,23 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
           >Source-use reference (navigation only). Line style: dashed.</span
         >
       </li>
+      <li>
+        <span class="psam__legend-node psam__legend-node--selected" aria-hidden="true">◉</span>
+        <span
+          >Selected node — an interface state, not a property of the record.</span
+        >
+      </li>
     </ul>
+    <p class="psam__legend-note">
+      Color is used for exactly two things. Line color and line style together
+      distinguish the <code>relation_type</code> metadata field, whose only two
+      values are <code>boundary_reference</code> and
+      <code>source_use_reference</code>; the two are drawn with the same line
+      width and the same opacity, so neither reads as stronger. Node color
+      changes only with interface state (selected or keyboard-focused). No
+      color, size, or position is derived from edge count, grouping size, or any
+      score, and no gradient or scale is used.
+    </p>
   </div>
 
   <!-- Server-rendered fallback: all records, always present without JavaScript. -->
@@ -647,9 +676,13 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     min-width: 0;
   }
 
+  /* Horizontal scrolling is the intended overflow behavior for the map when the
+     deterministic layout is wider than the viewport. Vertical growth is not
+     clipped: the scroller has no fixed height, so a tall group column extends
+     the page instead of hiding records. Phase 2A adds no pan or zoom. */
   .psam__map-scroll {
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: auto;
+    overscroll-behavior-x: contain;
     border: 1px solid var(--psam-line);
     border-radius: 8px;
     background: var(--psam-panel);
@@ -657,21 +690,63 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
 
   .psam__map {
     position: relative;
-    min-height: 18rem;
     min-width: 100%;
   }
 
-  .psam__edges {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+  .psam__map-hint,
+  .psam__map-empty {
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+    margin: 0 0 0.6rem;
+  }
+
+  .psam__map-empty {
+    margin: 0;
+    padding: 1rem 1.1rem;
+  }
+
+  /* D3-rendered map surface. The SVG carries width/height only once the client
+     has rendered a deterministic layout, so the no-JavaScript page shows the
+     fallback paragraph instead of an empty default-sized SVG box. */
+  .psam__svg {
+    display: block;
+  }
+
+  .psam__svg:not([width]) {
+    display: none;
+  }
+
+  .psam__layer--edges {
     pointer-events: none;
   }
 
+  .psam__group-frame {
+    fill: none;
+    stroke: var(--psam-line);
+    stroke-width: 1;
+  }
+
+  .psam__group-label {
+    fill: var(--psam-accent);
+    font-family: inherit;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .psam__group-count {
+    fill: var(--psam-muted);
+    font-family: inherit;
+    font-size: 0.72rem;
+  }
+
+  /* Both relation types share stroke width and opacity; only hue and dash
+     pattern differ, so line styling never encodes strength or importance. */
   .psam__edge {
     fill: none;
     stroke-width: 1.4;
+    stroke-opacity: 1;
+    stroke-linecap: round;
   }
 
   .psam__edge--boundary_reference {
@@ -683,54 +758,51 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     stroke-dasharray: 6 4;
   }
 
-  .psam__col-label {
-    position: absolute;
-    color: var(--psam-muted);
-    font-size: 0.75rem;
-    line-height: 1.2;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    overflow-wrap: anywhere;
+  .psam__node {
+    cursor: pointer;
   }
 
-  .psam__node {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    border: 1px solid var(--psam-node-border);
-    border-radius: 6px;
-    background: var(--psam-node-bg);
-    color: var(--psam-text);
-    cursor: pointer;
-    font: inherit;
-    font-size: 0.82rem;
-    line-height: 1.2;
-    text-align: left;
-    padding: 0.4rem 0.5rem;
-    overflow: hidden;
+  .psam__node-shape {
+    fill: var(--psam-node-bg);
+    stroke: var(--psam-node-border);
+    stroke-width: 1;
   }
 
   .psam__node-glyph {
-    flex: 0 0 auto;
-    color: var(--psam-accent);
+    fill: var(--psam-accent);
   }
 
-  .psam__node-name {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .psam__node-label {
+    fill: var(--psam-text);
+    font-family: inherit;
+    font-size: 0.8rem;
   }
 
-  .psam__node[aria-pressed="true"] {
-    border-color: var(--psam-accent);
-    background: var(--psam-node-selected);
-    box-shadow: 0 0 0 1px var(--psam-accent);
+  .psam__node:hover .psam__node-shape {
+    stroke: var(--psam-link);
   }
 
-  .psam__node:hover {
-    border-color: var(--psam-link);
+  /* Selection is an interface state. Only stroke and fill change — every node
+     box keeps exactly the same width and height. */
+  .psam__node--selected .psam__node-shape {
+    fill: var(--psam-node-selected);
+    stroke: var(--psam-accent);
+    stroke-width: 2;
+  }
+
+  .psam__node:focus {
+    outline: none;
+  }
+
+  .psam__node:focus-visible .psam__node-shape {
+    stroke: var(--psam-focus);
+    stroke-width: 2;
+    stroke-dasharray: none;
+  }
+
+  .psam__node:focus-visible {
+    outline: 2px solid var(--psam-focus);
+    outline-offset: 2px;
   }
 
   /* Detail */
@@ -810,6 +882,16 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     border-top-color: var(--psam-edge-source);
   }
 
+  .psam__legend-node--selected {
+    color: var(--psam-accent);
+  }
+
+  .psam__legend-note {
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+    margin: 0.85rem 0 0;
+  }
+
   /* Table */
   .psam__table-wrap {
     overflow-x: auto;
@@ -871,8 +953,11 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     border-radius: 4px;
   }
 
-  /* Responsive: stack map and detail, drop sticky, keep table scrollable. */
-  @media (max-width: 780px) {
+  /* Responsive: below desktop, stack the map above the detail panel and drop
+     sticky positioning. Stacking starts at tablet width so the map keeps the
+     full content width instead of being squeezed into a narrow column beside
+     the detail panel. */
+  @media (max-width: 1023px) {
     .psam__stage {
       grid-template-columns: 1fr;
     }
@@ -880,7 +965,10 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     .psam__detail {
       position: static;
     }
+  }
 
+  /* Narrow widths: single-column controls and a stacked snapshot-status list. */
+  @media (max-width: 780px) {
     .psam__field {
       min-width: 100%;
     }
@@ -899,9 +987,13 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     }
   }
 
+  /* Phase 2A renders statically: layout updates are applied in one pass with no
+     transition, no easing, and no timed reveal, so nothing here depends on
+     motion. This rule keeps that guarantee explicit for the whole component. */
   @media (prefers-reduced-motion: reduce) {
-    .psam__node {
-      transition: none;
+    .psam :where(*) {
+      animation: none !important;
+      transition: none !important;
     }
   }
 </style>
