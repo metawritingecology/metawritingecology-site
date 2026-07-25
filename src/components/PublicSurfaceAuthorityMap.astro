@@ -277,6 +277,66 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
         Node labels are shortened; the full name is in the node detail panel and
         the record table. Selection and routing are navigation only.
       </p>
+      <!-- Viewport navigation. Requires JavaScript, so the whole panel stays
+           hidden until the client module initializes; every record remains
+           reachable without it through the record table below. -->
+      <div
+        class="psam__panel psam__viewport"
+        data-psam-viewport
+        role="group"
+        aria-label="Map viewport navigation"
+        hidden
+      >
+        <h3 class="psam__viewport-title">Viewport navigation</h3>
+        <p class="psam__viewport-lead">
+          These controls change which part of the map is visible and at what
+          magnification. Viewport navigation is navigation only: zoom level,
+          viewport position, and group navigation do not indicate importance,
+          hierarchy, authority, centrality, similarity, causal direction, model
+          family, a formal conceptual relation, Registry status, or currentness.
+          Every record stays available in the record table below at every zoom
+          level and viewport position.
+        </p>
+        <div class="psam__viewport-actions">
+          <button type="button" class="psam__button psam__button--viewport" data-psam-zoom-in>
+            Zoom in
+          </button>
+          <button type="button" class="psam__button psam__button--viewport" data-psam-zoom-out>
+            Zoom out
+          </button>
+          <button type="button" class="psam__button psam__button--viewport" data-psam-zoom-reset>
+            Reset to 100%
+          </button>
+          <button type="button" class="psam__button psam__button--viewport" data-psam-zoom-fit>
+            Fit visible content
+          </button>
+          <button
+            type="button"
+            class="psam__button psam__button--viewport"
+            data-psam-center-selected
+            disabled
+          >
+            Center selected node
+          </button>
+        </div>
+        <div class="psam__viewport-row">
+          <div class="psam__field psam__field--viewport">
+            <label for="psam-group-jump">Jump to visible group</label>
+            <select id="psam-group-jump" data-psam-group-jump>
+              <option value="">Choose a visible group</option>
+            </select>
+          </div>
+          <p class="psam__viewport-zoom">
+            <span class="psam__viewport-zoom-label">Viewport zoom</span>
+            <span class="psam__viewport-zoom-value" data-psam-zoom-level>100%</span>
+            <span class="psam__viewport-zoom-note">
+              Interface state only. Not a measurement, score, or property of any
+              record.
+            </span>
+          </p>
+        </div>
+      </div>
+
       <div class="psam__map-scroll" data-psam-map-scroll>
         <div class="psam__map" data-psam-map>
           <svg
@@ -646,6 +706,94 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     color: var(--psam-link);
   }
 
+  .psam__button:disabled {
+    color: var(--psam-muted);
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .psam__button:disabled:hover {
+    border-color: var(--psam-line);
+    color: var(--psam-muted);
+  }
+
+  /* Viewport navigation.
+     Transient interface controls only: nothing here reads or writes snapshot
+     data, and no control encodes a property of a record. Tap targets are at
+     least 44 CSS pixels tall and the rows wrap instead of clipping, so every
+     operation stays reachable at narrow widths without a pointer gesture. */
+  .psam__viewport {
+    margin: 0 0 0.75rem;
+  }
+
+  .psam__viewport-title {
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem;
+  }
+
+  .psam__viewport-lead,
+  .psam__viewport-zoom-note {
+    color: var(--psam-muted);
+    font-size: 0.92rem;
+  }
+
+  .psam__viewport-lead {
+    margin: 0 0 0.85rem;
+  }
+
+  .psam__viewport-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .psam__button--viewport {
+    min-height: 2.75rem;
+    flex: 0 1 auto;
+  }
+
+  .psam__viewport-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: flex-end;
+    margin: 0.85rem 0 0;
+  }
+
+  .psam__field--viewport {
+    flex: 1 1 16rem;
+    max-width: 26rem;
+  }
+
+  .psam__field--viewport select {
+    min-height: 2.75rem;
+  }
+
+  .psam__viewport-zoom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.6rem;
+    margin: 0;
+    flex: 1 1 14rem;
+  }
+
+  .psam__viewport-zoom-label {
+    color: var(--psam-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .psam__viewport-zoom-value {
+    color: var(--psam-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .psam__viewport-zoom-note {
+    flex: 1 1 100%;
+  }
+
   /* Routing */
   .psam__routing {
     display: flex;
@@ -684,7 +832,11 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
   /* Horizontal scrolling is the intended overflow behavior for the map when the
      deterministic layout is wider than the viewport. Vertical growth is not
      clipped: the scroller has no fixed height, so a tall group column extends
-     the page instead of hiding records. Phase 2A adds no pan or zoom. */
+     the page instead of hiding records, one-finger vertical scrolling always
+     belongs to the page, and the user is never trapped inside the map.
+     Phase 2B-1 magnifies inside this same bounded region: the map surface grows
+     or shrinks with the transient viewport scale, so all map-specific overflow
+     stays here and no page-level horizontal overflow is introduced. */
   .psam__map-scroll {
     overflow: auto;
     overscroll-behavior-x: contain;
@@ -976,6 +1128,17 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
   @media (max-width: 780px) {
     .psam__field {
       min-width: 100%;
+    }
+
+    /* Viewport buttons share the row and grow to fill it, so they wrap onto as
+       many rows as they need instead of clipping, and every tap target keeps
+       its full 44 CSS pixel height. */
+    .psam__button--viewport {
+      flex: 1 1 8.5rem;
+    }
+
+    .psam__field--viewport {
+      max-width: none;
     }
 
     /* Snapshot status: single column so labels sit above values and long

@@ -1,9 +1,16 @@
-// Public Surface and Authority-Ceiling Map — Phase 2A D3 SVG renderer.
+// Public Surface and Authority-Ceiling Map — Phase 2A D3 SVG renderer
+// (Phase 2B-1: one containing viewport group).
 //
 // D3 (`d3-selection` only) owns the visual map's data join and SVG rendering.
 // The coordinates it draws come entirely from the pure, deterministic layout
 // module (`./d3AuthorityLayout.ts`); this file adds no geometry of its own
 // beyond fixed text offsets, and computes nothing semantic.
+//
+// Phase 2B-1 adds exactly one structural change: the group regions, the edges,
+// and the nodes are drawn inside a single containing viewport group, and the
+// bounded transient transform from `./d3AuthorityViewport.ts` is applied to THAT
+// group alone. Nodes and edges therefore always share one transform, and no
+// content coordinate is recomputed when the viewport changes.
 //
 // Hard boundaries preserved here:
 //   - locally installed npm package only — no CDN, no remote ESM, no runtime
@@ -30,6 +37,7 @@ import type {
   AuthorityLayoutGroup,
   AuthorityLayoutNode,
 } from "./d3AuthorityLayout.ts";
+import type { ViewportSurface } from "./d3AuthorityViewport.ts";
 
 // Fixed text geometry (CSS pixels). Constants, never data-derived.
 const GLYPH_X = 15;
@@ -52,6 +60,11 @@ export interface AuthorityRenderState {
   /** Already-selected existing snapshot edges. Rendered verbatim. */
   readonly edges: readonly PublicSurfaceEdge[];
   readonly selectedId: string | null;
+  /**
+   * Transient viewport surface. Presentation only: it sets the SVG box and the
+   * one containing group's transform, and never participates in layout.
+   */
+  readonly viewport: ViewportSurface;
 }
 
 export interface AuthorityRenderer {
@@ -83,17 +96,17 @@ function edgeDescription(edge: PublicSurfaceEdge): string {
 }
 
 /**
- * Ensure a direct child `<g class="…">` layer exists under `root` and return it.
+ * Ensure a `<g class="…">` layer exists under `parent` and return it.
  * Re-selected on every render so a rollback that restores previously captured
  * SVG children is picked up unchanged rather than duplicated.
  */
-function ensureLayer(
-  root: Selection<SVGSVGElement, unknown, null, undefined>,
+function ensureLayer<ParentElement extends SVGSVGElement | SVGGElement>(
+  parent: Selection<ParentElement, unknown, null, undefined>,
   className: string,
 ): AnySelection {
-  const existing = root.select<SVGGElement>(`g.${className}`);
+  const existing = parent.select<SVGGElement>(`g.${className}`);
   if (!existing.empty()) return existing;
-  return root.append("g").attr("class", className);
+  return parent.append("g").attr("class", className);
 }
 
 export function createAuthorityRenderer(
@@ -104,19 +117,30 @@ export function createAuthorityRenderer(
   let nodeElements = new Map<string, SVGGElement>();
 
   function render(state: AuthorityRenderState): void {
-    const { layout, edges, selectedId } = state;
+    const { layout, edges, selectedId, viewport } = state;
 
-    // Responsive, deterministic canvas: intrinsic size from the layout, with a
-    // viewBox so the drawing stays crisp. The container scrolls when the
-    // intrinsic width exceeds the viewport; labels are never scaled down.
+    // Responsive, deterministic canvas: the intrinsic size comes from the
+    // layout, resolved through the bounded viewport surface. At the identity
+    // transform the surface IS the layout canvas, so this reproduces the
+    // Phase 2A.1 drawing exactly. The container scrolls when the surface is
+    // wider than the visible box; labels are never scaled down by the layout.
     root
-      .attr("width", String(layout.width))
-      .attr("height", String(layout.height))
-      .attr("viewBox", `0 0 ${layout.width} ${layout.height}`);
+      .attr("width", String(viewport.width))
+      .attr("height", String(viewport.height))
+      .attr("viewBox", viewport.viewBox);
 
-    const groupLayer = ensureLayer(root, "psam__layer--groups");
-    const edgeLayer = ensureLayer(root, "psam__layer--edges");
-    const nodeLayer = ensureLayer(root, "psam__layer--nodes");
+    // ONE containing viewport group holds group regions, edges, and nodes, and
+    // carries the transient transform. Nodes and edges never receive separate
+    // transforms, so routing stays aligned with node centres at every viewport
+    // state without recomputing a single coordinate.
+    const viewportLayer = ensureLayer(root, "psam__layer--viewport").attr(
+      "transform",
+      viewport.transformAttr,
+    );
+
+    const groupLayer = ensureLayer(viewportLayer, "psam__layer--groups");
+    const edgeLayer = ensureLayer(viewportLayer, "psam__layer--edges");
+    const nodeLayer = ensureLayer(viewportLayer, "psam__layer--nodes");
 
     // --- Group regions -------------------------------------------------------
     groupLayer
@@ -274,7 +298,13 @@ export function createAuthorityRenderer(
       nodeElements = next;
     },
     clear(): void {
-      root.selectAll("*").remove();
+      // Remove the SVG's DIRECT children only. Each removed layer keeps its own
+      // subtree, so a capture taken before the teardown still holds the complete
+      // drawing and an activation rollback restores real SVG content rather than
+      // empty layer shells. A descendant-wide removal would detach every node,
+      // group, and edge from its layer as well, emptying the very elements the
+      // rollback path reinstates.
+      root.selectChildren().remove();
       nodeElements = new Map<string, SVGGElement>();
     },
   };
