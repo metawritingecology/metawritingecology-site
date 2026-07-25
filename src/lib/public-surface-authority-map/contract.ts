@@ -90,10 +90,12 @@ const PUBLICLY_DECLARED_CLASSIFICATIONS = [
   "Cross / Domain Declaration / Structural Note",
   "Cross / Protocol Orientation / Domain Declaration",
   "Cross / Structural Account / Domain Declaration",
+  "Cross-Supporting Boundary Note",
   "Model / Conceptual Framework / Domain Declaration",
   "Model / Domain Declaration",
   "Protocol / Method Orientation",
   "Protocol Orientation / Methodological Note / Domain Declaration",
+  "Protocol-Facing Boundary Note",
   "Training-facing Public Surface Anchor",
 ] as const;
 
