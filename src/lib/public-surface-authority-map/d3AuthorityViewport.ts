@@ -50,15 +50,36 @@ const M = AUTHORITY_LAYOUT_METRICS;
 
 // --- Fixed bounds ------------------------------------------------------------
 //
-// A bounded scale extent. The lower bound keeps the 0.8rem node label legible
-// (0.5 x 0.8rem is the smallest step this map is verified at) and the upper
-// bound keeps the magnified canvas within the existing map scroller at every
-// tested width. Both are constants, never derived from data, so no zoom level
-// can encode anything about a record.
+// A bounded scale extent. Both bounds are constants, never derived from data, so
+// no zoom level can encode anything about a record.
+//
+// The lower bound is an ACCESSIBILITY floor, not a convenience. Everything drawn
+// inside the viewport group scales with it, including the node activation box
+// and every label, so the floor is what guarantees:
+//
+//   - node activation target: the deterministic node box is 64 CSS pixels high,
+//     and 64 x 0.8 = 51.2 CSS pixels, which stays above the ~44 CSS pixel tap
+//     target the phase requires;
+//   - node label:  0.8rem  x 0.8 = 0.64rem (~10.2px at a 16px root);
+//     group label: 0.78rem x 0.8 = 0.624rem;
+//     group count: 0.72rem x 0.8 = 0.576rem.
+//
+// 0.8 is also exactly one multiplicative STEP below the identity scale, so the
+// downward ladder is 100% -> 80% and then holds at 80%. A smaller floor was
+// rejected: at 0.5 the activation box falls to 32 CSS pixels and the three label
+// sizes fall to roughly 0.4rem / 0.39rem / 0.36rem, which is below both the tap
+// target requirement and any readable-label claim.
+//
+// The upper bound keeps the magnified canvas within the existing map scroller at
+// every tested width.
 
 export const VIEWPORT_SCALE = {
-  /** Smallest permitted magnification. */
-  MIN: 0.5,
+  /**
+   * Smallest permitted magnification. An accessibility floor: below this the
+   * scaled node activation box drops under the required tap target and the
+   * scaled labels stop being readable. See the note above.
+   */
+  MIN: 0.8,
   /** Largest permitted magnification. */
   MAX: 2.5,
   /** The identity magnification. The initial and reset state. */
@@ -200,27 +221,95 @@ export function contentExtentOf(layout: AuthorityLayout): ContentExtent {
 }
 
 /**
- * Largest magnification at which the rendered content fits the visible box,
- * never above the identity scale and never below the minimum bound. A
- * non-positive or unmeasured visible dimension is ignored rather than treated as
- * a constraint. Height is only considered when a bounded visible height is
- * supplied.
+ * The outcome of one fit operation, stated explicitly.
+ *
+ * `requiredScale` is the UNCONSTRAINED magnification a complete fit would need
+ * (never above the identity scale, and never clamped up to the accessibility
+ * floor). `scale` is the magnification actually applied after clamping into the
+ * bounded extent. `fullyFits` is measured from `scale` against the rendered
+ * content and the visible box — it is NOT inferred from the fact that a scale
+ * was produced, and it is false whenever the readable floor stopped the fit
+ * short.
  */
-export function fitScale(
+export interface FitViewportResult {
+  /** Bounded magnification actually applied. */
+  readonly scale: number;
+  /** Unconstrained magnification a complete fit would require. */
+  readonly requiredScale: number;
+  /** True only when the applied scale really does fit the rendered content. */
+  readonly fullyFits: boolean;
+  /** True when the applied scale sits exactly on the accessibility floor. */
+  readonly atReadableMinimum: boolean;
+}
+
+/**
+ * Resolve the fit outcome for the currently rendered content inside a measured
+ * visible box.
+ *
+ * A non-positive or unmeasured visible dimension is not treated as a constraint;
+ * it also cannot be used to confirm a fit, so an unmeasured box fails CLOSED
+ * (`fullyFits: false`) rather than claiming a fit that was never verified.
+ * Height is only considered when a bounded visible height is supplied.
+ */
+export function fitViewport(
   content: ContentExtent,
   visibleWidth: number,
   visibleHeight: number = 0,
-): number {
+): FitViewportResult {
   const width = finiteOr(visibleWidth, 0);
   const height = finiteOr(visibleHeight, 0);
+  const widthConstrains = width > 0 && content.width > 0;
+  const heightConstrains = height > 0 && content.height > 0;
+
   let ratio: number = VIEWPORT_SCALE.IDENTITY;
-  if (width > 0 && content.width > 0) {
-    ratio = Math.min(ratio, width / content.width);
+  if (widthConstrains) ratio = Math.min(ratio, width / content.width);
+  if (heightConstrains) ratio = Math.min(ratio, height / content.height);
+
+  const requiredScale = roundScale(ratio);
+  const scale = clampScale(requiredScale);
+
+  // Measured, never assumed: does the APPLIED scale actually place the rendered
+  // content inside the box on every constrained axis?
+  let fullyFits = widthConstrains || heightConstrains;
+  if (widthConstrains && roundPixel(content.width * scale) > roundPixel(width)) {
+    fullyFits = false;
   }
-  if (height > 0 && content.height > 0) {
-    ratio = Math.min(ratio, height / content.height);
+  if (heightConstrains && roundPixel(content.height * scale) > roundPixel(height)) {
+    fullyFits = false;
   }
-  return clampScale(ratio);
+
+  return {
+    scale,
+    requiredScale,
+    fullyFits,
+    atReadableMinimum: scale === VIEWPORT_SCALE.MIN,
+  };
+}
+
+/**
+ * The bounded, accurate announcement for one fit outcome.
+ *
+ * "Fitted" is used ONLY when the complete rendered content really fits. When the
+ * readable minimum stopped the reduction short, the announcement says so and
+ * states that the map remains horizontally scrollable, so the spoken outcome can
+ * never overstate what happened. Navigation only in every case: the sentence
+ * describes the view, never a property of a record.
+ */
+export function describeFitOutcome(result: FitViewportResult): string {
+  const percent = formatScalePercent(result.scale);
+  if (result.fullyFits) {
+    return `Fitted the visible map content at ${percent}. Navigation only.`;
+  }
+  if (result.atReadableMinimum) {
+    return (
+      `Reduced the map to the minimum readable zoom of ${percent}. ` +
+      "The complete map remains horizontally scrollable. Navigation only."
+    );
+  }
+  return (
+    `The map viewport is at ${percent}. ` +
+    "The complete map remains horizontally scrollable. Navigation only."
+  );
 }
 
 // --- Surface -----------------------------------------------------------------

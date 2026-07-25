@@ -68,9 +68,10 @@ import {
   clampScale,
   computeViewportSurface,
   contentExtentOf,
+  describeFitOutcome,
   findGroup,
   findNode,
-  fitScale,
+  fitViewport,
   formatScalePercent,
   groupRect,
   nodeRect,
@@ -537,19 +538,23 @@ function init(root: HTMLElement): void {
     announce(describe(formatScalePercent(viewportScale)));
   }
 
-  /** Largest magnification at which the currently rendered content fits. */
+  /**
+   * Largest READABLE magnification for the currently rendered content. The
+   * outcome is announced from the pure module's explicit fit result, so a
+   * reduction that the accessibility floor stopped short is never reported as a
+   * completed fit.
+   */
   function fitVisibleContent(): void {
     if (!currentLayout) {
       return;
     }
-    viewportScale = fitScale(contentExtentOf(currentLayout), visibleBoxWidth());
+    const outcome = fitViewport(contentExtentOf(currentLayout), visibleBoxWidth());
+    viewportScale = outcome.scale;
     draw(currentLayout);
     if (scrollEl) {
       scrollEl.scrollLeft = 0;
     }
-    announce(
-      `Fitted the visible map content at ${formatScalePercent(viewportScale)}. Navigation only.`,
-    );
+    announce(describeFitOutcome(outcome));
   }
 
   /** Centre the selected node. A missing or hidden selection is a safe no-op. */

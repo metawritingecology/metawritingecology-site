@@ -42,7 +42,8 @@ import {
   contentExtentOf,
   findGroup,
   findNode,
-  fitScale,
+  describeFitOutcome,
+  fitViewport,
   formatScalePercent,
   groupRect,
   isIdentityViewport,
@@ -114,9 +115,20 @@ const WIDE_HEIGHT = 1676;
 const NARROW_WIDTH = 292;
 
 // The full scale ladder, written out by hand from the fixed 1.25 step and the
-// fixed 0.5 / 2.5 bounds on the fixed 4-decimal rounding grid.
+// fixed 0.8 / 2.5 bounds on the fixed 4-decimal rounding grid. One step below
+// the identity scale IS the accessibility floor, so the downward ladder holds
+// at 80% immediately.
 const ZOOM_IN_LADDER = [1.25, 1.5625, 1.9531, 2.4414, 2.5, 2.5];
-const ZOOM_OUT_LADDER = [0.8, 0.64, 0.512, 0.5, 0.5];
+const ZOOM_OUT_LADDER = [0.8, 0.8, 0.8, 0.8, 0.8];
+
+// Hand-written accessibility constants. NEITHER is read from the modules under
+// test: the 64 CSS pixel node box and the ~44 CSS pixel tap target are stated
+// here as the independent requirement the floor has to satisfy.
+const REQUIRED_TAP_TARGET_PX = 44;
+const DETERMINISTIC_NODE_HEIGHT_PX = 64;
+const NODE_LABEL_REM = 0.8;
+const GROUP_LABEL_REM = 0.78;
+const GROUP_COUNT_REM = 0.72;
 
 // ---------------------------------------------------------------------------
 // 16. The adopted dataset is untouched by this phase.
@@ -200,20 +212,83 @@ test("identity: the surface is stable under repeated computation", () => {
 // 2 & 3. Bounded, deterministic zoom.
 // ---------------------------------------------------------------------------
 
-test("bounds: the scale extent is exactly 0.5 to 2.5", () => {
-  assert.equal(VIEWPORT_SCALE.MIN, 0.5);
+test("bounds: the scale extent is exactly 0.8 to 2.5", () => {
+  assert.equal(VIEWPORT_SCALE.MIN, 0.8);
   assert.equal(VIEWPORT_SCALE.MAX, 2.5);
+  assert.equal(VIEWPORT_SCALE.IDENTITY, 1);
   assert.equal(VIEWPORT_SCALE.STEP, 1.25);
+  // The floor is exactly one multiplicative step below the identity scale.
+  assert.equal(Math.round((1 / VIEWPORT_SCALE.STEP) * 10000) / 10000, VIEWPORT_SCALE.MIN);
+});
+
+test("accessibility: the floor keeps the node activation target above 44 CSS pixels", () => {
+  // The requirement is stated here, not read from the implementation.
+  assert.equal(M.NODE_HEIGHT, DETERMINISTIC_NODE_HEIGHT_PX);
+  const effective = DETERMINISTIC_NODE_HEIGHT_PX * VIEWPORT_SCALE.MIN;
+  assert.equal(effective, 51.2);
+  assert.ok(
+    effective >= REQUIRED_TAP_TARGET_PX,
+    `node activation box is ${effective} CSS pixels at the minimum scale`,
+  );
+  // The rejected 0.5 floor really did violate it, so this assertion is not
+  // vacuous.
+  assert.ok(DETERMINISTIC_NODE_HEIGHT_PX * 0.5 < REQUIRED_TAP_TARGET_PX);
+
+  // Every label stays materially larger than it was at the rejected floor.
+  const LABELS = [
+    ["node label", NODE_LABEL_REM, 0.64],
+    ["group label", GROUP_LABEL_REM, 0.624],
+    ["group count", GROUP_COUNT_REM, 0.576],
+  ];
+  for (const [name, rem, expected] of LABELS) {
+    const scaled = Math.round(rem * VIEWPORT_SCALE.MIN * 1000) / 1000;
+    assert.equal(scaled, expected, `${name} at the minimum scale`);
+    assert.ok(scaled > rem * 0.5, `${name} must exceed its size at the rejected 0.5 floor`);
+  }
+});
+
+test("accessibility: no viewport operation can produce a scale below the floor", () => {
+  const CANDIDATES = [
+    -100, -1, 0, 0.0001, 0.1, 0.25, 0.4, 0.49, 0.5, 0.512, 0.64, 0.7, 0.79, 0.7999,
+    0.8, 1, 1.25, 2.5, 3, 1000, Number.NaN, Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+  ];
+  for (const candidate of CANDIDATES) {
+    for (const produced of [
+      clampScale(candidate),
+      scaleIn(candidate),
+      scaleOut(candidate),
+      computeViewportSurface(WIDE_WIDTH, WIDE_HEIGHT, candidate, DESKTOP).transform.k,
+    ]) {
+      assert.ok(
+        produced >= VIEWPORT_SCALE.MIN,
+        `scale ${produced} from candidate ${candidate} is below the floor`,
+      );
+      assert.ok(produced <= VIEWPORT_SCALE.MAX);
+    }
+  }
+  // Repeated zoom-out from anywhere converges on the floor and stays there.
+  let scale = VIEWPORT_SCALE.MAX;
+  for (let step = 0; step < 25; step += 1) scale = scaleOut(scale);
+  assert.equal(scale, VIEWPORT_SCALE.MIN);
+  assert.equal(scaleOut(scale), VIEWPORT_SCALE.MIN);
+
+  // Fit can never go below the floor either, at any measured box size.
+  const content = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  for (const visible of [1, 40, 120, MOBILE, TABLET, DESKTOP, 8000]) {
+    assert.ok(fitViewport(content, visible).scale >= VIEWPORT_SCALE.MIN);
+  }
 });
 
 test("bounds: every candidate scale is clamped into the extent", () => {
   const CASES = [
-    [0.5, 0.5],
     [2.5, 2.5],
     [1, 1],
-    [0.49, 0.5],
-    [0, 0.5],
-    [-3, 0.5],
+    [0.8, 0.8],
+    [0.79, 0.8],
+    [0.5, 0.8],
+    [0, 0.8],
+    [-3, 0.8],
     [2.51, 2.5],
     [1000, 2.5],
     [Number.NaN, 1],
@@ -246,12 +321,15 @@ test("zoom: the zoom-out ladder is the hand-written deterministic sequence", () 
     scale = scaleOut(scale);
     seen.push(scale);
   }
+  // One zoom-out from 100% reaches exactly 80%; every further zoom-out holds.
   assert.deepEqual(seen, ZOOM_OUT_LADDER);
+  assert.equal(scaleOut(VIEWPORT_SCALE.IDENTITY), 0.8);
+  assert.equal(scaleOut(0.8), 0.8);
   assert.equal(scaleOut(VIEWPORT_SCALE.MIN), VIEWPORT_SCALE.MIN);
 });
 
 test("zoom: repeated identical operations produce identical results", () => {
-  for (const scale of [0.5, 0.512, 0.8, 1, 1.25, 1.9531, 2.5]) {
+  for (const scale of [0.8, 1, 1.25, 1.5625, 1.9531, 2.4414, 2.5]) {
     assert.equal(scaleIn(scale), scaleIn(scale));
     assert.equal(scaleOut(scale), scaleOut(scale));
     assert.equal(roundScale(scale), roundScale(scale));
@@ -265,9 +343,6 @@ test("zoom: repeated identical operations produce identical results", () => {
 
 test("zoom: the percentage label is a bounded whole-percent interface string", () => {
   const CASES = [
-    [0.5, "50%"],
-    [0.512, "51%"],
-    [0.64, "64%"],
     [0.8, "80%"],
     [1, "100%"],
     [1.25, "125%"],
@@ -276,7 +351,11 @@ test("zoom: the percentage label is a bounded whole-percent interface string", (
     [2.4414, "244%"],
     [2.5, "250%"],
     [99, "250%"],
-    [0, "50%"],
+    // Anything under the floor is clamped before it is ever displayed, so no
+    // percentage below 80% can reach the interface.
+    [0.5, "80%"],
+    [0.64, "80%"],
+    [0, "80%"],
   ];
   for (const [scale, expected] of CASES) {
     assert.equal(formatScalePercent(scale), expected, `label for ${scale}`);
@@ -346,29 +425,170 @@ test("fit: never exceeds 100% and never falls below the minimum bound", () => {
   const narrow = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 1 }));
   for (const content of [wide, narrow]) {
     for (const visible of [0, 1, 120, MOBILE, 480, 768, TABLET, 1024, DESKTOP, 1920, 8000]) {
-      const scale = fitScale(content, visible);
-      assert.ok(scale >= VIEWPORT_SCALE.MIN, `fit ${scale} below minimum`);
-      assert.ok(scale <= VIEWPORT_SCALE.MAX, `fit ${scale} above maximum`);
-      assert.ok(scale <= VIEWPORT_SCALE.IDENTITY, `fit ${scale} magnified above 100%`);
+      const result = fitViewport(content, visible);
+      assert.ok(result.scale >= VIEWPORT_SCALE.MIN, `fit ${result.scale} below minimum`);
+      assert.ok(result.scale <= VIEWPORT_SCALE.MAX, `fit ${result.scale} above maximum`);
+      assert.ok(
+        result.scale <= VIEWPORT_SCALE.IDENTITY,
+        `fit ${result.scale} magnified above 100%`,
+      );
+      // The unconstrained requirement is reported separately and is never
+      // clamped up to the floor, so a blocked fit stays visible in the result.
+      assert.ok(result.requiredScale <= VIEWPORT_SCALE.IDENTITY);
+      if (result.requiredScale < VIEWPORT_SCALE.MIN) {
+        assert.equal(result.fullyFits, false, `fit claimed at ${visible}px`);
+        assert.equal(result.scale, VIEWPORT_SCALE.MIN);
+        assert.equal(result.atReadableMinimum, true);
+      }
     }
   }
 });
 
-test("fit: the three inspection widths give the hand-written scales", () => {
+// ---------------------------------------------------------------------------
+// 6, 7, 8, 9, 10. The fit outcome is explicit, and the announcement is accurate.
+// ---------------------------------------------------------------------------
+
+test("fit: reports a genuine fit only when the content really fits", () => {
+  const narrow = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 1 }));
+  // 292 px of content in a 375 px box: no reduction is needed at all.
+  const mobile = fitViewport(narrow, MOBILE);
+  assert.deepEqual({ ...mobile }, {
+    scale: 1,
+    requiredScale: 1,
+    fullyFits: true,
+    atReadableMinimum: false,
+  });
+  assert.ok(NARROW_WIDTH * mobile.scale <= MOBILE);
+
+  // 1712 px of content in a 1440 px box: a real reduction that stays readable.
+  const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  const desktop = fitViewport(wide, DESKTOP);
+  assert.equal(desktop.requiredScale, 0.8411); // 1440 / 1712
+  assert.equal(desktop.scale, 0.8411);
+  assert.equal(desktop.fullyFits, true);
+  assert.equal(desktop.atReadableMinimum, false);
+  assert.ok(roundPixel(WIDE_WIDTH * desktop.scale) <= DESKTOP);
+});
+
+test("fit: reports NO fit when the required scale is below the readable floor", () => {
+  const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  // 1712 px of content in an 834 px box needs 0.4871 — far below the floor.
+  const tablet = fitViewport(wide, TABLET);
+  assert.deepEqual({ ...tablet }, {
+    scale: 0.8,
+    requiredScale: 0.4871,
+    fullyFits: false,
+    atReadableMinimum: true,
+  });
+  // The applied scale genuinely leaves the content wider than the box.
+  assert.ok(roundPixel(WIDE_WIDTH * tablet.scale) > TABLET);
+  assert.equal(roundPixel(WIDE_WIDTH * tablet.scale), 1369.6);
+
+  // The measured desktop map column (810 px) is the case the reviewer raised.
+  const column = fitViewport(wide, 810);
+  assert.equal(column.requiredScale, 0.4731);
+  assert.equal(column.scale, 0.8);
+  assert.equal(column.fullyFits, false);
+  assert.equal(column.atReadableMinimum, true);
+
+  // A bounded visible height blocks the fit the same way.
+  const short = fitViewport(wide, DESKTOP, 838);
+  assert.equal(short.requiredScale, 0.5);
+  assert.equal(short.scale, 0.8);
+  assert.equal(short.fullyFits, false);
+
+  // An unmeasured box fails CLOSED: no fit is ever claimed unverified.
+  for (const visible of [0, -1, Number.NaN]) {
+    const unmeasured = fitViewport(wide, visible);
+    assert.equal(unmeasured.scale, 1);
+    assert.equal(unmeasured.fullyFits, false, `unverified fit claimed at ${visible}`);
+  }
+});
+
+test("fit: a clamped outcome never announces a completed fit", () => {
+  const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  const clamped = fitViewport(wide, 810);
+  const message = describeFitOutcome(clamped);
+  assert.equal(
+    message,
+    "Reduced the map to the minimum readable zoom of 80%. " +
+      "The complete map remains horizontally scrollable. Navigation only.",
+  );
+  // The word "Fitted" must not appear anywhere in a blocked outcome.
+  assert.equal(/fitted/i.test(message), false, "a blocked fit must not say 'Fitted'");
+  // It must say, in so many words, that horizontal scrolling remains.
+  assert.ok(message.includes("remains horizontally scrollable"));
+  // And the reported percentage is the applied 80%, not the required 47%.
+  assert.ok(message.includes("80%"));
+  assert.equal(formatScalePercent(clamped.scale), "80%");
+  assert.equal(message.includes("47%"), false);
+
+  // The same holds at every width where the floor blocks the fit.
+  for (const visible of [1, 120, MOBILE, TABLET, 810, 1024]) {
+    const result = fitViewport(wide, visible);
+    if (result.fullyFits) continue;
+    assert.equal(/fitted/i.test(describeFitOutcome(result)), false, `at ${visible}px`);
+    assert.ok(describeFitOutcome(result).includes("horizontally scrollable"));
+  }
+});
+
+test("fit: a genuine fit announces the completed fit and its percentage", () => {
+  const narrow = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 1 }));
+  assert.equal(
+    describeFitOutcome(fitViewport(narrow, MOBILE)),
+    "Fitted the visible map content at 100%. Navigation only.",
+  );
+  const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  assert.equal(
+    describeFitOutcome(fitViewport(wide, DESKTOP)),
+    "Fitted the visible map content at 84%. Navigation only.",
+  );
+  // Every announcement keeps the navigation-only boundary and asserts nothing
+  // about importance, authority, or any property of a record.
+  for (const visible of [0, MOBILE, TABLET, 810, DESKTOP, 4000]) {
+    for (const content of [wide, narrow]) {
+      const message = describeFitOutcome(fitViewport(content, visible));
+      assert.ok(message.endsWith("Navigation only."), message);
+      for (const banned of ["important", "authority", "central", "similar", "rank"]) {
+        assert.equal(message.toLowerCase().includes(banned), false, message);
+      }
+    }
+  }
+});
+
+test("fit: the unmeasured degenerate outcome is stated without overclaiming", () => {
+  const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
+  const message = describeFitOutcome(fitViewport(wide, 0));
+  assert.equal(
+    message,
+    "The map viewport is at 100%. " +
+      "The complete map remains horizontally scrollable. Navigation only.",
+  );
+  assert.equal(/fitted/i.test(message), false);
+  // It must not claim the readable minimum was reached when it was not.
+  assert.equal(message.includes("minimum readable zoom"), false);
+});
+
+test("fit: the three inspection widths give the hand-written outcomes", () => {
   const wide = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 6 }));
   const narrow = contentExtentOf(layoutOf(allNodes, "surface_role", { columnsPerBand: 1 }));
-  // 1440 / 1712 = 0.84112…, rounded onto the fixed 4-decimal grid.
-  assert.equal(fitScale(wide, DESKTOP), 0.8411);
-  // 834 / 1712 = 0.48714…, which is below the minimum bound and clamps to it.
-  assert.equal(fitScale(wide, TABLET), 0.5);
-  // 375 / 268 would magnify, so fit stays at the identity scale.
-  assert.equal(fitScale(narrow, MOBILE), 1);
-  // An unmeasured container is not treated as a constraint.
-  assert.equal(fitScale(wide, 0), 1);
-  assert.equal(fitScale(wide, Number.NaN), 1);
+  // 1440 / 1712 = 0.84112…, rounded onto the fixed 4-decimal grid; it fits.
+  assert.equal(fitViewport(wide, DESKTOP).scale, 0.8411);
+  assert.equal(fitViewport(wide, DESKTOP).fullyFits, true);
+  // 834 / 1712 = 0.48714…, below the readable floor: clamped and NOT a fit.
+  assert.equal(fitViewport(wide, TABLET).scale, 0.8);
+  assert.equal(fitViewport(wide, TABLET).fullyFits, false);
+  // 375 / 292 would magnify, so fit stays at the identity scale and fits.
+  assert.equal(fitViewport(narrow, MOBILE).scale, 1);
+  assert.equal(fitViewport(narrow, MOBILE).fullyFits, true);
+  // An unmeasured container is not treated as a constraint, and cannot confirm.
+  assert.equal(fitViewport(wide, 0).scale, 1);
+  assert.equal(fitViewport(wide, Number.NaN).scale, 1);
   // A bounded visible height is honored when one is supplied.
-  assert.equal(fitScale(wide, DESKTOP, 4000), 0.8411);
-  assert.equal(fitScale(wide, DESKTOP, 838), 0.5);
+  assert.equal(fitViewport(wide, DESKTOP, 4000).scale, 0.8411);
+  assert.equal(fitViewport(wide, DESKTOP, 4000).fullyFits, true);
+  assert.equal(fitViewport(wide, DESKTOP, 838).scale, 0.8);
+  assert.equal(fitViewport(wide, DESKTOP, 838).fullyFits, false);
 });
 
 // ---------------------------------------------------------------------------
@@ -387,17 +607,24 @@ test("surface: magnification grows the surface and keeps the content anchored", 
 
 test("surface: reduction shrinks the surface and centres the smaller drawing", () => {
   const layout = layoutOf(allNodes, "surface_role", { columnsPerBand: 6 });
-  const reduced = computeViewportSurface(layout.width, layout.height, 0.5, DESKTOP);
+  const reduced = computeViewportSurface(layout.width, layout.height, 0.8, DESKTOP);
   assert.equal(reduced.width, DESKTOP); // never past the identity canvas
-  assert.equal(reduced.height, 838); // 1676 * 0.5
-  assert.deepEqual({ ...reduced.transform }, { k: 0.5, x: 292, y: 0 });
-  assert.equal(reduced.transformAttr, "translate(292,0) scale(0.5)");
+  assert.equal(reduced.height, 1340.8); // 1676 * 0.8
+  // 1712 * 0.8 = 1369.6, centred in the 1440 box -> (1440 - 1369.6) / 2 = 35.2
+  assert.deepEqual({ ...reduced.transform }, { k: 0.8, x: 35.2, y: 0 });
+  assert.equal(reduced.transformAttr, "translate(35.2,0) scale(0.8)");
+
+  // In the MEASURED 810 px desktop map column the reduced drawing is still
+  // wider than the box, so it is not centred and the region keeps scrolling.
+  const column = computeViewportSurface(layout.width, layout.height, 0.8, 810);
+  assert.equal(column.width, 1369.6);
+  assert.deepEqual({ ...column.transform }, { k: 0.8, x: 0, y: 0 });
 });
 
 test("surface: the map surface never grows past the identity canvas", () => {
   const layout = layoutOf(allNodes, "surface_role", { columnsPerBand: 6 });
   for (const visible of [0, MOBILE, TABLET, DESKTOP, 4000]) {
-    for (const scale of [0.5, 0.64, 0.8, 1]) {
+    for (const scale of [0.8, 0.9, 1]) {
       const surface = computeViewportSurface(
         layout.width,
         layout.height,
@@ -637,7 +864,7 @@ test("isolation: no viewport operation changes a content coordinate", () => {
           scale = scaleOut(scale);
           computeViewportSurface(layout.width, layout.height, scale, visible);
         }
-        fitScale(contentExtentOf(layout), visible);
+        fitViewport(contentExtentOf(layout), visible);
       }
 
       assert.equal(serialize(layout), before, `content moved for ${field}`);
@@ -654,7 +881,7 @@ test("isolation: no node, group, or edge is created by any viewport operation", 
     renderedIds,
   });
 
-  for (const scale of [0.5, 0.8, 1, 1.25, 2.5]) {
+  for (const scale of [0.8, 1, 1.25, 2.5]) {
     const surface = computeViewportSurface(layout.width, layout.height, scale, DESKTOP);
     assert.equal(layout.nodes.length, 30);
     assert.equal(layout.groups.length, 6);
@@ -802,6 +1029,26 @@ test("wiring: every required viewport control is wired to a bounded operation", 
   // Group-jump options come from the current deterministic group order.
   assert.match(clientCode, /for \(const group of active\.groups\) \{/);
   assert.equal(clientCode.includes("groupJumpEl.value = groupJumpEl"), false);
+});
+
+test("wiring: fit applies the bounded scale and announces the module's own outcome", () => {
+  // The client takes BOTH the applied scale and the announcement from the pure
+  // fit result, so it cannot infer success from the fact that a scale came back.
+  assert.match(
+    clientCode,
+    /const outcome = fitViewport\(contentExtentOf\(currentLayout\), visibleBoxWidth\(\)\);\s*viewportScale = outcome\.scale;\s*draw\(currentLayout\);/,
+  );
+  assert.match(clientCode, /announce\(describeFitOutcome\(outcome\)\);/);
+  // No hand-rolled fit wording survives anywhere in the client.
+  assert.equal(clientCode.includes("Fitted the visible map content"), false);
+  assert.equal(clientCode.includes("fitScale"), false);
+  // The zoom indicator is fed from the applied scale, so a clamped fit shows
+  // the bounded percentage rather than the unreachable required one.
+  assert.match(
+    clientCode,
+    /function syncZoomDisplay\(\): void \{\s*if \(zoomLevelEl\) \{\s*zoomLevelEl\.textContent = formatScalePercent\(viewportScale\);/,
+  );
+  assert.equal(clientCode.includes("formatScalePercent(outcome.requiredScale)"), false);
 });
 
 test("wiring: the renderer applies one transform to one containing group", () => {
