@@ -1,13 +1,21 @@
-// Public Surface and Authority-Ceiling Map — Phase 1 preview + Phase 2B runtime.
+// Public Surface and Authority-Ceiling Map — Phase 1 preview + Phase 2B runtime
+// + Phase 2A deterministic D3 Authority View.
 //
-// Native DOM + native SVG only. No D3, no CDN, no canvas/WebGL, no iframe, no
-// remote dynamic import, no innerHTML for metadata, no storage, no service
-// worker, no telemetry. The bundled snapshot is read from an already-rendered
-// <script type="application/json"> element, so the initial interface makes NO
-// network request. All derived values are limited to filtering, grouping,
-// layout coordinates, counts, selection, and routing visibility — nothing here
-// computes similarity, centrality, importance, authority, classification,
-// inferred relations, or ranking. All edges remain navigation only.
+// Phase 2A: the visual map is rendered by D3 (`d3-selection` only) into a single
+// SVG surface. All coordinates come from the PURE deterministic layout module
+// (`d3AuthorityLayout.ts`); this file owns interaction, filtering, selection,
+// runtime activation, and the accessible surfaces around the drawing. There is
+// no CDN, no remote ESM import, no runtime package loading, no iframe, no
+// canvas/WebGL, no force simulation, no drag, no pan, and no zoom.
+//
+// Native DOM everywhere else. No innerHTML for metadata, no eval, no
+// `new Function`, no storage, no service worker, no telemetry. The bundled
+// snapshot is read from an already-rendered <script type="application/json">
+// element, so the initial interface makes NO network request. All derived
+// values are limited to filtering, grouping, layout coordinates, counts,
+// selection, and routing visibility — nothing here computes similarity,
+// centrality, importance, authority, classification, inferred relations, or
+// ranking. All edges remain navigation only.
 //
 // Phase 2B (progressive enhancement): after the bundled fallback interface is
 // fully initialized, the runtime loader is invoked EXACTLY ONCE. On a verified
@@ -25,8 +33,19 @@ import type {
 } from "../lib/public-surface-authority-map/contract.ts";
 import type { RuntimeManifest } from "../lib/public-surface-authority-map/runtimeManifestContract.ts";
 import { bootRuntimeLoader } from "../lib/public-surface-authority-map/runtimeLoader.ts";
+import {
+  compareNodes,
+  computeAuthorityLayout,
+  resolveColumnsPerBand,
+  resolveRoutingMode,
+  selectRoutingEdges,
+  type AuthorityLayout,
+} from "../lib/public-surface-authority-map/d3AuthorityLayout.ts";
+import {
+  createAuthorityRenderer,
+  type AuthorityRenderer,
+} from "../lib/public-surface-authority-map/d3AuthorityRenderer.ts";
 
-const SVG_NS = "http://www.w3.org/2000/svg";
 const SOURCE_LINK_PREFIX =
   "https://github.com/metawritingecology/meta-writing-ecology/";
 
@@ -36,16 +55,6 @@ const FAILURE_STATUS =
   "Runtime snapshot unavailable; showing bundled last-known-good preview snapshot.";
 const MISSING_SELECTION_MSG =
   "The previously selected node is not present in the verified runtime snapshot. Selection and selected-node routing were cleared.";
-
-const NODE_W = 168;
-const NODE_H = 52;
-const COL_GAP = 32;
-const ROW_GAP = 14;
-const PAD_X = 20;
-const PAD_TOP = 42;
-const PAD_BOTTOM = 22;
-const COL_W = NODE_W + COL_GAP;
-const ROW_H = NODE_H + ROW_GAP;
 
 const GROUP_LABELS: Record<GroupingField, string> = {
   surface_role: "surface role",
@@ -68,18 +77,12 @@ const METADATA_FIELDS: readonly MetadataField[] = [
   "classification_evidence",
 ];
 
-interface Point {
-  readonly cx: number;
-  readonly cy: number;
-}
-
 // A fully-prepared runtime activation, built off-DOM. Committing it mutates the
 // live runtime root in one synchronous pass; nothing here touches live DOM.
 interface ActivationPlan {
   readonly snapshot: PublicSurfaceAuthoritySnapshot;
   readonly manifest: RuntimeManifest;
   readonly nodesById: Map<string, PublicSurfaceNode>;
-  readonly buttons: Map<string, HTMLButtonElement>;
   readonly optionValues: Map<MetadataField, string[]>;
   readonly tableFragment: DocumentFragment;
 }
@@ -91,17 +94,13 @@ interface ActivationPlan {
 interface LiveCapture {
   snapshot: PublicSurfaceAuthoritySnapshot;
   nodesById: Map<string, PublicSurfaceNode>;
-  buttons: Map<string, HTMLButtonElement>;
   selectedId: string | null;
-  mapChildren: ChildNode[];
-  mapWidth: string;
-  mapHeight: string;
-  edgesChildren: ChildNode[];
-  edgesW: string | null;
-  edgesH: string | null;
-  edgesVB: string | null;
-  columnLabels: HTMLElement[];
-  positions: Array<[string, Point]>;
+  svgChildren: ChildNode[];
+  svgW: string | null;
+  svgH: string | null;
+  svgVB: string | null;
+  nodeElements: Map<string, SVGGElement>;
+  layout: AuthorityLayout | null;
   selects: Map<MetadataField, { options: ChildNode[]; value: string }>;
   tableRows: ChildNode[] | null;
   status: Record<string, string | null>;
@@ -109,6 +108,7 @@ interface LiveCapture {
   routeSelected: boolean;
   routeGlobal: boolean;
   densityHidden: boolean;
+  emptyHidden: boolean;
   activeEl: HTMLElement | null;
 }
 
@@ -130,10 +130,6 @@ function isGroupingField(value: string): value is GroupingField {
     value === "authority_ceiling" ||
     value === "public_surface_status"
   );
-}
-
-function comparator(a: PublicSurfaceNode, b: PublicSurfaceNode): number {
-  return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
 }
 
 function distinctValues(
@@ -161,9 +157,11 @@ function init(root: HTMLElement): void {
     return;
   }
 
-  const mapEl = root.querySelector<HTMLElement>("[data-psam-map]");
-  const edgesEl = root.querySelector<SVGSVGElement>("[data-psam-edges]");
+  const svgEl = root.querySelector<SVGSVGElement>("[data-psam-map-svg]");
+  const scrollEl = root.querySelector<HTMLElement>("[data-psam-map-scroll]");
   const fallbackEl = root.querySelector<HTMLElement>("[data-psam-map-fallback]");
+  const mapHintEl = root.querySelector<HTMLElement>("[data-psam-map-hint]");
+  const mapEmptyEl = root.querySelector<HTMLElement>("[data-psam-map-empty]");
   const statusEl = root.querySelector<HTMLElement>("[data-psam-status]");
   const detailEmptyEl = root.querySelector<HTMLElement>("[data-psam-detail-empty]");
   const detailBodyEl = root.querySelector<HTMLElement>("[data-psam-detail-body]");
@@ -187,7 +185,7 @@ function init(root: HTMLElement): void {
   const tableHeadingEl = root.querySelector<HTMLElement>("[data-psam-table-heading]");
   const tableBodyEl = root.querySelector<HTMLElement>("[data-psam-table-body]");
 
-  if (!mapEl || !edgesEl) {
+  if (!svgEl) {
     return;
   }
 
@@ -206,55 +204,26 @@ function init(root: HTMLElement): void {
 
   // Mutable model. Reassigned atomically on a verified runtime activation.
   let nodesById = new Map<string, PublicSurfaceNode>();
-  let buttons = new Map<string, HTMLButtonElement>();
-  const columnLabels: HTMLElement[] = [];
-  const positions = new Map<string, Point>();
+  for (const node of snapshot.nodes) {
+    nodesById.set(node.id, node);
+  }
 
   let selectedId: string | null = null;
   let runtimeBooted = false;
+  let currentLayout: AuthorityLayout | null = null;
+  let lastColumnsPerBand = 0;
 
-  // Build the initial fallback model (buttons appended to the live map).
-  for (const node of snapshot.nodes) {
-    nodesById.set(node.id, node);
-    const button = createNodeButton(node);
-    buttons.set(node.id, button);
-    mapEl.appendChild(button);
-  }
+  const renderer: AuthorityRenderer = createAuthorityRenderer(svgEl, {
+    onActivate: (id) => {
+      selectNode(id);
+    },
+  });
 
   if (fallbackEl) {
     fallbackEl.hidden = true;
   }
-
-  // Return a DETACHED node button (caller appends). No layout side effects.
-  function createNodeButton(node: PublicSurfaceNode): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "psam__node";
-    button.dataset.id = node.id;
-    button.setAttribute("aria-pressed", "false");
-    button.setAttribute(
-      "aria-label",
-      `${node.name} — surface role ${node.surface_role}; ` +
-        `public-surface status ${node.public_surface_status}; ` +
-        `authority ceiling ${node.authority_ceiling}. Navigation only.`,
-    );
-    button.style.width = `${NODE_W}px`;
-    button.style.height = `${NODE_H}px`;
-
-    const glyph = document.createElement("span");
-    glyph.className = "psam__node-glyph";
-    glyph.setAttribute("aria-hidden", "true");
-    glyph.textContent = "●";
-
-    const name = document.createElement("span");
-    name.className = "psam__node-name";
-    name.textContent = node.name;
-
-    button.append(glyph, name);
-    button.addEventListener("click", () => {
-      selectNode(node.id);
-    });
-    return button;
+  if (mapHintEl) {
+    mapHintEl.hidden = false;
   }
 
   function currentGroupField(): GroupingField {
@@ -295,108 +264,52 @@ function init(root: HTMLElement): void {
     return false;
   }
 
-  function layout(visible: PublicSurfaceNode[]): void {
-    positions.clear();
-    for (const label of columnLabels) {
-      label.remove();
-    }
-    columnLabels.length = 0;
-
-    const visibleIds = new Set(visible.map((node) => node.id));
-    for (const [id, button] of buttons) {
-      button.hidden = !visibleIds.has(id);
-    }
-
-    const groupField = currentGroupField();
-    const groups = new Map<string, PublicSurfaceNode[]>();
-    for (const node of visible) {
-      const key = node[groupField];
-      const bucket = groups.get(key);
-      if (bucket) {
-        bucket.push(node);
-      } else {
-        groups.set(key, [node]);
-      }
-    }
-
-    const groupKeys = Array.from(groups.keys()).sort((a, b) =>
-      a.localeCompare(b),
-    );
-
-    let maxRows = 0;
-    groupKeys.forEach((key, columnIndex) => {
-      const bucket = (groups.get(key) ?? []).slice().sort(comparator);
-      maxRows = Math.max(maxRows, bucket.length);
-      const x = PAD_X + columnIndex * COL_W;
-
-      const label = document.createElement("div");
-      label.className = "psam__col-label";
-      label.setAttribute("aria-hidden", "true");
-      label.style.left = `${x}px`;
-      label.style.top = "12px";
-      label.style.width = `${NODE_W}px`;
-      label.textContent = `${key} (${bucket.length})`;
-      mapEl!.appendChild(label);
-      columnLabels.push(label);
-
-      bucket.forEach((node, rowIndex) => {
-        const y = PAD_TOP + rowIndex * ROW_H;
-        const button = buttons.get(node.id);
-        if (button) {
-          button.style.left = `${x}px`;
-          button.style.top = `${y}px`;
-        }
-        positions.set(node.id, {
-          cx: x + NODE_W / 2,
-          cy: y + NODE_H / 2,
-        });
-      });
-    });
-
-    const width = Math.max(
-      PAD_X * 2 + Math.max(groupKeys.length, 1) * COL_W - COL_GAP,
-      PAD_X * 2 + NODE_W,
-    );
-    const height = Math.max(PAD_TOP + maxRows * ROW_H - ROW_GAP + PAD_BOTTOM, 220);
-
-    mapEl!.style.width = `${width}px`;
-    mapEl!.style.height = `${height}px`;
-    edgesEl!.setAttribute("width", String(width));
-    edgesEl!.setAttribute("height", String(height));
-    edgesEl!.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  /**
+   * How many group regions sit side by side right now, under the Phase 2A
+   * wrapping policy. Purely a responsive decision: it never reorders groups or
+   * nodes and never changes which records are shown.
+   */
+  function columnsPerBandFor(groupCount: number): number {
+    const available = scrollEl ? scrollEl.clientWidth : 0;
+    return resolveColumnsPerBand(available, groupCount);
   }
 
-  function drawRouting(): void {
-    while (edgesEl!.firstChild) {
-      edgesEl!.removeChild(edgesEl!.firstChild);
-    }
+  /** Recompute the deterministic layout for the currently visible nodes. */
+  function layout(visible: PublicSurfaceNode[]): AuthorityLayout {
+    const groupField = currentGroupField();
+    const groupKeys = new Set(visible.map((node) => node[groupField]));
+    const columnsPerBand = columnsPerBandFor(groupKeys.size);
+    lastColumnsPerBand = columnsPerBand;
+    currentLayout = computeAuthorityLayout(visible, groupField, { columnsPerBand });
+    return currentLayout;
+  }
 
+  /** Existing snapshot edges chosen for the current routing state. */
+  function routedEdges(active: AuthorityLayout): readonly PublicSurfaceEdge[] {
     const showGlobal = routeGlobalEl ? routeGlobalEl.checked : false;
     const showSelected = routeSelectedEl ? routeSelectedEl.checked : false;
+    return selectRoutingEdges(snapshot.edges, {
+      mode: resolveRoutingMode(showSelected, showGlobal, selectedId),
+      selectedId,
+      renderedIds: new Set(active.nodes.map((entry) => entry.id)),
+    });
+  }
 
-    let edges: readonly PublicSurfaceEdge[] = [];
-    if (showGlobal) {
-      edges = snapshot.edges;
-    } else if (showSelected && selectedId) {
-      const active = selectedId;
-      edges = snapshot.edges.filter(
-        (edge) => edge.source === active || edge.target === active,
-      );
+  /** One deterministic draw pass. D3 owns the data join and the SVG output. */
+  function draw(active: AuthorityLayout): void {
+    renderer.render({
+      layout: active,
+      edges: routedEdges(active),
+      selectedId,
+    });
+    if (mapEmptyEl) {
+      mapEmptyEl.hidden = !active.isEmpty;
     }
+  }
 
-    for (const edge of edges) {
-      const from = positions.get(edge.source);
-      const to = positions.get(edge.target);
-      if (!from || !to) {
-        continue; // endpoint filtered out of the current view
-      }
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", String(from.cx));
-      line.setAttribute("y1", String(from.cy));
-      line.setAttribute("x2", String(to.cx));
-      line.setAttribute("y2", String(to.cy));
-      line.setAttribute("class", `psam__edge psam__edge--${edge.relation_type}`);
-      edgesEl!.appendChild(line);
+  function redrawRouting(): void {
+    if (currentLayout) {
+      draw(currentLayout);
     }
   }
 
@@ -485,19 +398,13 @@ function init(root: HTMLElement): void {
       return;
     }
     selectedId = id;
-    for (const [buttonId, button] of buttons) {
-      button.setAttribute("aria-pressed", buttonId === id ? "true" : "false");
-    }
     renderDetail(node);
     announce(`Selected ${node.name}. Navigation only.`);
-    drawRouting();
+    redrawRouting();
   }
 
   function clearSelection(): void {
     selectedId = null;
-    for (const button of buttons.values()) {
-      button.setAttribute("aria-pressed", "false");
-    }
     if (detailBodyEl && detailEmptyEl) {
       detailBodyEl.hidden = true;
       detailEmptyEl.hidden = false;
@@ -526,8 +433,7 @@ function init(root: HTMLElement): void {
 
   function refresh(announceMode: "count" | "silent"): void {
     const visible = visibleNodes();
-    layout(visible);
-    drawRouting();
+    draw(layout(visible));
     if (announceMode === "count") {
       announceCount(visible.length);
     }
@@ -594,10 +500,8 @@ function init(root: HTMLElement): void {
     manifest: RuntimeManifest,
   ): ActivationPlan {
     const nextNodesById = new Map<string, PublicSurfaceNode>();
-    const nextButtons = new Map<string, HTMLButtonElement>();
     for (const node of runtimeSnapshot.nodes) {
       nextNodesById.set(node.id, node);
-      nextButtons.set(node.id, createNodeButton(node)); // detached
     }
 
     const optionValues = new Map<MetadataField, string[]>();
@@ -606,7 +510,7 @@ function init(root: HTMLElement): void {
     }
 
     const tableFragment = document.createDocumentFragment();
-    const sorted = [...runtimeSnapshot.nodes].sort(comparator);
+    const sorted = [...runtimeSnapshot.nodes].sort(compareNodes);
     for (const node of sorted) {
       tableFragment.appendChild(buildTableRow(node));
     }
@@ -615,7 +519,6 @@ function init(root: HTMLElement): void {
       snapshot: runtimeSnapshot,
       manifest,
       nodesById: nextNodesById,
-      buttons: nextButtons,
       optionValues,
       tableFragment,
     };
@@ -626,7 +529,7 @@ function init(root: HTMLElement): void {
   //   validated runtime snapshot (already prepared off-DOM as `plan`)
   //     → capture complete fallback/live model + DOM state
   //     → begin activation transaction
-  //     → apply all live mutations (8 stages)
+  //     → apply all live mutations (7 stages)
   //     → commit
   //   catch (any stage throws)
   //     → restore the captured model and DOM completely
@@ -637,18 +540,21 @@ function init(root: HTMLElement): void {
   // Preparation being off-DOM is not sufficient: a stage that throws mid-apply
   // must not leave runtime nodes over a fallback table, fallback provenance over
   // a runtime model, a cleared-but-not-restored selection, or any mixed surface.
+  // The rendered SVG is restored as CAPTURED CHILD NODES, never by re-running
+  // the renderer, so rollback itself cannot fail on a rendering error.
 
   // Activation-stage fault injection is exercised by the environment-assisted
   // browser harness, which one-shot-overrides the specific DOM element operation
-  // each stage performs (e.g. `mapEl.appendChild`, `tableBodyEl.appendChild`,
-  // a status element's `textContent` setter). That requires no production seam,
-  // no global, no DOM attribute, no query parameter, and no debug mode here.
+  // each stage performs (e.g. the SVG root's `replaceChildren`,
+  // `tableBodyEl.appendChild`, a status element's `textContent` setter). That
+  // requires no production seam, no global, no DOM attribute, no query
+  // parameter, and no debug mode here.
   function commitActivation(plan: ActivationPlan): void {
     const priorSelected = selectedId;
-    const active = document.activeElement as HTMLElement | null;
+    const active = document.activeElement as Element | null;
     const focusedNodeId =
-      active && active.classList.contains("psam__node")
-        ? active.dataset.id ?? null
+      active && active instanceof SVGElement && active.classList.contains("psam__node")
+        ? active.getAttribute("data-id")
         : null;
 
     const capture = captureLiveState();
@@ -664,7 +570,7 @@ function init(root: HTMLElement): void {
       return;
     }
     // Success-only side effect: announce the final outcome exactly once. (The
-    // verified status label was set inside stage 5 so a later-stage failure
+    // verified status label was set inside stage 4 so a later-stage failure
     // rolls it back.)
     announce(missingSelection ? MISSING_SELECTION_MSG : VERIFIED_STATUS);
   }
@@ -677,17 +583,13 @@ function init(root: HTMLElement): void {
     return {
       snapshot,
       nodesById,
-      buttons,
       selectedId,
-      mapChildren: Array.from(mapEl!.childNodes),
-      mapWidth: mapEl!.style.width,
-      mapHeight: mapEl!.style.height,
-      edgesChildren: Array.from(edgesEl!.childNodes),
-      edgesW: edgesEl!.getAttribute("width"),
-      edgesH: edgesEl!.getAttribute("height"),
-      edgesVB: edgesEl!.getAttribute("viewBox"),
-      columnLabels: [...columnLabels],
-      positions: Array.from(positions.entries()),
+      svgChildren: Array.from(svgEl!.childNodes),
+      svgW: svgEl!.getAttribute("width"),
+      svgH: svgEl!.getAttribute("height"),
+      svgVB: svgEl!.getAttribute("viewBox"),
+      nodeElements: new Map(renderer.nodeElements),
+      layout: currentLayout,
       selects,
       tableRows: tableBodyEl ? Array.from(tableBodyEl.childNodes) : null,
       status: {
@@ -713,6 +615,7 @@ function init(root: HTMLElement): void {
       routeSelected: routeSelectedEl ? routeSelectedEl.checked : false,
       routeGlobal: routeGlobalEl ? routeGlobalEl.checked : false,
       densityHidden: densityWarningEl ? densityWarningEl.hidden : true,
+      emptyHidden: mapEmptyEl ? mapEmptyEl.hidden : true,
       activeEl: document.activeElement as HTMLElement | null,
     };
   }
@@ -736,31 +639,23 @@ function init(root: HTMLElement): void {
       nodesById = cap.nodesById;
     });
     guard(() => {
-      buttons = cap.buttons;
-    });
-    guard(() => {
       selectedId = cap.selectedId;
     });
     guard(() => {
-      columnLabels.length = 0;
-      columnLabels.push(...cap.columnLabels);
-    });
-    guard(() => {
-      positions.clear();
-      for (const [id, point] of cap.positions) positions.set(id, point);
+      currentLayout = cap.layout;
     });
 
-    // Map + edges DOM (map first so the edges <svg> element is reinserted).
+    // Rendered SVG surface: previously captured child nodes and dimensions are
+    // reinstated verbatim (no re-render), then the renderer's element index is
+    // pointed back at those same elements.
     guard(() => {
-      mapEl!.replaceChildren(...cap.mapChildren);
-      mapEl!.style.width = cap.mapWidth;
-      mapEl!.style.height = cap.mapHeight;
+      svgEl!.replaceChildren(...cap.svgChildren);
+      setOrRemoveAttr(svgEl!, "width", cap.svgW);
+      setOrRemoveAttr(svgEl!, "height", cap.svgH);
+      setOrRemoveAttr(svgEl!, "viewBox", cap.svgVB);
     });
     guard(() => {
-      edgesEl!.replaceChildren(...cap.edgesChildren);
-      setOrRemoveAttr(edgesEl!, "width", cap.edgesW);
-      setOrRemoveAttr(edgesEl!, "height", cap.edgesH);
-      setOrRemoveAttr(edgesEl!, "viewBox", cap.edgesVB);
+      renderer.adoptNodeElements(new Map(cap.nodeElements));
     });
 
     // Filter option lists and selected values.
@@ -807,7 +702,8 @@ function init(root: HTMLElement): void {
       });
     }
 
-    // Selected-node routing state, global-routing preference, density warning.
+    // Selected-node routing state, global-routing preference, density warning,
+    // and the empty-view notice.
     guard(() => {
       if (routeSelectedEl) routeSelectedEl.checked = cap.routeSelected;
     });
@@ -816,6 +712,9 @@ function init(root: HTMLElement): void {
     });
     guard(() => {
       if (densityWarningEl) densityWarningEl.hidden = cap.densityHidden;
+    });
+    guard(() => {
+      if (mapEmptyEl) mapEmptyEl.hidden = cap.emptyHidden;
     });
 
     // Focus target where still applicable.
@@ -826,27 +725,20 @@ function init(root: HTMLElement): void {
     });
   }
 
-  // Apply all live mutations in eight discrete stages. A throw in any stage
+  // Apply all live mutations in seven discrete stages. A throw in any stage
   // propagates to `commitActivation`, which rolls the whole interface back.
   function applyActivation(
     plan: ActivationPlan,
     priorSelected: string | null,
     focusedNodeId: string | null,
   ): boolean {
-    // Stage 1: node + label replacement.
-    for (const button of buttons.values()) button.remove();
-    for (const label of columnLabels) label.remove();
-    columnLabels.length = 0;
-    positions.clear();
+    // Stage 1: rendered-map teardown + model swap.
+    renderer.clear();
+    currentLayout = null;
     snapshot = plan.snapshot;
     nodesById = plan.nodesById;
-    buttons = plan.buttons;
-    for (const button of buttons.values()) mapEl!.appendChild(button);
 
-    // Stage 2: edge replacement (clear prior edges).
-    edgesEl!.replaceChildren();
-
-    // Stage 3: filter-option replacement (preserve each value when still valid).
+    // Stage 2: filter-option replacement (preserve each value when still valid).
     for (const [field, select] of metadataSelects) {
       const prev = select.value;
       for (const opt of Array.from(select.options)) {
@@ -862,24 +754,22 @@ function init(root: HTMLElement): void {
       select.value = values.includes(prev) ? prev : "";
     }
 
-    // Stage 4: table-row replacement.
+    // Stage 3: table-row replacement.
     if (tableBodyEl) {
       while (tableBodyEl.firstChild) tableBodyEl.removeChild(tableBodyEl.firstChild);
       tableBodyEl.appendChild(plan.tableFragment);
     }
 
-    // Stage 5: status / provenance update (never sourced from failed metadata).
+    // Stage 4: status / provenance update (never sourced from failed metadata).
     updateStatusHooks(plan.manifest, plan.snapshot);
     setRuntimeStatusLabel(VERIFIED_STATUS);
 
-    // Stage 6: selection / detail reconciliation.
+    // Stage 5: selection / detail reconciliation.
     let missingSelection = false;
     if (priorSelected && nodesById.has(priorSelected)) {
       selectedId = priorSelected;
       const node = nodesById.get(priorSelected);
       if (node) renderDetail(node);
-      const btn = buttons.get(priorSelected);
-      if (btn) btn.setAttribute("aria-pressed", "true");
     } else if (priorSelected) {
       // Selected node absent from the runtime snapshot: clear selection and
       // selected-node routing; preserve unrelated filters and global routing.
@@ -890,12 +780,12 @@ function init(root: HTMLElement): void {
       selectedId = null;
     }
 
-    // Stage 7: layout and routing (global-routing preference never auto-enabled).
+    // Stage 6: deterministic layout + routing redraw (global-routing preference
+    // is never auto-enabled).
     updateDensityWarning();
-    layout(visibleNodes());
-    drawRouting();
+    draw(layout(visibleNodes()));
 
-    // Stage 8: focus restoration.
+    // Stage 7: focus restoration.
     restoreFocus(focusedNodeId);
 
     return missingSelection;
@@ -939,8 +829,8 @@ function init(root: HTMLElement): void {
     if (!focusedNodeId) {
       return;
     }
-    const target = buttons.get(focusedNodeId);
-    if (target && !target.hidden) {
+    const target = renderer.nodeElements.get(focusedNodeId);
+    if (target) {
       target.focus({ preventScroll: true });
       return;
     }
@@ -1014,14 +904,14 @@ function init(root: HTMLElement): void {
 
   if (routeSelectedEl) {
     routeSelectedEl.addEventListener("change", () => {
-      drawRouting();
+      redrawRouting();
     });
   }
 
   if (routeGlobalEl) {
     routeGlobalEl.addEventListener("change", () => {
       updateDensityWarning();
-      drawRouting();
+      redrawRouting();
     });
   }
 
@@ -1044,12 +934,24 @@ function init(root: HTMLElement): void {
       }
       updateDensityWarning();
       clearSelection();
-      const visible = visibleNodes();
-      layout(visible);
-      drawRouting();
+      draw(layout(visibleNodes()));
       announce(`View reset. Showing all ${snapshot.nodes.length} records.`);
     });
   }
+
+  // Responsive re-layout only. Group wrapping is recomputed from the container
+  // width; ordering, grouping, and record visibility never change here, and the
+  // pass is skipped entirely when the column count is unchanged. No data is
+  // refetched and no snapshot is touched.
+  window.addEventListener("resize", () => {
+    const visible = visibleNodes();
+    const groupField = currentGroupField();
+    const groupCount = new Set(visible.map((node) => node[groupField])).size;
+    if (columnsPerBandFor(groupCount) === lastColumnsPerBand) {
+      return;
+    }
+    draw(layout(visible));
+  });
 
   // Initial render of the bundled fallback model.
   updateDensityWarning();
