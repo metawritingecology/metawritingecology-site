@@ -122,6 +122,56 @@ test("baseline: raw identity validates", async () => {
   await assert.doesNotReject(() => assertRawIdentity(fallbackRaw));
 });
 
+// --- Public classification vocabulary ---------------------------------------
+
+function snapshotWithClassification(classification: string) {
+  const snapshot = cloneSnapshot();
+  snapshot.nodes[0].classification_evidence = "explicit_in_file";
+  snapshot.nodes[0].publicly_declared_classification = classification;
+  return snapshot;
+}
+
+test("snapshot: Cross-Supporting Boundary Note classification accepted", () => {
+  assert.doesNotThrow(() =>
+    assertSnapshot(snapshotWithClassification("Cross-Supporting Boundary Note")),
+  );
+});
+
+test("snapshot: Protocol-Facing Boundary Note classification accepted", () => {
+  assert.doesNotThrow(() =>
+    assertSnapshot(snapshotWithClassification("Protocol-Facing Boundary Note")),
+  );
+});
+
+test("snapshot: existing declared classifications remain accepted", () => {
+  const existingClassifications = [
+    "Boundary Note / Conceptual Framework",
+    "Boundary Packet / Boundary Note",
+    "Cross / Domain Declaration / Structural Note",
+    "Cross / Protocol Orientation / Domain Declaration",
+    "Cross / Structural Account / Domain Declaration",
+    "Model / Conceptual Framework / Domain Declaration",
+    "Model / Domain Declaration",
+    "Protocol / Method Orientation",
+    "Protocol Orientation / Methodological Note / Domain Declaration",
+    "Training-facing Public Surface Anchor",
+  ];
+
+  for (const classification of existingClassifications) {
+    assert.doesNotThrow(
+      () => assertSnapshot(snapshotWithClassification(classification)),
+      classification,
+    );
+  }
+});
+
+test("snapshot: fabricated declared classification rejected", async () => {
+  await rejects(
+    () => assertSnapshot(snapshotWithClassification("Fabricated Boundary Note")),
+    "node_declared_classification",
+  );
+});
+
 // --- Snapshot semantic failures ---------------------------------------------
 
 test("snapshot: authority elevation (top-level ceiling)", async () => {
