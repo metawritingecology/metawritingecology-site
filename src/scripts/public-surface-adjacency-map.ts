@@ -172,6 +172,24 @@ function enhance(container: HTMLElement): void {
     }
   });
 
+  // Details-panel Escape: return focus to the selected graph node.
+  //
+  // A SEPARATE listener on the details panel, because the canvas listener above
+  // only sees events inside a `[data-psadj-node]` group. The details panel holds
+  // a focusable canonical-source link, and an Escape pressed there never reaches
+  // the canvas, so focus could not otherwise return to the graph.
+  //
+  // This handler moves FOCUS only. It never changes the selection, clears the
+  // details, recomputes the layout, redraws the graph, issues a request, alters
+  // edge visibility, or infers a fallback node. With no selected record it is a
+  // no-op and the default Escape action is left alone.
+  details.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.selectedId) {
+      focusNode(canvas, state.selectedId);
+      event.preventDefault();
+    }
+  });
+
   canvas.addEventListener("click", (event) => {
     const group = (event.target as HTMLElement | null)?.closest<SVGGElement>("[data-psadj-node]");
     const id = group?.dataset.psadjNode;

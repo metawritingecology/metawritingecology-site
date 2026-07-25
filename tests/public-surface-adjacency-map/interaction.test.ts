@@ -357,13 +357,139 @@ test("arrow keys map to directions and nothing else does", () => {
   }
 });
 
-test("the client wires Home, End, Escape, Enter and Space explicitly", () => {
-  assert.ok(/event\.key === "Home"/.test(client));
-  assert.ok(/event\.key === "End"/.test(client));
-  assert.ok(/event\.key === "Escape"/.test(client));
-  assert.ok(/event\.key === "Enter"/.test(client));
-  assert.ok(/firstReachableId\(state\.navigation\)/.test(client));
-  assert.ok(/lastReachableId\(state\.navigation\)/.test(client));
+/**
+ * Slice one `<target>.addEventListener("<type>", …)` call out of the production
+ * client source by matching braces from the arrow-function body, then strip
+ * comment lines. Everything returned is EXECUTABLE code, so no assertion below
+ * can be satisfied by a comment or an unused string literal.
+ */
+const listenerBody = (source: string, target: string, type: string): string => {
+  const head = `${target}.addEventListener("${type}"`;
+  const start = source.indexOf(head);
+  assert.notEqual(start, -1, `no ${target}.addEventListener("${type}") call found`);
+  const bodyStart = source.indexOf("{", source.indexOf("=>", start));
+  assert.notEqual(bodyStart, -1, `no arrow body for ${target} ${type} listener`);
+
+  let depth = 0;
+  let end = -1;
+  for (let i = bodyStart; i < source.length; i += 1) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        end = i + 1;
+        break;
+      }
+    }
+  }
+  assert.notEqual(end, -1, `unbalanced braces in the ${target} ${type} listener`);
+
+  return source
+    .slice(bodyStart, end)
+    .split("\n")
+    .filter((line) => {
+      const trimmed = line.trim();
+      return !trimmed.startsWith("//") && !trimmed.startsWith("*") && !trimmed.startsWith("/*");
+    })
+    .join("\n");
+};
+
+test("a keydown listener is attached specifically to the details panel", () => {
+  // Not the canvas, not the document, not the window — the details panel itself,
+  // so an Escape pressed on the canonical-source link inside it is handled.
+  assert.ok(/\bdetails\.addEventListener\(\s*"keydown"/.test(client));
+  assert.equal([...client.matchAll(/\bdetails\.addEventListener\(/g)].length, 1);
+  // No document- or window-level keydown listener exists: the fix is scoped to
+  // the details panel, never a global key capture. (`window` is still used for
+  // the responsive `resize` listener, which is unrelated and unchanged.)
+  for (const wrongTarget of ["document", "window"]) {
+    assert.ok(
+      !new RegExp(`${wrongTarget}\\.addEventListener\\(\\s*"keydown"`).test(client),
+      `${wrongTarget} must not capture keydown`,
+    );
+  }
+  assert.ok(/window\.addEventListener\("resize"/.test(client), "the resize listener is unchanged");
+});
+
+test("details Escape returns focus to the selected node and is otherwise a no-op", () => {
+  const body = listenerBody(client, "details", "keydown");
+
+  // (2) it checks the Escape key, and (3) it checks the current selected id.
+  assert.ok(/event\.key === "Escape"/.test(body), "must check event.key === Escape");
+  assert.ok(/state\.selectedId/.test(body), "must check state.selectedId");
+
+  // (4) it focuses the graph node whose id equals the selected id, via the
+  //     existing bounded helper and the canvas the graph is rendered into.
+  assert.ok(
+    /focusNode\(canvas, state\.selectedId\)/.test(body),
+    "must call focusNode(canvas, state.selectedId)",
+  );
+
+  // (5) preventDefault is reached only through the handled branch: it sits
+  //     strictly after the guarded condition, inside the same block.
+  const guard = body.indexOf('event.key === "Escape" && state.selectedId');
+  const prevent = body.indexOf("event.preventDefault()");
+  assert.notEqual(guard, -1, "the handled case must be a single guarded condition");
+  assert.notEqual(prevent, -1, "the handled case must prevent the default action");
+  assert.ok(prevent > guard, "preventDefault must be inside the guarded branch");
+  assert.equal([...body.matchAll(/preventDefault\(\)/g)].length, 1, "exactly one preventDefault");
+
+  // (6) a missing selected id is a no-op: `state.selectedId` is the guard's own
+  //     truthiness test, so there is no else branch and no fallback lookup.
+  assert.ok(!/else/.test(body), "no else branch");
+  for (const fallback of [
+    "firstReachableId",
+    "lastReachableId",
+    "state.navigation",
+    "querySelector",
+    "[data-psadj-node]",
+    "nodes[0]",
+  ]) {
+    assert.ok(!body.includes(fallback), `must not infer a fallback node via ${fallback}`);
+  }
+
+  // (8) no layout, render, selection mutation, announcement or network call.
+  for (const forbidden of [
+    "computeSemanticLayout",
+    "computeFixedBands",
+    "buildNavigationIndex",
+    "relayout(",
+    "drawGraph(",
+    "renderDetails(",
+    "render()",
+    "selectNode(",
+    "state.selectedId =",
+    "state.visible",
+    "announce(",
+    "bootRuntimeLoader",
+    "fetch(",
+    "textContent",
+    "innerHTML",
+    "hidden",
+  ]) {
+    assert.ok(!body.includes(forbidden), `details Escape must not use ${forbidden}`);
+  }
+});
+
+test("the canvas keyboard behavior is unchanged and independent", () => {
+  const body = listenerBody(client, "canvas", "keydown");
+  // Graph-node Escape, activation, Home/End and arrow movement all still live on
+  // the canvas listener, which was not moved.
+  assert.ok(/event\.key === "Escape"/.test(body));
+  assert.ok(/event\.key === "Enter" \|\| event\.key === " "/.test(body));
+  assert.ok(/event\.key === "Home"/.test(body));
+  assert.ok(/event\.key === "End"/.test(body));
+  assert.ok(/firstReachableId\(state\.navigation\)/.test(body));
+  assert.ok(/lastReachableId\(state\.navigation\)/.test(body));
+  assert.ok(/directionForKey\(event\.key\)/.test(body));
+  assert.ok(/resolveSpatialTarget\(state\.navigation, currentId, direction\)/.test(body));
+  assert.ok(/selectNode\(state, currentId\)/.test(body));
+  // It still only acts on events originating inside a rendered graph node —
+  // which is exactly why the details panel needs its own listener.
+  assert.ok(/closest<SVGGElement>\("\[data-psadj-node\]"\)/.test(body));
+
+  // The two listeners are distinct registrations on distinct targets.
+  assert.ok(client.indexOf('canvas.addEventListener("keydown"') !== client.indexOf('details.addEventListener("keydown"'));
 });
 
 // ---------------------------------------------------------------------------
