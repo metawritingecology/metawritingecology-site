@@ -1437,11 +1437,14 @@ test("markup: no pointer gesture handler is installed on the map", () => {
       `client must not install a ${marker} handler`,
     );
   }
-  // The only listener the map adds to the SVG surface is focus tracking.
+  // The only listeners the map adds to the SVG surface are focus tracking
+  // (Phase 2B-1) and keyboard focus navigation (Phase 2B-2). Both are keyboard
+  // or focus events; no pointer, wheel, or touch event is bound at all, so this
+  // enumeration still fails closed on any gesture handler.
   const svgListeners = [...clientCode.matchAll(/svgEl\.addEventListener\("([^"]+)"/g)].map(
     (m) => m[1],
   );
-  assert.deepEqual(svgListeners, ["focusin"]);
+  assert.deepEqual(svgListeners, ["focusin", "keydown"]);
 });
 
 test("motion: viewport changes are applied without animation or timing", () => {

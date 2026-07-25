@@ -272,10 +272,15 @@ const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
     <div class="psam__map-region">
       <h2 class="psam__region-title">Categorical map</h2>
       <p class="psam__map-hint" data-psam-map-hint hidden>
-        Each map node is reachable with Tab and activated with Enter or Space.
-        The map scrolls horizontally when the groups are wider than the view.
-        Node labels are shortened; the full name is in the node detail panel and
-        the record table. Selection and routing are navigation only.
+        Each map node is reachable with Tab. Arrow keys move focus between
+        visible nodes: up and down move to the previous or next visible node in
+        the same visual group column, left and right move to the adjacent visual
+        group column. This is focus navigation only — moving focus does not
+        select a node. Enter or Space activates the focused node. The map scrolls
+        horizontally when the groups are wider than the view. Node labels are
+        shortened; the full name is in the node detail panel and the record
+        table, which remains available as the complete record. Selection and
+        routing are navigation only.
       </p>
       <!-- Viewport navigation. Requires JavaScript, so the whole panel stays
            hidden until the client module initializes; every record remains

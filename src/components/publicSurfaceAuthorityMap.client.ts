@@ -61,6 +61,10 @@ import {
   type AuthorityRenderer,
 } from "../lib/public-surface-authority-map/d3AuthorityRenderer.ts";
 import {
+  directionForKey,
+  resolveSpatialTarget,
+} from "../lib/public-surface-authority-map/d3AuthorityKeyboardNavigation.ts";
+import {
   VIEWPORT_SCALE,
   anchoredOffset,
   bringIntoViewOffset,
@@ -1334,6 +1338,59 @@ function init(root: HTMLElement): void {
         ensureNodeVisible(id);
       }
     }
+  });
+
+  // Phase 2B-2: spatial focus navigation between currently rendered nodes.
+  //
+  // The complete target algorithm lives in the pure module; this listener only
+  // (1) identifies the focused node id, (2) calls the pure resolver against the
+  // CURRENT rendered layout, (3) focuses the returned renderer element, and
+  // (4) reuses the existing viewport reveal. It reads no edge, no relation type,
+  // no metadata, no selection, and no viewport value, and it holds no state of
+  // its own: the focused DOM element remains the only focus state.
+  //
+  // Arrow focus movement is navigation only. It does not select, does not open
+  // or replace the node detail, does not change grouping, filtering, zoom, or
+  // routing, does not touch `aria-pressed`, and does not announce. Enter and
+  // Space (handled by the renderer) remain the only keyboard operations that
+  // activate a node. A boundary is a silent no-op.
+  svgEl.addEventListener("keydown", (event: KeyboardEvent) => {
+    // Shift deliberately does NOT take part: it never alters the target.
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+    const direction = directionForKey(event.key);
+    if (direction === null) {
+      return;
+    }
+    const target = event.target;
+    if (
+      !(target instanceof SVGElement) ||
+      !target.classList.contains("psam__node")
+    ) {
+      return;
+    }
+    // Focus is inside a map node and the key is a recognized unmodified arrow:
+    // suppress the browser's default arrow-scroll for this key press, whether or
+    // not a target exists in that direction.
+    event.preventDefault();
+    if (!currentLayout) {
+      return;
+    }
+    const nextId = resolveSpatialTarget(
+      currentLayout.nodes,
+      target.getAttribute("data-id"),
+      direction,
+    );
+    if (nextId === null) {
+      return;
+    }
+    const nextEl = renderer.nodeElements.get(nextId);
+    if (!nextEl) {
+      return;
+    }
+    nextEl.focus({ preventScroll: true });
+    ensureNodeVisible(nextId);
   });
 
   if (resetEl) {
