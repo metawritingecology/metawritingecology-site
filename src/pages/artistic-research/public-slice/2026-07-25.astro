@@ -11,8 +11,12 @@ import "../../../styles/global.css";
 //   evidence      — where the fact can be checked, pinned to an immutable commit
 //   boundary      — what the fact does not establish
 //
-// "paths" carries one or two entries under a single sha/timestamp, for the two
-// moments whose fact is a comparison of two files at the same commit.
+// "paths" carries one or two entries under a single sha/timestamp, for the
+// moments whose fact rests on two files at the same commit.
+//
+// "correction" is optional and used by one moment only: where a boundary names
+// a later commit, that commit is made traversable rather than left as text. It
+// is not a general companion-evidence schema.
 
 type EvidencePath = {
   path: string;
@@ -30,6 +34,7 @@ type Moment = {
   observedFact: string;
   phrase: string;
   evidence: Evidence;
+  correction?: Evidence;
   boundary: string;
   spacing?: "close" | "apart";
 };
@@ -56,7 +61,7 @@ const MOMENTS: readonly Moment[] = [
       ]
     },
     boundary:
-      "The file shows the characters present. It does not show how they came to be there. No origin is claimed here."
+      "The file contains the characters at this commit. It does not record their origin."
   },
   {
     observedFact:
@@ -74,13 +79,13 @@ const MOMENTS: readonly Moment[] = [
       ]
     },
     boundary:
-      "This shows the characters in a file. It does not establish that anyone read them, or that anything followed from reading them.",
+      "The characters are present in this file at this commit. The file does not establish that they were read, or that anything followed.",
     spacing: "close"
   },
   {
     observedFact:
       "Both occurrences are replaced with en dashes. The same commit changes four lines across two files and nothing else.",
-    phrase: "Eleven days later, four lines changed.",
+    phrase: "Eleven days later, the contents differed.",
     evidence: {
       repository: REPO,
       sha: "0479406cf2df032613fea9a2e7497065da72250d",
@@ -89,11 +94,15 @@ const MOMENTS: readonly Moment[] = [
         {
           path: "mwe-public-documents.json",
           url: "https://github.com/metawritingecology/meta-writing-ecology/blob/0479406cf2df032613fea9a2e7497065da72250d/mwe-public-documents.json"
+        },
+        {
+          path: "visualizations/public-surface-authority-map/data.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/0479406cf2df032613fea9a2e7497065da72250d/visualizations/public-surface-authority-map/data.json"
         }
       ]
     },
     boundary:
-      "Eleven days is the interval between two commit timestamps. It is not a measure of attention, delay, or difficulty, and it does not describe the work that lies between them."
+      "Eleven days is the interval between two commit timestamps. The interval is not a measure of attention, delay, or difficulty, and it does not describe the work that lies between them."
   },
   {
     observedFact:
@@ -115,13 +124,24 @@ const MOMENTS: readonly Moment[] = [
         }
       ]
     },
+    correction: {
+      repository: REPO,
+      sha: "8038fe1e2a525f377a3918cd7ba56feefda4ef29",
+      timestamp: "2026-07-25T20:35:21+08:00",
+      paths: [
+        {
+          path: "tests/test_public_surface_candidate_generator.py",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/8038fe1e2a525f377a3918cd7ba56feefda4ef29/tests/test_public_surface_candidate_generator.py"
+        }
+      ]
+    },
     boundary:
-      "The two values were brought back into agreement later the same day, at commit 8038fe1e2a525f377a3918cd7ba56feefda4ef29, by changing the record rather than the file. What is shown above is one commit, where the two can be compared."
+      "Commit 8038fe1e2a525f377a3918cd7ba56feefda4ef29 sets the constants to the file's measured values later the same day. The file itself is unchanged. The commit above is one commit where the two can be compared."
   },
   {
     observedFact:
       "The generator's default and explicit historical modes read the tracked file, recompute its identity, compare it against a pinned specification, and write nothing. The public README states the same.",
-    phrase: "From here, the view stays as it is.",
+    phrase: "Here, the view was fixed.",
     evidence: {
       repository: REPO,
       sha: "886f671347e06954b15d658803093df4d9c48b09",
@@ -138,12 +158,12 @@ const MOMENTS: readonly Moment[] = [
       ]
     },
     boundary:
-      "This is what the files do and what the README says they do. It is not a statement about policy, authority, or anything decided outside these files."
+      "The generator modes and the README state this at this commit. It is not a statement about policy, authority, or anything decided outside these files."
   },
   {
     observedFact:
       "mwe-public-documents.json declares 59 records. The drawn file is unchanged from the commit above, and continues to declare 30 records and to name mwe-public-documents.json as its source.",
-    phrase: "The view still names its source. The source has since grown.",
+    phrase: "The view names its source. The source remains open-ended.",
     evidence: {
       repository: REPO,
       sha: "933274af9693d6d1d9fac36819aafdf56f9ab81d",
@@ -160,7 +180,7 @@ const MOMENTS: readonly Moment[] = [
       ]
     },
     boundary:
-      "Both counts are fields the two files declare about themselves. Nothing public states that they are required to agree.",
+      "Both counts are fields the two files declare. No public file states that the two are required to agree.",
     spacing: "apart"
   }
 ];
@@ -195,6 +215,9 @@ const MOMENTS: readonly Moment[] = [
       <section class="case" aria-labelledby="case-title">
         <h2 id="case-title">The frozen view and its source</h2>
 
+        {/* Orientation layer (OD-01). Owner-approved wording, inserted verbatim. */}
+        <p class="orientation">Six selected states, each held at a fixed commit.</p>
+
         <ol class="moments">
           {
             MOMENTS.map((moment) => (
@@ -219,8 +242,8 @@ const MOMENTS: readonly Moment[] = [
             <p>
               The sequence is bounded to the main branch of one public
               repository as it stood at that boundary. Other public branches
-              existed. They are not read here, and public branch state is not
-              main-branch state.
+              existed. They fall outside this selection, and public branch
+              state is not main-branch state.
             </p>
             <p>
               The moments are ordered. The order does not explain them. Nothing
@@ -244,7 +267,7 @@ const MOMENTS: readonly Moment[] = [
                         <span class="sha">{moment.evidence.sha}</span>
                       </p>
                       <p class="traverse">
-                        Read it at that commit:
+                        <span class="pinned-label">Files</span>
                         {
                           moment.evidence.paths.map((entry) => (
                             <>
@@ -255,6 +278,23 @@ const MOMENTS: readonly Moment[] = [
                         }
                       </p>
                       <p class="limit">{moment.boundary}</p>
+                      {
+                        moment.correction && (
+                          <p class="traverse">
+                            <span class="pinned-label">Later commit</span>
+                            {" "}
+                            <span class="sha">{moment.correction.sha}</span>
+                            {
+                              moment.correction.paths.map((entry) => (
+                                <>
+                                  {" "}
+                                  <a href={entry.url}>{entry.path}</a>
+                                </>
+                              ))
+                            }
+                          </p>
+                        )
+                      }
                     </dd>
                   </div>
                 ))
@@ -325,7 +365,15 @@ const MOMENTS: readonly Moment[] = [
     font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.01em;
+    margin: 0 0 1.75rem;
+  }
+
+  /* OD-01 orientation layer. Carries the heading-to-sequence distance so the
+     spacing from the case title to the first moment is unchanged. */
+  .orientation {
+    color: var(--muted);
     margin: 0 0 3.5rem;
+    max-width: 28rem;
   }
 
   /* --- the sequence -------------------------------------------------- */
@@ -506,7 +554,14 @@ const MOMENTS: readonly Moment[] = [
       margin-top: 3rem;
     }
 
-    .disclosure[open] .disclosure-body {
+    /* The disclosure is closed by default, and a closed <details> is not
+       painted. Without this the printed page loses the whole evidence layer,
+       so print reveals it whatever its on-screen state. */
+    .disclosure::details-content {
+      content-visibility: visible;
+    }
+
+    .disclosure:not([open]) .disclosure-body {
       display: block;
     }
 
