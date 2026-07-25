@@ -1,10 +1,11 @@
 // Public Surface and Authority-Ceiling Map — Phase 2A deterministic layout.
 //
 // A PURE module: no DOM, no D3, no browser API, no randomness, no time, no
-// mutation of its inputs. Given the same validated snapshot nodes, the same
-// grouping field, and the same options, it returns byte-for-byte identical
-// coordinates. Semantic validation stays in `contract.ts` / `fallback.ts`; this
-// module only turns already-validated public metadata into positions.
+// host locale, no mutation of its inputs. Given the same validated snapshot
+// nodes, the same grouping field, and the same options, it returns
+// byte-for-byte identical coordinates in every JavaScript environment. Semantic
+// validation stays in `contract.ts` / `fallback.ts`; this module only turns
+// already-validated public metadata into positions.
 //
 // Deliberately NOT computed anywhere in this module (Phase 2A boundary):
 //   - centrality, degree, connectivity, or any edge-count-derived value;
@@ -13,8 +14,12 @@
 //   - force simulation, physics, or any iterative/converging placement;
 //   - inferred nodes, inferred edges, or inferred relations.
 //
-// Grouping and ordering are lexical over explicit approved metadata only.
-// Position therefore encodes group membership and alphabetical order — nothing
+// Grouping and ordering run over explicit approved metadata only, using stable
+// UTF-16 code-unit comparison. No collation API, no host locale, no user or
+// browser language, and no runtime-configured normalization takes part, so the
+// ordering — and therefore every coordinate derived from it — is identical
+// across browsers, operating systems, Node versions, ICU builds, and default
+// locales. Position encodes group membership and code-unit order and nothing
 // else. Every node is rendered at the SAME size in every group.
 
 import type {
@@ -118,18 +123,28 @@ export interface AuthorityLayoutOptions {
 // --- Deterministic comparators ----------------------------------------------
 
 /**
- * Lexical comparison with a code-unit tiebreak, so the result never depends on
- * host locale collation for otherwise-equal strings.
+ * Order two strings by stable UTF-16 code-unit comparison — exactly the
+ * relational `<` / `>` operators, which the language specifies over code units
+ * and which no host setting can vary.
+ *
+ * A collation-based comparison is deliberately NOT used here. An unspecified
+ * collation may return a different nonzero ordering under a different browser,
+ * operating system, Node version, ICU build, or default locale (for example
+ * whether `_` sorts before a letter, or where `Ä` falls relative to `A` and
+ * `Z`). A code-unit tiebreak cannot repair that, because it only runs when the
+ * collation already returned zero. Since group and node positions are derived
+ * from this ordering, any such variation would make the same validated snapshot
+ * produce a different layout in a different environment.
  */
 export function compareText(a: string, b: string): number {
-  const primary = a.localeCompare(b);
-  if (primary !== 0) return primary;
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
 }
 
-/** Node order inside a group: document name, then node id. */
+/**
+ * Node order inside a group: document name first, then node id as the exact
+ * tiebreak. Both steps use the code-unit comparator above.
+ */
 export function compareNodes(a: PublicSurfaceNode, b: PublicSurfaceNode): number {
   return compareText(a.name, b.name) || compareText(a.id, b.id);
 }
@@ -200,7 +215,7 @@ export function shortenLabel(
 
 /**
  * Bucket already-validated nodes by one approved grouping field. Group keys are
- * ordered lexically and nodes inside each group by name then id. No key is
+ * ordered by code unit and nodes inside each group by name then id. No key is
  * invented: every key is a verbatim metadata value present on some node.
  */
 export function groupNodes(
@@ -232,7 +247,7 @@ export function groupNodes(
  * nodes. Filtered-out nodes are simply absent from `nodes` and `positions`, so
  * they receive no coordinates at all.
  *
- * Coordinates are integers derived only from fixed metrics and lexical order.
+ * Coordinates are integers derived only from fixed metrics and code-unit order.
  * They are always finite and non-negative.
  */
 export function computeAuthorityLayout(
@@ -361,7 +376,7 @@ export function columnsForWidth(availableWidth: number, groupCount: number): num
  * Phase 2A wrapping policy.
  *
  * Wide enough for two or more group regions: every group keeps its own column
- * in ONE lexical row, and the map container scrolls horizontally when the row
+ * in ONE ordered row, and the map container scrolls horizontally when the row
  * is wider than the viewport. Too narrow for two: each group takes the full
  * width and the groups stack vertically, so nothing is clipped and no label is
  * shrunk.
@@ -369,7 +384,7 @@ export function columnsForWidth(availableWidth: number, groupCount: number): num
  * A partially filled grid is deliberately avoided. Group sizes in this dataset
  * are very uneven, so a wrapped grid leaves a large empty region beside a short
  * column — blank space that carries no meaning but could be read as if it did.
- * One lexical row keeps the reading order unambiguous and the canvas compact.
+ * One ordered row keeps the reading order unambiguous and the canvas compact.
  */
 export function resolveColumnsPerBand(
   availableWidth: number,

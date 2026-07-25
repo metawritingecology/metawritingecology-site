@@ -136,13 +136,280 @@ test("layout: computing a layout does not mutate its input nodes", () => {
   assert.equal(JSON.stringify(allNodes), before);
 });
 
-// --- 2. Lexical group ordering ----------------------------------------------
+// --- 1b. Locale independence of the ordering comparator -----------------------
+//
+// Group and node positions are derived from `compareText`, so if that
+// comparator consulted host collation the same validated snapshot could lay out
+// differently on a different browser, OS, Node version, ICU build, or default
+// locale. These tests pin the comparator to stable UTF-16 code-unit order using
+// an EXPLICIT fixture whose expected order is written out by hand — never
+// computed with the implementation under test.
 
-test("layout: group keys are ordered lexically", () => {
+// Code points, in ascending code-unit order:
+//   "Z" U+005A (90) < "_" U+005F (95) < "a" U+0061 (97) < "Ä" U+00C4 (196)
+// Common collations disagree with this: they typically place "_" first and sort
+// "a"/"Ä" before "Z" (and Swedish collation places "Ä" after "Z"). The fixture
+// is chosen precisely because collation and code-unit order diverge on it.
+const COLLATION_FIXTURE = ["Z", "_", "a", "Ä"];
+const EXPECTED_CODE_UNIT_ORDER = ["Z", "_", "a", "Ä"];
+const EXPECTED_CODE_UNITS = [90, 95, 97, 196];
+
+// Fixed, seeded-free permutations. No Math.random anywhere in this file.
+const reversed = (list) => [...list].reverse();
+const shuffled = (list) =>
+  list.map((_item, index) => list[(index * 7 + 3) % list.length]);
+
+test("comparator: the fixture's code units are exactly the documented ones", () => {
+  assert.deepEqual(
+    COLLATION_FIXTURE.map((s) => s.charCodeAt(0)),
+    EXPECTED_CODE_UNITS,
+  );
+});
+
+test("comparator: sorts the fixture into the hand-written code-unit order", () => {
+  // Expected order is a literal, not a compareText result.
+  for (const start of [
+    COLLATION_FIXTURE,
+    reversed(COLLATION_FIXTURE),
+    shuffled(COLLATION_FIXTURE),
+    ["Ä", "a", "_", "Z"],
+    ["a", "Ä", "Z", "_"],
+  ]) {
+    assert.deepEqual(
+      [...start].sort(compareText),
+      EXPECTED_CODE_UNIT_ORDER,
+      `sorting ${JSON.stringify(start)} must give the code-unit order`,
+    );
+  }
+});
+
+test("comparator: returns exactly -1, 0, or 1 with hand-written pair expectations", () => {
+  const PAIRS = [
+    ["Z", "_", -1],
+    ["Z", "a", -1],
+    ["Z", "Ä", -1],
+    ["_", "a", -1],
+    ["_", "Ä", -1],
+    ["a", "Ä", -1],
+    ["_", "Z", 1],
+    ["a", "Z", 1],
+    ["Ä", "Z", 1],
+    ["a", "_", 1],
+    ["Ä", "_", 1],
+    ["Ä", "a", 1],
+    ["Z", "Z", 0],
+    ["Ä", "Ä", 0],
+    ["", "", 0],
+    ["", "a", -1],
+    ["a", "", 1],
+    // Uppercase sorts before lowercase under code units, unlike most collations.
+    ["A", "a", -1],
+    ["Z", "a", -1],
+    // Digits before letters; space before digits.
+    ["1", "A", -1],
+    [" ", "1", -1],
+  ];
+  for (const [a, b, expected] of PAIRS) {
+    assert.equal(
+      compareText(a, b),
+      expected,
+      `compareText(${JSON.stringify(a)}, ${JSON.stringify(b)}) must be ${expected}`,
+    );
+  }
+});
+
+test("comparator: is reflexive, antisymmetric, and transitive over the fixture", () => {
+  for (const a of COLLATION_FIXTURE) {
+    assert.equal(compareText(a, a), 0);
+    for (const b of COLLATION_FIXTURE) {
+      // Sum form avoids the -0 vs 0 distinction that strict equality would flag
+      // on the reflexive pair.
+      assert.equal(compareText(a, b) + compareText(b, a), 0);
+    }
+  }
+  for (let i = 0; i < EXPECTED_CODE_UNIT_ORDER.length - 2; i += 1) {
+    const [x, y, z] = EXPECTED_CODE_UNIT_ORDER.slice(i, i + 3);
+    assert.equal(compareText(x, y), -1);
+    assert.equal(compareText(y, z), -1);
+    assert.equal(compareText(x, z), -1);
+  }
+});
+
+test("comparator: does not call or depend on String.prototype.localeCompare", () => {
+  // Replace the collation API with a deliberately WRONG, call-counting stub and
+  // recompute everything under it. If the layout consulted collation at all,
+  // either the counter would move or the results would change. Results are
+  // captured while patched and asserted only after restoring, so assertion
+  // internals cannot pollute the counter.
+  const realLocaleCompare = String.prototype.localeCompare;
+  const realCollator = Intl.Collator;
+
+  const expectedCompare = COLLATION_FIXTURE.map((a) =>
+    COLLATION_FIXTURE.map((b) => compareText(a, b)),
+  );
+  const expectedLayout = serialize(layoutOf(allNodes, "surface_role"));
+  const expectedSort = [...reversed(COLLATION_FIXTURE)].sort(compareText);
+
+  let localeCompareCalls = 0;
+  let collatorConstructions = 0;
+  let patchedCompare;
+  let patchedLayout;
+  let patchedSort;
+  try {
+    // eslint-disable-next-line no-extend-native
+    String.prototype.localeCompare = function stubLocaleCompare(that) {
+      localeCompareCalls += 1;
+      // Inverted relative to code-unit order, so any reliance on it shows up.
+      return String(this) === String(that) ? 0 : String(this) < String(that) ? 1 : -1;
+    };
+    Intl.Collator = function StubCollator() {
+      collatorConstructions += 1;
+      return { compare: () => 0 };
+    };
+
+    patchedCompare = COLLATION_FIXTURE.map((a) =>
+      COLLATION_FIXTURE.map((b) => compareText(a, b)),
+    );
+    patchedLayout = serialize(layoutOf(allNodes, "surface_role"));
+    patchedSort = [...reversed(COLLATION_FIXTURE)].sort(compareText);
+  } finally {
+    String.prototype.localeCompare = realLocaleCompare;
+    Intl.Collator = realCollator;
+  }
+
+  assert.equal(localeCompareCalls, 0, "localeCompare must never be called");
+  assert.equal(collatorConstructions, 0, "Intl.Collator must never be constructed");
+  assert.deepEqual(patchedCompare, expectedCompare);
+  assert.equal(patchedLayout, expectedLayout);
+  assert.deepEqual(patchedSort, EXPECTED_CODE_UNIT_ORDER);
+  // The stub really was installed and really is wrong, so the assertions above
+  // are meaningful rather than vacuous.
+  assert.equal("Z".localeCompare("a"), realLocaleCompare.call("Z", "a"));
+});
+
+test("comparator: group ordering follows the explicit code-unit order", () => {
+  // Synthetic grouping values drawn from the fixture. Group keys must come out
+  // in the hand-written code-unit order, not any collation order.
+  const nodes = COLLATION_FIXTURE.map((key, index) => ({
+    ...allNodes[index],
+    id: `fixture-${index}`,
+    surface_role: key,
+  }));
+  for (const input of [nodes, reversed(nodes), shuffled(nodes)]) {
+    const layout = computeAuthorityLayout(input, "surface_role");
+    assert.deepEqual(
+      layout.groups.map((group) => group.key),
+      EXPECTED_CODE_UNIT_ORDER,
+    );
+    assert.deepEqual(
+      layout.groups.map((group) => group.columnIndex),
+      [0, 1, 2, 3],
+    );
+  }
+});
+
+test("comparator: node name ordering follows the explicit code-unit order", () => {
+  const nodes = COLLATION_FIXTURE.map((name, index) => ({
+    ...allNodes[index],
+    id: `fixture-${index}`,
+    surface_role: "concept_node",
+    name,
+  }));
+  for (const input of [nodes, reversed(nodes), shuffled(nodes)]) {
+    const layout = computeAuthorityLayout(input, "surface_role");
+    assert.equal(layout.groups.length, 1);
+    assert.deepEqual(
+      layout.nodes.map((entry) => entry.node.name),
+      EXPECTED_CODE_UNIT_ORDER,
+    );
+    assert.deepEqual(
+      layout.nodes.map((entry) => entry.rowIndex),
+      [0, 1, 2, 3],
+    );
+  }
+});
+
+test("comparator: the node-id tiebreak follows the explicit code-unit order", () => {
+  // Identical names force the tiebreak; ids carry the fixture.
+  const nodes = COLLATION_FIXTURE.map((id, index) => ({
+    ...allNodes[index],
+    id,
+    surface_role: "concept_node",
+    name: "Identical Name",
+  }));
+  for (const input of [nodes, reversed(nodes), shuffled(nodes)]) {
+    const layout = computeAuthorityLayout(input, "surface_role");
+    assert.deepEqual(layout.nodes.map((entry) => entry.id), EXPECTED_CODE_UNIT_ORDER);
+  }
+  // Name still dominates the id.
+  const nameWins = [
+    { ...allNodes[0], id: "Ä", surface_role: "concept_node", name: "A first" },
+    { ...allNodes[1], id: "Z", surface_role: "concept_node", name: "B second" },
+  ];
+  assert.deepEqual(
+    computeAuthorityLayout(reversed(nameWins), "surface_role").nodes.map((e) => e.id),
+    ["Ä", "Z"],
+  );
+});
+
+test("comparator: reversed and shuffled fixture input serialize identically", () => {
+  const nodes = COLLATION_FIXTURE.map((key, index) => ({
+    ...allNodes[index],
+    id: `fixture-${index}`,
+    surface_role: key,
+    name: key,
+  }));
+  const baseline = serialize(computeAuthorityLayout(nodes, "surface_role"));
+  for (const input of [reversed(nodes), shuffled(nodes), reversed(shuffled(nodes))]) {
+    assert.equal(serialize(computeAuthorityLayout(input, "surface_role")), baseline);
+  }
+});
+
+test("layout: reversed and shuffled real input serialize identically", () => {
+  const permutation = shuffled(allNodes);
+  assert.equal(permutation.length, allNodes.length);
+  assert.equal(new Set(permutation.map((n) => n.id)).size, allNodes.length);
+  assert.notDeepEqual(
+    permutation.map((n) => n.id),
+    allNodes.map((n) => n.id),
+    "the permutation must actually reorder the input",
+  );
+  for (const field of GROUPING_FIELDS) {
+    const baseline = serialize(layoutOf(allNodes, field));
+    assert.equal(serialize(layoutOf(reversed(allNodes), field)), baseline);
+    assert.equal(serialize(layoutOf(permutation, field)), baseline);
+  }
+});
+
+// --- 2. Code-unit group ordering ---------------------------------------------
+
+// The adopted snapshot's actual group keys, written out in the code-unit order
+// the layout must produce. Hand-written, not derived from the implementation.
+const EXPECTED_GROUP_KEYS = {
+  surface_role: [
+    "boundary_document",
+    "concept_node",
+    "interpretation_guide",
+    "public_anchor",
+    "repository_orientation",
+    "source_use_guide",
+  ],
+  authority_ceiling: [
+    "navigation_only",
+    "public_file_claim_only",
+    "repository_boundary_only",
+  ],
+  public_surface_status: [
+    "public_boundary_document",
+    "public_navigation_surface",
+    "selected_external_node",
+  ],
+};
+
+test("layout: group keys come out in the hand-written code-unit order", () => {
   for (const field of GROUPING_FIELDS) {
     const keys = layoutOf(allNodes, field).groups.map((group) => group.key);
-    const sorted = [...keys].sort(compareText);
-    assert.deepEqual(keys, sorted, `grouping ${field} keys must be lexical`);
+    assert.deepEqual(keys, EXPECTED_GROUP_KEYS[field], `grouping ${field}`);
     assert.equal(new Set(keys).size, keys.length, "group keys must be unique");
   }
 });
@@ -170,7 +437,7 @@ test("layout: each group's declared count equals its rendered node count", () =>
   }
 });
 
-// --- 3. Lexical node ordering inside groups -----------------------------------
+// --- 3. Code-unit node ordering inside groups ---------------------------------
 
 test("layout: nodes inside a group are ordered by name, then id", () => {
   for (const field of GROUPING_FIELDS) {
@@ -647,6 +914,39 @@ test("boundary: no force, drag, zoom, hierarchy, geo, canvas, or WebGL API is us
       assert.equal(source.includes(marker), false, `${name} must not use ${marker}`);
     }
   }
+});
+
+test("boundary: the layout module contains no locale-dependent API at all", () => {
+  // Scanned against the RAW source, comments included: these tokens must not
+  // appear anywhere in the deterministic layout module, not even in prose.
+  const forbidden = [
+    ".localeCompare(",
+    "localeCompare",
+    "Intl.Collator",
+    "Intl.",
+    "navigator.language",
+    "navigator.languages",
+    "document.documentElement.lang",
+    "toLocaleUpperCase",
+    "toLocaleLowerCase",
+    "toLocaleString",
+    "normalize(",
+  ];
+  for (const marker of forbidden) {
+    assert.equal(
+      layoutSource.includes(marker),
+      false,
+      `d3AuthorityLayout.ts must not contain ${marker}`,
+    );
+  }
+  // The comparator is the relational-operator form, with no collation step.
+  assert.match(
+    layoutCode,
+    /export function compareText\(a: string, b: string\): number \{\s*if \(a === b\) return 0;\s*return a < b \? -1 : 1;\s*\}/,
+  );
+  // Both sorts inside the module go through the deterministic comparators.
+  const sorts = [...layoutCode.matchAll(/\.sort\(([^)]*)\)/g)].map((m) => m[1].trim());
+  assert.deepEqual(sorts, ["compareText", "compareNodes"]);
 });
 
 test("boundary: no centrality, rank, similarity, or authority score is computed", () => {
