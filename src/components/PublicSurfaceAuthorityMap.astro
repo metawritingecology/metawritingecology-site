@@ -26,6 +26,10 @@ import {
   SOURCE_LINK_PREFIX,
   EXPECTED_COUNTS,
 } from "../lib/public-surface-authority-map/contract.ts";
+import {
+  compareNodes,
+  compareText,
+} from "../lib/public-surface-authority-map/d3AuthorityLayout.ts";
 
 const snapshot = await assertSnapshotFromRawText(rawSnapshotText);
 
@@ -33,10 +37,13 @@ const APPROVED_TITLE = "Public Surface and Authority-Ceiling Map";
 const APPROVED_SUBTITLE =
   "An interactive view of selected public-document roles, source functions, and declared public authority ceilings.";
 
-// Deterministic, boundary-neutral display order for the fallback table.
-const tableNodes = [...snapshot.nodes].sort(
-  (a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id),
-);
+// Deterministic, boundary-neutral display order for the fallback table. The
+// shared comparators from the deterministic layout module are reused verbatim
+// (never reimplemented here), so the server-rendered table, the server-rendered
+// filter options, the client runtime option lists, and the D3 Authority View all
+// order by the same locale-independent UTF-16 code-unit comparison. No host
+// locale, collation API, or browser language takes part in any of them.
+const tableNodes = [...snapshot.nodes].sort(compareNodes);
 
 type FilterField =
   | "surface_role"
@@ -45,9 +52,7 @@ type FilterField =
   | "classification_evidence";
 
 const distinctValues = (field: FilterField): string[] =>
-  Array.from(new Set(snapshot.nodes.map((node) => node[field]))).sort((a, b) =>
-    a.localeCompare(b),
-  );
+  Array.from(new Set(snapshot.nodes.map((node) => node[field]))).sort(compareText);
 
 const surfaceRoles = distinctValues("surface_role");
 const authorityCeilings = distinctValues("authority_ceiling");
