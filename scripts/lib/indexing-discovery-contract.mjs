@@ -46,7 +46,9 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   // noindex,nofollow application-stage prototype (no canonical, not in feed)
   "/language-pressure-test-lab-prototype/",
   // noindex,nofollow bounded public preview (self-canonical, not in feed)
-  "/public-surface-map/interactive/"
+  "/public-surface-map/interactive/",
+  // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
+  "/public-surface-map/expanded/"
 ]);
 
 // Normalized path of the custom 404 / unmatched-route representation. Excluded

@@ -65,6 +65,28 @@ const EXPECTED_SNAPSHOT_BODY = [
   "X-Robots-Tag: noindex, nofollow, nosnippet"
 ];
 
+// Phase 3A P6 — the expanded adjacency product's own data routes. These are a
+// SEPARATE product from the 30-record authority map above; the two rule sets
+// never share a path. Unlike the older path-specific rules, these two pin
+// X-Content-Type-Options explicitly (in addition to the catch-all), so a change
+// to the catch-all can never leave a JSON data route sniffable.
+const EXPECTED_EXPANDED_MANIFEST_PATH =
+  "/public-surface-map/expanded/data/manifest.json";
+const EXPECTED_EXPANDED_SNAPSHOT_PATH =
+  "/public-surface-map/expanded/data/snapshots/*";
+const EXPECTED_EXPANDED_MANIFEST_BODY = [
+  "Content-Type: application/json; charset=utf-8",
+  "Cache-Control: no-cache, must-revalidate",
+  "X-Content-Type-Options: nosniff",
+  "X-Robots-Tag: noindex, nofollow, nosnippet"
+];
+const EXPECTED_EXPANDED_SNAPSHOT_BODY = [
+  "Content-Type: application/json; charset=utf-8",
+  "Cache-Control: public, max-age=31536000, immutable",
+  "X-Content-Type-Options: nosniff",
+  "X-Robots-Tag: noindex, nofollow, nosnippet"
+];
+
 // Package 2B — /.well-known/security.txt path-specific rule. Exactly two
 // ordered directives; it must NOT repeat any Package 2A catch-all security
 // header and must NOT carry X-Robots-Tag.
@@ -174,16 +196,32 @@ const validateHeadersContract = (text) => {
   const securityTxt = requireUnique(blocks, "/.well-known/security.txt");
   const manifest = requireUnique(blocks, "/public-surface-map/data/manifest.json");
   const snapshot = requireUnique(blocks, "/public-surface-map/data/snapshots/*");
+  const expandedManifest = requireUnique(blocks, EXPECTED_EXPANDED_MANIFEST_PATH);
+  const expandedSnapshot = requireUnique(blocks, EXPECTED_EXPANDED_SNAPSHOT_PATH);
 
   assert.deepEqual(catchAll.body, EXPECTED_CATCH_ALL_BODY);
   assert.deepEqual(securityTxt.body, EXPECTED_SECURITY_TXT_HEADER_BODY);
   assert.deepEqual(manifest.body, EXPECTED_MANIFEST_BODY);
   assert.deepEqual(snapshot.body, EXPECTED_SNAPSHOT_BODY);
+  assert.deepEqual(expandedManifest.body, EXPECTED_EXPANDED_MANIFEST_BODY);
+  assert.deepEqual(expandedSnapshot.body, EXPECTED_EXPANDED_SNAPSHOT_BODY);
+
+  // The expanded rules are a distinct product surface: they never collide with
+  // the 30-record authority-map data paths.
+  assert.notEqual(expandedManifest.path, manifest.path);
+  assert.notEqual(expandedSnapshot.path, snapshot.path);
 
   // X-Content-Type-Options, the enforced CSP, and the Report-Only CSP must live
   // only in the catch-all block, never in a path-specific block.
   for (const block of [securityTxt, manifest, snapshot]) {
     assert.equal(block.body.some((l) => /^X-Content-Type-Options:/i.test(l)), false);
+    assert.equal(block.body.some((l) => /^Content-Security-Policy:/i.test(l)), false);
+    assert.equal(block.body.some((l) => /^Content-Security-Policy-Report-Only:/i.test(l)), false);
+  }
+  // The two expanded data rules pin nosniff explicitly by design, but still
+  // carry no CSP directive of their own.
+  for (const block of [expandedManifest, expandedSnapshot]) {
+    assert.equal(block.body.some((l) => /^X-Content-Type-Options: nosniff$/i.test(l)), true);
     assert.equal(block.body.some((l) => /^Content-Security-Policy:/i.test(l)), false);
     assert.equal(block.body.some((l) => /^Content-Security-Policy-Report-Only:/i.test(l)), false);
   }
@@ -208,7 +246,15 @@ const validateHeadersContract = (text) => {
     "manifest rule must precede snapshot rule"
   );
 
-  return { blocks, catchAll, securityTxt, manifest, snapshot };
+  return {
+    blocks,
+    catchAll,
+    securityTxt,
+    manifest,
+    snapshot,
+    expandedManifest,
+    expandedSnapshot
+  };
 };
 
 // Parse the ACTUAL middleware ENFORCED_HEADERS object into a key→value mapping
@@ -384,6 +430,55 @@ test("_headers: manifest and snapshot retain exact MIME, cache, and robots contr
   assert.equal(s["X-Robots-Tag"], "noindex, nofollow, nosnippet");
 });
 
+test("_headers: expanded adjacency data rules pin exact MIME, cache, nosniff, and robots contracts", () => {
+  const { expandedManifest, expandedSnapshot } = validateHeadersContract(headers);
+
+  const m = directiveMap(expandedManifest.body);
+  assert.equal(expandedManifest.path, "/public-surface-map/expanded/data/manifest.json");
+  assert.equal(m["Content-Type"], "application/json; charset=utf-8");
+  assert.equal(m["Cache-Control"], "no-cache, must-revalidate");
+  assert.equal(m["X-Content-Type-Options"], "nosniff");
+  assert.equal(m["X-Robots-Tag"], "noindex, nofollow, nosnippet");
+
+  const s = directiveMap(expandedSnapshot.body);
+  assert.equal(expandedSnapshot.path, "/public-surface-map/expanded/data/snapshots/*");
+  assert.equal(s["Content-Type"], "application/json; charset=utf-8");
+  assert.equal(s["Cache-Control"], "public, max-age=31536000, immutable");
+  assert.equal(s["X-Content-Type-Options"], "nosniff");
+  assert.equal(s["X-Robots-Tag"], "noindex, nofollow, nosnippet");
+});
+
+test("_headers: the frozen authority-map data rules are unchanged by the expanded product", () => {
+  const { manifest, snapshot } = validateHeadersContract(headers);
+  assert.deepEqual(manifest.body, EXPECTED_MANIFEST_BODY);
+  assert.deepEqual(snapshot.body, EXPECTED_SNAPSHOT_BODY);
+  assert.equal(manifest.path, "/public-surface-map/data/manifest.json");
+  assert.equal(snapshot.path, "/public-surface-map/data/snapshots/*");
+});
+
+test("_headers fixture: a duplicated expanded rule is rejected", () => {
+  const conflicting = [
+    "/public-surface-map/expanded/data/snapshots/*",
+    "  Content-Type: application/json; charset=utf-8",
+    "  Cache-Control: no-store", // conflicts with the approved immutable value
+    "  X-Content-Type-Options: nosniff",
+    "  X-Robots-Tag: noindex, nofollow, nosnippet"
+  ].join("\n");
+  const fixture = [VALID_FIXTURE.trimEnd(), conflicting].join("\n\n") + "\n";
+  assert.throws(
+    () => validateHeadersContract(fixture),
+    /exactly one "\/public-surface-map\/expanded\/data\/snapshots\/\*" rule, found 2/
+  );
+});
+
+test("_headers fixture: a missing expanded rule is rejected", () => {
+  const withoutExpandedManifest = VALID_FIXTURE.replace(VALID_EXPANDED_MANIFEST, "").trim() + "\n";
+  assert.throws(
+    () => validateHeadersContract(withoutExpandedManifest),
+    /exactly one "\/public-surface-map\/expanded\/data\/manifest\.json" rule, found 0/
+  );
+});
+
 test("_headers: exactly one /.well-known/security.txt rule with the exact ordered two-directive body", () => {
   const { securityTxt } = validateHeadersContract(headers);
   assert.deepEqual(securityTxt.body, EXPECTED_SECURITY_TXT_HEADER_BODY);
@@ -425,10 +520,25 @@ const VALID_SNAPSHOT = [
   "/public-surface-map/data/snapshots/*",
   ...EXPECTED_SNAPSHOT_BODY.map((l) => `  ${l}`)
 ].join("\n");
+const VALID_EXPANDED_MANIFEST = [
+  EXPECTED_EXPANDED_MANIFEST_PATH,
+  ...EXPECTED_EXPANDED_MANIFEST_BODY.map((l) => `  ${l}`)
+].join("\n");
+const VALID_EXPANDED_SNAPSHOT = [
+  EXPECTED_EXPANDED_SNAPSHOT_PATH,
+  ...EXPECTED_EXPANDED_SNAPSHOT_BODY.map((l) => `  ${l}`)
+].join("\n");
 
 // A minimal, self-consistent valid file assembled from the approved bodies.
 const VALID_FIXTURE =
-  [VALID_CATCH_ALL, VALID_SECURITY_TXT, VALID_MANIFEST, VALID_SNAPSHOT].join("\n\n") + "\n";
+  [
+    VALID_CATCH_ALL,
+    VALID_SECURITY_TXT,
+    VALID_MANIFEST,
+    VALID_SNAPSHOT,
+    VALID_EXPANDED_MANIFEST,
+    VALID_EXPANDED_SNAPSHOT
+  ].join("\n\n") + "\n";
 
 test("_headers fixture: a valid synthetic file passes the contract", () => {
   assert.doesNotThrow(() => validateHeadersContract(VALID_FIXTURE));
