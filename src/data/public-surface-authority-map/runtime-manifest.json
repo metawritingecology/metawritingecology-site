@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "map_id": "public-surface-authority-map",
   "selected_snapshot": {
-    "id": "97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e",
-    "source_commit": "97631bc0a36f39331a6950d1498400213208afb6",
+    "id": "3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea",
+    "source_commit": "3219fa03149b4bf1a229f059b4912b632028422b",
     "snapshot_schema_version": "1.0",
-    "path": "/public-surface-map/data/snapshots/97631bc0a36f39331a6950d1498400213208afb6-82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e.json",
-    "byte_length": 83727,
-    "sha256": "82f7f74b98a9b3b94a9ed0b12a394f1db2d9b5d256f700d311061c1353f4ef1e",
-    "git_blob": "aa25de9c60b0c0bcb2f8fec1f82bafc135e1f10b"
+    "path": "/public-surface-map/data/snapshots/3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea.json",
+    "byte_length": 92903,
+    "sha256": "3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea",
+    "git_blob": "2d59c4fdd07a2a9ddfad94e2e214a2d1c84912af"
   },
   "currentness_claim": "none"
 }
