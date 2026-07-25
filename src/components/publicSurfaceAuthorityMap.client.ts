@@ -35,6 +35,7 @@ import type { RuntimeManifest } from "../lib/public-surface-authority-map/runtim
 import { bootRuntimeLoader } from "../lib/public-surface-authority-map/runtimeLoader.ts";
 import {
   compareNodes,
+  compareText,
   computeAuthorityLayout,
   resolveColumnsPerBand,
   resolveRoutingMode,
@@ -132,12 +133,16 @@ function isGroupingField(value: string): value is GroupingField {
   );
 }
 
+// Runtime filter-option order. Uses the SAME shared locale-independent
+// comparator as the deterministic layout and the server-rendered surfaces, so a
+// runtime activation can never reorder an option list relative to the map, the
+// record table, or the bundled fallback it replaces.
 function distinctValues(
   snapshot: PublicSurfaceAuthoritySnapshot,
   field: MetadataField,
 ): string[] {
   return Array.from(new Set(snapshot.nodes.map((node) => node[field]))).sort(
-    (a, b) => a.localeCompare(b),
+    compareText,
   );
 }
 

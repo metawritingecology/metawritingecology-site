@@ -1043,3 +1043,315 @@ test("boundary: groupNodes never drops or duplicates a record", () => {
     assert.equal(new Set(ids).size, allNodes.length);
   }
 });
+
+// --- 13. Phase 2A.1: one ordering comparator across every visible surface ------
+//
+// Phase 2A made the D3 Authority View locale-independent. Three ordering paths
+// still ran through the host collation afterwards: the server-rendered record
+// table, the server-rendered filter options, and the client runtime option
+// lists. Phase 2A.1 points all three at the SAME shared comparators, so the map,
+// the record table, and every filter option agree in every environment.
+//
+// The scans below are source-level contracts (the Astro component cannot be
+// rendered under the Node test runner, and the client module installs DOM
+// listeners on import), paired with behavioral assertions over the exact
+// expressions those two files now use. Every expected value is hand written.
+
+const astroSource = rd("src/components/PublicSurfaceAuthorityMap.astro");
+
+// Ordering code lives in the component's leading `---` frontmatter fence. The
+// markup, prose, and CSS below it are deliberately excluded from these scans.
+const astroFrontmatterMatch = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(astroSource);
+const astroFrontmatter = astroFrontmatterMatch ? astroFrontmatterMatch[1] : "";
+
+// `.sort(...)` arguments, normalized so a multi-line call with a trailing comma
+// compares equal to the single-line form.
+const sortArgs = (source) =>
+  [...source.matchAll(/\.sort\(([^)]*)\)/g)]
+    .map((match) => match[1].replace(/\s+/g, " ").trim().replace(/,$/, ""))
+    .sort();
+
+test("ordering: the component frontmatter really was extracted", () => {
+  // Guards every frontmatter scan below against silently matching an empty
+  // string, which would make the assertions vacuous.
+  assert.ok(astroFrontmatterMatch, "PublicSurfaceAuthorityMap.astro needs a frontmatter fence");
+  assert.ok(astroFrontmatter.includes("const tableNodes"));
+  assert.ok(astroFrontmatter.includes("const distinctValues"));
+  // The fence really did stop before the markup.
+  assert.equal(astroFrontmatter.includes("<section class=\"psam\""), false);
+});
+
+test("ordering: server-rendered record-table order goes through compareNodes()", () => {
+  assert.match(
+    astroFrontmatter,
+    /const tableNodes = \[\.\.\.snapshot\.nodes\]\.sort\(compareNodes\);/,
+  );
+});
+
+test("ordering: server-rendered metadata options go through compareText()", () => {
+  assert.match(
+    astroFrontmatter,
+    /const distinctValues = \(field: FilterField\): string\[\] =>\s*Array\.from\(new Set\(snapshot\.nodes\.map\(\(node\) => node\[field\]\)\)\)\.sort\(\s*compareText,?\s*\);/,
+  );
+});
+
+test("ordering: client runtime metadata options go through compareText()", () => {
+  assert.match(
+    clientCode,
+    /function distinctValues\([\s\S]*?\)\.sort\(\s*compareText,?\s*\);\s*\}/,
+  );
+});
+
+test("ordering: both components import the shared comparators, never redefine them", () => {
+  // Imported by name from the single deterministic layout module.
+  assert.match(
+    astroFrontmatter,
+    /import \{\s*compareNodes,\s*compareText,\s*\} from "\.\.\/lib\/public-surface-authority-map\/d3AuthorityLayout\.ts";/,
+  );
+  assert.match(
+    clientCode,
+    /import \{\s*compareNodes,\s*compareText,[\s\S]*?\} from "\.\.\/lib\/public-surface-authority-map\/d3AuthorityLayout\.ts";/,
+  );
+  // No local copy of either comparator, and no inline relational-operator or
+  // collation-shaped comparison standing in for one.
+  for (const [name, source] of [
+    ["PublicSurfaceAuthorityMap.astro", astroFrontmatter],
+    ["publicSurfaceAuthorityMap.client.ts", clientCode],
+  ]) {
+    for (const marker of [
+      "function compareText",
+      "function compareNodes",
+      "const compareText",
+      "const compareNodes",
+      "? -1 : 1",
+    ]) {
+      assert.equal(source.includes(marker), false, `${name} must not contain ${marker}`);
+    }
+  }
+  // Every ordering call in either file names one of the two shared comparators.
+  assert.deepEqual(sortArgs(astroFrontmatter), ["compareNodes", "compareText"]);
+  assert.deepEqual(sortArgs(clientCode), ["compareNodes", "compareText"]);
+});
+
+test("ordering: no production ordering path uses collation any more", () => {
+  // Scanned against RAW sources, comments included. These four files are every
+  // production path that orders a user-visible surface of this map.
+  const ORDERING_SOURCES = [
+    ["PublicSurfaceAuthorityMap.astro", astroSource],
+    ["publicSurfaceAuthorityMap.client.ts", clientSource],
+    ["d3AuthorityLayout.ts", layoutSource],
+    ["d3AuthorityRenderer.ts", rendererSource],
+  ];
+  const forbidden = [
+    ".localeCompare(",
+    "localeCompare",
+    "Intl.Collator",
+    "Intl.",
+    "navigator.language",
+    "navigator.languages",
+    "document.documentElement.lang",
+    "toLocaleUpperCase",
+    "toLocaleLowerCase",
+    "toLocaleString",
+  ];
+  for (const [name, source] of ORDERING_SOURCES) {
+    for (const marker of forbidden) {
+      assert.equal(source.includes(marker), false, `${name} must not contain ${marker}`);
+    }
+  }
+});
+
+// A fixture whose code-unit order and collation order disagree. Code units:
+// "S"=83, "Z"=90, "_"=95, "a"=97, "Ä"=196. A typical collation instead places
+// "_" first, folds case, and sorts "a"/"Ä" before "Z" (Swedish collation puts
+// "Ä" after "Z"), so every surface below would reorder if any of them consulted
+// the host locale. Two records deliberately share one name so the record-table
+// order also exercises compareNodes()' explicit id tiebreak.
+const ORDER_FIXTURE_NODES = [
+  { ...allNodes[0], id: "fx-a", name: "Z name", surface_role: "Z" },
+  { ...allNodes[1], id: "fx-b", name: "_ name", surface_role: "_" },
+  { ...allNodes[2], id: "fx-c", name: "a name", surface_role: "_" },
+  { ...allNodes[3], id: "fx-d", name: "Ä name", surface_role: "_" },
+  { ...allNodes[4], id: "fx-f", name: "Same name", surface_role: "Z" },
+  { ...allNodes[5], id: "fx-e", name: "Same name", surface_role: "Z" },
+];
+
+// Hand-written expectations. None of these is produced by a comparator.
+const FIXTURE_CODE_UNITS = [83, 90, 95, 97, 196];
+const FIXTURE_EXPECTED_OPTIONS = ["Z", "_"];
+const FIXTURE_EXPECTED_TABLE_IDS = ["fx-e", "fx-f", "fx-a", "fx-b", "fx-c", "fx-d"];
+const FIXTURE_EXPECTED_MAP = [
+  { key: "Z", ids: ["fx-e", "fx-f", "fx-a"] },
+  { key: "_", ids: ["fx-b", "fx-c", "fx-d"] },
+];
+
+// The exact expressions the two components now use, applied verbatim here.
+const tableOrderOf = (nodes) => [...nodes].sort(compareNodes);
+const optionOrderOf = (nodes, field) =>
+  Array.from(new Set(nodes.map((node) => node[field]))).sort(compareText);
+
+test("ordering: the fixture's code units are exactly the documented ones", () => {
+  assert.deepEqual(
+    ["S", "Z", "_", "a", "Ä"].map((s) => s.charCodeAt(0)),
+    FIXTURE_CODE_UNITS,
+  );
+  // The real snapshot diverges the same way: "Summary Contract" precedes
+  // "Summary and Interpretation Boundaries" because "C" (67) precedes "a" (97),
+  // while any case-folding collation inverts that pair.
+  assert.equal("C".charCodeAt(0), 67);
+  assert.equal("a".charCodeAt(0), 97);
+  assert.equal(
+    compareText("Summary Contract", "Summary and Interpretation Boundaries"),
+    -1,
+  );
+});
+
+test("ordering: map, record table, and filter options agree on the fixture", () => {
+  for (const input of [
+    ORDER_FIXTURE_NODES,
+    reversed(ORDER_FIXTURE_NODES),
+    shuffled(ORDER_FIXTURE_NODES),
+  ]) {
+    // 1. Filter options (server-rendered and client runtime use this expression).
+    assert.deepEqual(optionOrderOf(input, "surface_role"), FIXTURE_EXPECTED_OPTIONS);
+
+    // 2. Record table (server-rendered fallback and runtime rebuild).
+    assert.deepEqual(
+      tableOrderOf(input).map((node) => node.id),
+      FIXTURE_EXPECTED_TABLE_IDS,
+    );
+
+    // 3. Map: group columns and node rows in the D3 Authority View.
+    const layout = computeAuthorityLayout(input, "surface_role");
+    assert.deepEqual(
+      layout.groups.map((group) => group.key),
+      FIXTURE_EXPECTED_OPTIONS,
+    );
+    const mapGroups = layout.groups.map((group) => ({
+      key: group.key,
+      ids: layout.nodes
+        .filter((entry) => entry.groupKey === group.key)
+        .sort((x, y) => x.rowIndex - y.rowIndex)
+        .map((entry) => entry.id),
+    }));
+    assert.deepEqual(mapGroups, FIXTURE_EXPECTED_MAP);
+
+    // 4. Cross-surface agreement: group columns follow the option list, and each
+    //    group's rows are the record-table order restricted to that group.
+    const tableIds = tableOrderOf(input).map((node) => node.id);
+    for (const group of mapGroups) {
+      const groupIds = new Set(group.ids);
+      assert.deepEqual(group.ids, tableIds.filter((id) => groupIds.has(id)));
+    }
+  }
+});
+
+// The adopted snapshot's own hand-written ordering expectations.
+const EXPECTED_TABLE_NAME_ORDER = [
+  "AI Reading Guide for Meta-Writing Ecology",
+  "AI Training Boundary Statement",
+  "AI-Readable Knowledge Architecture for Structural Misreading Prevention: Documentation Boundaries and Machine-Facing Interpretation Constraints",
+  "Boundary Failure Diagnostics for AI-Mediated Workflows: Over-Fusion, Over-Separation, and Functional Boundary Calibration in Human-AI and Institutional Systems",
+  "Constraint Residue Governance: Instruction-Layer Sedimentation and Post-Hoc Control Drift in AI-Mediated and Institutional Systems",
+  "Delegated Execution / Retained Answerability",
+  "Evaluation Boundary Failure under Permitted Surface Variation",
+  "Generation-Condition Disclosure–Reproducibility Cross",
+  "LLM-Condition / Research-Result Boundary",
+  "Machine Interpretation State and Inference Ceiling",
+  "Machine Reading Precedence",
+  "Meta-Writing Ecology",
+  "Model-Induced Coherence Pressure",
+  "Model-Use Reporting Boundary Protocol",
+  "Observing AI-Induced Semantic Deviation in Pressure-Dense Texts",
+  "Origin Control and Validity Burden in Accelerated Submission Systems: Provenance Anxiety, Verification Labor, and Review Capacity Under Low-Friction Production",
+  "Policy Continuity Evidence Mapping",
+  "Premature Circulation Diagnostics for AI-Mediated Information Flows",
+  "Provenance–Validity Separation Model: Traceable Origin, Validity Gap, and Semantic Adequacy in AI-Mediated Evidence and Information Systems",
+  "Relation Status Guide",
+  "Responsibility Alignment Diagnostics: Capacity-Ownership Misalignment, Visibility-Responsibility Drift, and Accountability Calibration in AI-Mediated and Institutional Systems",
+  "Semantic Field Diagnostics",
+  "Source Use Guide",
+  "Source, Summary, and Citation Boundary Packet",
+  "Structural Fidelity / Use-Validity Boundary",
+  "Summary Contract",
+  "Summary and Interpretation Boundaries",
+  "Surface-Bounded Semantic Rendering",
+  "Text-Conditioned Semantic Rendering",
+  "Verification Labor Compression",
+];
+
+const EXPECTED_OPTION_ORDER = {
+  surface_role: [
+    "boundary_document",
+    "concept_node",
+    "interpretation_guide",
+    "public_anchor",
+    "repository_orientation",
+    "source_use_guide",
+  ],
+  authority_ceiling: [
+    "navigation_only",
+    "public_file_claim_only",
+    "repository_boundary_only",
+  ],
+  public_surface_status: [
+    "public_boundary_document",
+    "public_navigation_surface",
+    "selected_external_node",
+  ],
+  classification_evidence: ["explicit_in_file", "not_asserted"],
+};
+
+test("ordering: the adopted snapshot's record-table order matches the literal order", () => {
+  assert.deepEqual(
+    tableOrderOf(allNodes).map((node) => node.name),
+    EXPECTED_TABLE_NAME_ORDER,
+  );
+  // The one pair in this dataset where collation and code units disagree.
+  assert.equal(EXPECTED_TABLE_NAME_ORDER[25], "Summary Contract");
+  assert.equal(EXPECTED_TABLE_NAME_ORDER[26], "Summary and Interpretation Boundaries");
+});
+
+test("ordering: the adopted snapshot's filter options match the literal order", () => {
+  for (const [field, expected] of Object.entries(EXPECTED_OPTION_ORDER)) {
+    assert.deepEqual(optionOrderOf(allNodes, field), expected, `options for ${field}`);
+  }
+});
+
+test("ordering: map group columns match the filter-option order for every field", () => {
+  // The three grouping fields are also filter fields, so the map's group columns
+  // and the corresponding option list must read in the same order.
+  for (const field of GROUPING_FIELDS) {
+    const layout = computeAuthorityLayout(allNodes, field);
+    assert.deepEqual(
+      layout.groups.map((group) => group.key),
+      EXPECTED_OPTION_ORDER[field],
+      `group columns for ${field}`,
+    );
+  }
+  // Each group's node rows are the record-table order restricted to that group.
+  const tableIds = tableOrderOf(allNodes).map((node) => node.id);
+  for (const field of GROUPING_FIELDS) {
+    const layout = computeAuthorityLayout(allNodes, field);
+    for (const group of layout.groups) {
+      const rows = layout.nodes
+        .filter((entry) => entry.groupKey === group.key)
+        .sort((x, y) => x.rowIndex - y.rowIndex)
+        .map((entry) => entry.id);
+      const ids = new Set(rows);
+      assert.deepEqual(rows, tableIds.filter((id) => ids.has(id)), `${field}/${group.key}`);
+    }
+  }
+});
+
+test("ordering: the adopted dataset is still 30 nodes and 161 edges", () => {
+  assert.equal(allNodes.length, 30);
+  assert.equal(snapshot.edges.length, 161);
+  assert.equal(EXPECTED_COUNTS.nodes, 30);
+  assert.equal(EXPECTED_COUNTS.edges, 161);
+  assert.equal(EXPECTED_COUNTS.boundary_reference, 132);
+  assert.equal(EXPECTED_COUNTS.source_use_reference, 29);
+  assert.equal(EXPECTED_TABLE_NAME_ORDER.length, 30);
+  // Ordering is a display concern only: no record is added, dropped, or merged.
+  assert.equal(new Set(tableOrderOf(allNodes).map((node) => node.id)).size, 30);
+});
