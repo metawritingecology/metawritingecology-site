@@ -152,6 +152,12 @@ A possible reading path begins from the public website, moves through entry surf
 
 The work is therefore not contained in one page or one object. It appears through relations among surfaces.
 
+## Selected Public Reading
+
+A Public Slice assembles a small number of repository states into a bounded reading. It does not represent the full repository, archive, or system.
+
+[Enter Public Slice — 25 July 2026](/artistic-research/public-slice/2026-07-25/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

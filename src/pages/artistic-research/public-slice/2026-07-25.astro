@@ -302,21 +302,20 @@ const MOMENTS: readonly Moment[] = [
             </dl>
 
             <p class="disclosure-close">
-              Every reference above is pinned to an immutable commit, so what is
-              linked cannot change under the reading. What was selected, and the
-              order it was placed in, is authored.
+              Each reference is pinned to a fixed commit. The selection and
+              sequence are specific to this reading, not to the repository.
             </p>
           </div>
         </details>
       </section>
 
-      <nav class="return" aria-label="Return">
-        <a href="/artistic-research/">Artistic research</a>
-      </nav>
-
       <footer class="slice-foot">
         <p>Public repository evidence &ne; the reading presented here.</p>
       </footer>
+
+      <nav class="return" aria-label="Return">
+        <a href="/artistic-research/">Return to Artistic Research</a>
+      </nav>
     </main>
   </body>
 </html>
@@ -512,8 +511,10 @@ const MOMENTS: readonly Moment[] = [
 
   /* --- exits ----------------------------------------------------------- */
 
+  /* The boundary statement now precedes the return link. The two margins are
+     swapped with it so the vertical rhythm below the sequence is unchanged. */
   .return {
-    margin-top: 6rem;
+    margin-top: 4rem;
   }
 
   .return a {
@@ -523,7 +524,7 @@ const MOMENTS: readonly Moment[] = [
   .slice-foot {
     color: var(--muted);
     font-size: 0.8rem;
-    margin-top: 4rem;
+    margin-top: 6rem;
   }
 
   .slice-foot p {
