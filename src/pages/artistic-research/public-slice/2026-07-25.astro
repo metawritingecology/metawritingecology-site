@@ -1,0 +1,519 @@
+---
+import "../../../styles/global.css";
+
+// Local typed constant for this one page. Deliberately not a content
+// collection, data module, loader, or reusable component: it describes one
+// authored slice and is not a repository-wide data model.
+//
+// The distinction this shape exists to keep:
+//   observedFact  — what a public file shows
+//   phrase        — authored presentation language, approved for this prototype
+//   evidence      — where the fact can be checked, pinned to an immutable commit
+//   boundary      — what the fact does not establish
+//
+// "paths" carries one or two entries under a single sha/timestamp, for the two
+// moments whose fact is a comparison of two files at the same commit.
+
+type EvidencePath = {
+  path: string;
+  url: string;
+};
+
+type Evidence = {
+  repository: string;
+  sha: string;
+  timestamp: string;
+  paths: readonly EvidencePath[];
+};
+
+type Moment = {
+  observedFact: string;
+  phrase: string;
+  evidence: Evidence;
+  boundary: string;
+  spacing?: "close" | "apart";
+};
+
+// Evidence URLs are written as complete literal strings. The repository's
+// link verifier resolves occurrences statically and fails closed on an
+// interpolated URL, so no base constant is composed here.
+const REPO = "metawritingecology/meta-writing-ecology";
+
+const MOMENTS: readonly Moment[] = [
+  {
+    observedFact:
+      "Two document titles in mwe-public-documents.json carry codepoints from the Unicode Private Use Area, a range with no assigned public meaning, in the position an en dash occupies.",
+    phrase: "In two titles, a character stood where a dash belongs.",
+    evidence: {
+      repository: REPO,
+      sha: "68304c3287fb1faefb4e57c5f462c91ab2f627a7",
+      timestamp: "2026-07-13T20:20:46+08:00",
+      paths: [
+        {
+          path: "mwe-public-documents.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/68304c3287fb1faefb4e57c5f462c91ab2f627a7/mwe-public-documents.json"
+        }
+      ]
+    },
+    boundary:
+      "The file shows the characters present. It does not show how they came to be there. No origin is claimed here."
+  },
+  {
+    observedFact:
+      "The same two codepoints appear in visualizations/public-surface-authority-map/data.json, the file the public interface renders.",
+    phrase: "They also appeared in the file from which the view was drawn.",
+    evidence: {
+      repository: REPO,
+      sha: "cdbf3fefb85491ba2aa7aedde09e912598372483",
+      timestamp: "2026-07-14T05:49:51+08:00",
+      paths: [
+        {
+          path: "visualizations/public-surface-authority-map/data.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/cdbf3fefb85491ba2aa7aedde09e912598372483/visualizations/public-surface-authority-map/data.json"
+        }
+      ]
+    },
+    boundary:
+      "This shows the characters in a file. It does not establish that anyone read them, or that anything followed from reading them.",
+    spacing: "close"
+  },
+  {
+    observedFact:
+      "Both occurrences are replaced with en dashes. The same commit changes four lines across two files and nothing else.",
+    phrase: "Eleven days later, four lines changed.",
+    evidence: {
+      repository: REPO,
+      sha: "0479406cf2df032613fea9a2e7497065da72250d",
+      timestamp: "2026-07-25T10:39:16+08:00",
+      paths: [
+        {
+          path: "mwe-public-documents.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/0479406cf2df032613fea9a2e7497065da72250d/mwe-public-documents.json"
+        }
+      ]
+    },
+    boundary:
+      "Eleven days is the interval between two commit timestamps. It is not a measure of attention, delay, or difficulty, and it does not describe the work that lies between them."
+  },
+  {
+    observedFact:
+      "At one commit the tracked file measures 92,903 bytes, while the constants recording its identity elsewhere in the same repository state 92,901, together with a different checksum.",
+    phrase:
+      "For a while the record of what the file was, and the file, disagreed.",
+    evidence: {
+      repository: REPO,
+      sha: "3219fa03149b4bf1a229f059b4912b632028422b",
+      timestamp: "2026-07-25T10:45:03+08:00",
+      paths: [
+        {
+          path: "tests/test_public_surface_candidate_generator.py",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/3219fa03149b4bf1a229f059b4912b632028422b/tests/test_public_surface_candidate_generator.py"
+        },
+        {
+          path: "visualizations/public-surface-authority-map/data.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/3219fa03149b4bf1a229f059b4912b632028422b/visualizations/public-surface-authority-map/data.json"
+        }
+      ]
+    },
+    boundary:
+      "The two values were brought back into agreement later the same day, at commit 8038fe1e2a525f377a3918cd7ba56feefda4ef29, by changing the record rather than the file. What is shown above is one commit, where the two can be compared."
+  },
+  {
+    observedFact:
+      "The generator's default and explicit historical modes read the tracked file, recompute its identity, compare it against a pinned specification, and write nothing. The public README states the same.",
+    phrase: "From here, the view stays as it is.",
+    evidence: {
+      repository: REPO,
+      sha: "886f671347e06954b15d658803093df4d9c48b09",
+      timestamp: "2026-07-25T21:38:59+08:00",
+      paths: [
+        {
+          path: "visualizations/public-surface-authority-map/README.md",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/886f671347e06954b15d658803093df4d9c48b09/visualizations/public-surface-authority-map/README.md"
+        },
+        {
+          path: "scripts/build_public_surface_authority_map.py",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/886f671347e06954b15d658803093df4d9c48b09/scripts/build_public_surface_authority_map.py"
+        }
+      ]
+    },
+    boundary:
+      "This is what the files do and what the README says they do. It is not a statement about policy, authority, or anything decided outside these files."
+  },
+  {
+    observedFact:
+      "mwe-public-documents.json declares 59 records. The drawn file is unchanged from the commit above, and continues to declare 30 records and to name mwe-public-documents.json as its source.",
+    phrase: "The view still names its source. The source has since grown.",
+    evidence: {
+      repository: REPO,
+      sha: "933274af9693d6d1d9fac36819aafdf56f9ab81d",
+      timestamp: "2026-07-25T22:21:01+08:00",
+      paths: [
+        {
+          path: "mwe-public-documents.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/933274af9693d6d1d9fac36819aafdf56f9ab81d/mwe-public-documents.json"
+        },
+        {
+          path: "visualizations/public-surface-authority-map/data.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/933274af9693d6d1d9fac36819aafdf56f9ab81d/visualizations/public-surface-authority-map/data.json"
+        }
+      ]
+    },
+    boundary:
+      "Both counts are fields the two files declare about themselves. Nothing public states that they are required to agree.",
+    spacing: "apart"
+  }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Public Slice — 2026-07-25</title>
+    <meta
+      name="description"
+      content="A bounded public slice: a selected reading of public repository material visible by the end of 25 July 2026 in Taiwan time."
+    />
+  </head>
+  <body>
+    <main class="slice">
+      <header class="slice-head">
+        <h1>Public Slice — 2026-07-25</h1>
+        <p class="framing">
+          This page holds a selected public trace at a fixed date; it does not
+          present the whole system behind it.
+        </p>
+        <p class="slice-date">
+          <span>Slice date</span>
+          25 July 2026
+        </p>
+      </header>
+
+      <section class="case" aria-labelledby="case-title">
+        <h2 id="case-title">The frozen view and its source</h2>
+
+        <ol class="moments">
+          {
+            MOMENTS.map((moment) => (
+              <li class:list={["moment", moment.spacing && "is-" + moment.spacing]}>
+                {moment.phrase}
+              </li>
+            ))
+          }
+        </ol>
+
+        <details class="disclosure">
+          <summary>Evidence and boundary for this reading</summary>
+
+          <div class="disclosure-body">
+            <p>
+              This page presents a selected reading of public repository
+              material visible by the end of 25 July 2026 in Taiwan time. The
+              evidence boundary is 25 July 2026, 23:59:59, Asia/Taipei. The page
+              was assembled after that boundary; a later retrieval time does not
+              move it.
+            </p>
+            <p>
+              The sequence is bounded to the main branch of one public
+              repository as it stood at that boundary. Other public branches
+              existed. They are not read here, and public branch state is not
+              main-branch state.
+            </p>
+            <p>
+              The moments are ordered. The order does not explain them. Nothing
+              below establishes that any one of these states caused another.
+            </p>
+
+            <dl class="evidence-list">
+              {
+                MOMENTS.map((moment) => (
+                  <div class="evidence-entry">
+                    <dt>{moment.phrase}</dt>
+                    <dd>
+                      <p class="observed">{moment.observedFact}</p>
+                      <p class="pinned">
+                        <span class="pinned-label">Committed</span>
+                        {" "}
+                        {moment.evidence.timestamp}
+                        <br />
+                        <span class="pinned-label">Commit</span>
+                        {" "}
+                        <span class="sha">{moment.evidence.sha}</span>
+                      </p>
+                      <p class="traverse">
+                        Read it at that commit:
+                        {
+                          moment.evidence.paths.map((entry) => (
+                            <>
+                              {" "}
+                              <a href={entry.url}>{entry.path}</a>
+                            </>
+                          ))
+                        }
+                      </p>
+                      <p class="limit">{moment.boundary}</p>
+                    </dd>
+                  </div>
+                ))
+              }
+            </dl>
+
+            <p class="disclosure-close">
+              Every reference above is pinned to an immutable commit, so what is
+              linked cannot change under the reading. What was selected, and the
+              order it was placed in, is authored.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <nav class="return" aria-label="Return">
+        <a href="/artistic-research/">Artistic research</a>
+      </nav>
+
+      <footer class="slice-foot">
+        <p>Public repository evidence &ne; the reading presented here.</p>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style>
+  /* Page-scoped only. No global token, layout, or stylesheet is altered. */
+
+  .slice {
+    max-width: 34rem;
+  }
+
+  /* The slice date is part of the title and must not break across lines. */
+  .slice h1 {
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    letter-spacing: -0.01em;
+    margin-bottom: 0;
+    text-wrap: balance;
+  }
+
+  /* --- first encounter ---------------------------------------------- */
+
+  .slice-head {
+    margin-bottom: 6rem;
+  }
+
+  .framing {
+    color: var(--text);
+    margin: 1.25rem 0 2.5rem;
+  }
+
+  .slice-date {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .slice-date span {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .case h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin: 0 0 3.5rem;
+  }
+
+  /* --- the sequence -------------------------------------------------- */
+  /*
+    Spacing here is authored and qualitative. It does not encode elapsed
+    time, chronological scale, importance, difficulty, severity, or causal
+    weight. The widest gap is deliberately not the longest interval.
+  */
+
+  .moments {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  .moment {
+    margin: 0 0 2.75rem;
+    max-width: 28rem;
+    text-wrap: pretty;
+  }
+
+  .moment.is-close {
+    margin-top: -1.35rem;
+  }
+
+  .moment.is-apart {
+    margin-top: 7.5rem;
+  }
+
+  /* An ending that stops rather than concludes: a rule that does not reach
+     the edge of its column. */
+  .moment:last-child {
+    margin-bottom: 0;
+    padding-bottom: 2.25rem;
+    position: relative;
+  }
+
+  .moment:last-child::after {
+    border-bottom: 1px solid var(--line);
+    bottom: 0;
+    content: "";
+    left: 0;
+    position: absolute;
+    width: 4.5rem;
+  }
+
+  /* --- disclosure ----------------------------------------------------- */
+
+  .disclosure {
+    margin-top: 7rem;
+  }
+
+  /* display stays list-item so the native disclosure marker remains: it is
+     the only affordance signalling that the evidence can be opened. */
+  .disclosure summary {
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    min-height: 44px;
+    padding: 12px 0;
+    width: fit-content;
+  }
+
+  .disclosure summary::marker {
+    color: var(--muted);
+  }
+
+  .disclosure summary:hover {
+    color: var(--text);
+  }
+
+  .disclosure-body {
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-top: 1.5rem;
+  }
+
+  .disclosure-body > p {
+    max-width: 30rem;
+  }
+
+  .evidence-list {
+    margin: 2.5rem 0 0;
+  }
+
+  .evidence-entry {
+    border-top: 1px solid var(--line);
+    padding: 1.5rem 0;
+  }
+
+  .evidence-entry dt {
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .evidence-entry dd {
+    margin-left: 0;
+  }
+
+  .evidence-entry p {
+    margin: 0 0 0.75rem;
+    max-width: 30rem;
+  }
+
+  .evidence-entry p:last-child {
+    margin-bottom: 0;
+  }
+
+  .pinned-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sha {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.76rem;
+    overflow-wrap: anywhere;
+  }
+
+  .traverse a {
+    overflow-wrap: anywhere;
+  }
+
+  .limit {
+    color: var(--muted);
+    opacity: 0.85;
+  }
+
+  .disclosure-close {
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+  }
+
+  /* --- exits ----------------------------------------------------------- */
+
+  .return {
+    margin-top: 6rem;
+  }
+
+  .return a {
+    font-size: 0.85rem;
+  }
+
+  .slice-foot {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 4rem;
+  }
+
+  .slice-foot p {
+    margin: 0;
+  }
+
+  /* --- focus ring (global.css defines none) ----------------------------- */
+
+  .slice a:focus-visible,
+  .disclosure summary:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* --- print (global.css defines none) ---------------------------------- */
+
+  @media print {
+    .slice {
+      max-width: none;
+    }
+
+    .moment.is-apart {
+      margin-top: 3rem;
+    }
+
+    .disclosure {
+      margin-top: 3rem;
+    }
+
+    .disclosure[open] .disclosure-body {
+      display: block;
+    }
+
+    .slice a::after {
+      content: " (" attr(href) ")";
+      font-size: 0.75em;
+      overflow-wrap: anywhere;
+    }
+  }
+</style>
