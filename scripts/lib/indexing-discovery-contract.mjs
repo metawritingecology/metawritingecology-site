@@ -48,7 +48,9 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   // noindex,nofollow bounded public preview (self-canonical, not in feed)
   "/public-surface-map/interactive/",
   // noindex,nofollow bounded public slice prototype (not in feed)
-  "/artistic-research/public-slice/2026-07-25/"
+  "/artistic-research/public-slice/2026-07-25/",
+  // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
+  "/public-surface-map/expanded/"
 ]);
 
 // Normalized path of the custom 404 / unmatched-route representation. Excluded

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "map_id": "public-surface-adjacency-map",
+  "selected_snapshot": {
+    "id": "933274af9693d6d1d9fac36819aafdf56f9ab81d-0b763eb78fea5c53364609ecc5d7019422c54b950d32f29f79ad37f24f1637b7",
+    "source_commit": "933274af9693d6d1d9fac36819aafdf56f9ab81d",
+    "snapshot_schema_version": "1.0",
+    "path": "/public-surface-map/expanded/data/snapshots/933274af9693d6d1d9fac36819aafdf56f9ab81d-0b763eb78fea5c53364609ecc5d7019422c54b950d32f29f79ad37f24f1637b7.json",
+    "byte_length": 206617,
+    "sha256": "0b763eb78fea5c53364609ecc5d7019422c54b950d32f29f79ad37f24f1637b7",
+    "git_blob": "3077568edeeb0d6a769899a1a3cf79c3f9152f83"
+  },
+  "currentness_claim": "none"
+}

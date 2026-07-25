@@ -46,11 +46,13 @@ const PREVIEW = "https://mwe-site.pages.dev";
 const WORKERS = "https://mwe-site.workers.dev";
 
 const INTERACTIVE = "/public-surface-map/interactive/";
+const EXPANDED = "/public-surface-map/expanded/";
 
-// Every registered route except the single interactive preview is one of the
-// 40 indexable routes.
+// The two noindex interactive previews. Every other registered route is one of
+// the 40 indexable routes.
+const NOINDEX_PREVIEWS = [INTERACTIVE, EXPANDED];
 const registeredRoutes = getRegisteredRoutes();
-const indexableRegistered = registeredRoutes.filter((r) => r !== INTERACTIVE);
+const indexableRegistered = registeredRoutes.filter((r) => !NOINDEX_PREVIEWS.includes(r));
 
 // A minimal valid input for a given route.
 function input(route, over = {}) {
@@ -71,14 +73,24 @@ test("approved production origin equals Package C PRODUCTION_ORIGIN", () => {
 
 // --- 1 / 3: registration count and cardinality -----------------------------
 
-test("registry has exactly 40 indexable routes and 1 interactive noindex route", () => {
+test("registry has exactly 40 indexable routes and 2 interactive noindex routes", () => {
   assert.equal(indexableRegistered.length, 40);
-  const interactive = getRoutePolicy(INTERACTIVE);
-  assert.ok(interactive);
-  assert.equal(interactive.indexing.kind, "noindex");
-  assert.equal(interactive.indexing.follow, false);
-  // total registered = 41
-  assert.equal(registeredRoutes.length, 41);
+  for (const route of NOINDEX_PREVIEWS) {
+    const policy = getRoutePolicy(route);
+    assert.ok(policy, route);
+    assert.equal(policy.indexing.kind, "noindex", route);
+    assert.equal(policy.indexing.follow, false, route);
+    assert.equal(policy.canonical.kind, "self", route);
+    assert.equal(policy.structuredData.enabled, true, route);
+    assert.equal(policy.structuredData.type, "WebPage", route);
+    assert.equal(policy.language, "en", route);
+  }
+  // total registered = 42
+  assert.equal(registeredRoutes.length, 42);
+  // Each noindex preview is registered exactly once.
+  for (const route of NOINDEX_PREVIEWS) {
+    assert.equal(registeredRoutes.filter((r) => r === route).length, 1, route);
+  }
 });
 
 test("every registered route is registered exactly once (no duplicate keys)", () => {
@@ -100,8 +112,10 @@ test("registry indexable routes exactly equal Package C's independent expected s
   const expectedSorted = [...expected].sort();
   const registeredSorted = [...indexableRegistered].sort();
   assert.deepEqual(registeredSorted, expectedSorted);
-  // The interactive preview is NOT in the indexable oracle (it is noindex).
-  assert.ok(!expected.has(INTERACTIVE));
+  // Neither noindex preview is in the indexable oracle.
+  for (const route of NOINDEX_PREVIEWS) {
+    assert.ok(!expected.has(route), route);
+  }
 });
 
 test("no unregistered BaseLayout indexable route exists (no fallback needed)", () => {
@@ -467,10 +481,13 @@ test("robots values derive only from the typed indexing policy", () => {
   assert.equal(robotsFromIndexing({ kind: "indexable" }), undefined);
   assert.equal(robotsFromIndexing({ kind: "noindex", follow: true }), "noindex, follow");
   assert.equal(robotsFromIndexing({ kind: "noindex", follow: false }), "noindex, nofollow");
-  // Indexable registered routes emit no robots; interactive emits noindex,nofollow.
+  // Indexable registered routes emit no robots; both noindex previews emit
+  // exactly "noindex, nofollow".
   for (const route of indexableRegistered) {
     const resolved = resolvePublicMetadata(input(route));
     assert.equal(resolved.robots, undefined, route);
   }
-  assert.equal(resolvePublicMetadata(input(INTERACTIVE)).robots, "noindex, nofollow");
+  for (const route of NOINDEX_PREVIEWS) {
+    assert.equal(resolvePublicMetadata(input(route)).robots, "noindex, nofollow", route);
+  }
 });

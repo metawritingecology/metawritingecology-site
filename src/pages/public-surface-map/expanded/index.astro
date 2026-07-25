@@ -1,0 +1,44 @@
+---
+// Expanded public-surface adjacency route: /public-surface-map/expanded/
+//
+// A SECOND, parallel public product. The existing
+// /public-surface-map/interactive/ route and its data namespace are untouched:
+// this route has its own data namespace, runtime manifest, immutable snapshot
+// route, bundled fallback, contract, runtime loader, component, client module,
+// and build verifier.
+//
+// Prerendered so the byte-identity and dataset contracts run at build time (a
+// contract failure fails the build). The parent /public-surface-map/ page
+// remains the primary interpretive and boundary layer.
+//
+// Route policy (language, canonical, indexing, structured data) comes from the
+// shared route metadata registry in src/lib/publicMetadata.ts — this page never
+// bypasses it. The registry resolves this route to `noindex, nofollow`.
+export const prerender = true;
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PublicSurfaceAdjacencyMap from "../../../components/PublicSurfaceAdjacencyMap.astro";
+import {
+  APPROVED_TITLE,
+  APPROVED_DESCRIPTION,
+} from "../../../lib/public-surface-adjacency-map/publicWording.ts";
+---
+
+<BaseLayout
+  title={APPROVED_TITLE}
+  description={APPROVED_DESCRIPTION}
+  robots="noindex, nofollow"
+  mainClass="main--psadj-expanded"
+>
+  <PublicSurfaceAdjacencyMap />
+</BaseLayout>
+
+<style is:global>
+  /* Route-specific width/padding only. Applies solely to this child route
+     because no other route renders <main class="main--psadj-expanded">. */
+  main.main--psadj-expanded {
+    max-width: 1200px;
+    padding-left: clamp(16px, 4vw, 24px);
+    padding-right: clamp(16px, 4vw, 24px);
+  }
+</style>

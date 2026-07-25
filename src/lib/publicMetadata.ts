@@ -236,8 +236,14 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/zh/": zh(),
   "/zh/boundary/": zh(),
 
-  // --- 1 interactive noindex preview (self-canonical, JSON-LD enabled) ------
+  // --- 2 interactive noindex previews (self-canonical, JSON-LD enabled) -----
   "/public-surface-map/interactive/": {
+    language: "en",
+    canonical: { kind: "self" },
+    indexing: { kind: "noindex", follow: false },
+    structuredData: { enabled: true, type: "WebPage", genre: DEFAULT_GENRE }
+  },
+  "/public-surface-map/expanded/": {
     language: "en",
     canonical: { kind: "self" },
     indexing: { kind: "noindex", follow: false },

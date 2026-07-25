@@ -10,13 +10,27 @@ This page maps public orientation surfaces for Meta-Writing Ecology.
 
 It is a guide to publicly available entry points. It is not a full archive, complete corpus map, validation layer, or internal workflow record.
 
-## Interactive public-surface view
+## Interactive public-surface views
+
+Two interactive views are published from this page.
+
+These are parallel public views with different selection and edge contracts; neither supersedes the other.
+
+### 30-record authority-ceiling view
 
 Explore selected public-document roles, source functions, public-surface status, and declared authority ceilings.
 
 This view uses selected public metadata only. It is not the internal Registry, a complete archive, an ontology, or a confirmed conceptual relation graph.
 
-[Open the interactive map](/public-surface-map/interactive/)
+[Open the 30-record authority-ceiling view](/public-surface-map/interactive/)
+
+### 59-record expanded adjacency view
+
+Explore an expanded 59-record public-surface adjacency view with separate source-declared and provisional navigation evidence classes.
+
+This view uses selected public-document visualization membership only. It is not the internal Registry, a complete archive, an ontology, a confirmed conceptual relation graph, a ranking, or a currentness claim.
+
+[Open the 59-record expanded adjacency view](/public-surface-map/expanded/)
 
 ## Public orientation surfaces
 

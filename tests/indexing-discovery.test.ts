@@ -1692,6 +1692,45 @@ test("prototype and interactive preview contracts (unchanged, excluded)", () => 
   assert.ok(SITEMAP_EXCLUDED_PATHS.has("/public-surface-map/interactive/"));
 });
 
+test("expanded adjacency view: noindex, excluded, with extension-bearing JSON endpoints", () => {
+  const expanded = rd("src/pages/public-surface-map/expanded/index.astro");
+  assert.ok(/robots="noindex, ?nofollow"/i.test(expanded));
+  assert.ok(/import BaseLayout from/.test(expanded));
+  assert.ok(SITEMAP_EXCLUDED_PATHS.has("/public-surface-map/expanded/"));
+  assert.equal(isSitemapEligible("/public-surface-map/expanded/"), false);
+
+  // The two JSON endpoints are extension-bearing endpoint routes and never
+  // enter the sitemap, independently of the exclusion set.
+  for (const endpoint of [
+    "/public-surface-map/expanded/data/manifest.json",
+    "/public-surface-map/expanded/data/snapshots/933274af9693d6d1d9fac36819aafdf56f9ab81d-0b763eb78fea5c53364609ecc5d7019422c54b950d32f29f79ad37f24f1637b7.json"
+  ]) {
+    assert.equal(hasFileExtension(endpoint), true, endpoint);
+    assert.equal(isSitemapEligible(endpoint), false, endpoint);
+  }
+
+  // The parent orientation page remains indexable and in the feed.
+  assert.equal(isSitemapEligible("/public-surface-map/"), true);
+  assert.ok(!SITEMAP_EXCLUDED_PATHS.has("/public-surface-map/"));
+
+  // A generated expanded URL in a sitemap URL set is a contract violation.
+  const findings = sitemapUrlSetViolations([
+    `${PRODUCTION_ORIGIN}/public-surface-map/`,
+    `${PRODUCTION_ORIGIN}/public-surface-map/expanded/`
+  ]);
+  assert.ok(findings.some((f) => f.code === "SITEMAP_URL_EXCLUDED"));
+
+  // Windows and POSIX dist paths derive the identical generated route.
+  assert.equal(
+    distRelativeRoute("/d", "/d/public-surface-map/expanded/index.html"),
+    "/public-surface-map/expanded/"
+  );
+  assert.equal(
+    distRelativeRoute("C:\\d", "C:\\d\\public-surface-map\\expanded\\index.html"),
+    "/public-surface-map/expanded/"
+  );
+});
+
 // ===========================================================================
 // Windows-safe generated dist path handling
 // ===========================================================================
