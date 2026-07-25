@@ -1,12 +1,26 @@
 // Public Surface and Authority-Ceiling Map — Phase 1 preview + Phase 2B runtime
-// + Phase 2A deterministic D3 Authority View.
+// + Phase 2A deterministic D3 Authority View + Phase 2B-1 bounded viewport.
 //
 // Phase 2A: the visual map is rendered by D3 (`d3-selection` only) into a single
 // SVG surface. All coordinates come from the PURE deterministic layout module
 // (`d3AuthorityLayout.ts`); this file owns interaction, filtering, selection,
 // runtime activation, and the accessible surfaces around the drawing. There is
 // no CDN, no remote ESM import, no runtime package loading, no iframe, no
-// canvas/WebGL, no force simulation, no drag, no pan, and no zoom.
+// canvas/WebGL, and no force simulation.
+//
+// Phase 2B-1: bounded viewport navigation. All transform arithmetic lives in the
+// PURE viewport module (`d3AuthorityViewport.ts`); this file only wires native
+// controls to it, keeps the transient state, and announces bounded outcomes. The
+// viewport is interface state only — it never enters metadata, snapshot
+// identity, semantic classification, authority status, routing semantics, data
+// validation, or runtime currentness, and it is never persisted (no storage, no
+// URL parameter, no cookie, no telemetry). Zoom level, viewport position, and
+// group navigation carry no importance, hierarchy, authority, centrality,
+// similarity, model family, confirmed conceptual relation, Registry status, or
+// currentness. No third-party zoom behavior, no pointer drag panning, and no
+// gesture handler is installed: every viewport operation is reachable from a
+// native, labelled, keyboard-operable control, and ordinary wheel scrolling,
+// one-finger touch scrolling, and browser page zoom are left untouched.
 //
 // Native DOM everywhere else. No innerHTML for metadata, no eval, no
 // `new Function`, no storage, no service worker, no telemetry. The bundled
@@ -46,6 +60,27 @@ import {
   createAuthorityRenderer,
   type AuthorityRenderer,
 } from "../lib/public-surface-authority-map/d3AuthorityRenderer.ts";
+import {
+  VIEWPORT_SCALE,
+  anchoredOffset,
+  bringIntoViewOffset,
+  centeredOffset,
+  clampScale,
+  computeViewportSurface,
+  contentExtentOf,
+  describeFitOutcome,
+  findGroup,
+  findNode,
+  fitViewport,
+  formatScalePercent,
+  groupRect,
+  nodeRect,
+  projectRect,
+  scaleIn,
+  scaleOut,
+  type ContentRect,
+  type ViewportSurface,
+} from "../lib/public-surface-authority-map/d3AuthorityViewport.ts";
 
 const SOURCE_LINK_PREFIX =
   "https://github.com/metawritingecology/meta-writing-ecology/";
@@ -111,6 +146,17 @@ interface LiveCapture {
   densityHidden: boolean;
   emptyHidden: boolean;
   activeEl: HTMLElement | null;
+  // Phase 2B-1 transient viewport surfaces. Captured with everything else so a
+  // failed activation restores the exact magnification, position, control
+  // states, and announced percentage the user had before the attempt.
+  viewportScale: number;
+  viewportSurface: ViewportSurface | null;
+  scrollLeft: number;
+  scrollTop: number;
+  zoomLabel: string | null;
+  centerDisabled: boolean;
+  groupJump: { options: ChildNode[]; value: string; disabled: boolean } | null;
+  groupJumpKey: string;
 }
 
 function setOrRemoveAttr(el: Element, name: string, value: string | null): void {
@@ -176,6 +222,20 @@ function init(root: HTMLElement): void {
   const routeGlobalEl = root.querySelector<HTMLInputElement>("[data-psam-route-global]");
   const densityWarningEl = root.querySelector<HTMLElement>("[data-psam-density-warning]");
 
+  // Phase 2B-1 viewport controls. All native, all labelled, all keyboard
+  // operable; the whole panel stays hidden until this module initializes, so the
+  // no-JavaScript surface is unchanged.
+  const viewportPanelEl = root.querySelector<HTMLElement>("[data-psam-viewport]");
+  const zoomInEl = root.querySelector<HTMLButtonElement>("[data-psam-zoom-in]");
+  const zoomOutEl = root.querySelector<HTMLButtonElement>("[data-psam-zoom-out]");
+  const zoomResetEl = root.querySelector<HTMLButtonElement>("[data-psam-zoom-reset]");
+  const zoomFitEl = root.querySelector<HTMLButtonElement>("[data-psam-zoom-fit]");
+  const centerSelectedEl = root.querySelector<HTMLButtonElement>(
+    "[data-psam-center-selected]",
+  );
+  const groupJumpEl = root.querySelector<HTMLSelectElement>("[data-psam-group-jump]");
+  const zoomLevelEl = root.querySelector<HTMLElement>("[data-psam-zoom-level]");
+
   // Phase 2B snapshot-dependent surfaces (updated together on activation).
   const runtimeStatusEl = root.querySelector<HTMLElement>("[data-psam-runtime-status]");
   const recordCountEl = root.querySelector<HTMLElement>("[data-psam-record-count]");
@@ -218,6 +278,15 @@ function init(root: HTMLElement): void {
   let currentLayout: AuthorityLayout | null = null;
   let lastColumnsPerBand = 0;
 
+  // Transient viewport state. Never read from or written to storage, a URL
+  // parameter, a cookie, or any analytics surface; it starts at the identity
+  // transform on every page load.
+  let viewportScale: number = VIEWPORT_SCALE.IDENTITY;
+  let currentSurface: ViewportSurface | null = null;
+  // Deterministic option-set fingerprint for the group-jump control, so its
+  // options are rebuilt only when the rendered group order actually changes.
+  let groupJumpKey = "";
+
   const renderer: AuthorityRenderer = createAuthorityRenderer(svgEl, {
     onActivate: (id) => {
       selectNode(id);
@@ -229,6 +298,9 @@ function init(root: HTMLElement): void {
   }
   if (mapHintEl) {
     mapHintEl.hidden = false;
+  }
+  if (viewportPanelEl) {
+    viewportPanelEl.hidden = false;
   }
 
   function currentGroupField(): GroupingField {
@@ -300,22 +372,244 @@ function init(root: HTMLElement): void {
     });
   }
 
+  /**
+   * Visible width of the map scroller. Zero before first measurement, which the
+   * pure viewport module treats as "unmeasured" rather than as a constraint.
+   */
+  function visibleBoxWidth(): number {
+    return scrollEl ? scrollEl.clientWidth : 0;
+  }
+
+  /** Transient viewport surface for the current magnification. */
+  function surfaceFor(active: AuthorityLayout): ViewportSurface {
+    return computeViewportSurface(
+      active.width,
+      active.height,
+      viewportScale,
+      visibleBoxWidth(),
+    );
+  }
+
   /** One deterministic draw pass. D3 owns the data join and the SVG output. */
   function draw(active: AuthorityLayout): void {
+    const surface = surfaceFor(active);
+    currentSurface = surface;
     renderer.render({
       layout: active,
       edges: routedEdges(active),
       selectedId,
+      viewport: surface,
     });
     if (mapEmptyEl) {
       mapEmptyEl.hidden = !active.isEmpty;
     }
+    syncViewportControls(active);
   }
 
   function redrawRouting(): void {
     if (currentLayout) {
       draw(currentLayout);
     }
+  }
+
+  // --- Phase 2B-1: bounded viewport navigation --------------------------------
+  //
+  // Every operation below moves or magnifies the VIEW. None of them recomputes a
+  // content coordinate, changes grouping or filtering, alters selection, or
+  // creates a node or an edge.
+
+  /** Return the viewport to the exact identity transform and start position. */
+  function resetViewport(): void {
+    viewportScale = VIEWPORT_SCALE.IDENTITY;
+    if (scrollEl) {
+      scrollEl.scrollLeft = 0;
+      scrollEl.scrollTop = 0;
+    }
+  }
+
+  function syncZoomDisplay(): void {
+    if (zoomLevelEl) {
+      zoomLevelEl.textContent = formatScalePercent(viewportScale);
+    }
+  }
+
+  /**
+   * Rebuild the group-jump options from the CURRENT deterministic group order.
+   * No grouping is inferred and no key is invented: every option is a verbatim
+   * rendered group key in the exact order the layout produced.
+   */
+  function syncGroupJumpOptions(active: AuthorityLayout): void {
+    if (!groupJumpEl) {
+      return;
+    }
+    const fingerprint = active.groups
+      .map((group) => `${group.key}:${group.count}`)
+      .join("");
+    if (fingerprint === groupJumpKey) {
+      return;
+    }
+    groupJumpKey = fingerprint;
+    while (groupJumpEl.firstChild) {
+      groupJumpEl.removeChild(groupJumpEl.firstChild);
+    }
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Choose a visible group";
+    groupJumpEl.appendChild(placeholder);
+    for (const group of active.groups) {
+      const option = document.createElement("option");
+      option.value = group.key;
+      option.textContent = `${group.key} (${group.count} records)`;
+      groupJumpEl.appendChild(option);
+    }
+    groupJumpEl.value = "";
+    groupJumpEl.disabled = active.groups.length === 0;
+  }
+
+  function syncViewportControls(active: AuthorityLayout): void {
+    syncZoomDisplay();
+    syncGroupJumpOptions(active);
+    if (centerSelectedEl) {
+      // Disabled unless a currently VISIBLE node is selected.
+      centerSelectedEl.disabled = findNode(active, selectedId) === null;
+    }
+  }
+
+  /**
+   * Move the page vertically only when the target is not already visible. Used
+   * by centering, group jumping, and focus, so a node never sits outside the
+   * view. Changes position only — never selection or any semantic state.
+   */
+  function bringPageIntoView(projected: ContentRect): void {
+    if (!scrollEl) {
+      return;
+    }
+    const box = scrollEl.getBoundingClientRect();
+    const pageTop = window.scrollY + box.top + projected.y - scrollEl.scrollTop;
+    const next = bringIntoViewOffset(
+      pageTop,
+      projected.height,
+      window.scrollY,
+      window.innerHeight,
+      document.documentElement.scrollHeight,
+    );
+    if (next !== window.scrollY) {
+      window.scrollTo({ top: next, behavior: "auto" });
+    }
+  }
+
+  /** Centre one rendered content rectangle in the map viewport. */
+  function centerContentRect(rect: ContentRect): void {
+    if (!currentSurface) {
+      return;
+    }
+    const projected = projectRect(rect, currentSurface.transform);
+    if (scrollEl) {
+      scrollEl.scrollLeft = centeredOffset(
+        projected.x,
+        projected.width,
+        scrollEl.clientWidth,
+        currentSurface.width,
+      );
+    }
+    bringPageIntoView(projected);
+  }
+
+  /**
+   * Apply one bounded magnification, keeping the visible centre stable across
+   * the surface resize, then announce the resulting percentage.
+   */
+  function applyScale(next: number, describe: (percent: string) => string): void {
+    if (!currentLayout) {
+      return;
+    }
+    const previous = currentSurface;
+    const previousLeft = scrollEl ? scrollEl.scrollLeft : 0;
+    viewportScale = clampScale(next);
+    draw(currentLayout);
+    if (scrollEl && previous && currentSurface) {
+      scrollEl.scrollLeft = anchoredOffset(
+        previousLeft,
+        scrollEl.clientWidth,
+        previous.width,
+        currentSurface.width,
+      );
+    }
+    announce(describe(formatScalePercent(viewportScale)));
+  }
+
+  /**
+   * Largest READABLE magnification for the currently rendered content. The
+   * outcome is announced from the pure module's explicit fit result, so a
+   * reduction that the accessibility floor stopped short is never reported as a
+   * completed fit.
+   */
+  function fitVisibleContent(): void {
+    if (!currentLayout) {
+      return;
+    }
+    const outcome = fitViewport(contentExtentOf(currentLayout), visibleBoxWidth());
+    viewportScale = outcome.scale;
+    draw(currentLayout);
+    if (scrollEl) {
+      scrollEl.scrollLeft = 0;
+    }
+    announce(describeFitOutcome(outcome));
+  }
+
+  /** Centre the selected node. A missing or hidden selection is a safe no-op. */
+  function centerSelectedNode(): void {
+    if (!currentLayout) {
+      return;
+    }
+    const entry = findNode(currentLayout, selectedId);
+    if (!entry) {
+      return;
+    }
+    centerContentRect(nodeRect(entry));
+    announce(
+      `Centered ${entry.node.name} in the map viewport. Selection is unchanged; navigation only.`,
+    );
+  }
+
+  /** Move to one visible group region. A missing key is a safe no-op. */
+  function jumpToGroup(key: string): void {
+    if (!currentLayout || key === "") {
+      return;
+    }
+    const group = findGroup(currentLayout, key);
+    if (!group) {
+      return;
+    }
+    centerContentRect(groupRect(group));
+    announce(
+      `Moved the map viewport to group ${group.key}. Grouping and filtering are unchanged; navigation only.`,
+    );
+  }
+
+  /**
+   * Make a focused node visible without centring it and without announcing.
+   * Selection, routing, grouping, and filtering are untouched.
+   */
+  function ensureNodeVisible(id: string): void {
+    if (!currentLayout || !currentSurface) {
+      return;
+    }
+    const entry = findNode(currentLayout, id);
+    if (!entry) {
+      return;
+    }
+    const projected = projectRect(nodeRect(entry), currentSurface.transform);
+    if (scrollEl) {
+      scrollEl.scrollLeft = bringIntoViewOffset(
+        projected.x,
+        projected.width,
+        scrollEl.scrollLeft,
+        scrollEl.clientWidth,
+        currentSurface.width,
+      );
+    }
+    bringPageIntoView(projected);
   }
 
   function renderDetail(node: PublicSurfaceNode): void {
@@ -436,8 +730,16 @@ function init(root: HTMLElement): void {
     }
   }
 
+  /**
+   * Recompute the deterministic layout and redraw. A grouping or filter change
+   * replaces the rendered content, so the transient viewport returns to the
+   * identity transform rather than leaving the user magnified into a region
+   * that no longer exists. Selection and routing toggles never come through
+   * here, so they never reset the viewport.
+   */
   function refresh(announceMode: "count" | "silent"): void {
     const visible = visibleNodes();
+    resetViewport();
     draw(layout(visible));
     if (announceMode === "count") {
       announceCount(visible.length);
@@ -622,6 +924,20 @@ function init(root: HTMLElement): void {
       densityHidden: densityWarningEl ? densityWarningEl.hidden : true,
       emptyHidden: mapEmptyEl ? mapEmptyEl.hidden : true,
       activeEl: document.activeElement as HTMLElement | null,
+      viewportScale,
+      viewportSurface: currentSurface,
+      scrollLeft: scrollEl ? scrollEl.scrollLeft : 0,
+      scrollTop: scrollEl ? scrollEl.scrollTop : 0,
+      zoomLabel: zoomLevelEl?.textContent ?? null,
+      centerDisabled: centerSelectedEl ? centerSelectedEl.disabled : true,
+      groupJump: groupJumpEl
+        ? {
+            options: Array.from(groupJumpEl.childNodes),
+            value: groupJumpEl.value,
+            disabled: groupJumpEl.disabled,
+          }
+        : null,
+      groupJumpKey,
     };
   }
 
@@ -648,6 +964,11 @@ function init(root: HTMLElement): void {
     });
     guard(() => {
       currentLayout = cap.layout;
+    });
+    guard(() => {
+      viewportScale = cap.viewportScale;
+      currentSurface = cap.viewportSurface;
+      groupJumpKey = cap.groupJumpKey;
     });
 
     // Rendered SVG surface: previously captured child nodes and dimensions are
@@ -722,6 +1043,31 @@ function init(root: HTMLElement): void {
       if (mapEmptyEl) mapEmptyEl.hidden = cap.emptyHidden;
     });
 
+    // Transient viewport surfaces: magnification and position were restored on
+    // the model above; the SVG box and the containing group's transform came
+    // back with the captured SVG children. What remains is the scroll position
+    // and the viewport controls' own visible state.
+    guard(() => {
+      if (scrollEl) {
+        scrollEl.scrollLeft = cap.scrollLeft;
+        scrollEl.scrollTop = cap.scrollTop;
+      }
+    });
+    guard(() => {
+      if (zoomLevelEl) zoomLevelEl.textContent = cap.zoomLabel;
+    });
+    guard(() => {
+      if (centerSelectedEl) centerSelectedEl.disabled = cap.centerDisabled;
+    });
+    if (groupJumpEl && cap.groupJump) {
+      const jump = cap.groupJump;
+      guard(() => {
+        groupJumpEl.replaceChildren(...jump.options);
+        groupJumpEl.value = jump.value;
+        groupJumpEl.disabled = jump.disabled;
+      });
+    }
+
     // Focus target where still applicable.
     guard(() => {
       if (cap.activeEl && document.contains(cap.activeEl)) {
@@ -786,8 +1132,11 @@ function init(root: HTMLElement): void {
     }
 
     // Stage 6: deterministic layout + routing redraw (global-routing preference
-    // is never auto-enabled).
+    // is never auto-enabled). A verified activation replaces the rendered
+    // content, so the transient viewport is returned to a known valid identity
+    // transform before the redraw.
     updateDensityWarning();
+    resetViewport();
     draw(layout(visibleNodes()));
 
     // Stage 7: focus restoration.
@@ -920,6 +1269,73 @@ function init(root: HTMLElement): void {
     });
   }
 
+  // Viewport controls. Each one changes the VIEW only: no filter, grouping,
+  // selection, routing, or record is touched by any of them.
+  if (zoomInEl) {
+    zoomInEl.addEventListener("click", () => {
+      applyScale(
+        scaleIn(viewportScale),
+        (percent) => `Map viewport zoom ${percent}. Interface state; navigation only.`,
+      );
+    });
+  }
+
+  if (zoomOutEl) {
+    zoomOutEl.addEventListener("click", () => {
+      applyScale(
+        scaleOut(viewportScale),
+        (percent) => `Map viewport zoom ${percent}. Interface state; navigation only.`,
+      );
+    });
+  }
+
+  if (zoomResetEl) {
+    zoomResetEl.addEventListener("click", () => {
+      if (!currentLayout) {
+        return;
+      }
+      resetViewport();
+      draw(currentLayout);
+      announce("Map viewport returned to 100%. Navigation only.");
+    });
+  }
+
+  if (zoomFitEl) {
+    zoomFitEl.addEventListener("click", () => {
+      fitVisibleContent();
+    });
+  }
+
+  if (centerSelectedEl) {
+    centerSelectedEl.addEventListener("click", () => {
+      centerSelectedNode();
+    });
+  }
+
+  if (groupJumpEl) {
+    groupJumpEl.addEventListener("change", () => {
+      const key = groupJumpEl.value;
+      groupJumpEl.value = "";
+      jumpToGroup(key);
+    });
+  }
+
+  // Focusing a node that sits outside the visible area brings it into view.
+  // Position only: selection, routing, and every semantic state are untouched,
+  // and nothing is announced.
+  svgEl.addEventListener("focusin", (event: FocusEvent) => {
+    const target = event.target;
+    if (
+      target instanceof SVGElement &&
+      target.classList.contains("psam__node")
+    ) {
+      const id = target.getAttribute("data-id");
+      if (id) {
+        ensureNodeVisible(id);
+      }
+    }
+  });
+
   if (resetEl) {
     resetEl.addEventListener("click", () => {
       if (filterTextEl) {
@@ -939,8 +1355,11 @@ function init(root: HTMLElement): void {
       }
       updateDensityWarning();
       clearSelection();
+      resetViewport();
       draw(layout(visibleNodes()));
-      announce(`View reset. Showing all ${snapshot.nodes.length} records.`);
+      announce(
+        `View reset. Showing all ${snapshot.nodes.length} records at 100% map viewport zoom.`,
+      );
     });
   }
 
@@ -953,6 +1372,18 @@ function init(root: HTMLElement): void {
     const groupField = currentGroupField();
     const groupCount = new Set(visible.map((node) => node[groupField])).size;
     if (columnsPerBandFor(groupCount) === lastColumnsPerBand) {
+      // The deterministic layout is unchanged. Below the identity magnification
+      // the transient surface still tracks the measured visible width, so it is
+      // redrawn only when that surface actually differs.
+      if (currentLayout && currentSurface) {
+        const next = surfaceFor(currentLayout);
+        if (
+          next.width !== currentSurface.width ||
+          next.height !== currentSurface.height
+        ) {
+          draw(currentLayout);
+        }
+      }
       return;
     }
     draw(layout(visible));
