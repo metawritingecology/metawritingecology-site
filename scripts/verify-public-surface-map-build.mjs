@@ -598,6 +598,206 @@ await check("20 Phase 2B-1 viewport navigation is bundled, bounded, and transien
   return "viewport bundled locally; no added D3 package; no persistence/telemetry/service worker; no gesture-only path; no HTML writing";
 });
 
+await check("21 Phase 2B-2 spatial keyboard navigation is bundled, geometry-bound, and navigation-only", () => {
+  // Phase 2B-2 adds an OPTIONAL arrow-key focus shortcut between currently
+  // rendered nodes, resolved from the deterministic layout's own rendering
+  // indices. The browser bundle must therefore contain the intended
+  // implementation and must NOT contain a keyboard-navigation package, an
+  // edge-driven target resolution, a roving tabindex, storage, telemetry, or an
+  // unsafe HTML-writing path. Checks 1-20 above are unchanged and unweakened.
+  const files = clientJsFiles();
+  const combined = files.map((file) => readFileSync(file, "utf8")).join("\n");
+
+  // (a) The four arrow directions, the focus application, the existing reveal,
+  //     and the preserved Tab + Enter/Space surfaces really shipped.
+  const required = [
+    '"ArrowUp"',
+    '"ArrowDown"',
+    '"ArrowLeft"',
+    '"ArrowRight"',
+    'addEventListener("keydown"',
+    "preventScroll",
+    'attr("tabindex",0)',
+    '"Enter"',
+    '"Spacebar"',
+    "psam__node",
+  ];
+  const missing = required.filter((needle) => !combined.includes(needle));
+  if (missing.length) {
+    throw new Error(`Phase 2B-2 navigation marker(s) missing: ${missing.join(", ")}`);
+  }
+
+  // (b) No roving tabindex and no alternative focus model was introduced: every
+  //     rendered node keeps tabindex="0" and Tab access is unchanged.
+  const forbiddenFocusModel = [
+    '"tabindex",-1',
+    '"tabindex","-1"',
+    'attr("tabindex",-1)',
+    "aria-activedescendant",
+  ];
+
+  // (c) No keyboard-navigation, hotkey, or focus-management package. Asserted
+  //     against the declared dependency surface, so a package that tree-shakes
+  //     to nothing still fails.
+  const pkg = JSON.parse(readFileSync(p("package.json"), "utf8"));
+  const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+  const FORBIDDEN_PACKAGES = [
+    "mousetrap",
+    "hotkeys",
+    "hotkeys-js",
+    "tinykeys",
+    "keymaster",
+    "focus-trap",
+    "focus-visible",
+    "tabbable",
+    "react-hotkeys",
+    "arrow-key-navigation",
+    "roving-ux",
+    "@react-aria/focus",
+  ];
+  const installed = FORBIDDEN_PACKAGES.filter((name) => name in deps);
+  if (installed.length) {
+    throw new Error(`keyboard-navigation package(s) added: ${installed.join(", ")}`);
+  }
+
+  // (d) No remote dependency, storage, or telemetry path reached the bundle.
+  const forbiddenRuntime = [
+    "raw.githubusercontent.com",
+    "githubusercontent.com",
+    "api.github.com",
+    "cdn.jsdelivr.net",
+    "unpkg.com",
+    "esm.sh",
+    "localStorage",
+    "sessionStorage",
+    "indexedDB",
+    "document.cookie",
+    "serviceWorker",
+    "sendBeacon",
+    "dataLayer",
+    "gtag(",
+  ];
+
+  const offenders = [];
+  for (const file of files) {
+    const text = readFileSync(file, "utf8");
+    for (const marker of [...forbiddenFocusModel, ...forbiddenRuntime]) {
+      if (text.includes(marker)) offenders.push(`${marker} in ${file}`);
+    }
+  }
+  if (offenders.length) throw new Error(offenders.join("; "));
+
+  // (e) The target resolver is geometry-bound: its SOURCE must contain no edge,
+  //     relation, metadata, ranking, DOM, collation, or HTML-writing path, and
+  //     its only import is the shared deterministic comparator. Asserted at
+  //     source level for the same reason as checks 19(e) / 20(f).
+  const NAV_SOURCE = "src/lib/public-surface-authority-map/d3AuthorityKeyboardNavigation.ts";
+  const navCode = readFileSync(p(NAV_SOURCE), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .map((line) => line.replace(/(^|[^:"'\\])\/\/.*$/, "$1"))
+    .join("\n");
+  if (!navCode.includes("export function resolveSpatialTarget(")) {
+    throw new Error(`${NAV_SOURCE} does not export the expected resolver`);
+  }
+  const navForbidden = [
+    // edge-driven target resolution
+    "edge",
+    "Edge",
+    "relation",
+    "Relation",
+    "boundary_reference",
+    "source_use_reference",
+    // semantic metadata, ranking, inference
+    "surface_role",
+    "authority_ceiling",
+    "public_surface_status",
+    "degree",
+    "centrality",
+    "rank",
+    "weight",
+    "score",
+    "similar",
+    "cluster",
+    "hierarch",
+    // non-deterministic or environment-dependent inputs
+    "localeCompare",
+    "Intl",
+    "Collator",
+    "Math.random",
+    "Date",
+    "getBoundingClientRect",
+    "document",
+    "window",
+    "querySelector",
+    "localStorage",
+    "sessionStorage",
+    "fetch(",
+    // unsafe HTML writing
+    "innerHTML",
+    "outerHTML",
+    "insertAdjacentHTML",
+    ".html(",
+  ];
+  const navOffenders = navForbidden.filter((marker) => navCode.includes(marker));
+  if (navOffenders.length) {
+    throw new Error(`${NAV_SOURCE}: ${navOffenders.join(", ")}`);
+  }
+  const navImports = navCode.match(/^import[\s\S]*?;$/gm) ?? [];
+  if (navImports.length !== 1 || !navImports[0].includes("./d3AuthorityLayout.ts")) {
+    throw new Error(`${NAV_SOURCE} must import only the deterministic layout comparator`);
+  }
+
+  // (f) The client integration delegates: the algorithm is not inlined in the
+  //     event listener, and the listener never selects or announces.
+  const clientCode = readFileSync(p("src/components/publicSurfaceAuthorityMap.client.ts"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .map((line) => line.replace(/(^|[^:"'\\])\/\/.*$/, "$1"))
+    .join("\n");
+  const start = clientCode.indexOf('svgEl.addEventListener("keydown"');
+  if (start === -1) throw new Error("arrow-navigation listener missing from the client");
+  const end = clientCode.indexOf("if (resetEl) {", start);
+  const listener = clientCode.slice(start, end === -1 ? undefined : end);
+  for (const marker of ["resolveSpatialTarget(", "ensureNodeVisible(", "preventScroll"]) {
+    if (!listener.includes(marker)) {
+      throw new Error(`arrow-navigation listener is missing ${marker}`);
+    }
+  }
+  for (const marker of [
+    "bandIndex",
+    "columnIndex",
+    "rowIndex",
+    "selectNode(",
+    "selectedId =",
+    "aria-pressed",
+    "announce(",
+    "viewportScale",
+  ]) {
+    if (listener.includes(marker)) {
+      throw new Error(`arrow-navigation listener must not contain ${marker}`);
+    }
+  }
+
+  // (g) The generated interactive route states the navigation accurately and
+  //     still ships the complete record table as the authoritative record.
+  const html = readFileSync(DIST_INTERACTIVE, "utf8");
+  const REQUIRED_HINT_PHRASES = [
+    "reachable with Tab",
+    "Arrow keys move focus between",
+    "visual group column",
+    "Enter or Space activates the focused node",
+    "does not",
+    "record table",
+  ];
+  const missingHint = REQUIRED_HINT_PHRASES.filter((phrase) => !html.includes(phrase));
+  if (missingHint.length) {
+    throw new Error(`map hint phrase(s) missing: ${missingHint.join(" | ")}`);
+  }
+
+  return "arrow navigation bundled locally; geometry-bound resolver; no package/edge/storage/telemetry/roving-tabindex/HTML-writing path";
+});
+
 for (const line of results) console.log(line);
 console.log("");
 if (failed > 0) {
