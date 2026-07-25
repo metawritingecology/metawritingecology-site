@@ -1,0 +1,621 @@
+---
+// Expanded Public Surface Adjacency Map — server-rendered component.
+//
+// Renders a review-first, boundary-preserving interface around the ONE bundled
+// adopted dataset. All interactivity is progressive enhancement layered on top
+// of a complete no-JavaScript fallback: every one of the 59 records, every
+// boundary statement, the legend, the counts, and the snapshot identity all
+// render without scripts and are never hidden behind a JavaScript-only control.
+//
+// Validation runs at BUILD time on the RAW bundled bytes (imported as text via
+// Vite `?raw`, so no runtime fetch and no filesystem path is exposed):
+// byte length -> SHA-256 -> Git blob id -> fatal UTF-8 decode -> JSON parse ->
+// full dataset contract. The route is prerendered, so a violation fails the
+// build rather than rendering unverified or partially valid data.
+//
+// This component is independent of the frozen 30-record authority-map product
+// and imports nothing from it.
+
+import rawSnapshotText from "../data/public-surface-adjacency-map/last-known-good.json?raw";
+import {
+  assertSnapshotFromRawText,
+  SOURCE_REPOSITORY,
+  SOURCE_MERGE_COMMIT,
+  SNAPSHOT_SOURCE_COMMIT,
+  SNAPSHOT_SOURCE_PATH,
+  SNAPSHOT_COMMIT_URL,
+  SNAPSHOT_SHA256,
+  SNAPSHOT_GIT_BLOB_SHA,
+  SNAPSHOT_BYTE_LENGTH,
+  FALLBACK_STATUS_LABEL,
+} from "../lib/public-surface-adjacency-map/fallback.ts";
+import {
+  EXPECTED_EDGE_COUNTS,
+  EXPECTED_TOTAL_EDGES,
+  FIXED_BAND_ROLES,
+  fixedBandRecords,
+  isApprovedSourceUrl,
+  semanticLayoutRecords,
+} from "../lib/public-surface-adjacency-map/contract.ts";
+import { compareNodes } from "../lib/public-surface-adjacency-map/layout.ts";
+
+const snapshot = await assertSnapshotFromRawText(rawSnapshotText);
+
+// Approved public wording comes from ONE shared module so the page metadata,
+// this component, the tests, and the build verifier pin identical strings.
+import {
+  APPROVED_TITLE,
+  APPROVED_DESCRIPTION,
+  RELATIONSHIP_SENTENCE,
+  AUTHORITY_VIEW_LABEL,
+  EXPANDED_VIEW_LABEL,
+  AUTHORITY_ROUTE,
+  PARENT_ROUTE,
+  NOT_CLAIMS,
+  SCOPE_STATEMENT,
+} from "../lib/public-surface-adjacency-map/publicWording.ts";
+
+// --- Deterministic display order --------------------------------------------
+
+const conceptRecords = [...semanticLayoutRecords(snapshot)].sort(compareNodes);
+const bandRecords = fixedBandRecords(snapshot);
+const allRecords = [...snapshot.nodes].sort(compareNodes);
+
+const roleCounts = FIXED_BAND_ROLES.map((role) => ({
+  role,
+  records: bandRecords.filter((node) => node.visualization_role === role).sort(compareNodes),
+}));
+
+const groupingKeys = [...new Set(conceptRecords.map((node) => node.grouping))].sort();
+
+// Embed the validated dataset for the client with no runtime request. Escape
+// "<" so the JSON can never break out of the script element.
+const dataJson = JSON.stringify(snapshot).replace(/</g, "\\u003c");
+
+// Rendered link safety: only an approved HTTPS source-repository URL is ever
+// emitted as an href, and every string is rendered as text (Astro escapes all
+// interpolated expressions — no field is ever injected as raw HTML).
+const safeHref = (node: { canonical_public_url: string; repository_path: string }) =>
+  isApprovedSourceUrl(node.canonical_public_url, node.repository_path)
+    ? node.canonical_public_url
+    : undefined;
+---
+
+<section class="psadj" data-psadj aria-labelledby="psadj-title">
+  <header class="psadj__header">
+    <h1 id="psadj-title">{APPROVED_TITLE}</h1>
+    <p class="psadj__subtitle">{APPROVED_DESCRIPTION}</p>
+    <p class="psadj__scope-lead" data-psadj-scope>{SCOPE_STATEMENT}</p>
+  </header>
+
+  <!-- Persistent scope and boundary banner. Never sourced from the runtime
+       manifest or a runtime snapshot, so a runtime activation can never replace
+       or remove a boundary statement. -->
+  <div class="psadj__scope" role="note" aria-label="Scope and boundary statements">
+    <h2 class="psadj__scope-title">Scope and boundaries</h2>
+    <ul class="psadj__scope-list" data-psadj-boundary-statements>
+      {snapshot.boundary_statements.map((statement) => <li>{statement}</li>)}
+    </ul>
+    <p class="psadj__scope-note">This view is:</p>
+    <ul class="psadj__scope-list psadj__scope-list--not">
+      {NOT_CLAIMS.map((claim) => <li>{claim}</li>)}
+    </ul>
+  </div>
+
+  <!-- Relationship to the other public view. -->
+  <section class="psadj__panel psadj__relationship" aria-label="Relationship to the other public view">
+    <h2>Two parallel public views</h2>
+    <p data-psadj-relationship>{RELATIONSHIP_SENTENCE}</p>
+    <ul class="psadj__view-list">
+      <li>
+        <a href={AUTHORITY_ROUTE}>{AUTHORITY_VIEW_LABEL}</a>
+      </li>
+      <li>
+        <span aria-current="page">{EXPANDED_VIEW_LABEL} (this page)</span>
+      </li>
+    </ul>
+    <p>
+      <a href={PARENT_ROUTE}>Return to the Public Surface Map</a>
+    </p>
+  </section>
+
+  <!-- Snapshot identity and live runtime status. -->
+  <section class="psadj__panel psadj__status" aria-label="Snapshot status">
+    <h2>Snapshot status</h2>
+    <dl class="psadj__status-list">
+      <div class="psadj__status-row">
+        <dt>Source repository</dt>
+        <dd><code>{SOURCE_REPOSITORY}</code></dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Source path</dt>
+        <dd><code>{SNAPSHOT_SOURCE_PATH}</code></dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Source commit</dt>
+        <dd>
+          <a
+            href={SNAPSHOT_COMMIT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="psadj__commit-link"><code data-psadj-source-commit>{SNAPSHOT_SOURCE_COMMIT}</code></a>
+        </dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Adopted from merge commit</dt>
+        <dd><code>{SOURCE_MERGE_COMMIT}</code></dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>SHA-256</dt>
+        <dd>
+          <code
+            class="psadj__hash"
+            tabindex="0"
+            aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
+            data-psadj-sha256>{SNAPSHOT_SHA256}</code>
+        </dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Git blob</dt>
+        <dd><code data-psadj-git-blob>{SNAPSHOT_GIT_BLOB_SHA}</code></dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Byte length</dt>
+        <dd><code>{SNAPSHOT_BYTE_LENGTH}</code></dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Schema version</dt>
+        <dd>{snapshot.schema_version}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Data status</dt>
+        <dd data-psadj-runtime-status>{FALLBACK_STATUS_LABEL}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Counts. -->
+  <section class="psadj__panel psadj__counts" aria-label="Record and edge counts">
+    <h2>Counts</h2>
+    <dl class="psadj__status-list">
+      <div class="psadj__status-row">
+        <dt>Records</dt>
+        <dd data-psadj-record-count>{snapshot.nodes.length}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Concept records in the semantic layout</dt>
+        <dd data-psadj-semantic-count>{conceptRecords.length}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Records in fixed bands</dt>
+        <dd data-psadj-band-count>{bandRecords.length}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Edges</dt>
+        <dd data-psadj-edge-count>{EXPECTED_TOTAL_EDGES}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Source-declared adjacency edges</dt>
+        <dd data-psadj-source-named-count>{EXPECTED_EDGE_COUNTS.source_named_adjacency}</dd>
+      </div>
+      <div class="psadj__status-row">
+        <dt>Provisional navigation adjacency edges</dt>
+        <dd data-psadj-navigation-count>{EXPECTED_EDGE_COUNTS.navigation_adjacency}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Edge-class legend. Each class is distinguished by a written label, a line
+       pattern, and a shape marker — never by color alone. -->
+  <section class="psadj__panel psadj__legend" aria-label="Edge class legend">
+    <h2>Edge classes</h2>
+    <ul class="psadj__legend-list">
+      {snapshot.edge_classes.map((descriptor) => (
+        <li class={`psadj__legend-item psadj__legend-item--${descriptor.edge_class}`}>
+          <span class="psadj__legend-swatch" aria-hidden="true">
+            {descriptor.edge_class === "source_named_adjacency" ? "──▸" : "╌╌▹"}
+          </span>
+          <span class="psadj__legend-body">
+            <strong>{descriptor.display_label}</strong>
+            <span class="psadj__legend-pattern">
+              {descriptor.edge_class === "source_named_adjacency"
+                ? "solid line, filled arrow head"
+                : "dashed line, open arrow head"}
+            </span>
+            <span class="psadj__legend-detail">Evidence: {descriptor.evidence_source}</span>
+            <span class="psadj__legend-detail">
+              Shown by default: {descriptor.default_visible ? "yes" : "no"}
+            </span>
+          </span>
+        </li>
+      ))}
+    </ul>
+    <p class="psadj__legend-note">
+      Both classes are directed and both carry a navigation-only authority ceiling.
+      Governance references, source-use references, visual layout adjacency, and
+      user-confirmed relations are never rendered here.
+    </p>
+  </section>
+
+  <!-- Progressive-enhancement region. Without JavaScript this renders the note
+       below and nothing else; the record list further down remains complete. -->
+  <section class="psadj__panel psadj__view" aria-label="Adjacency view">
+    <h2>Adjacency view</h2>
+
+    <div class="psadj__controls" data-psadj-controls hidden>
+      <fieldset class="psadj__fieldset">
+        <legend>Edge classes shown</legend>
+        <label class="psadj__control">
+          <input
+            type="checkbox"
+            checked
+            data-psadj-toggle="source_named_adjacency"
+          />
+          <span>Source-declared adjacency</span>
+        </label>
+        <label class="psadj__control">
+          <input
+            type="checkbox"
+            data-psadj-toggle="navigation_adjacency"
+          />
+          <span>Provisional navigation adjacency</span>
+        </label>
+      </fieldset>
+      <p class="psadj__controls-note">
+        Showing or hiding an edge class reveals or hides already-defined edges only.
+        It never moves a record, changes a record size, or changes any ordering.
+      </p>
+    </div>
+
+    <div class="psadj__canvas" data-psadj-canvas hidden></div>
+
+    <div class="psadj__details" data-psadj-details hidden>
+      <h3 data-psadj-details-title>No record selected</h3>
+      <dl class="psadj__status-list" data-psadj-details-body></dl>
+    </div>
+
+    <p class="psadj__noscript" data-psadj-noscript>
+      The interactive view is progressive enhancement. The complete record list
+      below is server rendered and stays available without JavaScript.
+    </p>
+  </section>
+
+  <!-- Live status region. Announces runtime status, selection changes, and
+       edge-class toggle state. -->
+  <p class="psadj__live" role="status" aria-live="polite" data-psadj-live>
+    {FALLBACK_STATUS_LABEL}. Source-declared adjacency shown. Provisional
+    navigation adjacency hidden.
+  </p>
+
+  <!-- Complete no-JavaScript fallback: every one of the 59 records. -->
+  <section class="psadj__panel psadj__records" aria-labelledby="psadj-records-title">
+    <h2 id="psadj-records-title">All {snapshot.nodes.length} records</h2>
+    <p class="psadj__records-note">
+      Record order is alphabetical by display label. Order does not indicate
+      hierarchy, priority, or importance.
+    </p>
+    <ol class="psadj__record-list" data-psadj-record-list>
+      {allRecords.map((node) => (
+        <li class="psadj__record" data-psadj-record={node.id}>
+          <span class="psadj__record-label">{node.display_label}</span>
+          <dl class="psadj__record-fields">
+            <div class="psadj__record-field">
+              <dt>Visualization role</dt>
+              <dd>{node.visualization_role}</dd>
+            </div>
+            <div class="psadj__record-field">
+              <dt>Grouping</dt>
+              <dd>{node.grouping}</dd>
+            </div>
+            <div class="psadj__record-field">
+              <dt>Relation evidence ceiling</dt>
+              <dd>{node.relation_evidence_ceiling}</dd>
+            </div>
+            <div class="psadj__record-field">
+              <dt>Canonical source</dt>
+              <dd>
+                {safeHref(node) ? (
+                  <a href={safeHref(node)} target="_blank" rel="noopener noreferrer">
+                    {node.repository_path}
+                  </a>
+                ) : (
+                  <code>{node.repository_path}</code>
+                )}
+              </dd>
+            </div>
+          </dl>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- Fixed-band summary: the 10 non-concept records, listed by role, outside
+       the semantic layout. -->
+  <section class="psadj__panel psadj__bands" aria-label="Fixed bands">
+    <h2>Fixed bands</h2>
+    <p>
+      These {bandRecords.length} records render in fixed, visibly separate bands.
+      They do not enter the semantic layout, are never semantic-edge endpoints,
+      and contribute nothing to edge layout.
+    </p>
+    {roleCounts.map((band) => (
+      <div class="psadj__band">
+        <h3>{band.role} ({band.records.length})</h3>
+        <ul>
+          {band.records.map((node) => <li>{node.display_label}</li>)}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <!-- Grouping summary for the semantic layout. -->
+  <section class="psadj__panel psadj__groupings" aria-label="Semantic layout groupings">
+    <h2>Semantic layout groupings</h2>
+    <p>
+      Only the {conceptRecords.length} concept records enter the semantic layout.
+      Grouping comes from the MODEL_ATLAS field recorded for each record and is a
+      navigation grouping only.
+    </p>
+    <ul>
+      {groupingKeys.map((key) => (
+        <li>
+          {key} ({conceptRecords.filter((node) => node.grouping === key).length})
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <script type="application/json" data-psadj-data set:html={dataJson}></script>
+</section>
+
+<style>
+  .psadj {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .psadj__header h1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .psadj__subtitle,
+  .psadj__scope-lead {
+    max-width: 68ch;
+  }
+
+  .psadj__scope,
+  .psadj__panel {
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 1rem 1.15rem;
+  }
+
+  .psadj__scope-title,
+  .psadj__panel h2 {
+    margin-top: 0;
+    font-size: 1.05rem;
+  }
+
+  .psadj__scope-list {
+    max-width: 78ch;
+    padding-left: 1.2rem;
+  }
+
+  .psadj__scope-list li {
+    margin-bottom: 0.35rem;
+  }
+
+  .psadj__status-list {
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .psadj__status-row {
+    display: grid;
+    grid-template-columns: minmax(12rem, 22rem) 1fr;
+    gap: 0.5rem;
+  }
+
+  .psadj__status-row dt {
+    font-weight: 600;
+  }
+
+  .psadj__status-row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psadj__view-list {
+    padding-left: 1.2rem;
+  }
+
+  .psadj__legend-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .psadj__legend-item {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .psadj__legend-swatch {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.1rem;
+    letter-spacing: -0.05em;
+  }
+
+  .psadj__legend-body {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .psadj__legend-pattern,
+  .psadj__legend-detail {
+    font-size: 0.9rem;
+  }
+
+  .psadj__fieldset {
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 0.5rem 0.85rem 0.85rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .psadj__control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    cursor: pointer;
+  }
+
+  .psadj__canvas {
+    overflow: auto;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  .psadj__canvas svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .psadj__record-list {
+    display: grid;
+    gap: 0.9rem;
+    padding-left: 1.4rem;
+  }
+
+  .psadj__record-label {
+    font-weight: 600;
+  }
+
+  .psadj__record-fields {
+    margin: 0.25rem 0 0;
+    display: grid;
+    gap: 0.15rem;
+    font-size: 0.92rem;
+  }
+
+  .psadj__record-field {
+    display: grid;
+    grid-template-columns: minmax(10rem, 16rem) 1fr;
+    gap: 0.5rem;
+  }
+
+  .psadj__record-field dt {
+    font-weight: 500;
+  }
+
+  .psadj__record-field dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psadj__live {
+    border: 1px dashed currentColor;
+    border-radius: 4px;
+    padding: 0.6rem 0.85rem;
+    margin: 0;
+  }
+
+  /* Visible focus indicator on every interactive element in this component. */
+  .psadj :is(a, button, input, [tabindex]):focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  /* Narrow mobile width: collapse the two-column description rows. */
+  @media (max-width: 640px) {
+    .psadj__status-row,
+    .psadj__record-field {
+      grid-template-columns: 1fr;
+    }
+
+    .psadj__legend-item {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* No animation is required for any behavior; this pins the preference too. */
+  @media (prefers-reduced-motion: reduce) {
+    .psadj *,
+    .psadj *::before,
+    .psadj *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Rendered graph styling. Global because the SVG is created by the client
+     module and therefore carries no scoped-style attribute. Every selector is
+     namespaced under .psadj__canvas so no other route is affected. */
+  .psadj__canvas .psadj-node rect {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .psadj__canvas .psadj-node text {
+    fill: currentColor;
+    font-size: 12px;
+  }
+
+  .psadj__canvas .psadj-node:focus-visible rect,
+  .psadj__canvas .psadj-node[data-selected="true"] rect {
+    stroke-width: 3.5;
+    stroke-dasharray: none;
+  }
+
+  .psadj__canvas .psadj-node[data-selected="true"] rect {
+    stroke-dasharray: 2 2;
+  }
+
+  .psadj__canvas .psadj-edge {
+    stroke: currentColor;
+    fill: none;
+  }
+
+  /* Class distinction is carried by line pattern and arrow head, not color. */
+  .psadj__canvas .psadj-edge--source_named_adjacency {
+    stroke-width: 1.6;
+  }
+
+  .psadj__canvas .psadj-edge--navigation_adjacency {
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+  }
+
+  .psadj__canvas .psadj-group-label,
+  .psadj__canvas .psadj-band-label {
+    fill: currentColor;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .psadj__canvas .psadj-group rect,
+  .psadj__canvas .psadj-band rect {
+    fill: none;
+    stroke: currentColor;
+    stroke-dasharray: 3 3;
+    stroke-width: 1;
+    opacity: 0.55;
+  }
+</style>
+
+<script>
+  import "../scripts/public-surface-adjacency-map.ts";
+</script>
