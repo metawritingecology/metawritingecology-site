@@ -1,3 +1,6 @@
 src/data/public-surface-authority-map/runtime-manifest.json -text
 src/data/public-surface-authority-map/last-known-good.json -text
 src/data/public-surface-authority-map/runtime-snapshots/*.json -text
+src/data/public-surface-adjacency-map/runtime-manifest.json -text
+src/data/public-surface-adjacency-map/last-known-good.json -text
+src/data/public-surface-adjacency-map/runtime-snapshots/*.json -text
