@@ -47,6 +47,8 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   "/language-pressure-test-lab-prototype/",
   // noindex,nofollow bounded public preview (self-canonical, not in feed)
   "/public-surface-map/interactive/",
+  // noindex,nofollow bounded public slice prototype (not in feed)
+  "/artistic-research/public-slice/2026-07-25/",
   // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
   "/public-surface-map/expanded/"
 ]);
