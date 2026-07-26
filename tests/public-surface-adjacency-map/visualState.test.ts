@@ -303,12 +303,81 @@ test("95 — the decor layer is aria-hidden, inert and carries no listener", () 
 // Glow and visual state — checks 96–100
 // ---------------------------------------------------------------------------
 
-test("96 — no filter, blur, shadow or glow is declared for the rest state", () => {
+test("96 — no glow, and the field is neutral graphite carrying no spectrum", () => {
   for (const effect of ["filter:", "box-shadow", "drop-shadow", "feGaussianBlur", "text-shadow"]) {
     assert.ok(!componentCode.includes(effect), `${effect} must not appear`);
   }
   // Positive control: the scan would catch a real glow declaration.
   assert.ok(".psadj-node { filter: drop-shadow(0 0 4px gold); }".includes("filter:"));
+
+  const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const token = (name: string) => {
+    const match = new RegExp(`${name}:\\s*(#[0-9a-f]{6})`, "i").exec(componentCode);
+    assert.ok(match, `${name} must be declared`);
+    return match[1].toLowerCase();
+  };
+
+  // The field is warm graphite, not a technology blue. Blue must not exceed red.
+  const [fieldR, , fieldB] = rgb(token("--bg"));
+  assert.ok(
+    fieldB <= fieldR,
+    `the graph field must not read blue: blue ${fieldB} exceeds red ${fieldR}`,
+  );
+
+  // Record bodies are ONE neutral stone: the three channels sit close together,
+  // and that neutral — never a grouping accent — is what fills a glyph.
+  const [bodyR, bodyG, bodyB] = rgb(token("--node-body"));
+  assert.ok(
+    Math.max(bodyR, bodyG, bodyB) - Math.min(bodyR, bodyG, bodyB) <= 24,
+    "the record body must be a neutral stone, not a hue",
+  );
+  const glyphFills = [...componentCode.matchAll(/\.psadj-node__glyph[^{]*\{[^}]*fill:\s*([^;]+);/g)]
+    .map((match) => match[1].trim());
+  assert.ok(glyphFills.length > 0, "the glyph fill must be declared");
+  for (const fill of glyphFills) {
+    assert.ok(
+      !/--group-/.test(fill),
+      `a grouping accent must never fill a record body, found ${fill}`,
+    );
+  }
+  // …and the accent is painted as a stroke, so grouping stays a thin rim.
+  assert.ok(/\.psadj-node--concept \.psadj-node__glyph \{\s*stroke: var\(--group-stroke/.test(componentCode));
+
+  // The seven accents are not arranged as a hue spectrum. Their hues, taken in
+  // ring order, must be neither ascending nor descending.
+  const RING_ORDER = [
+    "--group-ai-readable",
+    "--group-boundary-representation",
+    "--group-coherence",
+    "--group-constraint",
+    "--group-proxy",
+    "--group-responsibility",
+    "--group-semantic-field-foundations",
+  ];
+  const hueOf = (hex: string) => {
+    const [r, g, b] = rgb(hex).map((channel) => channel / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    if (max === min) return 0;
+    const d = max - min;
+    const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return h * 60;
+  };
+  const hues = RING_ORDER.map((name) => hueOf(token(name)));
+  assert.equal(hues.length, 7);
+  const ascending = hues.every((h, i) => i === 0 || h >= hues[i - 1]);
+  const descending = hues.every((h, i) => i === 0 || h <= hues[i - 1]);
+  assert.ok(!ascending && !descending, `the accents must not run in hue order: ${hues.map(Math.round)}`);
+  // No accent is a saturated attention colour that would mark one group as
+  // more important than the others. The threshold separates the approved
+  // mineral accents (0.15–0.39 measured) from the rejected jewel/neon palette
+  // it replaced (0.58–0.63 measured), so it is a real boundary rather than a
+  // number fitted to the current values.
+  for (const name of RING_ORDER) {
+    const [r, g, b] = rgb(token(name));
+    const saturation = (Math.max(r, g, b) - Math.min(r, g, b)) / Math.max(r, g, b);
+    assert.ok(saturation <= 0.45, `${name} is too saturated to be equal-status: ${saturation}`);
+  }
 });
 
 test("97 — halo classes exist only for hover, focus and selected", () => {

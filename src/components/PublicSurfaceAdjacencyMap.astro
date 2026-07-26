@@ -793,9 +793,9 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     border: 1px solid currentColor;
     border-radius: 4px;
     min-width: 0;
-    /* Dark Archival Observatory field. Route-local: this literal exists only so
-       the framed area matches the SVG before the SVG paints. */
-    background: #1b2740;
+    /* Archival mineral / volcanic graphite field. Route-local: this literal
+       exists only so the framed area matches the SVG before the SVG paints. */
+    background: #24211d;
   }
 
   .psadj__details {
@@ -918,44 +918,52 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
      page. Every token is declared on `.psadj__canvas`, so nothing here reaches
      the global palette or any other route. */
   .psadj__canvas {
-    /* The field is deliberately LIGHTER as well as cooler than the page. A
-       near-black graph on a near-black page is what the previous palette got
-       wrong: the two were within a 1.03 contrast ratio, so the graph read as
-       more page rather than as its own field. This sits ~11 L* above the page
-       surface at a 1.28 ratio — a visible step — while still reading as deep
-       blue-black. */
-    --bg: #1b2740;
-    /* Centre and glyph fill: a lighter cool slate, so records sit ON the field
-       rather than dissolving into it. */
-    --surface: #2c3c5e;
-    --text: #e4eaf5;
-    --muted: #a6b3ca;
-    --line: #3a4a6e;
+    /* Warm graphite field. It is lighter than the page surface (#11100d) so the
+       graph reads as its own specimen plate rather than as more page, but its
+       blue channel is BELOW its red channel, so it reads as neutral graphite
+       rather than as a technology-blue dashboard. */
+    --bg: #24211d;
+
+    /* Record bodies are ONE neutral archival stone. Grouping never controls a
+       record's visual mass — it appears only as the thin rim below. */
+    --node-body: #b8b6aa;
+    --node-outline: #cfccc0;
+    --node-muted: #85877f;
+
+    --muted: #a39e94;
+    --centre-text: #e6e1d5;
+    --line: #49453f;
     /* Deliberately sub-threshold. Decorative by construction. */
-    --decor: #222f4c;
+    --decor: #2b2823;
 
-    /* Edges: low-luminance neutrals. Class distinction is carried by dash
-       pattern and arrow head; these two tones are a secondary channel only. */
-    --edge-source: #c6d1e3;
-    --edge-nav: #8492ac;
+    /* Edges: two low-luminance graphite neutrals carried at low opacity, so the
+       383 relations read as an ambient field rather than a bright central fog.
+       Class distinction is carried by dash pattern and arrow head; these two
+       tones are a secondary channel only. */
+    --edge-source: #706d66;
+    --edge-nav: #66645f;
 
-    /* State channel. Three visually distinct hues, none of them a group hue,
-       so a state can never be mistaken for a grouping. Measured against the
-       field: focus 12.15, selection 7.71, hover 5.61. */
-    --focus: #f4e7cb;
-    --selection: #57c8ec;
-    --hover: #ab92e0;
+    /* State channel. Three restrained mineral hues, none of them a group
+       accent, so a state can never be mistaken for a grouping. */
+    --focus: #e8d6a7;
+    --hover: #b6a5b8;
+    --selection: #8faea7;
 
-    /* Muted jewel tones, every one at or above a 3.65 contrast ratio on the
-       field. Restrained and distinguishable, and never the only cue: grouping
-       is also written out in the details panel and the record list. */
-    --group-semantic-field-foundations: #cbab52;
-    --group-boundary-representation: #5299c2;
-    --group-coherence: #bd6178;
-    --group-ai-readable: #57a984;
-    --group-proxy: #977cc0;
-    --group-responsibility: #c87e46;
-    --group-constraint: #46a3a3;
+    /* Seven equal-status mineral accents, deliberately NOT in hue-spectrum
+       order and not mapped by quadrant. Going clockwise around the ring they
+       run slate, sandstone, sage, iron rose, verdigris, plum, ochre — so the
+       two warm-tan accents and the two green-grey accents are never adjacent
+       and cannot read as one category. None is brighter or more saturated than
+       the others: no group is visually "important". Grouping is also written
+       out in the details panel and the record list, so colour is never the
+       sole carrier of the distinction. */
+    --group-ai-readable: #7a929d; /* steel slate   — ring position 1 */
+    --group-boundary-representation: #b59a72; /* sandstone     — 2 */
+    --group-coherence: #81917b; /* dry sage      — 3 */
+    --group-constraint: #9b7e78; /* iron rose     — 4 */
+    --group-proxy: #708a86; /* verdigris     — 5 */
+    --group-responsibility: #957e89; /* dusty plum    — 6 */
+    --group-semantic-field-foundations: #a88767; /* muted ochre   — 7 */
   }
 
   .psadj__canvas svg {
@@ -984,22 +992,26 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
 
   .psadj__canvas .psadj-edge {
     fill: none;
-    opacity: 0.16;
+    opacity: 0.12;
   }
 
   .psadj__canvas .psadj-edge--source_named_adjacency {
     stroke: var(--edge-source);
-    stroke-width: 1.6;
+    stroke-width: 0.9;
   }
 
   .psadj__canvas .psadj-edge--navigation_adjacency {
     stroke: var(--edge-nav);
-    stroke-width: 1.2;
+    stroke-width: 0.8;
     stroke-dasharray: 5 4;
   }
 
+  /* The selected neighbourhood lifts to a persistent, readable trace — never a
+     glow. There is no separate hover/focus edge state in P7.1: edge emphasis is
+     driven by SELECTION only, and wiring a hover-driven one would be a client
+     change rather than a palette change. */
   .psadj__canvas .psadj-edge[data-emphasis="true"] {
-    opacity: 0.95;
+    opacity: 0.58;
   }
 
   .psadj__canvas .psadj-edge[data-inactive="true"] {
@@ -1043,21 +1055,23 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
   }
 
   .psadj__canvas .psadj-centre-line {
-    fill: var(--muted);
+    fill: var(--centre-text);
     font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     line-height: 1.45;
   }
 
   /* Records. Equal 18 by 18 footprint for every role; no state changes size. */
   .psadj__canvas .psadj-node__glyph {
-    fill: var(--surface);
-    stroke: var(--muted);
+    fill: var(--node-body);
+    stroke: var(--node-outline);
     stroke-width: 1.5;
   }
 
   .psadj__canvas .psadj-node__glyph rect {
-    fill: var(--surface);
-    stroke: var(--muted);
+    fill: var(--node-body);
+    stroke: var(--node-outline);
     stroke-width: 1.5;
   }
 
@@ -1066,8 +1080,10 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     stroke: none;
   }
 
+  /* The ONLY place a grouping accent is painted: a thin rim on an otherwise
+     neutral body. It never fills a record and never sets its size. */
   .psadj__canvas .psadj-node--concept .psadj-node__glyph {
-    stroke: var(--group-stroke, var(--muted));
+    stroke: var(--group-stroke, var(--node-outline));
   }
 
   .psadj__canvas .psadj-node[data-psadj-group="Semantic Field Foundations"] {
@@ -1136,7 +1152,7 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
   }
 
   .psadj__canvas .psadj-node[data-selected="true"] .psadj-node__glyph {
-    fill: var(--group-stroke, var(--muted));
+    fill: var(--node-outline);
     stroke: var(--selection);
     stroke-width: 3;
   }
@@ -1149,7 +1165,11 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
      from 0.28 with the darker field: the same fraction reads dimmer against
      blue-black than it did against the previous warm charcoal. */
   .psadj__canvas .psadj-node[data-inactive="true"] {
-    opacity: 0.42;
+    opacity: 0.55;
+  }
+
+  .psadj__canvas .psadj-node[data-inactive="true"] .psadj-node__glyph {
+    fill: var(--node-muted);
   }
 
   /* Responsive role labels — D18.
