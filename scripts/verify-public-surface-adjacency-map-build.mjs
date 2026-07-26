@@ -56,7 +56,15 @@ import {
   EXPANDED_ROUTE,
   NOT_CLAIMS,
   SCOPE_STATEMENT,
+  CENTRAL_STATEMENT_LINES,
+  GROUP_ARC_STATEMENT,
+  RECORD_ORDER_DISCLAIMER,
+  ROLE_ORBIT_CAPTION,
 } from "../src/lib/public-surface-adjacency-map/publicWording.ts";
+import {
+  GRAPH_RECORD_ORDER,
+  GROUP_ARC_R,
+} from "../src/lib/public-surface-adjacency-map/layout.ts";
 import { SITEMAP_EXCLUDED_PATHS } from "./lib/indexing-discovery-contract.mjs";
 
 const root = new URL("../", import.meta.url);
@@ -115,6 +123,13 @@ function clientJsFiles() {
   if (!existsSync(DIST_ASTRO)) return [];
   return readdirSync(DIST_ASTRO)
     .filter((f) => f.endsWith(".js"))
+    .map((f) => p(`dist/_astro/${f}`));
+}
+
+function clientCssFiles() {
+  if (!existsSync(DIST_ASTRO)) return [];
+  return readdirSync(DIST_ASTRO)
+    .filter((f) => f.endsWith(".css"))
     .map((f) => p(`dist/_astro/${f}`));
 }
 
@@ -377,6 +392,11 @@ await check("PSADJ-09 required visible content is present", () => {
     "Provisional navigation adjacency",
     "solid line, filled arrow head",
     "dashed line, open arrow head",
+    // P7.1 required visible wording.
+    GROUP_ARC_STATEMENT,
+    ROLE_ORBIT_CAPTION,
+    RECORD_ORDER_DISCLAIMER,
+    ...CENTRAL_STATEMENT_LINES,
   ];
   const missing = required.filter((needle) => !html.includes(needle));
   if (missing.length > 0) throw new Error(`missing visible content: ${missing.join(" | ")}`);
@@ -611,6 +631,199 @@ await check("PSADJ-14 the frozen 30-record product is unchanged", async () => {
     throw new Error("the expanded manifest points at the frozen product's route namespace");
   }
   return `${frozen.length} frozen file(s) byte-identical`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-15 — authored layer structure in the emitted SVG
+// ---------------------------------------------------------------------------
+//
+// P7.1 authors the SVG skeleton statically. These checks are the emitted-bytes
+// leg of the source contracts asserted by the P7.1 Node suites: the Node tests
+// prove the component declares the structure, and these prove the browser
+// actually receives it.
+
+const LAYER_ORDER = ["decor", "edges", "arcs", "centre", "nodes"];
+
+await check("PSADJ-15 the five rendering layers are emitted in order", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const positions = LAYER_ORDER.map((layer) => {
+    const index = html.indexOf(`data-psadj-layer="${layer}"`);
+    if (index === -1) throw new Error(`the ${layer} layer is missing from the emitted SVG`);
+    const occurrences = html.split(`data-psadj-layer="${layer}"`).length - 1;
+    if (occurrences !== 1) throw new Error(`the ${layer} layer is emitted ${occurrences} times`);
+    return index;
+  });
+  const sorted = [...positions].sort((a, b) => a - b);
+  if (positions.join() !== sorted.join()) throw new Error("the layers are emitted out of order");
+
+  const wrappers = html.split("data-psadj-viewport").length - 1;
+  if (wrappers !== 1) throw new Error(`expected exactly one viewport wrapper, found ${wrappers}`);
+  const wrapperIndex = html.indexOf("data-psadj-viewport");
+  if (positions[0] > wrapperIndex) throw new Error("decor must sit outside the viewport wrapper");
+  for (let i = 1; i < LAYER_ORDER.length; i += 1) {
+    if (positions[i] < wrapperIndex) {
+      throw new Error(`${LAYER_ORDER[i]} must sit inside the viewport wrapper`);
+    }
+  }
+  return `5 layers in order, 1 viewport wrapper, decor outside it`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-16 — all 59 record controls, in canonical order, all focusable
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-16 all 59 record controls are emitted in GRAPH_RECORD_ORDER", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const snapshot = assertAdjacencySnapshot(JSON.parse(readFileSync(SRC_FALLBACK, "utf8")));
+  const expected = GRAPH_RECORD_ORDER(snapshot.nodes).map((node) => node.id);
+
+  const emitted = [...html.matchAll(/data-psadj-node="([^"]+)"/g)].map((m) => m[1]);
+  if (emitted.length !== EXPECTED_RECORD_COUNT) {
+    throw new Error(`emitted ${emitted.length} record controls, expected ${EXPECTED_RECORD_COUNT}`);
+  }
+  for (let i = 0; i < expected.length; i += 1) {
+    if (emitted[i] !== expected[i]) {
+      throw new Error(`control ${i} is ${emitted[i]}, expected ${expected[i]}`);
+    }
+  }
+
+  // Sequential focus order follows authored DOM order, so every control must
+  // carry a focusable tabindex and none may be removed from the order.
+  const focusable = [...html.matchAll(/data-psadj-node="[^"]+"[^>]*tabindex="0"/g)].length;
+  if (focusable !== EXPECTED_RECORD_COUNT) {
+    throw new Error(`${focusable} of ${EXPECTED_RECORD_COUNT} controls carry a focusable tabindex`);
+  }
+  if (/data-psadj-node="[^"]+"[^>]*tabindex="-1"/.test(html)) {
+    throw new Error("a record control was removed from the sequential focus order");
+  }
+  const named = [...html.matchAll(/data-psadj-node="[^"]+"[^>]*aria-label="[^"]+ record\."/g)].length;
+  if (named !== EXPECTED_RECORD_COUNT) {
+    throw new Error(`${named} of ${EXPECTED_RECORD_COUNT} controls carry the accessible name`);
+  }
+  return `${emitted.length} controls in canonical order, all focusable and named`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-17 — the label-readout element contract
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-17 the label readout is a non-live visual element", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const occurrences = html.split("data-psadj-label-readout").length - 1;
+  if (occurrences !== 1) throw new Error(`the readout is emitted ${occurrences} times`);
+
+  const index = html.indexOf("data-psadj-label-readout");
+  const open = html.lastIndexOf("<", index);
+  const tag = html.slice(open, html.indexOf(">", index) + 1);
+  if (!tag.startsWith("<p ")) throw new Error(`the readout must be a <p>, got ${tag}`);
+  if (!/aria-hidden="true"/.test(tag)) throw new Error("the readout must be aria-hidden");
+  for (const forbidden of [" role=", "aria-live", "aria-atomic", "tabindex"]) {
+    if (tag.includes(forbidden)) throw new Error(`the readout must carry no ${forbidden.trim()}`);
+  }
+  if (/<output/i.test(html)) throw new Error("<output> must not appear as a readout element");
+
+  const svgClose = html.indexOf("</svg>");
+  const legend = html.indexOf("psadj__compact-legend");
+  if (!(svgClose < index && index < legend)) {
+    throw new Error("the readout must sit after the SVG and before the compact legend");
+  }
+  return "one non-live <p> readout, correctly placed";
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-18 — two functional controls, and no deferred control or placeholder
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-18 exactly two toolbar controls and no deferred control", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const toggles = [...html.matchAll(/data-psadj-toggle="([a-z_]+)"/g)].map((m) => m[1]);
+  if (toggles.length !== 2 || toggles[0] !== "source_named_adjacency" || toggles[1] !== "navigation_adjacency") {
+    throw new Error(`expected exactly the two edge-class toggles, found ${toggles.join(", ")}`);
+  }
+  for (const deferred of ["Zoom Out", "Zoom In", "Fit All", "Reset Exploration", "Focus Record", "Reset view"]) {
+    if (html.includes(deferred)) throw new Error(`${deferred} is deferred to P7.2 and must not render`);
+  }
+  if (/aria-disabled/.test(html)) throw new Error("no placeholder control may be aria-disabled");
+  return "2 functional controls, 0 deferred controls, 0 placeholders";
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-19 — route width and the responsive grid
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-19 the route width and responsive grid are emitted", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const css = [
+    ...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g),
+  ].map((m) => m[1]).join("\n");
+  const styleSheets = clientCssFiles().map((file) => readFileSync(file, "utf8")).join("\n");
+  const all = `${css}\n${styleSheets}`;
+
+  const required = [
+    [/main\.main--psadj-expanded\s*\{[^}]*max-width:\s*1440px/, "route max-width 1440px"],
+    [/grid-template-columns:\s*minmax\(0,\s*880px\)\s*minmax\(280px,\s*340px\)/, "grid tracks"],
+    [/min-width:\s*0/, "min-width: 0 on the canvas column"],
+    [/max-width:\s*100%/, "max-width: 100% on the SVG"],
+    [/overflow-wrap:\s*anywhere/, "wrap rule"],
+    [/@media\s*\(max-width:\s*640px\)/, "the 640px breakpoint"],
+  ];
+  const missing = required.filter(([pattern]) => !pattern.test(all)).map(([, label]) => label);
+  if (missing.length > 0) throw new Error(`missing emitted CSS: ${missing.join(" | ")}`);
+  if (/main\.main--psadj-expanded\s*\{[^}]*max-width:\s*1200px/.test(all)) {
+    throw new Error("the superseded 1200px route width is still emitted");
+  }
+  return `${required.length} emitted CSS contracts present`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-20 — grouping arcs at the fixed radius, non-interactive
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-20 grouping arcs use the fixed radius and stay non-interactive", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const arcs = [...html.matchAll(/data-psadj-arc="([^"]+)"[^>]*d="([^"]+)"/g)];
+  if (arcs.length !== 7) throw new Error(`expected 7 grouping arcs, found ${arcs.length}`);
+
+  const radius = GROUP_ARC_R.toFixed(3);
+  for (const [, key, d] of arcs) {
+    if (!d.includes(`A ${radius} ${radius} `)) {
+      throw new Error(`the ${key} arc does not use radius ${radius}: ${d}`);
+    }
+    if (!/^M -?\d+\.\d{3} -?\d+\.\d{3} A /.test(d)) {
+      throw new Error(`the ${key} arc is not serialized to three decimals: ${d}`);
+    }
+  }
+  // Non-interactive in P7.1: no arc is focusable or exposes control semantics.
+  if (/data-psadj-arc="[^"]*"[^>]*tabindex/.test(html)) {
+    throw new Error("a grouping arc is focusable, which is P7.2 behaviour");
+  }
+  if (/data-psadj-arc="[^"]*"[^>]*role="button"/.test(html)) {
+    throw new Error("a grouping arc exposes control semantics, which is P7.2 behaviour");
+  }
+  return `7 arcs at radius ${radius}, all non-interactive`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-21 — build-output boundary scan
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-21 no prohibited runtime surface appears in the route's own output", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const scripts = clientJsFiles().map((file) => readFileSync(file, "utf8"));
+  const bundle = [html, ...scripts].join("\n");
+
+  const prohibited = [
+    [/codepen\.io|cdpn\.io|cpwebassets\.com/i, "a CodePen reference"],
+    [/WebGLRenderer|WebGL2?RenderingContext/, "a WebGL renderer or context"],
+    [/getContext\s*\(\s*["'`]\s*(?:experimental-)?webgl/i, "a WebGL context request"],
+    [/<canvas\b/i, "a Canvas element"],
+    [/requestAnimationFrame|cancelAnimationFrame/, "an animation frame loop"],
+    [/Math\.random|crypto\.getRandomValues|randomUUID/, "a random source"],
+    [/ResizeObserver/, "a ResizeObserver"],
+  ];
+  const found = prohibited.filter(([pattern]) => pattern.test(bundle)).map(([, label]) => label);
+  if (found.length > 0) throw new Error(`prohibited in build output: ${found.join(" | ")}`);
+  return `${prohibited.length} prohibited runtime surfaces absent from ${scripts.length + 1} artifact(s)`;
 });
 
 // ---------------------------------------------------------------------------

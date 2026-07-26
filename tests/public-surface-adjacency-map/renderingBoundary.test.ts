@@ -205,7 +205,7 @@ const pageCode = stripComments(page);
 
 // The stripper must leave executable code intact and must really remove prose,
 // or every comment-stripped assertion below would be meaningless.
-assert.ok(layoutCode.includes("export function computeSemanticLayout"));
+assert.ok(layoutCode.includes("export function computeRadialLayout"));
 assert.ok(clientCode.includes("function enhance("));
 assert.ok(componentCode.includes("{APPROVED_TITLE}"));
 assert.ok(layoutSource.includes("centrality") && !layoutCode.includes("centrality"));
@@ -917,13 +917,28 @@ test("guard 10 — retained semantic and security guarantees", () => {
 test("guard 11 — no ResizeObserver", () => {
   clean("ResizeObserver in production source:", scan(String.raw`ResizeObserver`));
 
-  // The EXISTING window resize implementation is unchanged by P7.0. Its removal
-  // is P7.1 work, so this guard must not pass because the responsive behaviour
-  // was deleted here.
-  assert.ok(
-    /window\.addEventListener\("resize"/.test(client),
-    "the existing resize listener must remain untouched in P7.0",
+  // Re-scoped at P7.1. Until P7.1 the client re-laid-out the graph on a window
+  // resize, so this guard pinned that listener in place to prove the responsive
+  // behaviour had not simply been deleted. P7.1 removes the listener because
+  // responsiveness is now entirely static — a fixed logical viewBox plus CSS —
+  // so the guard now bans BOTH observers and resize listeners, and proves the
+  // static mechanism is actually present rather than absent.
+  clean(
+    "window resize listener in production source:",
+    scan(String.raw`addEventListener\(\s*["']resize["']`),
   );
+
+  // Positive control: the pattern really does catch a resize listener.
+  assert.ok(
+    /addEventListener\(\s*["']resize["']/.test('window.addEventListener("resize", handler)'),
+  );
+
+  // …and the static replacement is present, so this guard cannot pass because
+  // responsive behaviour was dropped altogether.
+  assert.ok(component.includes("preserveAspectRatio"), "the fixed viewBox fit must be declared");
+  assert.ok(/max-width:\s*100%/.test(component), "the SVG must be width-constrained by CSS");
+  assert.ok(/@media \(max-width: 640px\)/.test(component), "the responsive breakpoint must remain");
+  assert.ok(/grid-template-columns:\s*1fr/.test(component), "the single-column collapse must remain");
 });
 
 // ---------------------------------------------------------------------------
@@ -1015,16 +1030,16 @@ const INTERACTION_TEST = "tests/public-surface-adjacency-map/interaction.test.ts
  * one out, comment one out, or delete it.
  */
 const PROTECTED_TESTS: [string, number][] = [
-  ["edge classes are distinguished by pattern and marker, not color alone", 17],
+  ["edge classes are distinguished by pattern and marker, not color alone", 21],
   ["a visible focus indicator is defined for every interactive element", 36],
-  ["the layout is usable at narrow mobile width", 8],
+  ["the layout is usable at narrow mobile width", 9],
 ];
 
 /** Active assertions across every test in `interaction.test.ts`. Recomputed
  *  from the parse tree after each correction: a stale floor stops pinning the
  *  state it is supposed to protect, which is how a removed assertion slipped
  *  past once already. */
-const INTERACTION_ASSERTION_FLOOR = 201;
+const INTERACTION_ASSERTION_FLOOR = 220;
 
 /**
  * Tokens that would mean a test depends on implementation that does not exist
@@ -1209,8 +1224,13 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
     ["the canvas Escape no-op guard", /closest<SVGGElement>/],
     ["the complete no-JavaScript fallback", /data-psadj-record-list/],
     ["reduced motion is honoured", /prefers-reduced-motion/],
-    ["responsive layout resolves a usable column count", /columnsForWidth/],
-    ["…and keeps every concept record at every column count", /responsive\.nodes\.length/],
+    // Re-scoped at P7.1 alongside the layout change. The guarantee is unchanged
+    // — the layout stays usable at narrow width and never drops a record — but
+    // it is now carried by the responsive grid and the fixed logical viewBox
+    // rather than by a resolved column count, because `columnsForWidth` no
+    // longer exists.
+    ["responsive layout collapses to a single column", /psadj__grid/],
+    ["…and keeps every concept record at every width", /concepts\.length/],
   ];
   for (const [guarantee, pattern] of RETAINED) {
     assert.ok(pattern.test(asserted), `retargeting dropped the guarantee: ${guarantee}`);
