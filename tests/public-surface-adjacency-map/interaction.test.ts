@@ -580,10 +580,6 @@ const effectiveValue = (selectorPart: string, property: string): string | null =
   return values.length > 0 ? values[values.length - 1] : null;
 };
 
-/** Every declaration that applies to rules written with exactly this selector,
- *  in source order across all of them. */
-const declarationsForSelector = (selector: string) =>
-  COMPONENT_RULES.filter((rule) => rule.selector === selector).flatMap((rule) => rule.declarations);
 
 /**
  * Interpret an SVG `stroke-dasharray` value. `effective` is the guarantee that
@@ -631,6 +627,10 @@ const OUTLINE_STYLES = [
 ];
 const OUTLINE_WIDTH_KEYWORDS: Record<string, number> = { thin: 1, medium: 3, thick: 5 };
 
+/** A value this bounded model cannot resolve statically. Colour functions such
+ *  as `rgb(...)` are deliberately not listed: they never decide visibility. */
+const DYNAMIC_VALUE = /\b(?:var|calc|env|clamp|min|max|attr)\s*\(/i;
+
 /** A CSS length token as a number, or null when the token is not a length. */
 const cssLength = (token: string): number | null => {
   const parsed = /^(-?\d*\.?\d+)(px|rem|em|pt|ch|ex|vh|vw)?$/i.exec(token);
@@ -648,10 +648,14 @@ const effectiveOutline = (declarations: { property: string; value: string }[]) =
   let width: number | null = null;
   let style: string | null = null;
   let touched = false;
+  let unresolved: string | null = null;
 
   for (const { property, value } of declarations) {
     if (property === "outline") {
       touched = true;
+      // A dynamic value cannot be resolved here, and must never be ASSUMED
+      // visible; the contract fails closed instead.
+      if (DYNAMIC_VALUE.test(value)) unresolved = `outline: ${value}`;
       // The shorthand resets every longhand it does not name.
       width = null;
       style = null;
@@ -666,51 +670,322 @@ const effectiveOutline = (declarations: { property: string; value: string }[]) =
       }
     } else if (property === "outline-width") {
       touched = true;
-      const lower = value.toLowerCase();
-      width = lower in OUTLINE_WIDTH_KEYWORDS ? OUTLINE_WIDTH_KEYWORDS[lower] : cssLength(value);
+      const lower = value.trim().toLowerCase();
+      if (lower in OUTLINE_WIDTH_KEYWORDS) width = OUTLINE_WIDTH_KEYWORDS[lower];
+      else {
+        width = cssLength(value.trim());
+        if (width === null) unresolved = `outline-width: ${value}`;
+      }
     } else if (property === "outline-style") {
       touched = true;
       style = value.trim().toLowerCase();
+      if (!OUTLINE_STYLES.includes(style)) unresolved = `outline-style: ${value}`;
     }
   }
 
   const resolvedWidth = width === null ? OUTLINE_WIDTH_KEYWORDS.medium : width;
   const resolvedStyle = style === null ? "none" : style;
   const visible =
-    touched && resolvedStyle !== "none" && resolvedStyle !== "hidden" && resolvedWidth > 0;
-  return { touched, width: resolvedWidth, style: resolvedStyle, visible, suppressed: touched && !visible };
+    touched &&
+    unresolved === null &&
+    resolvedStyle !== "none" &&
+    resolvedStyle !== "hidden" &&
+    resolvedWidth > 0;
+  return {
+    touched,
+    unresolved,
+    width: resolvedWidth,
+    style: resolvedStyle,
+    visible,
+    suppressed: touched && !visible,
+  };
 };
 
 const INTERACTIVE_ELEMENTS = ["a", "button", "input", "select", "textarea"];
 
-/** The compound a `:focus-visible` selector actually matches the focused
- *  element on — everything before the pseudo-class. */
-const focusedCompound = (selector: string) => selector.slice(0, selector.indexOf(":focus-visible"));
+/**
+ * Bounded selector model for the focus contract.
+ *
+ * Focus is a CASCADE property: a narrower rule that changes only
+ * `outline-width` keeps the style established by a broader rule that already
+ * matched the same element. Evaluating each rule's declarations in isolation
+ * therefore misreads an ordinary positive refinement such as
+ * `.psadj__toolbar button:focus-visible { outline-width: 4px }` as suppression.
+ *
+ * The model below resolves the effective outline PER TARGET ELEMENT: it works
+ * out which `:focus-visible` rules apply to a representative element, then
+ * composes their declarations in source order. It is deliberately conservative
+ * rather than a full engine — specificity is not resolved, so a later
+ * applicable zero or `none` declaration is always treated as suppression even
+ * where real specificity might override it. Unsupported selector syntax inside
+ * the protected focus set fails closed rather than being skipped.
+ */
 
-/** Bare element type names in a compound. A class, id, attribute or hyphenated
- *  fragment is never mistaken for an element name. */
-const elementNames = (compound: string) =>
-  [...compound.matchAll(/(?:^|[\s,(>+~])([a-z][a-z0-9]*)\b/g)].map((match) => match[1]);
+/** Split a selector list on top-level commas, never inside parentheses. */
+const splitSelectorList = (selector: string): string[] => {
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const char of selector) {
+    if (char === "(") depth += 1;
+    if (char === ")") depth -= 1;
+    if (char === "," && depth === 0) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  parts.push(current);
+  return parts.map((part) => part.trim()).filter(Boolean);
+};
 
-/** Does this focus rule style an INTERACTIVE element, and therefore owe an
- *  outline? `.psadj-node:focus-visible rect` does not: it indicates focus on the
- *  rendered record with a stroke, which is a different, already-asserted
- *  mechanism. */
-const isInteractiveFocusSelector = (selector: string) => {
-  const compound = focusedCompound(selector);
-  return (
-    /\[tabindex/.test(compound) ||
-    elementNames(compound).some((name) => INTERACTIVE_ELEMENTS.includes(name))
+/** Split one selector into descendant compounds, never inside parentheses. */
+const splitCompounds = (selector: string): string[] => {
+  const compounds: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const char of selector) {
+    if (char === "(") depth += 1;
+    if (char === ")") depth -= 1;
+    if (/\s/.test(char) && depth === 0) {
+      if (current) compounds.push(current);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  if (current) compounds.push(current);
+  return compounds;
+};
+
+/**
+ * Parse one compound into simple selectors, or return `null` for syntax this
+ * bounded model does not interpret — a combinator, an id, a pseudo-element or
+ * any pseudo-class other than `:focus-visible` and `:is()`. A `null` inside the
+ * protected focus set is a hard test failure, never a silent skip.
+ */
+const parseCompound = (compound: string): { kind: string; value?: string; attr?: string; attrValue?: string | null; alternatives?: unknown[] }[] | null => {
+  const simples = [];
+  let index = 0;
+  while (index < compound.length) {
+    const rest = compound.slice(index);
+    if (rest.startsWith("*")) {
+      simples.push({ kind: "any" });
+      index += 1;
+    } else if (rest.startsWith(":focus-visible")) {
+      simples.push({ kind: "focus" });
+      index += ":focus-visible".length;
+    } else if (rest.startsWith(":is(")) {
+      let depth = 0;
+      let end = index + 3;
+      for (; end < compound.length; end += 1) {
+        if (compound[end] === "(") depth += 1;
+        else if (compound[end] === ")") {
+          depth -= 1;
+          if (depth === 0) break;
+        }
+      }
+      if (end >= compound.length) return null;
+      const alternatives = splitSelectorList(compound.slice(index + 4, end)).map(parseCompound);
+      if (alternatives.length === 0 || alternatives.some((alternative) => alternative === null)) return null;
+      simples.push({ kind: "is", alternatives });
+      index = end + 1;
+    } else if (rest.startsWith(".")) {
+      const match = /^\.([A-Za-z_][\w-]*)/.exec(rest);
+      if (!match) return null;
+      simples.push({ kind: "class", value: match[1] });
+      index += match[0].length;
+    } else if (rest.startsWith("[")) {
+      const match = /^\[([A-Za-z_][\w-]*)(?:\s*=\s*["']([^"']*)["'])?\]/.exec(rest);
+      if (!match) return null;
+      simples.push({ kind: "attr", attr: match[1], attrValue: match[2] ?? null });
+      index += match[0].length;
+    } else {
+      const match = /^[A-Za-z][\w-]*/.exec(rest);
+      if (!match) return null;
+      simples.push({ kind: "type", value: match[0].toLowerCase() });
+      index += match[0].length;
+    }
+  }
+  return simples.length > 0 ? simples : null;
+};
+
+/** A representative element: a type, a class set and an attribute map. */
+const elementNode = (
+  type: string | null,
+  classes: string[] = [],
+  attributes: [string, string | null][] = [],
+) => ({ type, classes: new Set(classes), attributes: new Map(attributes) });
+
+const mergeNodes = (base, extra) =>
+  elementNode(
+    extra.type ?? base.type,
+    [...base.classes, ...extra.classes],
+    [...base.attributes, ...extra.attributes],
   );
+
+const simpleMatches = (simple, node): boolean => {
+  switch (simple.kind) {
+    case "any":
+    case "focus":
+      return true;
+    case "type":
+      return node.type === simple.value;
+    case "class":
+      return node.classes.has(simple.value);
+    case "attr":
+      if (!node.attributes.has(simple.attr)) return false;
+      return simple.attrValue === null || node.attributes.get(simple.attr) === simple.attrValue;
+    case "is":
+      return simple.alternatives.some((alternative) =>
+        alternative.every((inner) => simpleMatches(inner, node)),
+      );
+    default:
+      return false;
+  }
 };
 
-/** Does this focus rule cover the whole interactive set, making it the rule
- *  that ESTABLISHES the component's focus contract? */
-const coversEveryInteractiveElement = (selector: string) => {
-  const compound = focusedCompound(selector);
-  const names = new Set(elementNames(compound));
-  return ["a", "button", "input"].every((name) => names.has(name)) && /\[tabindex/.test(compound);
+const compoundMatches = (simples, node) => simples.every((simple) => simpleMatches(simple, node));
+
+/** Descendant matching, right to left. The SUBJECT compound — the last one —
+ *  must match the target itself, so `.psadj-node:focus-visible rect` styles the
+ *  descendant rect and never the focused record. */
+const selectorMatchesTarget = (compounds, chain: unknown[]) => {
+  let selectorIndex = compounds.length - 1;
+  let chainIndex = chain.length - 1;
+  if (!compoundMatches(compounds[selectorIndex], chain[chainIndex])) return false;
+  selectorIndex -= 1;
+  chainIndex -= 1;
+  while (selectorIndex >= 0) {
+    let matched = false;
+    while (chainIndex >= 0) {
+      const candidate = chain[chainIndex];
+      chainIndex -= 1;
+      if (compoundMatches(compounds[selectorIndex], candidate)) {
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) return false;
+    selectorIndex -= 1;
+  }
+  return true;
 };
+
+/** The element candidates a compound could match, expanding `:is()`. */
+const nodesFromCompound = (simples): unknown[] => {
+  let candidates = [elementNode(null)];
+  for (const simple of simples) {
+    if (simple.kind === "focus" || simple.kind === "any") continue;
+    if (simple.kind === "is") {
+      candidates = simple.alternatives.flatMap((alternative) =>
+        nodesFromCompound(alternative).flatMap((sub) =>
+          candidates.map((base) => mergeNodes(base, sub)),
+        ),
+      );
+    } else if (simple.kind === "type") {
+      candidates = candidates.map((base) => mergeNodes(base, elementNode(simple.value)));
+    } else if (simple.kind === "class") {
+      candidates = candidates.map((base) => mergeNodes(base, elementNode(null, [simple.value])));
+    } else if (simple.kind === "attr") {
+      candidates = candidates.map((base) =>
+        mergeNodes(base, elementNode(null, [], [[simple.attr, simple.attrValue]])),
+      );
+    }
+  }
+  return candidates;
+};
+
+const isInteractiveNode = (node) =>
+  (node.type !== null && INTERACTIVE_ELEMENTS.includes(node.type)) || node.attributes.has("tabindex");
+
+/** Every parsed `:focus-visible` selector in the component, in source order.
+ *  Parsing happens once; anything uninterpretable is reported, not skipped. */
+const FOCUS_RULES = COMPONENT_RULES.filter((rule) => rule.selector.includes(":focus-visible")).map(
+  (rule) => ({
+    selector: rule.selector,
+    declarations: rule.declarations,
+    selectors: splitSelectorList(rule.selector).map((part) => ({
+      text: part,
+      compounds: splitCompounds(part).map(parseCompound),
+    })),
+  }),
+);
+
+for (const rule of FOCUS_RULES) {
+  for (const parsed of rule.selectors) {
+    assert.ok(
+      parsed.compounds.length > 0 && parsed.compounds.every((compound) => compound !== null),
+      `the bounded focus model cannot interpret the protected selector "${parsed.text}"; extend the model rather than skipping the rule`,
+    );
+  }
+}
+
+/** A selector part whose SUBJECT carries `:focus-visible` — the ones that style
+ *  the focused element itself. */
+const focusSubjectSelectors = (rule) =>
+  rule.selectors.filter((parsed) =>
+    parsed.compounds[parsed.compounds.length - 1].some((simple) => simple.kind === "focus"),
+  );
+
+/** The component root. Every rule in this stylesheet is scoped beneath it, and
+ *  the markup renders the whole product inside `<section class="psadj">`. */
+const PSADJ_ROOT = elementNode(null, ["psadj"]);
+
+/** Representative protected targets: the interactive contexts the component
+ *  actually renders, plus one derived from every interactive focus selector the
+ *  stylesheet itself declares, so a newly added focus rule is protected too. */
+const focusTargets = () => {
+  const targets: { name: string; chain: unknown[] }[] = [
+    { name: "an anchor inside .psadj", chain: [PSADJ_ROOT, elementNode("a")] },
+    { name: "a button inside .psadj", chain: [PSADJ_ROOT, elementNode("button")] },
+    {
+      name: "a toolbar button inside .psadj",
+      chain: [PSADJ_ROOT, elementNode(null, ["psadj__toolbar"]), elementNode("button")],
+    },
+    { name: "an input inside .psadj", chain: [PSADJ_ROOT, elementNode("input")] },
+    {
+      name: "a [tabindex] element inside .psadj",
+      chain: [PSADJ_ROOT, elementNode(null, [], [["tabindex", null]])],
+    },
+    {
+      name: "a rendered record inside .psadj__canvas",
+      chain: [
+        PSADJ_ROOT,
+        elementNode(null, ["psadj__canvas"]),
+        elementNode(null, ["psadj-node"], [["tabindex", null]]),
+      ],
+    },
+  ];
+
+  for (const rule of FOCUS_RULES) {
+    for (const parsed of focusSubjectSelectors(rule)) {
+      const chains = parsed.compounds.reduce(
+        (accumulated, compound) =>
+          nodesFromCompound(compound).flatMap((node) =>
+            accumulated.map((chain) => [...chain, node]),
+          ),
+        [[]],
+      );
+      for (const chain of chains) {
+        if (!isInteractiveNode(chain[chain.length - 1])) continue;
+        const rooted = chain[0].classes.has("psadj") ? chain : [PSADJ_ROOT, ...chain];
+        targets.push({ name: `"${parsed.text}"`, chain: rooted });
+      }
+    }
+  }
+  return targets;
+};
+
+/** Declarations of every focus rule that applies to a target, in source order,
+ *  composed rather than reset per rule. */
+const applicableFocusDeclarations = (target) =>
+  FOCUS_RULES.filter((rule) =>
+    focusSubjectSelectors(rule).some((parsed) =>
+      selectorMatchesTarget(parsed.compounds, target.chain),
+    ),
+  ).flatMap((rule) => rule.declarations);
 
 // The model must never silently collapse: an empty or truncated rule list would
 // make every effective-value assertion below vacuously true.
@@ -798,10 +1073,49 @@ test("a visible focus indicator is defined for every interactive element", () =>
     assert.equal(
       effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, suppression]).visible,
       false,
-      `${suppression.property}: ${suppression.value} must count as suppression`,
+      `a later ${suppression.property}: ${suppression.value} suppresses the focus outline`,
     );
   }
-  // Reordering that preserves the effective style still passes.
+  // A later POSITIVE partial override refines the outline; it does not remove
+  // it. This is the case the previous per-selector model got wrong.
+  for (const refinement of [
+    { property: "outline-width", value: "4px" },
+    { property: "outline-width", value: "2px" },
+    { property: "outline-width", value: "thick" },
+    { property: "outline-style", value: "dashed" },
+    { property: "outline-style", value: "dotted" },
+  ]) {
+    assert.equal(
+      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, refinement]).visible,
+      true,
+      `a later ${refinement.property}: ${refinement.value} must remain visible`,
+    );
+  }
+  // An unresolvable dynamic value fails closed rather than being assumed
+  // visible, in the shorthand and in either longhand.
+  for (const dynamic of [
+    { property: "outline", value: "var(--focus-outline)" },
+    { property: "outline-width", value: "var(--w)" },
+    { property: "outline-width", value: "calc(1px * 0)" },
+    { property: "outline-style", value: "var(--s)" },
+  ]) {
+    assert.equal(
+      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, dynamic]).visible,
+      false,
+      `an unresolvable ${dynamic.property}: ${dynamic.value} must not be assumed visible`,
+    );
+  }
+
+  // Equivalent positive longhands, and reordering that preserves the effective
+  // state, both still pass.
+  assert.equal(
+    effectiveOutline([
+      { property: "outline-width", value: "3px" },
+      { property: "outline-style", value: "solid" },
+      { property: "outline-color", value: "currentColor" },
+    ]).visible,
+    true,
+  );
   assert.equal(
     effectiveOutline([
       { property: "outline-offset", value: "2px" },
@@ -810,45 +1124,54 @@ test("a visible focus indicator is defined for every interactive element", () =>
     true,
   );
 
-  // Which focus rules owe an outline: the ones whose focused compound names an
-  // interactive element. The rendered-record rule indicates focus with a stroke
-  // on its `rect`, which is a different mechanism and is not required to.
-  const required = focusRules.filter((rule) => isInteractiveFocusSelector(rule.selector));
-  assert.ok(required.length > 0, "no interactive :focus-visible rule was found");
-
-  // (1) The contract is actually established: the rule covering links, buttons,
-  //     inputs and tabindex holders paints a real outline.
-  const establishing = required.filter((rule) => coversEveryInteractiveElement(rule.selector));
+  // The selector model must resolve the rules that APPLY to each element, not
+  // the rules that share a selector string.
+  const targets = focusTargets();
+  assert.ok(targets.length >= 6, `only ${targets.length} protected focus targets were derived`);
   assert.ok(
-    establishing.length > 0,
-    "one :focus-visible rule must cover a, button, input and [tabindex]",
+    targets.some((target) => target.name.includes("toolbar")),
+    "the toolbar-button context must be a protected target",
   );
-  for (const rule of establishing) {
-    const outline = effectiveOutline(declarationsForSelector(rule.selector));
+
+  for (const target of targets) {
+    const outline = effectiveOutline(applicableFocusDeclarations(target));
+    assert.ok(
+      outline.touched,
+      `no applicable :focus-visible rule establishes an outline for ${target.name}`,
+    );
+    assert.ok(
+      !outline.suppressed,
+      `an applicable rule removes the focus outline for ${target.name} (width ${outline.width}, style ${outline.style})`,
+    );
     assert.ok(
       outline.visible,
-      `${rule.selector} must paint a focus outline, got width ${outline.width} style ${outline.style}`,
+      `${target.name} must paint a focus outline, got width ${outline.width} style ${outline.style}`,
     );
   }
 
-  // (2) …and no interactive focus selector may take it away again, whether by a
-  //     later shorthand or a later longhand.
-  for (const rule of required) {
-    const outline = effectiveOutline(declarationsForSelector(rule.selector));
-    assert.ok(
-      !outline.suppressed,
-      `${rule.selector} suppresses the focus outline (width ${outline.width}, style ${outline.style})`,
-    );
-  }
+  // The composition really is cross-selector, not per-selector-string: a rule
+  // whose selector never mentions the toolbar still applies to a toolbar
+  // button, which is exactly why a narrower rule setting one longhand inherits
+  // the style already established instead of resetting it.
+  const toolbar = targets.find((target) => target.name.includes("toolbar"));
+  assert.ok(toolbar, "the toolbar-button target must exist");
+  const toolbarRules = FOCUS_RULES.filter((rule) =>
+    focusSubjectSelectors(rule).some((parsed) =>
+      selectorMatchesTarget(parsed.compounds, toolbar.chain),
+    ),
+  );
+  assert.ok(toolbarRules.length > 0, "no focus rule applies to a toolbar button");
+  assert.ok(
+    toolbarRules.some((rule) => !rule.selector.includes("psadj__toolbar")),
+    "a broader rule must apply across selector text, not only to an identical selector",
+  );
 
-  // (3) …and no rule anywhere in the component removes a focus outline.
-  for (const rule of COMPONENT_RULES) {
-    const outline = effectiveOutline(rule.declarations);
-    assert.ok(
-      !outline.suppressed,
-      `${rule.selector} removes the focus outline (width ${outline.width}, style ${outline.style})`,
-    );
-  }
+  // The rendered-record rule styles the descendant rect, so it is never treated
+  // as the focused element's own outline contract.
+  assert.ok(
+    focusRules.some((rule) => rule.selector.includes(".psadj-node:focus-visible")),
+    "the rendered-record focus rule must still exist",
+  );
 });
 
 test("edge classes are distinguished by pattern and marker, not color alone", () => {
