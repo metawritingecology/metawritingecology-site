@@ -433,7 +433,7 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   const { expected, findings: robotsFindings } = buildExpectedRouteSet({ pagesDir: PAGES_DIR });
   for (const f of robotsFindings) check(false, "ROBOTS_CONTRACT", "page robots contract unambiguous", f.message);
   const indexableRoutes = [...expected].sort();
-  check(indexableRoutes.length === 40, "INDEXABLE_COUNT", "exactly 40 indexable routes", `${indexableRoutes.length}`);
+  check(indexableRoutes.length === 41, "INDEXABLE_COUNT", "exactly 41 indexable routes", `${indexableRoutes.length}`);
 
   // Every indexable route is registered in the Package D registry.
   for (const route of indexableRoutes) {
@@ -446,7 +446,7 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   }
 
   await withLocalServer(async (origin, renderRoute) => {
-    // --- 40 indexable routes ---------------------------------------------
+    // --- 41 indexable routes ---------------------------------------------
     for (const route of indexableRoutes) {
       const policy = ROUTE_METADATA_REGISTRY[route];
       const expectedLang = policy ? policy.language : "en";
