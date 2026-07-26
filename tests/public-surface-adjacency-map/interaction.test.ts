@@ -657,10 +657,25 @@ const IMPORTANT_ANNOTATION = /!\s*important\b/i;
 const OUTLINE_PROPERTIES = ["outline", "outline-width", "outline-style"];
 
 /**
- * The subproperty candidates one declaration contributes. The `outline`
- * shorthand contributes to BOTH width and style, resetting to the CSS initial
- * value whichever of them it does not name; a longhand contributes only to its
- * own subproperty. Colour tokens are ignored and never corrupt the parse.
+ * Outline resolution, step one: expand one declaration into the subproperty
+ * CANDIDATES it contributes. Nothing is decided here — a candidate only becomes
+ * effective once `resolveOutline` weighs it against every other candidate that
+ * applies to the same target.
+ *
+ *   - the `outline` shorthand contributes to BOTH protected subproperties,
+ *     resetting to the CSS initial value whichever of them it does not name;
+ *   - `outline-width` and `outline-style` contribute only to their own
+ *     subproperty, leaving the other one to whatever else wins it;
+ *   - colour tokens are ignored and never corrupt the parse.
+ *
+ * Candidates are compared by specificity BEFORE rule source order and
+ * declaration order, so a later declaration does not simply win. Two inputs
+ * never establish visibility at all: an unresolvable dynamic value, and a
+ * protected `!important` declaration — both are reported as defects by
+ * `focusModelDefects` and fail closed.
+ *
+ * This resolves the outline subproperties only. It is not the complete browser
+ * cascade.
  */
 const outlineCandidates = ({ property, value }: { property: string; value: string }) => {
   if (property === "outline") {
@@ -696,19 +711,35 @@ const INTERACTIVE_ELEMENTS = ["a", "button", "input", "select", "textarea"];
 /**
  * Bounded selector model for the focus contract.
  *
- * Focus is a CASCADE property: a narrower rule that changes only
- * `outline-width` keeps the style established by a broader rule that already
- * matched the same element. Evaluating each rule's declarations in isolation
- * therefore misreads an ordinary positive refinement such as
- * `.psadj__toolbar button:focus-visible { outline-width: 4px }` as suppression.
+ * Focus is a CASCADE property. Which declaration a browser applies is decided
+ * by importance, then specificity, and only then by source and declaration
+ * order — so neither evaluating a rule in isolation nor comparing rules by
+ * source order alone gives the right answer.
  *
- * The model below resolves the effective outline PER TARGET ELEMENT: it works
- * out which `:focus-visible` rules apply to a representative element, then
- * composes their declarations in source order. It is deliberately conservative
- * rather than a full engine — specificity is not resolved, so a later
- * applicable zero or `none` declaration is always treated as suppression even
- * where real specificity might override it. Unsupported selector syntax inside
- * the protected focus set fails closed rather than being skipped.
+ * The model below therefore:
+ *
+ *   - parses each selector-list branch INDEPENDENTLY, as CSS does;
+ *   - gives every branch a specificity tuple
+ *     (ids, classes/attributes/pseudo-classes, types/pseudo-elements), where
+ *     `:is(...)` contributes the lexicographically greatest specificity among
+ *     its alternatives — which is why
+ *     `.psadj :is(a, button, input, [tabindex]):focus-visible` scores (0,3,0)
+ *     and outranks the textually narrower
+ *     `.psadj__toolbar button:focus-visible` at (0,2,1);
+ *   - resolves each representative target against every branch that matches it;
+ *   - lets matching declarations contribute independent candidates for
+ *     `outline-width` and `outline-style`, each subproperty being won by
+ *     specificity, then rule source order, then declaration order.
+ *
+ * Two things fail closed rather than being skipped or assumed visible:
+ * unsupported selector syntax inside the protected focus set, and a protected
+ * `!important` declaration, which this contract does not authorize.
+ *
+ * This intentionally supports only the component's authorized selector grammar.
+ * It is not a complete CSS engine: cascade layers, `@scope`, inline styles,
+ * transitions and animations are not modelled, and none of them appears on the
+ * protected focus surface. Extend the model rather than assume, if one ever
+ * does.
  */
 
 /** Split a selector list on top-level commas, never inside parentheses. */
