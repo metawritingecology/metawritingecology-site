@@ -223,7 +223,7 @@ test("91 — no generator and no pseudo-random source exists in the decor path",
   assert.ok("const marks = Array.from({length: 20}, () => Math.random())".includes("Math.random"));
 });
 
-test("92 — no build step generates the marks", () => {
+test("92 — no build step generates the marks, and two builds emit identical route bytes", () => {
   const packageJson = JSON.parse(rd("package.json"));
   for (const command of Object.values(packageJson.scripts)) {
     assert.ok(!command.includes("decor"), `no script may generate decor: ${command}`);
@@ -231,6 +231,39 @@ test("92 — no build step generates the marks", () => {
   // The component consumes the committed constant directly.
   assert.ok(/import \{ DECOR_MARKS \} from/.test(component));
   assert.ok(/DECOR_MARKS\.map/.test(componentCode));
+
+  // The second half of this check's approved contract: the emitted route must be
+  // byte-identical across two builds. A Node test cannot BE that proof — the
+  // decisive proof is the executed two-build byte comparison inside PSADJ-21,
+  // which really deletes build 1 and really runs build 2. What this asserts is
+  // that the gate is wired into the ordinary pipeline and cannot be silently
+  // dropped, which is the part a source-level suite can actually guarantee.
+  const verifier = rd("scripts/verify-public-surface-adjacency-map-build.mjs");
+
+  // Build 1 is captured outside the repository, and left nowhere afterwards.
+  assert.ok(/mkdtempSync\(join\(tmpdir\(\)/.test(verifier), "build 1 is captured outside the repo");
+  assert.ok(/rmSync\(captureDir, \{ recursive: true, force: true \}\)/.test(verifier));
+  // Build 1 output is destroyed, so no stale byte can satisfy the comparison.
+  assert.ok(/rmSync\(p\("dist"\), \{ recursive: true, force: true \}\)/.test(verifier));
+  assert.ok(/build 1 output could not be isolated before build 2/.test(verifier));
+  // Build 2 really runs, on this pinned install, without re-entering `check`.
+  assert.ok(/execFileSync\(process\.execPath, \[astroBinaryPath\(\), "build"\]/.test(verifier));
+  assert.ok(!/"run",\s*"check"/.test(verifier), "the verifier must not re-enter the check script");
+  // Raw bytes, not parsed DOM or normalized text, plus the artifact set itself.
+  assert.ok(/bytesEqual\(readBytes\(first\), readBytes\(second\)\)/.test(verifier));
+  assert.ok(/route bytes differ between two builds/.test(verifier));
+  assert.ok(/the route-owned artifact set changed between builds/.test(verifier));
+  assert.ok(/build 2 is missing a route artifact/.test(verifier));
+  // At minimum the route document is compared.
+  assert.ok(/public-surface-map\/expanded\/index\.html", join\(captureDir, "route\.html"\)/.test(verifier));
+  // …and the comparison is over a deterministically ordered artifact list.
+  assert.ok(/\[\.\.\.reachable\]\.sort\(\)/.test(verifier));
+
+  // The gate runs in the ordinary pipeline: `check` invokes the verifier.
+  assert.ok(packageJson.scripts.check.includes("verify:public-surface-adjacency-map"));
+  assert.ok(/^node scripts\/verify-public-surface-adjacency-map-build\.mjs$/.test(
+    packageJson.scripts["verify:public-surface-adjacency-map"],
+  ));
 });
 
 test("93 — no decorative mark lies inside the central clear disc", () => {
