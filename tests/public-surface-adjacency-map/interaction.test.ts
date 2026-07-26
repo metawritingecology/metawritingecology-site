@@ -32,6 +32,7 @@ import {
   computeSemanticLayout,
   directionForKey,
   firstReachableId,
+  GROUP_REGION_WIDTH,
   lastReachableId,
   resolveSpatialTarget,
   shortenLabel,
@@ -492,6 +493,58 @@ test("the canvas keyboard behavior is unchanged and independent", () => {
   assert.ok(client.indexOf('canvas.addEventListener("keydown"') !== client.indexOf('details.addEventListener("keydown"'));
 });
 
+/**
+ * Stylesheet readers. These exist so the assertions below can state the
+ * GUARANTEE a rule provides — a real focus outline, a non-solid edge pattern —
+ * instead of pinning the literal declaration that happens to provide it today.
+ * A later package may restyle these rules freely; it may not remove what they
+ * guarantee.
+ */
+
+/** The declaration block of the first rule whose selector text contains
+ *  `selector`, so an assertion can never be satisfied by an unrelated rule. */
+const cssRuleBody = (source: string, selector: string): string => {
+  const at = source.indexOf(selector);
+  assert.notEqual(at, -1, `no CSS rule for ${selector}`);
+  const open = source.indexOf("{", at);
+  const close = source.indexOf("}", open);
+  assert.ok(open !== -1 && close > open, `unterminated CSS rule for ${selector}`);
+  return source.slice(open + 1, close);
+};
+
+/** The body of the first at-rule whose prelude matches, brace matched so a
+ *  nested rule cannot end the slice early. */
+const atRuleBody = (source: string, prelude: RegExp): string => {
+  const match = prelude.exec(source);
+  assert.ok(match, `no at-rule matching ${prelude}`);
+  const open = source.indexOf("{", match.index);
+  assert.notEqual(open, -1, `unterminated at-rule matching ${prelude}`);
+  let depth = 0;
+  for (let i = open; i < source.length; i += 1) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return assert.fail(`unbalanced braces in the at-rule matching ${prelude}`);
+};
+
+/** The value of one CSS property in a declaration block, or null. The property
+ *  name is matched exactly, so `outline-offset` never answers for `outline`
+ *  and `stroke-width` never answers for `stroke`. */
+const declarationValue = (block: string, property: string): string | null => {
+  const match = new RegExp(`(?:^|[^-\\w])${property}\\s*:\\s*([^;]+)`).exec(block);
+  return match ? match[1].trim() : null;
+};
+
+/** Every `:focus-visible` rule in the component, as `{ selector, body }`. */
+const focusVisibleRules = (source: string) =>
+  [...source.matchAll(/([^{}]*:focus-visible[^{}]*)\{([^{}]*)\}/g)].map((match) => ({
+    selector: match[1].trim(),
+    body: match[2],
+  }));
+
 // ---------------------------------------------------------------------------
 // Accessibility surface
 // ---------------------------------------------------------------------------
@@ -529,18 +582,78 @@ test("a polite live region announces status, selection, and toggle state", () =>
 
 test("a visible focus indicator is defined for every interactive element", () => {
   assert.ok(/:focus-visible/.test(component));
-  assert.ok(/outline: 3px solid currentColor/.test(component));
+
+  const rules = focusVisibleRules(component);
+  assert.ok(rules.length > 0, "the component must define at least one :focus-visible rule");
+
+  // The guarantee is a REAL outline on focus, not one specific declaration: at
+  // least one rule gives interactive elements an outline with a non-zero width
+  // and a visible style. The exact width, style and colour are presentation.
+  const outlined = rules
+    .map((rule) => ({ selector: rule.selector, outline: declarationValue(rule.body, "outline") }))
+    .filter((rule) => rule.outline !== null);
+  assert.ok(outlined.length > 0, "a :focus-visible rule must declare an outline");
+  for (const { selector, outline } of outlined) {
+    assert.ok(!/^(none|0)\b/.test(outline), `focus outline must not be suppressed: ${selector}`);
+    assert.ok(
+      /(?:^|\s)[1-9]\d*(?:\.\d+)?(?:px|rem|em)(?:\s|$)/.test(outline),
+      `focus outline needs a non-zero width: ${selector} { outline: ${outline} }`,
+    );
+  }
+
+  // …and nothing anywhere in the component takes the focus outline away again.
+  const outlines = [...component.matchAll(/(?:^|[^-\w])outline\s*:\s*([^;]+)/g)].map((match) =>
+    match[1].trim(),
+  );
+  assert.ok(outlines.length > 0);
+  for (const value of outlines) {
+    assert.ok(!/^(none|0)\b/.test(value), `no rule may remove the focus outline, found: ${value}`);
+  }
 });
 
 test("edge classes are distinguished by pattern and marker, not color alone", () => {
-  // The legend states the pattern in words, and the stylesheet distinguishes the
-  // two classes by dash pattern and stroke width — no `color`/`stroke:` hue is
-  // used to carry the distinction.
+  // The legend states the pattern in words…
   assert.ok(component.includes("solid line, filled arrow head"));
   assert.ok(component.includes("dashed line, open arrow head"));
-  assert.ok(/\.psadj-edge--navigation_adjacency \{\s*stroke-width: 1\.2;\s*stroke-dasharray: 5 4;/.test(component));
+
+  // …the stylesheet carries a real PATTERN difference: the navigation class is
+  // non-solid, the source-named class is not. The exact stroke width and dash
+  // lengths are presentation and are deliberately not pinned here.
+  const named = cssRuleBody(component, ".psadj-edge--source_named_adjacency");
+  const navigation = cssRuleBody(component, ".psadj-edge--navigation_adjacency");
+  const dashes = declarationValue(navigation, "stroke-dasharray");
+  assert.ok(dashes, "the navigation edge class must declare a dash pattern");
+  assert.ok(!/^none\b/.test(dashes), "the navigation dash pattern must not be `none`");
+  assert.ok(/\d/.test(dashes), `the navigation dash pattern must be a real pattern, got: ${dashes}`);
+  assert.equal(
+    declarationValue(named, "stroke-dasharray"),
+    null,
+    "the source-named edge class stays solid",
+  );
+
+  // …and the distinction is never carried by colour: neither class rule sets a
+  // hue of its own, so both classes render in the one shared stroke colour.
+  for (const [name, body] of [["source-named", named], ["navigation", navigation]]) {
+    for (const property of ["stroke", "fill", "color"]) {
+      assert.equal(
+        declarationValue(body, property),
+        null,
+        `the ${name} edge class must not carry its own ${property}`,
+      );
+    }
+  }
+  assert.ok(
+    /\.psadj-edge\s*\{[^}]*stroke:\s*currentColor/.test(component),
+    "both classes inherit one shared stroke colour",
+  );
+
+  // …and each class carries its own arrow marker, so shape distinguishes them
+  // even where a dash pattern cannot be seen.
   assert.ok(/psadj-arrow-filled/.test(client));
   assert.ok(/psadj-arrow-open/.test(client));
+  assert.ok(/"marker-end"/.test(client));
+  assert.ok(/url\(#psadj-arrow-filled\)/.test(client));
+  assert.ok(/url\(#psadj-arrow-open\)/.test(client));
 });
 
 test("a reduced-motion media query is present and no animation is mandatory", () => {
@@ -552,14 +665,58 @@ test("a reduced-motion media query is present and no animation is mandatory", ()
 });
 
 test("the layout is usable at narrow mobile width", () => {
-  assert.ok(/@media \(max-width: 640px\)/.test(component));
-  // One group column always fits, however narrow the viewport is.
-  assert.equal(columnsForWidth(320, 7), 1);
-  assert.equal(columnsForWidth(0, 7), 7);
-  assert.ok(columnsForWidth(1200, 7) >= 1);
-  const narrow = computeSemanticLayout(concepts, { columnsPerBand: 1 });
-  assert.equal(narrow.columnsPerBand, 1);
-  assert.equal(narrow.nodes.length, 49);
+  // A narrow-viewport rule exists and collapses the two-column description rows
+  // to a single column. WHICH breakpoint it uses is presentation; that a
+  // narrow-width rule exists and single-columns those grids is the guarantee.
+  const narrowRule = atRuleBody(component, /@media \(max-width:\s*[^)]+\)/);
+  assert.ok(
+    /grid-template-columns:\s*1fr/.test(narrowRule),
+    "the narrow-width rule must collapse the description grids to one column",
+  );
+
+  const groupCount = new Set(concepts.map((node) => node.grouping)).size;
+
+  // However narrow the viewport, the resolved column count stays usable: a
+  // whole number, at least one, and never more than there are groups.
+  for (const width of [1, 16, 64, 200, 320, 576, 640, 960, 1200, 1920, 4096]) {
+    const resolved = columnsForWidth(width, groupCount);
+    assert.ok(Number.isInteger(resolved), `width ${width} must resolve to a whole number`);
+    assert.ok(resolved >= 1 && resolved <= groupCount, `width ${width} resolved to ${resolved}`);
+  }
+
+  // A narrower viewport never resolves to MORE columns than a wider one.
+  for (let width = 1; width <= 4096; width += 7) {
+    assert.ok(
+      columnsForWidth(width, groupCount) <= columnsForWidth(width + 7, groupCount),
+      `the column count must not decrease as width grows, at width ${width}`,
+    );
+  }
+
+  // One group column always fits: a viewport wide enough for exactly one group
+  // region resolves to exactly one column. Derived from the layout module's own
+  // constants, so no pixel literal is pinned here.
+  assert.equal(
+    columnsForWidth(GROUP_REGION_WIDTH + ADJACENCY_LAYOUT_METRICS.CANVAS_PADDING * 2, groupCount),
+    1,
+  );
+
+  // An unknown or non-positive width falls back to the full group count — never
+  // to zero columns and never to an unrenderable layout.
+  for (const unknown of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.equal(columnsForWidth(unknown, groupCount), groupCount, `width ${unknown}`);
+  }
+
+  // Responsiveness is a presentation parameter ONLY: every concept record is
+  // present at every resolvable column count, and none is ever dropped.
+  for (let columns = 1; columns <= groupCount; columns += 1) {
+    const responsive = computeSemanticLayout(concepts, { columnsPerBand: columns });
+    assert.equal(responsive.nodes.length, concepts.length, `columns ${columns}`);
+    assert.equal(
+      new Set(responsive.nodes.map((node) => node.id)).size,
+      concepts.length,
+      `columns ${columns}`,
+    );
+  }
 });
 
 // ---------------------------------------------------------------------------
