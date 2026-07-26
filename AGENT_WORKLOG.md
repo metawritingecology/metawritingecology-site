@@ -3640,3 +3640,15 @@ Tests rerun locally, all 0 skipped: `radialLayout` 56/56; `directionalNavigation
 Result: one additional commit on `claude/p7-1-radial-constellation`, parented on `7d2ce51875c7cd95cf3eb04dcbfbada7e33a95a0`. Neither prior commit was amended, rebased, squashed or force-pushed, and no prior worklog entry was rewritten. The R1 invariant is unaffected: this commit touches neither resolver.
 Unresolved questions: unchanged from the previous entry.
 Risks or assumptions: the local Node suites cannot substitute for `astro check` and `tsc --noEmit`, which is precisely why this correction was needed; any further type error will surface only in CI under the same constraint.
+
+### 2026-07-26 — Claude Code — phase3a-p7-1-psadj21-scope-correction
+
+Agent: Claude Code
+Task: Second correction on P7.1 draft PR #96, fixing the single failing build-verifier check on head `3cd078c871aed2c63a202288340eced3484c9237`. Not a scope change and not a production-source change.
+Result of that CI run, recorded before the correction: `astro check` passed with 0 errors; the full build ran; every Node suite passed; and PSADJ-01 through PSADJ-20 all passed, including the six new P7.1 checks. The sole failure was PSADJ-21, the check this package itself added.
+Cause: PSADJ-21 scanned every `.js` file in `dist/_astro` rather than the adjacency route's own chunks. That directory also holds the frozen authority-map product's bundles and Astro's shared runtime, which legitimately contain `requestAnimationFrame`. The check was therefore reporting another product's code as this route's violation — a mis-scoped guard, and the canonical instruction is explicit that the scan covers the adjacency route's OWN chunks.
+Correction: PSADJ-21 now selects bundles exactly as PSADJ-11 already does — those referencing `/public-surface-map/expanded/data/` — and throws if none is found, so the narrowing cannot make the check vacuous. The prohibited-token list is unchanged and nothing was removed from it.
+Files changed: `scripts/verify-public-surface-adjacency-map-build.mjs`, `AGENT_WORKLOG.md`. Both inside the approved allowlist. No production source, component, client, layout, dataset, manifest, fallback, lockfile or dependency change, and no test assertion changed.
+Result: one additional commit, parented on `3cd078c871aed2c63a202288340eced3484c9237`. No prior commit was amended, rebased, squashed or force-pushed. The R1 invariant is unaffected: this commit touches neither resolver.
+Unresolved questions: unchanged.
+Risks or assumptions: narrowing a scan is a weakening if done carelessly, so the check now fails closed when no adjacency bundle is found, which is the same protection PSADJ-11 carries.

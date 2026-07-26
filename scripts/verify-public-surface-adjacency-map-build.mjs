@@ -809,7 +809,17 @@ await check("PSADJ-20 grouping arcs use the fixed radius and stay non-interactiv
 
 await check("PSADJ-21 no prohibited runtime surface appears in the route's own output", () => {
   const html = readFileSync(DIST_PAGE, "utf8");
-  const scripts = clientJsFiles().map((file) => readFileSync(file, "utf8"));
+
+  // The ADJACENCY ROUTE'S OWN chunks only, identified the same way PSADJ-11
+  // identifies them. `dist/_astro` also holds the frozen authority-map product's
+  // bundles and Astro's shared runtime, which legitimately contain some of the
+  // tokens below; scanning those would flag another product's code as this
+  // route's violation.
+  const bundles = clientJsFiles().filter((file) =>
+    readFileSync(file, "utf8").includes("/public-surface-map/expanded/data/"),
+  );
+  if (bundles.length === 0) throw new Error("no client bundle references the expanded data routes");
+  const scripts = bundles.map((file) => readFileSync(file, "utf8"));
   const bundle = [html, ...scripts].join("\n");
 
   const prohibited = [
