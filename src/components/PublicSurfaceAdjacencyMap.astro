@@ -15,6 +15,14 @@
 //
 // This component is independent of the frozen 30-record authority-map product
 // and imports nothing from it.
+//
+// P7.1 authors the SVG skeleton statically rather than building it at runtime.
+// That is what makes layer identity, layer order and — critically — the order
+// of the 59 record controls observable to a source contract and to the build
+// verifier. Sequential Tab order follows authored DOM order, and sequential Tab
+// order is the COMPLETE keyboard-reachability surface, so it cannot be left to
+// a runtime append loop. The client binds to these elements by key and never
+// creates, replaces, removes or reorders one.
 
 import rawSnapshotText from "../data/public-surface-adjacency-map/last-known-good.json?raw";
 import {
@@ -37,7 +45,21 @@ import {
   isApprovedSourceUrl,
   semanticLayoutRecords,
 } from "../lib/public-surface-adjacency-map/contract.ts";
-import { compareNodes } from "../lib/public-surface-adjacency-map/layout.ts";
+import {
+  compareNodes,
+  computeRadialLayout,
+  computeRoleOrbit,
+  formatLogicalNumber,
+  GRAPH_RECORD_ORDER,
+  groupArcPath,
+  CENTRE_X,
+  CENTRE_Y,
+  ROLE_LABEL_R,
+  SEPARATOR_RING_R,
+  VIEWBOX,
+  type LayoutPoint,
+} from "../lib/public-surface-adjacency-map/layout.ts";
+import { DECOR_MARKS } from "../lib/public-surface-adjacency-map/decor.ts";
 
 const snapshot = await assertSnapshotFromRawText(rawSnapshotText);
 
@@ -53,6 +75,16 @@ import {
   PARENT_ROUTE,
   NOT_CLAIMS,
   SCOPE_STATEMENT,
+  ABOUT_SUMMARY,
+  CENTRAL_STATEMENT_LINES,
+  GRAPH_REGION_LABEL,
+  GROUP_ARC_STATEMENT,
+  NAVIGATION_TOGGLE_LABEL,
+  RECORD_ORDER_DISCLAIMER,
+  ROLE_ORBIT_CAPTION,
+  ROLE_ORBIT_LABELS,
+  SEPARATOR_CAPTION,
+  SOURCE_NAMED_TOGGLE_LABEL,
 } from "../lib/public-surface-adjacency-map/publicWording.ts";
 
 // --- Deterministic display order --------------------------------------------
@@ -67,6 +99,77 @@ const roleCounts = FIXED_BAND_ROLES.map((role) => ({
 }));
 
 const groupingKeys = [...new Set(conceptRecords.map((node) => node.grouping))].sort();
+
+// --- Authored radial geometry ------------------------------------------------
+//
+// Computed once at build time from the validated records alone. No edge takes
+// part in any coordinate here.
+
+const radial = computeRadialLayout(snapshot.nodes);
+const orbit = computeRoleOrbit(snapshot.nodes);
+
+/** The complete authored control order. Sequential Tab order follows it. */
+const graphRecordOrder = GRAPH_RECORD_ORDER(snapshot.nodes);
+
+const pointOf = new Map([...radial.positions, ...orbit.positions]);
+
+/**
+ * The authored coordinate for one record.
+ *
+ * Every record in `GRAPH_RECORD_ORDER` belongs to exactly one of the two
+ * coordinate spaces, so a miss is impossible by construction. It throws rather
+ * than falling back, because this route is prerendered: a record without a
+ * coordinate must fail the build, never render a control at an invented
+ * position.
+ */
+const pointFor = (id: string): LayoutPoint => {
+  const point = pointOf.get(id);
+  if (!point) throw new Error(`no authored coordinate for record ${id}`);
+  return point;
+};
+
+const fmt = formatLogicalNumber;
+
+/**
+ * Compact-width role-label radius — PRESENTATION ONLY.
+ *
+ * The logical viewBox is fixed, so the rendered size of a label is its logical
+ * font size times the SVG's on-screen scale. At 390px that scale is about 0.32,
+ * which renders the 13-unit desktop label at roughly 4 CSS pixels. The fix is a
+ * much larger logical font at compact widths — but a 36-unit label cannot fit
+ * the 31-unit annulus between the separator ring at 385 and the role halo at
+ * 416, and would cross the ring.
+ *
+ * So at compact widths the label moves OUTWARD, past the role orbit, into the
+ * empty margin, where a large label has room and still sits on its own radius —
+ * label outside, glyph inside, same angle, so the association stays unambiguous.
+ *
+ * Nothing here changes geometry. `ROLE_LABEL_R`, `ROLE_ORBIT_R`, the role
+ * order, the record order, the glyph footprint, the concept coordinates, the
+ * grouping arcs and the separator ring are all untouched, and the coordinates
+ * `computeRoleOrbit` publishes are rendered unchanged into `x` and `y`. This is
+ * a CSS transform applied only below the wide breakpoint.
+ */
+const COMPACT_ROLE_LABEL_R = 486;
+const COMPACT_LABEL_SHIFT = COMPACT_ROLE_LABEL_R / ROLE_LABEL_R - 1;
+
+/** The outward shift for one label, as a fraction of its own radius vector. */
+const compactLabelShift = (point: { x: number; y: number }) =>
+  `--psadj-label-shift-x:${fmt((point.x - CENTRE_X) * COMPACT_LABEL_SHIFT)}px;` +
+  `--psadj-label-shift-y:${fmt((point.y - CENTRE_Y) * COMPACT_LABEL_SHIFT)}px;`;
+
+/**
+ * Readable tangential orientation for a label sitting ON the grouping arc.
+ * Text follows the arc, so its RADIAL extent stays inside the 14/15 unit gap
+ * between the concept hit area and the separator ring. The flip keeps a label
+ * in the lower half from rendering upside down.
+ */
+const arcLabelTransform = (x: number, y: number, midAngle: number) => {
+  const normalised = ((midAngle % 360) + 360) % 360;
+  const flip = normalised > 0 && normalised < 180;
+  const rotation = midAngle + 90 + (flip ? 180 : 0);
+  return `translate(${fmt(x)} ${fmt(y)}) rotate(${fmt(rotation)})`;
+};
 
 // Embed the validated dataset for the client with no runtime request. Escape
 // "<" so the JSON can never break out of the script element.
@@ -90,7 +193,7 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
 
   <!-- Persistent scope and boundary banner. Never sourced from the runtime
        manifest or a runtime snapshot, so a runtime activation can never replace
-       or remove a boundary statement. -->
+       or remove a boundary statement. Never collapsed. -->
   <div class="psadj__scope" role="note" aria-label="Scope and boundary statements">
     <h2 class="psadj__scope-title">Scope and boundaries</h2>
     <ul class="psadj__scope-list" data-psadj-boundary-statements>
@@ -102,7 +205,245 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     </ul>
   </div>
 
-  <!-- Relationship to the other public view. -->
+  <!-- GRAPH REGION — graph-first, above the fold.
+
+       Without JavaScript the canvas, the toolbar, the details panel and the
+       readout all stay hidden and the complete record list below carries the
+       whole product. The compact legend stays visible either way, so the
+       grouping-arc statement is present in the no-JS fallback. -->
+  <section class="psadj__panel psadj__view" aria-label="Adjacency view">
+    <h2>Adjacency view</h2>
+
+    <div class="psadj__controls" data-psadj-controls hidden>
+      <fieldset class="psadj__fieldset">
+        <legend>Edge classes shown</legend>
+        <label class="psadj__control">
+          <input
+            type="checkbox"
+            checked
+            data-psadj-toggle="source_named_adjacency"
+          />
+          <span>{SOURCE_NAMED_TOGGLE_LABEL}</span>
+        </label>
+        <label class="psadj__control">
+          <input
+            type="checkbox"
+            data-psadj-toggle="navigation_adjacency"
+          />
+          <span>{NAVIGATION_TOGGLE_LABEL}</span>
+        </label>
+      </fieldset>
+      <p class="psadj__controls-note">
+        Showing or hiding an edge class reveals or hides already-defined edges only.
+        It never moves a record, changes a record size, or changes any ordering.
+      </p>
+    </div>
+
+    <div class="psadj__grid">
+      <div class="psadj__canvas-column">
+        <div class="psadj__canvas" data-psadj-canvas hidden>
+          <svg
+            viewBox={VIEWBOX}
+            preserveAspectRatio="xMidYMid meet"
+            role="group"
+            aria-label={GRAPH_REGION_LABEL}
+          >
+            <title>
+              Expanded public surface adjacency graph: {radial.concepts.length} concept
+              records on one ring of equal radius and {orbit.roles.length} context records
+              on a separate outer orbit.
+            </title>
+            <desc>
+              Every concept record sits at the same radius and the same angular pitch, so
+              no position indicates importance, authority or centrality. Directed edges are
+              drawn between concept records only. Source-declared adjacency uses a solid
+              line with a filled arrow head; provisional navigation adjacency uses a dashed
+              line with an open arrow head. Grouping arcs are navigation labels and create
+              no enclosure. Every record is also listed in full below this graph.
+            </desc>
+
+            <defs>
+              <marker
+                id="psadj-arrow-filled"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>
+              <marker
+                id="psadj-arrow-open"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="7"
+                markerHeight="7"
+                orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10" fill="none" stroke-width="1.4" /></marker>
+            </defs>
+
+            <!-- Layer 1 — decor. OUTSIDE the viewport wrapper, so it never pans,
+                 zooms or creates moving parallax. Dataset-independent, removable
+                 without information loss. -->
+            <g data-psadj-layer="decor" aria-hidden="true">
+              {DECOR_MARKS.map((mark) => (
+                <circle
+                  class="psadj-decor"
+                  cx={fmt(mark.x)}
+                  cy={fmt(mark.y)}
+                  r={fmt(mark.r)}
+                  opacity={mark.opacity}
+                />
+              ))}
+            </g>
+
+            <!-- The viewport wrapper is a transform container, not a rendering
+                 layer. P7.1 writes no transform onto it. -->
+            <g data-psadj-viewport>
+              <!-- Layer 2 — edges. Populated by keyed join; a render filter only. -->
+              <g data-psadj-layer="edges"></g>
+
+              <!-- Layer 3 — grouping arcs. Rendered, NON-INTERACTIVE in P7.1:
+                   no listener, no tabindex, no control role, no placeholder. -->
+              <g data-psadj-layer="arcs">
+                <circle
+                  class="psadj-separator"
+                  cx="500"
+                  cy="500"
+                  r={fmt(SEPARATOR_RING_R)}
+                  aria-hidden="true"
+                />
+                {radial.groups.map((group) => (
+                  <path
+                    class="psadj-arc"
+                    data-psadj-arc={group.key}
+                    d={groupArcPath(group)}
+                    aria-hidden="true"
+                  />
+                ))}
+                {radial.groups.map((group) => (
+                  <text
+                    class="psadj-arc-label"
+                    data-psadj-arc-label={group.key}
+                    text-anchor="middle"
+                    transform={arcLabelTransform(
+                      500 + 370 * Math.cos((group.midAngle * Math.PI) / 180),
+                      500 + 370 * Math.sin((group.midAngle * Math.PI) / 180),
+                      group.midAngle,
+                    )}>{group.key}</text>
+                ))}
+                {orbit.labels.map((label) => (
+                  <text
+                    class="psadj-role-label"
+                    data-psadj-role-label={label.role}
+                    text-anchor="middle"
+                    x={fmt(label.x)}
+                    y={fmt(label.y)}
+                    style={compactLabelShift(label)}>{ROLE_ORBIT_LABELS[label.role] ?? label.role}</text>
+                ))}
+              </g>
+
+              <!-- Layer 4 — centre. Path-free, two approved lines, nothing else. -->
+              <g data-psadj-layer="centre" aria-hidden="true">
+                {CENTRAL_STATEMENT_LINES.map((line, index) => (
+                  <text
+                    class="psadj-centre-line"
+                    x="500"
+                    y={fmt(500 + (index - 0.5) * 19)}
+                    text-anchor="middle">{line}</text>
+                ))}
+              </g>
+
+              <!-- Layer 5 — nodes. All 59 record controls, authored in
+                   GRAPH_RECORD_ORDER. Sequential Tab order follows this order,
+                   and it is the complete keyboard-reachability surface, so the
+                   client binds by key and never reorders them.
+
+                   Every control carries a focusable tabindex. A roving-tabindex
+                   design that leaves only one record in the sequential focus
+                   order is prohibited. -->
+              <g data-psadj-layer="nodes">
+                {graphRecordOrder.map((node) => {
+                  const point = pointFor(node.id);
+                  const role = node.visualization_role;
+                  return (
+                    <g
+                      class={`psadj-node psadj-node--${role}`}
+                      data-psadj-node={node.id}
+                      data-psadj-role={role}
+                      data-psadj-group={node.grouping}
+                      data-selected="false"
+                      tabindex="0"
+                      role="button"
+                      aria-pressed="false"
+                      aria-label={`${node.display_label}. ${role} record.`}
+                      transform={`translate(${fmt(point.cx)} ${fmt(point.cy)})`}>
+                      <circle class="psadj-node__halo" r="14" />
+                      {role === "concept" && <circle class="psadj-node__glyph" r="9" />}
+                      {role === "orientation" && (
+                        <polygon class="psadj-node__glyph" points="0,-9 9,0 0,9 -9,0" />
+                      )}
+                      {role === "boundary" && (
+                        <g class="psadj-node__glyph">
+                          <rect x="-9" y="-9" width="18" height="18" rx="2" />
+                          <rect x="-6" y="-6" width="12" height="12" rx="1" />
+                        </g>
+                      )}
+                      {role === "anchor" && (
+                        <polygon
+                          class="psadj-node__glyph"
+                          points="9,0 4.5,7.794 -4.5,7.794 -9,0 -4.5,-7.794 4.5,-7.794"
+                        />
+                      )}
+                      <circle class="psadj-node__hit" r="26" />
+                    </g>
+                  );
+                })}
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Visual label readout. Immediately after the SVG, inside the graph
+             region, before the compact legend, OUTSIDE the SVG and outside the
+             viewport wrapper.
+
+             It is a duplicate visual aid and never an accessibility surface:
+             aria-hidden, no role, no aria-live, no aria-atomic, no tabindex. It
+             is written with textContent only. The authoritative assistive
+             surfaces remain each node's accessible name, the details panel, the
+             complete 59-record list and the status live region. -->
+        <p data-psadj-label-readout aria-hidden="true"></p>
+      </div>
+
+      <div class="psadj__details" data-psadj-details hidden>
+        <h3 data-psadj-details-title>No record selected</h3>
+        <dl class="psadj__status-list" data-psadj-details-body></dl>
+      </div>
+    </div>
+
+    <!-- Compact legend. Stays visible without JavaScript, so the approved
+         grouping-arc statement is present in the fallback. -->
+    <div class="psadj__compact-legend">
+      <p class="psadj__arc-statement" data-psadj-arc-statement>{GROUP_ARC_STATEMENT}</p>
+      <p class="psadj__orbit-caption" data-psadj-orbit-caption>{ROLE_ORBIT_CAPTION}</p>
+      <p class="psadj__separator-caption">{SEPARATOR_CAPTION}</p>
+      <p class="psadj__order-disclaimer" data-psadj-order-disclaimer>{RECORD_ORDER_DISCLAIMER}</p>
+    </div>
+
+    <p class="psadj__noscript" data-psadj-noscript>
+      The interactive view is progressive enhancement. The complete record list
+      below is server rendered and stays available without JavaScript.
+    </p>
+  </section>
+
+  <!-- Live status region. Announces runtime status, selection changes, and
+       edge-class toggle state. Authoritative for assistive output. -->
+  <p class="psadj__live" role="status" aria-live="polite" data-psadj-live>
+    {FALLBACK_STATUS_LABEL}. Source-declared adjacency shown. Provisional
+    navigation adjacency hidden.
+  </p>
+
+  <!-- Relationship to the other public view. Never collapsed. -->
   <section class="psadj__panel psadj__relationship" aria-label="Relationship to the other public view">
     <h2>Two parallel public views</h2>
     <p data-psadj-relationship>{RELATIONSHIP_SENTENCE}</p>
@@ -119,173 +460,167 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     </p>
   </section>
 
-  <!-- Snapshot identity and live runtime status. -->
-  <section class="psadj__panel psadj__status" aria-label="Snapshot status">
-    <h2>Snapshot status</h2>
-    <dl class="psadj__status-list">
-      <div class="psadj__status-row">
-        <dt>Source repository</dt>
-        <dd><code>{SOURCE_REPOSITORY}</code></dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Source path</dt>
-        <dd><code>{SNAPSHOT_SOURCE_PATH}</code></dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Source commit</dt>
-        <dd>
-          <a
-            href={SNAPSHOT_COMMIT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="psadj__commit-link"><code data-psadj-source-commit>{SNAPSHOT_SOURCE_COMMIT}</code></a>
-        </dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Adopted from merge commit</dt>
-        <dd><code>{SOURCE_MERGE_COMMIT}</code></dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>SHA-256</dt>
-        <dd>
-          <code
-            class="psadj__hash"
-            tabindex="0"
-            aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
-            data-psadj-sha256>{SNAPSHOT_SHA256}</code>
-        </dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Git blob</dt>
-        <dd><code data-psadj-git-blob>{SNAPSHOT_GIT_BLOB_SHA}</code></dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Byte length</dt>
-        <dd><code>{SNAPSHOT_BYTE_LENGTH}</code></dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Schema version</dt>
-        <dd>{snapshot.schema_version}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Data status</dt>
-        <dd data-psadj-runtime-status>{FALLBACK_STATUS_LABEL}</dd>
-      </div>
-    </dl>
-  </section>
-
-  <!-- Counts. -->
-  <section class="psadj__panel psadj__counts" aria-label="Record and edge counts">
-    <h2>Counts</h2>
-    <dl class="psadj__status-list">
-      <div class="psadj__status-row">
-        <dt>Records</dt>
-        <dd data-psadj-record-count>{snapshot.nodes.length}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Concept records in the semantic layout</dt>
-        <dd data-psadj-semantic-count>{conceptRecords.length}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Records in fixed bands</dt>
-        <dd data-psadj-band-count>{bandRecords.length}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Edges</dt>
-        <dd data-psadj-edge-count>{EXPECTED_TOTAL_EDGES}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Source-declared adjacency edges</dt>
-        <dd data-psadj-source-named-count>{EXPECTED_EDGE_COUNTS.source_named_adjacency}</dd>
-      </div>
-      <div class="psadj__status-row">
-        <dt>Provisional navigation adjacency edges</dt>
-        <dd data-psadj-navigation-count>{EXPECTED_EDGE_COUNTS.navigation_adjacency}</dd>
-      </div>
-    </dl>
-  </section>
-
-  <!-- Edge-class legend. Each class is distinguished by a written label, a line
-       pattern, and a shape marker — never by color alone. -->
-  <section class="psadj__panel psadj__legend" aria-label="Edge class legend">
-    <h2>Edge classes</h2>
-    <ul class="psadj__legend-list">
-      {snapshot.edge_classes.map((descriptor) => (
-        <li class={`psadj__legend-item psadj__legend-item--${descriptor.edge_class}`}>
-          <span class="psadj__legend-swatch" aria-hidden="true">
-            {descriptor.edge_class === "source_named_adjacency" ? "──▸" : "╌╌▹"}
-          </span>
-          <span class="psadj__legend-body">
-            <strong>{descriptor.display_label}</strong>
-            <span class="psadj__legend-pattern">
-              {descriptor.edge_class === "source_named_adjacency"
-                ? "solid line, filled arrow head"
-                : "dashed line, open arrow head"}
-            </span>
-            <span class="psadj__legend-detail">Evidence: {descriptor.evidence_source}</span>
-            <span class="psadj__legend-detail">
-              Shown by default: {descriptor.default_visible ? "yes" : "no"}
-            </span>
-          </span>
-        </li>
-      ))}
-    </ul>
-    <p class="psadj__legend-note">
-      Both classes are directed and both carry a navigation-only authority ceiling.
-      Governance references, source-use references, visual layout adjacency, and
-      user-confirmed relations are never rendered here.
-    </p>
-  </section>
-
-  <!-- Progressive-enhancement region. Without JavaScript this renders the note
-       below and nothing else; the record list further down remains complete. -->
-  <section class="psadj__panel psadj__view" aria-label="Adjacency view">
-    <h2>Adjacency view</h2>
-
-    <div class="psadj__controls" data-psadj-controls hidden>
-      <fieldset class="psadj__fieldset">
-        <legend>Edge classes shown</legend>
-        <label class="psadj__control">
-          <input
-            type="checkbox"
-            checked
-            data-psadj-toggle="source_named_adjacency"
-          />
-          <span>Source-declared adjacency</span>
-        </label>
-        <label class="psadj__control">
-          <input
-            type="checkbox"
-            data-psadj-toggle="navigation_adjacency"
-          />
-          <span>Provisional navigation adjacency</span>
-        </label>
-      </fieldset>
-      <p class="psadj__controls-note">
-        Showing or hiding an edge class reveals or hides already-defined edges only.
-        It never moves a record, changes a record size, or changes any ordering.
-      </p>
-    </div>
-
-    <div class="psadj__canvas" data-psadj-canvas hidden></div>
-
-    <div class="psadj__details" data-psadj-details hidden>
-      <h3 data-psadj-details-title>No record selected</h3>
-      <dl class="psadj__status-list" data-psadj-details-body></dl>
-    </div>
-
-    <p class="psadj__noscript" data-psadj-noscript>
-      The interactive view is progressive enhancement. The complete record list
-      below is server rendered and stays available without JavaScript.
-    </p>
-  </section>
-
-  <!-- Live status region. Announces runtime status, selection changes, and
-       edge-class toggle state. -->
-  <p class="psadj__live" role="status" aria-live="polite" data-psadj-live>
-    {FALLBACK_STATUS_LABEL}. Source-declared adjacency shown. Provisional
-    navigation adjacency hidden.
+  <!-- Data status. Never collapsed. -->
+  <p class="psadj__data-status">
+    Data status: <span data-psadj-runtime-status>{FALLBACK_STATUS_LABEL}</span>
   </p>
+
+  <!-- Collapsed about-region. Provenance is RELOCATED, never removed: the
+       content below renders server-side and is present in the emitted HTML
+       whether or not the disclosure is open. -->
+  <details class="psadj__about">
+    <summary>{ABOUT_SUMMARY}</summary>
+
+    <section class="psadj__panel psadj__status" aria-label="Snapshot status">
+      <h2>Snapshot status</h2>
+      <dl class="psadj__status-list">
+        <div class="psadj__status-row">
+          <dt>Source repository</dt>
+          <dd><code>{SOURCE_REPOSITORY}</code></dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Source path</dt>
+          <dd><code>{SNAPSHOT_SOURCE_PATH}</code></dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Source commit</dt>
+          <dd>
+            <a
+              href={SNAPSHOT_COMMIT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="psadj__commit-link"><code data-psadj-source-commit>{SNAPSHOT_SOURCE_COMMIT}</code></a>
+          </dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Adopted from merge commit</dt>
+          <dd><code>{SOURCE_MERGE_COMMIT}</code></dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>SHA-256</dt>
+          <dd>
+            <code
+              class="psadj__hash"
+              tabindex="0"
+              aria-label={`Snapshot SHA-256 ${SNAPSHOT_SHA256}`}
+              data-psadj-sha256>{SNAPSHOT_SHA256}</code>
+          </dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Git blob</dt>
+          <dd><code data-psadj-git-blob>{SNAPSHOT_GIT_BLOB_SHA}</code></dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Byte length</dt>
+          <dd><code>{SNAPSHOT_BYTE_LENGTH}</code></dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Schema version</dt>
+          <dd>{snapshot.schema_version}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="psadj__panel psadj__counts" aria-label="Record and edge counts">
+      <h2>Counts</h2>
+      <dl class="psadj__status-list">
+        <div class="psadj__status-row">
+          <dt>Records</dt>
+          <dd data-psadj-record-count>{snapshot.nodes.length}</dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Concept records in the semantic layout</dt>
+          <dd data-psadj-semantic-count>{conceptRecords.length}</dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Records in fixed bands</dt>
+          <dd data-psadj-band-count>{bandRecords.length}</dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Edges</dt>
+          <dd data-psadj-edge-count>{EXPECTED_TOTAL_EDGES}</dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Source-declared adjacency edges</dt>
+          <dd data-psadj-source-named-count>{EXPECTED_EDGE_COUNTS.source_named_adjacency}</dd>
+        </div>
+        <div class="psadj__status-row">
+          <dt>Provisional navigation adjacency edges</dt>
+          <dd data-psadj-navigation-count>{EXPECTED_EDGE_COUNTS.navigation_adjacency}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Extended edge-class legend. Each class is distinguished by a written
+         label, a line pattern, and a shape marker — never by color alone. -->
+    <section class="psadj__panel psadj__legend" aria-label="Edge class legend">
+      <h2>Edge classes</h2>
+      <ul class="psadj__legend-list">
+        {snapshot.edge_classes.map((descriptor) => (
+          <li class={`psadj__legend-item psadj__legend-item--${descriptor.edge_class}`}>
+            <span class="psadj__legend-swatch" aria-hidden="true">
+              {descriptor.edge_class === "source_named_adjacency" ? "──▸" : "╌╌▹"}
+            </span>
+            <span class="psadj__legend-body">
+              <strong>{descriptor.display_label}</strong>
+              <span class="psadj__legend-pattern">
+                {descriptor.edge_class === "source_named_adjacency"
+                  ? "solid line, filled arrow head"
+                  : "dashed line, open arrow head"}
+              </span>
+              <span class="psadj__legend-detail">Evidence: {descriptor.evidence_source}</span>
+              <span class="psadj__legend-detail">
+                Shown by default: {descriptor.default_visible ? "yes" : "no"}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p class="psadj__legend-note">
+        Both classes are directed and both carry a navigation-only authority ceiling.
+        Governance references, source-use references, visual layout adjacency, and
+        user-confirmed relations are never rendered here.
+      </p>
+      <p class="psadj__legend-note">{GROUP_ARC_STATEMENT}</p>
+    </section>
+
+    <!-- Fixed-band summary: the 10 non-concept records, listed by role, outside
+         the semantic layout. -->
+    <section class="psadj__panel psadj__bands" aria-label="Fixed bands">
+      <h2>Fixed bands</h2>
+      <p>
+        These {bandRecords.length} records render in fixed, visibly separate bands.
+        They do not enter the semantic layout, are never semantic-edge endpoints,
+        and contribute nothing to edge layout.
+      </p>
+      <p>{ROLE_ORBIT_CAPTION}</p>
+      {roleCounts.map((band) => (
+        <div class="psadj__band">
+          <h3>{band.role} ({band.records.length})</h3>
+          <ul>
+            {band.records.map((node) => <li>{node.display_label}</li>)}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+    <!-- Grouping summary for the semantic layout. -->
+    <section class="psadj__panel psadj__groupings" aria-label="Semantic layout groupings">
+      <h2>Semantic layout groupings</h2>
+      <p>
+        Only the {conceptRecords.length} concept records enter the semantic layout.
+        Grouping comes from the MODEL_ATLAS field recorded for each record and is a
+        navigation grouping only.
+      </p>
+      <ul>
+        {groupingKeys.map((key) => (
+          <li>
+            {key} ({conceptRecords.filter((node) => node.grouping === key).length})
+          </li>
+        ))}
+      </ul>
+    </section>
+  </details>
 
   <!-- Complete no-JavaScript fallback: every one of the 59 records. -->
   <section class="psadj__panel psadj__records" aria-labelledby="psadj-records-title">
@@ -327,42 +662,6 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
         </li>
       ))}
     </ol>
-  </section>
-
-  <!-- Fixed-band summary: the 10 non-concept records, listed by role, outside
-       the semantic layout. -->
-  <section class="psadj__panel psadj__bands" aria-label="Fixed bands">
-    <h2>Fixed bands</h2>
-    <p>
-      These {bandRecords.length} records render in fixed, visibly separate bands.
-      They do not enter the semantic layout, are never semantic-edge endpoints,
-      and contribute nothing to edge layout.
-    </p>
-    {roleCounts.map((band) => (
-      <div class="psadj__band">
-        <h3>{band.role} ({band.records.length})</h3>
-        <ul>
-          {band.records.map((node) => <li>{node.display_label}</li>)}
-        </ul>
-      </div>
-    ))}
-  </section>
-
-  <!-- Grouping summary for the semantic layout. -->
-  <section class="psadj__panel psadj__groupings" aria-label="Semantic layout groupings">
-    <h2>Semantic layout groupings</h2>
-    <p>
-      Only the {conceptRecords.length} concept records enter the semantic layout.
-      Grouping comes from the MODEL_ATLAS field recorded for each record and is a
-      navigation grouping only.
-    </p>
-    <ul>
-      {groupingKeys.map((key) => (
-        <li>
-          {key} ({conceptRecords.filter((node) => node.grouping === key).length})
-        </li>
-      ))}
-    </ul>
   </section>
 
   <script type="application/json" data-psadj-data set:html={dataJson}></script>
@@ -476,17 +775,61 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     cursor: pointer;
   }
 
+  /* P7.1 two-column grid: 880px canvas plus a 280-340px docked details panel.
+     `min-width: 0` lets the canvas column shrink instead of forcing body-level
+     horizontal overflow. */
+  .psadj__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 880px) minmax(280px, 340px);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .psadj__canvas-column {
+    min-width: 0;
+  }
+
   .psadj__canvas {
-    overflow: auto;
     border: 1px solid currentColor;
     border-radius: 4px;
+    min-width: 0;
+    /* Archival mineral / volcanic graphite field. Route-local: this literal
+       exists only so the framed area matches the SVG before the SVG paints. */
+    background: #24211d;
+  }
+
+  .psadj__details {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psadj__compact-legend {
+    margin-top: 0.75rem;
+    max-width: 78ch;
+    font-size: 0.92rem;
+  }
+
+  .psadj__compact-legend p {
+    margin: 0.35rem 0;
+    overflow-wrap: anywhere;
+  }
+
+  .psadj__data-status {
+    margin: 0;
+  }
+
+  .psadj__about > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.6rem 0;
+  }
+
+  .psadj__about[open] > summary {
     margin-bottom: 0.75rem;
   }
 
-  .psadj__canvas svg {
-    display: block;
-    max-width: 100%;
-    height: auto;
+  .psadj__about > section {
+    margin-bottom: 0.9rem;
   }
 
   .psadj__record-list {
@@ -534,7 +877,8 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     outline-offset: 2px;
   }
 
-  /* Narrow mobile width: collapse the two-column description rows. */
+  /* Narrow mobile width: collapse the two-column description rows, and drop the
+     details panel BELOW the canvas so nothing overflows horizontally. */
   @media (max-width: 640px) {
     .psadj__status-row,
     .psadj__record-field {
@@ -542,6 +886,10 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     }
 
     .psadj__legend-item {
+      grid-template-columns: 1fr;
+    }
+
+    .psadj__grid {
       grid-template-columns: 1fr;
     }
   }
@@ -560,59 +908,306 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
 </style>
 
 <style is:global>
-  /* Rendered graph styling. Global because the SVG is created by the client
-     module and therefore carries no scoped-style attribute. Every selector is
-     namespaced under .psadj__canvas so no other route is affected. */
-  .psadj__canvas .psadj-node rect {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.5;
+  /* Rendered graph styling — Dark Archival Observatory.
+     Global because the edge layer is populated by the client module and
+     therefore carries no scoped-style attribute. Every selector is namespaced
+     under .psadj__canvas so no other route is affected. */
+  /* Dark Archival Observatory.
+     A blue-black field, deliberately colder and darker than the surrounding
+     site surface, so the graph reads as its own instrument rather than as more
+     page. Every token is declared on `.psadj__canvas`, so nothing here reaches
+     the global palette or any other route. */
+  .psadj__canvas {
+    /* Warm graphite field. It is lighter than the page surface (#11100d) so the
+       graph reads as its own specimen plate rather than as more page, but its
+       blue channel is BELOW its red channel, so it reads as neutral graphite
+       rather than as a technology-blue dashboard. */
+    --bg: #24211d;
+
+    /* Record bodies are ONE neutral archival stone. Grouping never controls a
+       record's visual mass — it appears only as the thin rim below. */
+    --node-body: #b8b6aa;
+    --node-outline: #cfccc0;
+    --node-muted: #85877f;
+
+    --muted: #a39e94;
+    --centre-text: #e6e1d5;
+    --line: #49453f;
+    /* Deliberately sub-threshold. Decorative by construction. */
+    --decor: #2b2823;
+
+    /* Edges: two low-luminance graphite neutrals carried at low opacity, so the
+       383 relations read as an ambient field rather than a bright central fog.
+       Class distinction is carried by dash pattern and arrow head; these two
+       tones are a secondary channel only. */
+    --edge-source: #706d66;
+    --edge-nav: #66645f;
+
+    /* State channel. Three restrained mineral hues, none of them a group
+       accent, so a state can never be mistaken for a grouping. */
+    --focus: #e8d6a7;
+    --hover: #b6a5b8;
+    --selection: #8faea7;
+
+    /* Seven equal-status mineral accents, deliberately NOT in hue-spectrum
+       order and not mapped by quadrant. Going clockwise around the ring they
+       run slate, sandstone, sage, iron rose, verdigris, plum, ochre — so the
+       two warm-tan accents and the two green-grey accents are never adjacent
+       and cannot read as one category. None is brighter or more saturated than
+       the others: no group is visually "important". Grouping is also written
+       out in the details panel and the record list, so colour is never the
+       sole carrier of the distinction. */
+    --group-ai-readable: #7a929d; /* steel slate   — ring position 1 */
+    --group-boundary-representation: #b59a72; /* sandstone     — 2 */
+    --group-coherence: #81917b; /* dry sage      — 3 */
+    --group-constraint: #9b7e78; /* iron rose     — 4 */
+    --group-proxy: #708a86; /* verdigris     — 5 */
+    --group-responsibility: #957e89; /* dusty plum    — 6 */
+    --group-semantic-field-foundations: #a88767; /* muted ochre   — 7 */
   }
 
-  .psadj__canvas .psadj-node text {
-    fill: currentColor;
-    font-size: 12px;
+  .psadj__canvas svg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    background: var(--bg);
   }
 
-  .psadj__canvas .psadj-node:focus-visible rect,
-  .psadj__canvas .psadj-node[data-selected="true"] rect {
-    stroke-width: 3.5;
-    stroke-dasharray: none;
+  /* Decor — behind everything, non-informational, never interactive. */
+  .psadj__canvas [data-psadj-layer="decor"] {
+    pointer-events: none;
   }
 
-  .psadj__canvas .psadj-node[data-selected="true"] rect {
-    stroke-dasharray: 2 2;
+  .psadj__canvas .psadj-decor {
+    fill: var(--decor);
+  }
+
+  /* Edges. Class distinction is carried by line pattern and arrow head, never
+     by color alone. No filter, blur, glow or shadow in any state. */
+  .psadj__canvas [data-psadj-layer="edges"] {
+    pointer-events: none;
   }
 
   .psadj__canvas .psadj-edge {
-    stroke: currentColor;
     fill: none;
+    opacity: 0.12;
   }
 
-  /* Class distinction is carried by line pattern and arrow head, not color. */
   .psadj__canvas .psadj-edge--source_named_adjacency {
-    stroke-width: 1.6;
+    stroke: var(--edge-source);
+    stroke-width: 0.9;
   }
 
   .psadj__canvas .psadj-edge--navigation_adjacency {
-    stroke-width: 1.2;
+    stroke: var(--edge-nav);
+    stroke-width: 0.8;
     stroke-dasharray: 5 4;
   }
 
-  .psadj__canvas .psadj-group-label,
-  .psadj__canvas .psadj-band-label {
-    fill: currentColor;
-    font-size: 13px;
-    font-weight: 600;
+  /* The selected neighbourhood lifts to a persistent, readable trace — never a
+     glow. There is no separate hover/focus edge state in P7.1: edge emphasis is
+     driven by SELECTION only, and wiring a hover-driven one would be a client
+     change rather than a palette change. */
+  .psadj__canvas .psadj-edge[data-emphasis="true"] {
+    opacity: 0.58;
   }
 
-  .psadj__canvas .psadj-group rect,
-  .psadj__canvas .psadj-band rect {
+  .psadj__canvas .psadj-edge[data-inactive="true"] {
+    opacity: 0.05;
+  }
+
+  .psadj__canvas marker path {
+    fill: var(--edge-source);
+    stroke: var(--edge-nav);
+  }
+
+  /* Grouping arcs — rendered, non-interactive in P7.1. Arc length reflects the
+     number of displayed records only; radius is fixed and carries nothing. */
+  .psadj__canvas .psadj-arc {
     fill: none;
-    stroke: currentColor;
-    stroke-dasharray: 3 3;
+    stroke: var(--line);
+    stroke-width: 2;
+  }
+
+  .psadj__canvas .psadj-separator {
+    fill: none;
+    stroke: var(--line);
     stroke-width: 1;
+    stroke-dasharray: 4 5;
+  }
+
+  .psadj__canvas .psadj-arc-label,
+  .psadj__canvas .psadj-role-label {
+    fill: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .psadj__canvas .psadj-role-label {
+    font-size: 13px;
+  }
+
+  /* Central region — path-free, two approved lines, never interactive. */
+  .psadj__canvas [data-psadj-layer="centre"] {
+    pointer-events: none;
+  }
+
+  .psadj__canvas .psadj-centre-line {
+    fill: var(--centre-text);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.45;
+  }
+
+  /* Records. Equal 18 by 18 footprint for every role; no state changes size. */
+  .psadj__canvas .psadj-node__glyph {
+    fill: var(--node-body);
+    stroke: var(--node-outline);
+    stroke-width: 1.5;
+  }
+
+  .psadj__canvas .psadj-node__glyph rect {
+    fill: var(--node-body);
+    stroke: var(--node-outline);
+    stroke-width: 1.5;
+  }
+
+  .psadj__canvas .psadj-node__hit {
+    fill: transparent;
+    stroke: none;
+  }
+
+  /* The ONLY place a grouping accent is painted: a thin rim on an otherwise
+     neutral body. It never fills a record and never sets its size. */
+  .psadj__canvas .psadj-node--concept .psadj-node__glyph {
+    stroke: var(--group-stroke, var(--node-outline));
+  }
+
+  .psadj__canvas .psadj-node[data-psadj-group="Semantic Field Foundations"] {
+    --group-stroke: var(--group-semantic-field-foundations);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="Boundary / Representation"] {
+    --group-stroke: var(--group-boundary-representation);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="Coherence / Circulation / Collapse Risk"] {
+    --group-stroke: var(--group-coherence);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="AI-Readable Interface / Externalization"] {
+    --group-stroke: var(--group-ai-readable);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="Proxy / Legibility / Provenance"] {
+    --group-stroke: var(--group-proxy);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="Responsibility / Benefit-Burden / Cost"] {
+    --group-stroke: var(--group-responsibility);
+  }
+  .psadj__canvas .psadj-node[data-psadj-group="Constraint / Residue / Capability Shift"] {
+    --group-stroke: var(--group-constraint);
+  }
+
+  /* Halo — a stroke ring in --accent, not a soft shadow. Constant by
+     construction: the same radius, width and opacity for every record in every
+     one of the three approved states. It never varies with any data value, and
+     rest-state records carry no halo at all. */
+  .psadj__canvas .psadj-node__halo {
+    fill: none;
+    stroke: var(--halo-color, var(--focus));
+    stroke-width: 1.5;
+    opacity: 0;
+  }
+
+  /* The three approved states each take their own hue, so focus, hover and
+     selection are told apart by colour AND by the glyph treatments below —
+     never by colour alone. Geometry is identical in all three: same radius,
+     same stroke width, same opacity, never varying with any data value. */
+  .psadj__canvas .psadj-node:hover .psadj-node__halo {
+    --halo-color: var(--hover);
+    opacity: 1;
+  }
+
+  .psadj__canvas .psadj-node:focus-visible .psadj-node__halo {
+    --halo-color: var(--focus);
+    opacity: 1;
+  }
+
+  .psadj__canvas .psadj-node[data-selected="true"] .psadj-node__halo {
+    --halo-color: var(--selection);
+    opacity: 1;
+  }
+
+  /* Kept as two separate rules rather than one selector list: the interaction
+     suite's bounded focus model parses every branch of any rule mentioning
+     :focus-visible and fails closed on syntax it does not support, so pairing a
+     :hover branch with a :focus-visible branch would make a legitimate rule
+     unevaluable. */
+  .psadj__canvas .psadj-node:hover .psadj-node__glyph {
+    stroke-width: 2.5;
+  }
+
+  .psadj__canvas .psadj-node:focus-visible .psadj-node__glyph {
+    stroke-width: 2.5;
+  }
+
+  .psadj__canvas .psadj-node[data-selected="true"] .psadj-node__glyph {
+    fill: var(--node-outline);
+    stroke: var(--selection);
+    stroke-width: 3;
+  }
+
+  .psadj__canvas .psadj-node[data-emphasis="true"] .psadj-node__glyph {
+    stroke-width: 2;
+  }
+
+  /* Inactive records stay legible, focusable, selectable and announced. Raised
+     from 0.28 with the darker field: the same fraction reads dimmer against
+     blue-black than it did against the previous warm charcoal. */
+  .psadj__canvas .psadj-node[data-inactive="true"] {
     opacity: 0.55;
+  }
+
+  .psadj__canvas .psadj-node[data-inactive="true"] .psadj-node__glyph {
+    fill: var(--node-muted);
+  }
+
+  /* Responsive role labels — D18.
+     ---------------------------------------------------------------------
+     The viewBox is fixed, so a label's rendered size is its logical size
+     times the SVG's on-screen scale. That scale falls to about 0.32 at 390px
+     AND at 768px (where the two-column grid squeezes the canvas hardest), so
+     the 13-unit desktop label renders at roughly 4 CSS pixels at both. These
+     rules raise the logical size as the scale falls.
+
+     Two regimes, because a large label does not fit the 31-unit annulus
+     between the separator ring and the role halo:
+       - down to 1200px the label stays in the annulus at ROLE_LABEL_R;
+       - below 900px it moves outward past the orbit, where it has room.
+
+     Placed in this global block, AFTER the scoped 640px rule, so the first
+     `max-width` at-rule in this component remains the grid breakpoint.
+     Geometry is untouched: this is font size and a CSS transform only. */
+  @media (max-width: 1199px) {
+    .psadj__canvas .psadj-role-label {
+      font-size: 24px;
+      transform: translate(var(--psadj-label-shift-x, 0), var(--psadj-label-shift-y, 0));
+    }
+  }
+
+  @media (max-width: 899px) {
+    .psadj__canvas .psadj-role-label {
+      font-size: 38px;
+    }
+  }
+
+  /* The visual label readout: never focusable, never a pointer target. */
+  [data-psadj-label-readout] {
+    margin: 0.5rem 0 0;
+    min-height: 1.5em;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+    pointer-events: none;
   }
 </style>
 

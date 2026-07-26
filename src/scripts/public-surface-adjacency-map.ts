@@ -6,73 +6,79 @@
 // the document before this file runs, and this module never removes them.
 //
 // Boundaries held here:
-//   - only the 49 concept records enter the semantic layout; the 10 fixed-band
-//     records render in separate bands and are never semantic-edge endpoints;
-//   - node size is constant per presentation role, never derived from data, so
-//     it can never encode degree, centrality, rank, or importance;
+//   - only the 49 concept records enter the concept ring; the 10 role records
+//     sit on a separate outer orbit and are never semantic-edge endpoints;
+//   - glyph footprint is constant per presentation role, never derived from
+//     data, so it can never encode degree, centrality, rank, or importance;
 //   - edge visibility is a RENDER filter only. Positions are computed once from
-//     the record set alone, so toggling a class cannot move a node, resize it,
-//     or change any ordering;
+//     the record set alone, so toggling a class cannot move a record, resize
+//     it, or change any ordering;
 //   - every string from the dataset is written with `textContent`, never as
 //     HTML; only an approved HTTPS source-repository URL is ever set as an href;
 //   - runtime activation is atomic: the whole view is rebuilt from ONE verified
 //     snapshot, or the bundled fallback is retained untouched;
 //   - no retry, no polling, no storage service, no service worker, no telemetry.
+//
+// P7.1 rendering contract:
+//   - the SVG, its five layers, the single viewport wrapper and all 59 record
+//     controls are AUTHORED in the component. This module binds to them by key.
+//     It never creates, replaces, removes or reorders a layer or a record
+//     control, and there is no teardown step;
+//   - no custom Tab or Shift+Tab handler is installed and Tab is never
+//     prevented, because native sequential focus order over the authored
+//     controls IS the complete keyboard-reachability surface;
+//   - arrow keys are a local spatial accelerator resolved purely from
+//     coordinates. A null result changes nothing at all.
+//
+// P7.1 contains no viewport implementation: no zoom, pan, drag, pinch, pointer
+// capture, grouping-arc activation, or +/-/0 shortcut, and no placeholder or
+// dead branch for any of them.
 
-import { select, type Selection } from "d3-selection";
+import { select } from "d3-selection";
 
 import {
   assertAdjacencySnapshot,
-  fixedBandRecords,
   isApprovedSourceUrl,
-  semanticLayoutRecords,
   EDGE_CLASSES,
   type AdjacencyEdgeClass,
   type AdjacencyNode,
   type AdjacencySnapshot,
 } from "../lib/public-surface-adjacency-map/contract.ts";
 import {
-  ADJACENCY_LAYOUT_METRICS,
-  buildNavigationIndex,
-  columnsForWidth,
-  computeFixedBands,
-  computeSemanticLayout,
+  buildDirectionalIndex,
+  computeEdgeRouting,
   directionForKey,
   firstReachableId,
+  GRAPH_RECORD_ORDER,
   lastReachableId,
-  resolveSpatialTarget,
-  type FixedBandLayout,
-  type SemanticLayout,
-  type SpatialNavigationNode,
+  resolveDirectionalTarget,
+  resolveReadoutLabel,
+  type DirectionalIndex,
+  type RoutedEdge,
 } from "../lib/public-surface-adjacency-map/layout.ts";
+import { resolveEmphasis } from "../lib/public-surface-adjacency-map/emphasis.ts";
 import {
   FALLBACK_STATUS_LABEL,
   RUNTIME_STATUS_LABEL,
   RUNTIME_UNAVAILABLE_LABEL,
 } from "../lib/public-surface-adjacency-map/fallback.ts";
+import { READOUT_NEUTRAL_TEXT } from "../lib/public-surface-adjacency-map/publicWording.ts";
 import { bootRuntimeLoader } from "../lib/public-surface-adjacency-map/runtimeLoader.ts";
-
-const M = ADJACENCY_LAYOUT_METRICS;
 
 const EDGE_CLASS_LABEL: Record<AdjacencyEdgeClass, string> = {
   source_named_adjacency: "Source-declared adjacency",
   navigation_adjacency: "Provisional navigation adjacency",
 };
 
-const ROLE_LABEL: Record<string, string> = {
-  concept: "concept",
-  orientation: "orientation",
-  boundary: "boundary",
-  anchor: "anchor",
-};
-
 interface ViewState {
   snapshot: AdjacencySnapshot;
-  semantic: SemanticLayout;
-  fixed: FixedBandLayout;
-  navigation: SpatialNavigationNode[];
+  routed: RoutedEdge[];
+  navigation: DirectionalIndex;
+  labels: Map<string, string>;
   visible: Record<AdjacencyEdgeClass, boolean>;
   selectedId: string | null;
+  focusedId: string | null;
+  hoveredId: string | null;
   statusLabel: string;
 }
 
@@ -99,6 +105,7 @@ function enhance(container: HTMLElement): void {
   const controls = container.querySelector<HTMLElement>("[data-psadj-controls]");
   const details = container.querySelector<HTMLElement>("[data-psadj-details]");
   const live = container.querySelector<HTMLElement>("[data-psadj-live]");
+  const readout = container.querySelector<HTMLElement>("[data-psadj-label-readout]");
   const runtimeStatus = container.querySelector<HTMLElement>("[data-psadj-runtime-status]");
   const noscriptNote = container.querySelector<HTMLElement>("[data-psadj-noscript]");
   if (!canvas || !controls || !details || !live) return;
@@ -111,11 +118,12 @@ function enhance(container: HTMLElement): void {
       "The complete record list below stays server rendered and is always available.";
   }
 
-  const state = buildState(bundled, FALLBACK_STATUS_LABEL, availableWidth(canvas));
+  const state = buildState(bundled, FALLBACK_STATUS_LABEL);
 
   const render = () => {
     drawGraph(canvas, state);
     renderDetails(details, state);
+    renderReadout(readout, state);
   };
 
   // --- Edge-class toggles ---------------------------------------------------
@@ -124,8 +132,8 @@ function enhance(container: HTMLElement): void {
     if (!EDGE_CLASSES.includes(edgeClass)) continue;
     input.checked = state.visible[edgeClass];
     input.addEventListener("change", () => {
-      // A render filter only. `state.semantic` / `state.fixed` are never
-      // recomputed here, so no position, size, or ordering can change.
+      // A render filter only. Coordinates and routing are never recomputed
+      // here, so no position, footprint, or ordering can change.
       state.visible[edgeClass] = input.checked;
       render();
       announce(live, state, `${EDGE_CLASS_LABEL[edgeClass]} ${input.checked ? "shown" : "hidden"}.`);
@@ -133,6 +141,10 @@ function enhance(container: HTMLElement): void {
   }
 
   // --- Keyboard interaction -------------------------------------------------
+  //
+  // No Tab or Shift+Tab branch exists here. Sequential traversal of all 59
+  // authored record controls is native browser behaviour over authored DOM
+  // order, and intercepting it would replace a guarantee with an imitation.
   canvas.addEventListener("keydown", (event) => {
     const target = event.target as HTMLElement | null;
     const currentId = target?.closest<SVGGElement>("[data-psadj-node]")?.dataset.psadjNode;
@@ -147,6 +159,7 @@ function enhance(container: HTMLElement): void {
       selectNode(state, currentId);
       renderDetails(details, state);
       drawGraph(canvas, state);
+      renderReadout(readout, state);
       focusNode(canvas, currentId);
       announce(live, state, `${labelOf(state, currentId)} selected.`);
       event.preventDefault();
@@ -165,14 +178,16 @@ function enhance(container: HTMLElement): void {
     }
     const direction = directionForKey(event.key);
     if (!direction) return;
-    const nextId = resolveSpatialTarget(state.navigation, currentId, direction);
+    const nextId = resolveDirectionalTarget(state.navigation, currentId, direction);
+    // A null result is a normal outcome: focus, selection and presentation all
+    // stay exactly as they are, and the key is not consumed.
     if (nextId) {
       focusNode(canvas, nextId);
       event.preventDefault();
     }
   });
 
-  // Details-panel Escape: return focus to the selected graph node.
+  // Details-panel Escape: return focus to the selected graph record.
   //
   // A SEPARATE listener on the details panel, because the canvas listener above
   // only sees events inside a `[data-psadj-node]` group. The details panel holds
@@ -200,18 +215,40 @@ function enhance(container: HTMLElement): void {
     announce(live, state, `${labelOf(state, id)} selected.`);
   });
 
-  // Re-layout on viewport change. Column count is a function of available width
-  // only — never of edge visibility, selection, or any data-derived value.
-  let lastColumns = state.semantic.columnsPerBand;
-  window.addEventListener("resize", () => {
-    const columns = columnsForWidth(
-      availableWidth(canvas),
-      new Set(semanticLayoutRecords(state.snapshot).map((n) => n.grouping)).size,
-    );
-    if (columns === lastColumns) return;
-    lastColumns = columns;
-    relayout(state, columns);
-    render();
+  // --- Readout state ---------------------------------------------------------
+  //
+  // Focus state is cleared ONLY by actual focus departure — never by selection,
+  // hover or any other operation. Hover is tracked separately and can never
+  // overwrite a keyboard-focused record's label, because the precedence resolver
+  // ranks focus above hover.
+  canvas.addEventListener("focusin", (event) => {
+    const id = (event.target as HTMLElement | null)?.closest<SVGGElement>("[data-psadj-node]")
+      ?.dataset.psadjNode;
+    if (!id) return;
+    state.focusedId = id;
+    renderReadout(readout, state);
+  });
+
+  canvas.addEventListener("focusout", (event) => {
+    const next = (event as FocusEvent).relatedTarget as HTMLElement | null;
+    if (next && next.closest("[data-psadj-node]")) return;
+    state.focusedId = null;
+    renderReadout(readout, state);
+  });
+
+  canvas.addEventListener("pointerover", (event) => {
+    const id = (event.target as HTMLElement | null)?.closest<SVGGElement>("[data-psadj-node]")
+      ?.dataset.psadjNode;
+    if (!id || id === state.hoveredId) return;
+    state.hoveredId = id;
+    renderReadout(readout, state);
+  });
+
+  canvas.addEventListener("pointerout", (event) => {
+    const next = (event as PointerEvent).relatedTarget as HTMLElement | null;
+    if (next && next.closest("[data-psadj-node]")) return;
+    state.hoveredId = null;
+    renderReadout(readout, state);
   });
 
   render();
@@ -225,7 +262,7 @@ function enhance(container: HTMLElement): void {
       return; // bundled fallback retained, untouched and un-mixed
     }
     // Atomic activation: ONE fully verified snapshot replaces the whole view.
-    const next = buildState(result.snapshot, RUNTIME_STATUS_LABEL, availableWidth(canvas));
+    const next = buildState(result.snapshot, RUNTIME_STATUS_LABEL);
     next.visible = { ...state.visible };
     Object.assign(state, next);
     if (runtimeStatus) runtimeStatus.textContent = RUNTIME_STATUS_LABEL;
@@ -236,38 +273,19 @@ function enhance(container: HTMLElement): void {
 
 // --- State ------------------------------------------------------------------
 
-function availableWidth(canvas: HTMLElement): number {
-  const width = canvas.clientWidth;
-  return Number.isFinite(width) && width > 0 ? width : 960;
-}
-
-function buildState(
-  snapshot: AdjacencySnapshot,
-  statusLabel: string,
-  width: number,
-): ViewState {
-  const concepts = semanticLayoutRecords(snapshot);
-  const groupCount = new Set(concepts.map((node) => node.grouping)).size;
-  const columnsPerBand = columnsForWidth(width, groupCount);
-  const semantic = computeSemanticLayout(concepts, { columnsPerBand });
-  const fixed = computeFixedBands(fixedBandRecords(snapshot), { columnsPerBand });
+function buildState(snapshot: AdjacencySnapshot, statusLabel: string): ViewState {
   return {
     snapshot,
-    semantic,
-    fixed,
-    navigation: buildNavigationIndex(semantic, fixed),
+    routed: computeEdgeRouting(snapshot.nodes, snapshot.edges),
+    navigation: buildDirectionalIndex(snapshot.nodes),
+    labels: new Map(GRAPH_RECORD_ORDER(snapshot.nodes).map((node) => [node.id, node.display_label])),
     // Fixed initial visibility: source-named on, navigation off.
     visible: { source_named_adjacency: true, navigation_adjacency: false },
     selectedId: null,
+    focusedId: null,
+    hoveredId: null,
     statusLabel,
   };
-}
-
-function relayout(state: ViewState, columnsPerBand: number): void {
-  const concepts = semanticLayoutRecords(state.snapshot);
-  state.semantic = computeSemanticLayout(concepts, { columnsPerBand });
-  state.fixed = computeFixedBands(fixedBandRecords(state.snapshot), { columnsPerBand });
-  state.navigation = buildNavigationIndex(state.semantic, state.fixed);
 }
 
 function selectNode(state: ViewState, id: string): void {
@@ -284,204 +302,82 @@ function labelOf(state: ViewState, id: string): string {
 
 // --- Rendering --------------------------------------------------------------
 
+/**
+ * Update the authored SVG in place.
+ *
+ * Edges are a keyed join into the authored edge layer. Record controls are
+ * never created, removed or reordered here — only their state attributes are
+ * written, so focus survives every redraw and authored Tab order is preserved.
+ */
 function drawGraph(canvas: HTMLElement, state: ViewState): void {
-  const { semantic, fixed } = state;
-  const width = Math.max(semantic.width, fixed.width);
-  const bandsTop = semantic.height + M.BAND_GAP;
-  const height = bandsTop + fixed.height;
+  const svg = select(canvas).select<SVGSVGElement>("svg");
+  if (svg.empty()) return;
 
-  const host = select(canvas);
-  host.selectAll("*").remove();
+  const emphasis = resolveEmphasis({
+    selectedId: state.selectedId,
+    edges: state.snapshot.edges,
+    visible: state.visible,
+  });
 
-  const svg = host
-    .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", width)
-    .attr("height", height)
-    .attr("role", "group")
-    .attr("aria-label", "Expanded public surface adjacency graph");
+  const visibleEdges = state.routed.filter((edge) => state.visible[edge.edgeClass]);
 
   svg
-    .append("title")
-    .text(
-      `Expanded public surface adjacency graph: ${semantic.nodes.length} concept records in the semantic layout and ${fixed.items.length} records in fixed bands.`,
-    );
-  svg
-    .append("desc")
-    .text(
-      "Directed edges are drawn between concept records only. Source-declared adjacency uses a solid line with a filled arrow head; provisional navigation adjacency uses a dashed line with an open arrow head. Every record is also listed in full below this graph.",
-    );
-
-  appendArrowMarkers(svg);
-
-  // --- Group regions --------------------------------------------------------
-  const groups = svg.append("g").attr("class", "psadj-groups");
-  for (const group of semantic.groups) {
-    const node = groups.append("g").attr("class", "psadj-group");
-    node
-      .append("rect")
-      .attr("x", group.x)
-      .attr("y", group.y)
-      .attr("width", group.width)
-      .attr("height", group.height)
-      .attr("rx", 4);
-    node
-      .append("text")
-      .attr("class", "psadj-group-label")
-      .attr("x", group.x + M.GROUP_PADDING)
-      .attr("y", group.y + 22)
-      .text(`${group.key} (${group.count})`);
-  }
-
-  // --- Edges (render filter only) -------------------------------------------
-  const edgeLayer = svg.append("g").attr("class", "psadj-edges");
-  for (const edge of state.snapshot.edges) {
-    if (!state.visible[edge.edge_class]) continue;
-    const from = semantic.positions.get(edge.source);
-    const to = semantic.positions.get(edge.target);
-    if (!from || !to) continue; // a non-concept record is never an endpoint
-    edgeLayer
-      .append("line")
-      .attr("class", `psadj-edge psadj-edge--${edge.edge_class}`)
-      .attr("x1", from.cx)
-      .attr("y1", from.cy)
-      .attr("x2", to.cx)
-      .attr("y2", to.cy)
-      .attr(
-        "marker-end",
-        edge.edge_class === "source_named_adjacency"
-          ? "url(#psadj-arrow-filled)"
-          : "url(#psadj-arrow-open)",
-      );
-  }
-
-  // --- Concept records ------------------------------------------------------
-  const nodeLayer = svg.append("g").attr("class", "psadj-nodes");
-  for (const entry of semantic.nodes) {
-    appendRecord(nodeLayer, {
-      id: entry.id,
-      node: entry.node,
-      x: entry.x,
-      y: entry.y,
-      width: entry.width,
-      height: entry.height,
-      labelLines: entry.labelLines,
-      selected: state.selectedId === entry.id,
-    });
-  }
-
-  // --- Fixed bands ----------------------------------------------------------
-  const bandLayer = svg.append("g").attr("class", "psadj-bands").attr("transform", `translate(0, ${bandsTop})`);
-  for (const band of fixed.bands) {
-    const bandGroup = bandLayer.append("g").attr("class", "psadj-band");
-    bandGroup
-      .append("rect")
-      .attr("x", M.CANVAS_PADDING / 2)
-      .attr("y", band.y)
-      .attr("width", Math.max(fixed.width - M.CANVAS_PADDING, M.BAND_ITEM_WIDTH))
-      .attr("height", band.height)
-      .attr("rx", 4);
-    bandGroup
-      .append("text")
-      .attr("class", "psadj-band-label")
-      .attr("x", M.CANVAS_PADDING)
-      .attr("y", band.y + 20)
-      .text(`${ROLE_LABEL[band.role] ?? band.role} band (${band.count}) — outside the semantic layout`);
-    for (const item of band.items) {
-      appendRecord(bandGroup, {
-        id: item.id,
-        node: item.node,
-        x: item.x,
-        y: item.y,
-        width: item.width,
-        height: item.height,
-        labelLines: item.labelLines,
-        selected: state.selectedId === item.id,
-      });
-    }
-  }
-}
-
-function appendArrowMarkers(svg: Selection<SVGSVGElement, unknown, null, undefined>): void {
-  const defs = svg.append("defs");
-  const filled = defs
-    .append("marker")
-    .attr("id", "psadj-arrow-filled")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", 9)
-    .attr("refY", 5)
-    .attr("markerWidth", 7)
-    .attr("markerHeight", 7)
-    .attr("orient", "auto-start-reverse");
-  filled.append("path").attr("d", "M 0 0 L 10 5 L 0 10 z").attr("fill", "currentColor");
-
-  const open = defs
-    .append("marker")
-    .attr("id", "psadj-arrow-open")
-    .attr("viewBox", "0 0 10 10")
-    .attr("refX", 9)
-    .attr("refY", 5)
-    .attr("markerWidth", 7)
-    .attr("markerHeight", 7)
-    .attr("orient", "auto-start-reverse");
-  open
-    .append("path")
-    .attr("d", "M 0 0 L 10 5 L 0 10")
-    .attr("fill", "none")
-    .attr("stroke", "currentColor")
-    .attr("stroke-width", 1.4);
-}
-
-interface RecordVisual {
-  id: string;
-  node: AdjacencyNode;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  labelLines: readonly string[];
-  selected: boolean;
-}
-
-function appendRecord(
-  parent: Selection<SVGGElement, unknown, null, undefined>,
-  visual: RecordVisual,
-): void {
-  const group = parent
-    .append("g")
-    .attr("class", "psadj-node")
-    .attr("data-psadj-node", visual.id)
-    .attr("data-selected", visual.selected ? "true" : "false")
-    .attr("tabindex", 0)
-    .attr("role", "button")
-    .attr("aria-pressed", visual.selected ? "true" : "false")
-    // The accessible name carries the FULL untruncated label plus the role, so
-    // a shortened on-canvas label never becomes the accessible name.
-    .attr(
-      "aria-label",
-      `${visual.node.display_label}. ${ROLE_LABEL[visual.node.visualization_role] ?? visual.node.visualization_role} record.`,
+    .select<SVGGElement>('[data-psadj-layer="edges"]')
+    .selectAll<SVGPathElement, RoutedEdge>("path.psadj-edge")
+    .data(visibleEdges, (edge) => edge.id)
+    .join(
+      (enter) =>
+        enter
+          .append("path")
+          .attr("class", (edge) => `psadj-edge psadj-edge--${edge.edgeClass}`)
+          .attr("d", (edge) => edge.d)
+          .attr(
+            "marker-end",
+            (edge) =>
+              edge.edgeClass === "source_named_adjacency"
+                ? "url(#psadj-arrow-filled)"
+                : "url(#psadj-arrow-open)",
+          ),
+      (update) => update,
+      (exit) => exit.remove(),
+    )
+    .attr("data-emphasis", (edge) => (emphasis.edgeIds.has(edge.id) ? "true" : "false"))
+    .attr("data-inactive", (edge) =>
+      state.selectedId !== null && !emphasis.edgeIds.has(edge.id) ? "true" : "false",
     );
 
-  group
-    .append("rect")
-    .attr("x", visual.x)
-    .attr("y", visual.y)
-    .attr("width", visual.width)
-    .attr("height", visual.height)
-    .attr("rx", 4);
+  // Record state only. No append, no remove, no reorder.
+  svg.selectAll<SVGGElement, unknown>("[data-psadj-node]").each(function () {
+    const id = this.dataset.psadjNode as string;
+    const selected = state.selectedId === id;
+    const adjacent = emphasis.nodeIds.has(id);
+    this.setAttribute("data-selected", selected ? "true" : "false");
+    this.setAttribute("aria-pressed", selected ? "true" : "false");
+    this.setAttribute("data-emphasis", adjacent ? "true" : "false");
+    // Inactive records stay focusable, selectable, announced and listed. Only
+    // their opacity changes, and never below the legibility floor.
+    this.setAttribute(
+      "data-inactive",
+      state.selectedId !== null && !selected && !adjacent ? "true" : "false",
+    );
+  });
+}
 
-  const text = group
-    .append("text")
-    .attr("x", visual.x + 10)
-    .attr("y", visual.y + 20)
-    .attr("aria-hidden", "true");
-  visual.labelLines.forEach((line, index) => {
-    text
-      .append("tspan")
-      .attr("x", visual.x + 10)
-      .attr("dy", index === 0 ? 0 : 14)
-      // Dataset strings are always written as text, never as HTML.
-      .text(line);
+/**
+ * The visual label readout.
+ *
+ * Written with `textContent` only, and never given a role, a live-region value
+ * or focus. It is a duplicate visual aid: the details panel, the 59-record list
+ * and each control's accessible name remain the authoritative surfaces.
+ */
+function renderReadout(readout: HTMLElement | null, state: ViewState): void {
+  if (!readout) return;
+  readout.textContent = resolveReadoutLabel({
+    focusedId: state.focusedId,
+    hoveredId: state.hoveredId,
+    selectedId: state.selectedId,
+    labels: state.labels,
+    neutralText: READOUT_NEUTRAL_TEXT,
   });
 }
 
