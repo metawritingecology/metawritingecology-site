@@ -494,23 +494,235 @@ test("the canvas keyboard behavior is unchanged and independent", () => {
 });
 
 /**
- * Stylesheet readers. These exist so the assertions below can state the
- * GUARANTEE a rule provides — a real focus outline, a non-solid edge pattern —
- * instead of pinning the literal declaration that happens to provide it today.
- * A later package may restyle these rules freely; it may not remove what they
- * guarantee.
+ * Bounded stylesheet model. These readers exist so the assertions below can
+ * state the GUARANTEE a rule provides — an effectively visible focus outline,
+ * an effectively non-solid edge pattern — instead of pinning the literal
+ * declaration that happens to provide it today, AND so that a later rule cannot
+ * quietly take that guarantee away again. Reading only the first matching rule,
+ * or only testing that a value contains a digit, both admit a value such as
+ * `stroke-dasharray: 0 0`, which is neither the word `none` nor a real pattern.
+ *
+ * This is not a CSS engine and does not try to be. It models exactly what this
+ * component uses: flat class and element rules, optionally nested inside an
+ * at-rule, with a later declaration of the same property winning.
  */
 
-/** The declaration block of the first rule whose selector text contains
- *  `selector`, so an assertion can never be satisfied by an unrelated rule. */
-const cssRuleBody = (source: string, selector: string): string => {
-  const at = source.indexOf(selector);
-  assert.notEqual(at, -1, `no CSS rule for ${selector}`);
-  const open = source.indexOf("{", at);
-  const close = source.indexOf("}", open);
-  assert.ok(open !== -1 && close > open, `unterminated CSS rule for ${selector}`);
-  return source.slice(open + 1, close);
+/** The declarations of one rule body, in source order. */
+const cssDeclarations = (body: string): { property: string; value: string }[] =>
+  body
+    .split(";")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const colon = entry.indexOf(":");
+      if (colon === -1) return null;
+      return {
+        property: entry.slice(0, colon).trim().toLowerCase(),
+        value: entry.slice(colon + 1).trim(),
+      };
+    })
+    .filter((declaration) => declaration !== null);
+
+/**
+ * Every style rule in the component's `<style>` blocks, in source order.
+ * Comments are stripped first. An at-rule prelude is never treated as a
+ * selector, but the rules nested inside it ARE returned, so a suppression
+ * hidden inside a media query is still seen.
+ */
+const componentStyleRules = (source: string) => {
+  const rules: { selector: string; declarations: { property: string; value: string }[] }[] = [];
+  const collect = (css: string): void => {
+    let buffer = "";
+    let index = 0;
+    while (index < css.length) {
+      if (css[index] !== "{") {
+        buffer += css[index];
+        index += 1;
+        continue;
+      }
+      let depth = 0;
+      let end = index;
+      for (; end < css.length; end += 1) {
+        if (css[end] === "{") depth += 1;
+        else if (css[end] === "}") {
+          depth -= 1;
+          if (depth === 0) break;
+        }
+      }
+      const prelude = buffer.trim();
+      const body = css.slice(index + 1, end);
+      if (prelude.startsWith("@")) collect(body);
+      else if (prelude) rules.push({ selector: prelude, declarations: cssDeclarations(body) });
+      buffer = "";
+      index = end + 1;
+    }
+  };
+  for (const block of source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) {
+    collect(block[1].replace(/\/\*[\s\S]*?\*\//g, ""));
+  }
+  return rules;
 };
+
+const COMPONENT_RULES = componentStyleRules(component);
+
+const SOURCE_NAMED_EDGE_CLASS = ".psadj-edge--source_named_adjacency";
+const NAVIGATION_EDGE_CLASS = ".psadj-edge--navigation_adjacency";
+
+/** The last-wins value of one property across EVERY rule whose selector
+ *  contains `selectorPart`, or null when no rule declares it. The property name
+ *  is matched exactly, so `outline-offset` never answers for `outline` and
+ *  `stroke-width` never answers for `stroke`. */
+const effectiveValue = (selectorPart: string, property: string): string | null => {
+  const values = COMPONENT_RULES.filter((rule) => rule.selector.includes(selectorPart))
+    .flatMap((rule) => rule.declarations)
+    .filter((declaration) => declaration.property === property)
+    .map((declaration) => declaration.value);
+  return values.length > 0 ? values[values.length - 1] : null;
+};
+
+/** Every declaration that applies to rules written with exactly this selector,
+ *  in source order across all of them. */
+const declarationsForSelector = (selector: string) =>
+  COMPONENT_RULES.filter((rule) => rule.selector === selector).flatMap((rule) => rule.declarations);
+
+/**
+ * Interpret an SVG `stroke-dasharray` value. `effective` is the guarantee that
+ * matters: a pattern that actually renders non-solid, meaning at least one
+ * positive dash AND at least one positive gap. `0 0` parses, contains digits
+ * and is not `none`, yet paints a solid line — so it is reported ineffective.
+ */
+const dashPattern = (value: string | null) => {
+  if (value === null) return { declared: false, valid: true, effective: false, reason: "no declaration" };
+  const trimmed = value.trim();
+  if (trimmed === "") return { declared: true, valid: false, effective: false, reason: "empty value" };
+  if (/^none$/i.test(trimmed)) return { declared: true, valid: true, effective: false, reason: "none" };
+
+  const lengths: number[] = [];
+  for (const entry of trimmed.split(/[\s,]+/).filter(Boolean)) {
+    const parsed = /^(-?\d*\.?\d+)(px|rem|em|pt|ch|%)?$/i.exec(entry);
+    if (!parsed) {
+      return { declared: true, valid: false, effective: false, reason: `unsupported dash entry "${entry}"` };
+    }
+    const length = Number(parsed[1]);
+    if (!Number.isFinite(length)) {
+      return { declared: true, valid: false, effective: false, reason: `non-numeric dash entry "${entry}"` };
+    }
+    if (length < 0) {
+      return { declared: true, valid: false, effective: false, reason: `negative dash entry "${entry}"` };
+    }
+    lengths.push(length);
+  }
+  // An odd-length list repeats to complete the dash/gap alternation.
+  const sequence = lengths.length % 2 === 1 ? [...lengths, ...lengths] : lengths;
+  const dashes = sequence.filter((_, position) => position % 2 === 0);
+  const gaps = sequence.filter((_, position) => position % 2 === 1);
+  const effective = dashes.some((length) => length > 0) && gaps.some((length) => length > 0);
+  return {
+    declared: true,
+    valid: true,
+    effective,
+    reason: effective ? "non-solid" : `no visible alternation in "${trimmed}"`,
+  };
+};
+
+const OUTLINE_STYLES = [
+  "none", "hidden", "dotted", "dashed", "solid", "double",
+  "groove", "ridge", "inset", "outset", "auto",
+];
+const OUTLINE_WIDTH_KEYWORDS: Record<string, number> = { thin: 1, medium: 3, thick: 5 };
+
+/** A CSS length token as a number, or null when the token is not a length. */
+const cssLength = (token: string): number | null => {
+  const parsed = /^(-?\d*\.?\d+)(px|rem|em|pt|ch|ex|vh|vw)?$/i.exec(token);
+  return parsed ? Number(parsed[1]) : null;
+};
+
+/**
+ * The EFFECTIVE outline of a declaration sequence, applied in source order with
+ * later declarations winning, understanding the `outline` shorthand as well as
+ * the `outline-width` and `outline-style` longhands. Unset values fall back to
+ * the CSS initial values — width `medium`, style `none` — so `outline-width: 0`
+ * and `outline-style: none` are both correctly read as suppression.
+ */
+const effectiveOutline = (declarations: { property: string; value: string }[]) => {
+  let width: number | null = null;
+  let style: string | null = null;
+  let touched = false;
+
+  for (const { property, value } of declarations) {
+    if (property === "outline") {
+      touched = true;
+      // The shorthand resets every longhand it does not name.
+      width = null;
+      style = null;
+      for (const token of value.split(/\s+/).filter(Boolean)) {
+        const lower = token.toLowerCase();
+        if (OUTLINE_STYLES.includes(lower)) style = lower;
+        else if (lower in OUTLINE_WIDTH_KEYWORDS) width = OUTLINE_WIDTH_KEYWORDS[lower];
+        else {
+          const length = cssLength(token);
+          if (length !== null) width = length;
+        }
+      }
+    } else if (property === "outline-width") {
+      touched = true;
+      const lower = value.toLowerCase();
+      width = lower in OUTLINE_WIDTH_KEYWORDS ? OUTLINE_WIDTH_KEYWORDS[lower] : cssLength(value);
+    } else if (property === "outline-style") {
+      touched = true;
+      style = value.trim().toLowerCase();
+    }
+  }
+
+  const resolvedWidth = width === null ? OUTLINE_WIDTH_KEYWORDS.medium : width;
+  const resolvedStyle = style === null ? "none" : style;
+  const visible =
+    touched && resolvedStyle !== "none" && resolvedStyle !== "hidden" && resolvedWidth > 0;
+  return { touched, width: resolvedWidth, style: resolvedStyle, visible, suppressed: touched && !visible };
+};
+
+const INTERACTIVE_ELEMENTS = ["a", "button", "input", "select", "textarea"];
+
+/** The compound a `:focus-visible` selector actually matches the focused
+ *  element on — everything before the pseudo-class. */
+const focusedCompound = (selector: string) => selector.slice(0, selector.indexOf(":focus-visible"));
+
+/** Bare element type names in a compound. A class, id, attribute or hyphenated
+ *  fragment is never mistaken for an element name. */
+const elementNames = (compound: string) =>
+  [...compound.matchAll(/(?:^|[\s,(>+~])([a-z][a-z0-9]*)\b/g)].map((match) => match[1]);
+
+/** Does this focus rule style an INTERACTIVE element, and therefore owe an
+ *  outline? `.psadj-node:focus-visible rect` does not: it indicates focus on the
+ *  rendered record with a stroke, which is a different, already-asserted
+ *  mechanism. */
+const isInteractiveFocusSelector = (selector: string) => {
+  const compound = focusedCompound(selector);
+  return (
+    /\[tabindex/.test(compound) ||
+    elementNames(compound).some((name) => INTERACTIVE_ELEMENTS.includes(name))
+  );
+};
+
+/** Does this focus rule cover the whole interactive set, making it the rule
+ *  that ESTABLISHES the component's focus contract? */
+const coversEveryInteractiveElement = (selector: string) => {
+  const compound = focusedCompound(selector);
+  const names = new Set(elementNames(compound));
+  return ["a", "button", "input"].every((name) => names.has(name)) && /\[tabindex/.test(compound);
+};
+
+// The model must never silently collapse: an empty or truncated rule list would
+// make every effective-value assertion below vacuously true.
+assert.ok(COMPONENT_RULES.length > 20, `only ${COMPONENT_RULES.length} component style rules parsed`);
+assert.ok(
+  COMPONENT_RULES.some((rule) => rule.selector.includes(":focus-visible")),
+  "the stylesheet model did not find the focus rules",
+);
+assert.ok(
+  COMPONENT_RULES.some((rule) => rule.selector.includes(".psadj-edge--navigation_adjacency")),
+  "the stylesheet model did not find the edge-class rules",
+);
 
 /** The body of the first at-rule whose prelude matches, brace matched so a
  *  nested rule cannot end the slice early. */
@@ -529,21 +741,6 @@ const atRuleBody = (source: string, prelude: RegExp): string => {
   }
   return assert.fail(`unbalanced braces in the at-rule matching ${prelude}`);
 };
-
-/** The value of one CSS property in a declaration block, or null. The property
- *  name is matched exactly, so `outline-offset` never answers for `outline`
- *  and `stroke-width` never answers for `stroke`. */
-const declarationValue = (block: string, property: string): string | null => {
-  const match = new RegExp(`(?:^|[^-\\w])${property}\\s*:\\s*([^;]+)`).exec(block);
-  return match ? match[1].trim() : null;
-};
-
-/** Every `:focus-visible` rule in the component, as `{ selector, body }`. */
-const focusVisibleRules = (source: string) =>
-  [...source.matchAll(/([^{}]*:focus-visible[^{}]*)\{([^{}]*)\}/g)].map((match) => ({
-    selector: match[1].trim(),
-    body: match[2],
-  }));
 
 // ---------------------------------------------------------------------------
 // Accessibility surface
@@ -583,31 +780,74 @@ test("a polite live region announces status, selection, and toggle state", () =>
 test("a visible focus indicator is defined for every interactive element", () => {
   assert.ok(/:focus-visible/.test(component));
 
-  const rules = focusVisibleRules(component);
-  assert.ok(rules.length > 0, "the component must define at least one :focus-visible rule");
+  const focusRules = COMPONENT_RULES.filter((rule) => rule.selector.includes(":focus-visible"));
+  assert.ok(focusRules.length > 0, "the component must define at least one :focus-visible rule");
 
-  // The guarantee is a REAL outline on focus, not one specific declaration: at
-  // least one rule gives interactive elements an outline with a non-zero width
-  // and a visible style. The exact width, style and colour are presentation.
-  const outlined = rules
-    .map((rule) => ({ selector: rule.selector, outline: declarationValue(rule.body, "outline") }))
-    .filter((rule) => rule.outline !== null);
-  assert.ok(outlined.length > 0, "a :focus-visible rule must declare an outline");
-  for (const { selector, outline } of outlined) {
-    assert.ok(!/^(none|0)\b/.test(outline), `focus outline must not be suppressed: ${selector}`);
+  // The helper reads EFFECTIVE outline state, so these hold by construction and
+  // a shorthand or longhand suppression cannot slip past the assertions below.
+  assert.equal(effectiveOutline([{ property: "outline", value: "3px solid currentColor" }]).visible, true);
+  for (const suppression of [
+    { property: "outline", value: "none" },
+    { property: "outline", value: "0" },
+    { property: "outline", value: "0 solid currentColor" },
+    { property: "outline-width", value: "0" },
+    { property: "outline-width", value: "0px" },
+    { property: "outline-style", value: "none" },
+    { property: "outline-style", value: "hidden" },
+  ]) {
+    assert.equal(
+      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, suppression]).visible,
+      false,
+      `${suppression.property}: ${suppression.value} must count as suppression`,
+    );
+  }
+  // Reordering that preserves the effective style still passes.
+  assert.equal(
+    effectiveOutline([
+      { property: "outline-offset", value: "2px" },
+      { property: "outline", value: "3px solid currentColor" },
+    ]).visible,
+    true,
+  );
+
+  // Which focus rules owe an outline: the ones whose focused compound names an
+  // interactive element. The rendered-record rule indicates focus with a stroke
+  // on its `rect`, which is a different mechanism and is not required to.
+  const required = focusRules.filter((rule) => isInteractiveFocusSelector(rule.selector));
+  assert.ok(required.length > 0, "no interactive :focus-visible rule was found");
+
+  // (1) The contract is actually established: the rule covering links, buttons,
+  //     inputs and tabindex holders paints a real outline.
+  const establishing = required.filter((rule) => coversEveryInteractiveElement(rule.selector));
+  assert.ok(
+    establishing.length > 0,
+    "one :focus-visible rule must cover a, button, input and [tabindex]",
+  );
+  for (const rule of establishing) {
+    const outline = effectiveOutline(declarationsForSelector(rule.selector));
     assert.ok(
-      /(?:^|\s)[1-9]\d*(?:\.\d+)?(?:px|rem|em)(?:\s|$)/.test(outline),
-      `focus outline needs a non-zero width: ${selector} { outline: ${outline} }`,
+      outline.visible,
+      `${rule.selector} must paint a focus outline, got width ${outline.width} style ${outline.style}`,
     );
   }
 
-  // …and nothing anywhere in the component takes the focus outline away again.
-  const outlines = [...component.matchAll(/(?:^|[^-\w])outline\s*:\s*([^;]+)/g)].map((match) =>
-    match[1].trim(),
-  );
-  assert.ok(outlines.length > 0);
-  for (const value of outlines) {
-    assert.ok(!/^(none|0)\b/.test(value), `no rule may remove the focus outline, found: ${value}`);
+  // (2) …and no interactive focus selector may take it away again, whether by a
+  //     later shorthand or a later longhand.
+  for (const rule of required) {
+    const outline = effectiveOutline(declarationsForSelector(rule.selector));
+    assert.ok(
+      !outline.suppressed,
+      `${rule.selector} suppresses the focus outline (width ${outline.width}, style ${outline.style})`,
+    );
+  }
+
+  // (3) …and no rule anywhere in the component removes a focus outline.
+  for (const rule of COMPONENT_RULES) {
+    const outline = effectiveOutline(rule.declarations);
+    assert.ok(
+      !outline.suppressed,
+      `${rule.selector} removes the focus outline (width ${outline.width}, style ${outline.style})`,
+    );
   }
 });
 
@@ -616,35 +856,60 @@ test("edge classes are distinguished by pattern and marker, not color alone", ()
   assert.ok(component.includes("solid line, filled arrow head"));
   assert.ok(component.includes("dashed line, open arrow head"));
 
-  // …the stylesheet carries a real PATTERN difference: the navigation class is
-  // non-solid, the source-named class is not. The exact stroke width and dash
-  // lengths are presentation and are deliberately not pinned here.
-  const named = cssRuleBody(component, ".psadj-edge--source_named_adjacency");
-  const navigation = cssRuleBody(component, ".psadj-edge--navigation_adjacency");
-  const dashes = declarationValue(navigation, "stroke-dasharray");
-  assert.ok(dashes, "the navigation edge class must declare a dash pattern");
-  assert.ok(!/^none\b/.test(dashes), "the navigation dash pattern must not be `none`");
-  assert.ok(/\d/.test(dashes), `the navigation dash pattern must be a real pattern, got: ${dashes}`);
-  assert.equal(
-    declarationValue(named, "stroke-dasharray"),
-    null,
-    "the source-named edge class stays solid",
+  // …the stylesheet carries a real, EFFECTIVE pattern difference. The exact
+  // stroke width and dash lengths are presentation and are deliberately not
+  // pinned; what is required is that the navigation class still renders
+  // non-solid once every rule in the sheet has had its say. A value such as
+  // `0 0` contains digits and is not the word `none`, yet paints a solid line,
+  // so it must not satisfy this contract.
+  //
+  // The interpreter is pinned first, so the assertions that follow cannot pass
+  // because the helper became permissive.
+  for (const pattern of ["5 4", "5px 4px", "2 0 0 3", "5", "1.5,2.5"]) {
+    assert.equal(dashPattern(pattern).effective, true, `${pattern} is a real dash pattern`);
+  }
+  for (const pattern of ["none", "", "0 0", "0px 0px", "0, 0", "0 0 0 0", "0", "-5 4", "var(--x)"]) {
+    assert.equal(dashPattern(pattern).effective, false, `${pattern} is not a real dash pattern`);
+  }
+  assert.equal(dashPattern(null).declared, false);
+
+  assert.ok(
+    effectiveValue(NAVIGATION_EDGE_CLASS, "stroke-dasharray") !== null,
+    "the navigation edge class must declare a stroke-dasharray",
+  );
+  const navigation = dashPattern(effectiveValue(NAVIGATION_EDGE_CLASS, "stroke-dasharray"));
+  assert.ok(navigation.valid, `the navigation dash pattern is unusable: ${navigation.reason}`);
+  assert.ok(
+    navigation.effective,
+    `the navigation edge class must render non-solid: ${navigation.reason}`,
   );
 
-  // …and the distinction is never carried by colour: neither class rule sets a
-  // hue of its own, so both classes render in the one shared stroke colour.
-  for (const [name, body] of [["source-named", named], ["navigation", navigation]]) {
+  const named = dashPattern(effectiveValue(SOURCE_NAMED_EDGE_CLASS, "stroke-dasharray"));
+  assert.ok(
+    !named.effective,
+    `the source-named edge class must stay solid: ${named.reason}`,
+  );
+
+  // …and the distinction is never carried by colour: neither class sets a hue
+  // of its own in any rule, so both render in the one shared stroke colour.
+  for (const [name, selector] of [
+    ["source-named", SOURCE_NAMED_EDGE_CLASS],
+    ["navigation", NAVIGATION_EDGE_CLASS],
+  ]) {
     for (const property of ["stroke", "fill", "color"]) {
       assert.equal(
-        declarationValue(body, property),
+        effectiveValue(selector, property),
         null,
         `the ${name} edge class must not carry its own ${property}`,
       );
     }
   }
-  assert.ok(
-    /\.psadj-edge\s*\{[^}]*stroke:\s*currentColor/.test(component),
-    "both classes inherit one shared stroke colour",
+  const sharedEdgeRule = COMPONENT_RULES.find((rule) => rule.selector.trim().endsWith(".psadj-edge"));
+  assert.ok(sharedEdgeRule, "both classes must inherit one shared edge rule");
+  assert.equal(
+    sharedEdgeRule.declarations.find((declaration) => declaration.property === "stroke")?.value,
+    "currentColor",
+    "the shared edge rule carries the one stroke colour",
   );
 
   // …and each class carries its own arrow marker, so shape distinguishes them

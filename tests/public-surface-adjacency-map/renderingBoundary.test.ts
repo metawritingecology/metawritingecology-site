@@ -28,8 +28,14 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+
+// The TypeScript compiler API is already a declared dependency of this
+// repository (`dependencies.typescript`), so Guard 13 can inspect the sibling
+// test file syntactically rather than textually. No dependency is added.
+import ts from "typescript";
 
 const root = new URL("../../", import.meta.url);
 const p = (rel: string) => fileURLToPath(new URL(rel, root));
@@ -164,6 +170,19 @@ const layoutSource = rd(`${ADJACENCY_LIB}/layout.ts`);
 const packageJson = JSON.parse(rd("package.json"));
 const lockfile = rd("pnpm-lock.yaml");
 
+// Raw bytes, never newline-normalised text: the lockfile identity below is a
+// byte contract, so a line-ending rewrite or an appended whitespace byte must
+// change the digest.
+const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
+
+/** Authorized baseline `pnpm-lock.yaml` identity at 32f992d2…eed8. If this
+ *  fails, the correct response is to restore the lockfile — never to update the
+ *  expectation. */
+const LOCKFILE_IDENTITY = {
+  byteLength: 184577,
+  sha256: "9da220e6781fa9bf636fe2f2540dd1a40dad2ed44a031afd86f099ab8c041719",
+};
+
 /**
  * Executable code only. These files deliberately NAME banned APIs and banned
  * concepts in prose to document the boundary they hold, so a raw substring scan
@@ -244,28 +263,61 @@ const importSpecifiers = (source: string): string[] => {
 };
 
 /**
- * The full text of every `assert.<method>(…)` call in a source, parenthesis
- * matched. Guard 13 requires a guarantee to appear INSIDE an assertion, so a
- * token left behind in a helper or a comment cannot stand in for an assertion
- * that was deleted.
+ * Syntax-aware inspection of a test file, via the TypeScript compiler API.
+ *
+ * Guard 13 requires each retained guarantee to appear inside an ACTIVE
+ * assertion. A textual scanner cannot tell an assertion from a comment, a
+ * string, a template literal or a regex that merely looks like one, so
+ * commenting an assertion out left it counted. The parser can: only a real
+ * `assert.<method>(…)` CallExpression inside a real `test(…)` callback is an
+ * active assertion, and comments and literals are never call expressions.
  */
-const assertionCalls = (source: string): string[] => {
-  const calls: string[] = [];
-  const head = /\bassert\.[a-zA-Z]+\(/g;
-  for (let match = head.exec(source); match !== null; match = head.exec(source)) {
-    let depth = 0;
-    for (let i = match.index + match[0].length - 1; i < source.length; i += 1) {
-      if (source[i] === "(") depth += 1;
-      else if (source[i] === ")") {
-        depth -= 1;
-        if (depth === 0) {
-          calls.push(source.slice(match.index, i + 1));
-          break;
-        }
+const inspectTestFile = (relativePath: string) => {
+  const text = rd(relativePath);
+  const source = ts.createSourceFile(
+    relativePath,
+    text,
+    ts.ScriptTarget.ESNext,
+    /* setParentNodes */ true,
+    ts.ScriptKind.TS,
+  );
+
+  const activeAssertions = (node: ts.Node): string[] => {
+    const found: string[] = [];
+    const visit = (child: ts.Node): void => {
+      if (
+        ts.isCallExpression(child) &&
+        ts.isPropertyAccessExpression(child.expression) &&
+        ts.isIdentifier(child.expression.expression) &&
+        child.expression.expression.text === "assert"
+      ) {
+        found.push(text.slice(child.getStart(source), child.getEnd()));
       }
+      ts.forEachChild(child, visit);
+    };
+    ts.forEachChild(node, visit);
+    return found;
+  };
+
+  const tests: { title: string; assertions: string[] }[] = [];
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "test" &&
+      node.arguments.length >= 2 &&
+      ts.isStringLiteralLike(node.arguments[0])
+    ) {
+      tests.push({
+        title: node.arguments[0].text,
+        assertions: activeAssertions(node.arguments[1]),
+      });
     }
-  }
-  return calls;
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(source, visit);
+
+  return { text, tests, assertions: tests.flatMap((entry) => entry.assertions) };
 };
 
 /**
@@ -578,6 +630,20 @@ test("guard 9 — dependency and lockfile boundary", () => {
   assert.equal(packageJson.packageManager, "pnpm@10.34.5");
   assert.ok(existsSync(p("pnpm-lock.yaml")), "pnpm-lock.yaml must exist");
 
+  // The lockfile is unchanged BY BYTES, not merely by parsed package names. A
+  // package-name check alone accepts a reordered, re-encoded or whitespace-
+  // altered lockfile, so the authorized baseline identity is pinned directly.
+  assert.equal(
+    LOCKFILE_BYTES.byteLength,
+    LOCKFILE_IDENTITY.byteLength,
+    `pnpm-lock.yaml is ${LOCKFILE_BYTES.byteLength} bytes, expected ${LOCKFILE_IDENTITY.byteLength}`,
+  );
+  assert.equal(
+    createHash("sha256").update(LOCKFILE_BYTES).digest("hex"),
+    LOCKFILE_IDENTITY.sha256,
+    "pnpm-lock.yaml no longer matches the authorized baseline SHA-256",
+  );
+
   // No prohibited package at ANY depth, matched against parsed lockfile package
   // names rather than raw text, so a version string or an unrelated path can
   // never satisfy or trip the check.
@@ -862,6 +928,20 @@ test("guard 12 — no browser or DOM harness", () => {
 
 const INTERACTION_TEST = "tests/public-surface-adjacency-map/interaction.test.ts";
 
+/**
+ * The retargeted tests P7.0 protects, with the number of ACTIVE assertions each
+ * leaves behind. A later package may add to one of these tests; it may not thin
+ * one out, comment one out, or delete it.
+ */
+const PROTECTED_TESTS: [string, number][] = [
+  ["edge classes are distinguished by pattern and marker, not color alone", 17],
+  ["a visible focus indicator is defined for every interactive element", 10],
+  ["the layout is usable at narrow mobile width", 8],
+];
+
+/** Active assertions across every test in `interaction.test.ts` at P7.0. */
+const INTERACTION_ASSERTION_FLOOR = 175;
+
 /** Tokens that would mean a test depends on P7.1 or P7.2 implementation. */
 const FUTURE_IMPLEMENTATION_TOKENS = [
   "GROUP_ARC_R",
@@ -942,24 +1022,76 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
   //     is STILL asserted — checked against assertion CONTENT, not against a
   //     token that could survive somewhere else in the file after the assertion
   //     using it was deleted.
-  const assertions = assertionCalls(interaction);
-  assert.ok(assertions.length > 100, `only ${assertions.length} assertions were extracted`);
+  //     Extraction is SYNTAX-AWARE: a commented-out, stringified, templated or
+  //     regex-shaped assertion is not a call expression and is never counted.
+  const inspected = inspectTestFile(INTERACTION_TEST);
+  const assertions = inspected.assertions;
+  assert.ok(assertions.length > 100, `only ${assertions.length} active assertions were parsed`);
   assert.ok(
     assertions.some((call) => call.includes("EDGE_CLASS_DEFAULT_VISIBLE")),
-    "the assertion extractor did not find a known assertion",
+    "the assertion parser did not find a known assertion",
   );
   const asserted = assertions.join("\n");
 
+  //     The parser must actually discriminate. These fixtures prove it counts a
+  //     real assertion and refuses every look-alike, which is the exact bypass
+  //     the previous textual extractor allowed.
+  const parseFixture = (body: string) => {
+    const fixture = ts.createSourceFile(
+      "fixture.test.ts",
+      `test("fixture", () => {\n${body}\n});\n`,
+      ts.ScriptTarget.ESNext,
+      true,
+      ts.ScriptKind.TS,
+    );
+    let count = 0;
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression) &&
+        node.expression.expression.text === "assert"
+      ) {
+        count += 1;
+      }
+      ts.forEachChild(node, visit);
+    };
+    ts.forEachChild(fixture, visit);
+    return count;
+  };
+  for (const inactive of [
+    "// assert.match(client, /x/);",
+    "/* assert.match(client, /x/); */",
+    'const note = "assert.match(client, /x/)";',
+    "const note = `assert.match(client, /x/)`;",
+    "const pattern = /assert\\.match/;",
+  ]) {
+    assert.equal(parseFixture(inactive), 0, `must not count an inactive assertion: ${inactive}`);
+  }
+  for (const [active, expected] of [
+    ["assert.ok(true);", 1],
+    ["assert.ok(\n  /psadj-arrow-open/.test(client),\n  `multiline ${1 + 1}`,\n);", 1],
+    ["assert.ok(nested(inner(deep())));", 1],
+    ["assert.ok(/assert\\.match/.test(client));", 1],
+    ["assert.ok(true);\nassert.equal(1, 1);", 2],
+  ]) {
+    assert.equal(parseFixture(active), expected, `must count the active assertion: ${active}`);
+  }
+
   const RETAINED = [
-    ["the navigation class keeps a non-solid pattern", /stroke-dasharray/],
-    ["that pattern is required, not merely read", /must declare a dash pattern/],
+    ["the navigation class keeps a dash declaration", /stroke-dasharray/],
+    ["that declaration is required, not merely read", /must declare a stroke-dasharray/],
+    ["…and it must actually render non-solid, not just contain digits", /must render non-solid/],
+    ["the source-named class stays solid", /must stay solid/],
     ["edge-class distinction is not colour alone", /must not carry its own/],
     ["source-named and navigation carry distinct arrow markers", /psadj-arrow-filled/],
     ["…and the open marker too", /psadj-arrow-open/],
     ["edge-class default visibility is unchanged", /EDGE_CLASS_DEFAULT_VISIBLE/],
     ["only the two approved classes are toggleable", /data-psadj-toggle=/],
     ["a visible focus indicator exists", /:focus-visible/],
-    ["…and it is never suppressed", /remove the focus outline/],
+    ["…the interactive focus contract is actually established", /must paint a focus outline/],
+    ["…no interactive selector suppresses it", /suppresses the focus outline/],
+    ["…and no rule anywhere removes it", /removes the focus outline/],
     ["focus and selection state are exposed", /aria-pressed/],
     ["approved URL gating", /isApprovedSourceUrl/],
     ["external-link protection", /rel="noopener noreferrer"/],
@@ -999,28 +1131,22 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
   //     No assertion was quietly deleted from a retargeted test. These floors
   //     are the counts P7.0 leaves behind; a later package may add to a test,
   //     but may not thin one out.
-  const bodyOf = (title: string): string => {
-    const match = new RegExp(
-      `^test\\("${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}",[\\s\\S]*?\\n\\}\\);$`,
-      "m",
-    ).exec(interaction);
-    assert.ok(match, `no test named ${title}`);
-    return match[0];
-  };
-  for (const [title, floor] of [
-    ["edge classes are distinguished by pattern and marker, not color alone", 13],
-    ["a visible focus indicator is defined for every interactive element", 7],
-    ["the layout is usable at narrow mobile width", 8],
-  ]) {
-    const count = [...bodyOf(title).matchAll(/\bassert\.[a-zA-Z]+\(/g)].length;
-    assert.ok(count >= floor, `"${title}" asserts ${count} times, below the P7.0 floor of ${floor}`);
+  //     Floors are counted from ACTIVE assertions, so commenting one out drops
+  //     the count and fails here.
+  for (const [title, floor] of PROTECTED_TESTS) {
+    const protectedTest = inspected.tests.find((entry) => entry.title === title);
+    assert.ok(protectedTest, `the protected test "${title}" is missing`);
+    assert.ok(
+      protectedTest.assertions.length >= floor,
+      `"${title}" has ${protectedTest.assertions.length} active assertions, below the P7.0 floor of ${floor}`,
+    );
   }
   //     …and the file as a whole did not shrink: retargeting replaced literal
   //     assertions with intent-level ones, it did not remove coverage.
-  assert.equal([...interaction.matchAll(/^test\(/gm)].length, 39, "no test was added or removed");
+  assert.equal(inspected.tests.length, 39, "no test was added or removed");
   assert.ok(
-    [...interaction.matchAll(/\bassert\.[a-zA-Z]+\(/g)].length >= 156,
-    "the retargeted file must assert at least as much as the baseline did",
+    assertions.length >= INTERACTION_ASSERTION_FLOOR,
+    `the retargeted file has ${assertions.length} active assertions, below the P7.0 floor of ${INTERACTION_ASSERTION_FLOOR}`,
   );
 
   // (c) No assertion depends on P7.1 or P7.2 implementation, and (d) no test in
@@ -1049,6 +1175,15 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
     for (const [body, title] of bodies) {
       assert.ok(/\bassert\./.test(body), `${name}: test "${title}" asserts nothing`);
     }
+  }
+
+  //     …and for the interaction suite the same claim is re-checked from the
+  //     parse tree, so an "assertion" that is only a comment cannot satisfy it.
+  for (const entry of inspected.tests) {
+    assert.ok(
+      entry.assertions.length > 0,
+      `interaction.test.ts: test "${entry.title}" has no active assertion`,
+    );
   }
 
   // (e) This guard suite itself covers all thirteen canonical guards.
