@@ -935,12 +935,15 @@ const INTERACTION_TEST = "tests/public-surface-adjacency-map/interaction.test.ts
  */
 const PROTECTED_TESTS: [string, number][] = [
   ["edge classes are distinguished by pattern and marker, not color alone", 17],
-  ["a visible focus indicator is defined for every interactive element", 10],
+  ["a visible focus indicator is defined for every interactive element", 36],
   ["the layout is usable at narrow mobile width", 8],
 ];
 
-/** Active assertions across every test in `interaction.test.ts` at P7.0. */
-const INTERACTION_ASSERTION_FLOOR = 175;
+/** Active assertions across every test in `interaction.test.ts`. Recomputed
+ *  from the parse tree after each correction: a stale floor stops pinning the
+ *  state it is supposed to protect, which is how a removed assertion slipped
+ *  past once already. */
+const INTERACTION_ASSERTION_FLOOR = 201;
 
 /** Tokens that would mean a test depends on P7.1 or P7.2 implementation. */
 const FUTURE_IMPLEMENTATION_TOKENS = [
@@ -998,13 +1001,22 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
   for (const [coupling, note] of [
     ["stroke-width: 1.2", "literal edge stroke width"],
     ["stroke-dasharray: 5 4", "literal edge dash declaration"],
-    ["outline: 3px solid currentColor", "literal focus-outline declaration"],
     ["max-width: 640px", "literal responsive breakpoint"],
     ["columnsForWidth(320, 7)", "exact column count at a pinned width"],
     ["columnsForWidth(0, 7)", "exact column count at a pinned width"],
   ]) {
     assert.ok(!interaction.includes(coupling), `${note} is still pinned: ${coupling}`);
   }
+  //     The focus-outline literal is coupling only when it is matched AGAINST
+  //     THE COMPONENT. The cascade fixtures legitimately declare it as their own
+  //     synthetic stylesheet input, which pins nothing about production.
+  assert.deepEqual(
+    interaction
+      .split("\n")
+      .filter((line) => line.includes("outline: 3px solid currentColor") && line.includes("component")),
+    [],
+    "the literal focus-outline declaration is still pinned against the component",
+  );
   //     …and no assertion pins a resolved column count to a bare literal.
   assert.deepEqual(
     [...interaction.matchAll(/assert\.equal\(\s*columnsForWidth\([^)]*\),\s*\d+\s*\)/g)].map(

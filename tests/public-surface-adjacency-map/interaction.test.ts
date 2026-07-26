@@ -529,7 +529,7 @@ const cssDeclarations = (body: string): { property: string; value: string }[] =>
  * selector, but the rules nested inside it ARE returned, so a suppression
  * hidden inside a media query is still seen.
  */
-const componentStyleRules = (source: string) => {
+const parseStyleRules = (styleSheet: string) => {
   const rules: { selector: string; declarations: { property: string; value: string }[] }[] = [];
   const collect = (css: string): void => {
     let buffer = "";
@@ -557,11 +557,15 @@ const componentStyleRules = (source: string) => {
       index = end + 1;
     }
   };
-  for (const block of source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) {
-    collect(block[1].replace(/\/\*[\s\S]*?\*\//g, ""));
-  }
+  collect(styleSheet.replace(/\/\*[\s\S]*?\*\//g, ""));
   return rules;
 };
+
+/** The same, over every `<style>` block of an Astro component, in order. */
+const componentStyleRules = (source: string) =>
+  [...source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].flatMap((block) =>
+    parseStyleRules(block[1]),
+  );
 
 const COMPONENT_RULES = componentStyleRules(component);
 
@@ -644,61 +648,47 @@ const cssLength = (token: string): number | null => {
  * the CSS initial values — width `medium`, style `none` — so `outline-width: 0`
  * and `outline-style: none` are both correctly read as suppression.
  */
-const effectiveOutline = (declarations: { property: string; value: string }[]) => {
-  let width: number | null = null;
-  let style: string | null = null;
-  let touched = false;
-  let unresolved: string | null = null;
+/** The CSS initial outline state. */
+const OUTLINE_INITIAL = { width: OUTLINE_WIDTH_KEYWORDS.medium, style: "none" };
 
-  for (const { property, value } of declarations) {
-    if (property === "outline") {
-      touched = true;
-      // A dynamic value cannot be resolved here, and must never be ASSUMED
-      // visible; the contract fails closed instead.
-      if (DYNAMIC_VALUE.test(value)) unresolved = `outline: ${value}`;
-      // The shorthand resets every longhand it does not name.
-      width = null;
-      style = null;
-      for (const token of value.split(/\s+/).filter(Boolean)) {
-        const lower = token.toLowerCase();
-        if (OUTLINE_STYLES.includes(lower)) style = lower;
-        else if (lower in OUTLINE_WIDTH_KEYWORDS) width = OUTLINE_WIDTH_KEYWORDS[lower];
-        else {
-          const length = cssLength(token);
-          if (length !== null) width = length;
-        }
-      }
-    } else if (property === "outline-width") {
-      touched = true;
-      const lower = value.trim().toLowerCase();
-      if (lower in OUTLINE_WIDTH_KEYWORDS) width = OUTLINE_WIDTH_KEYWORDS[lower];
+/** A `!important` annotation, case-insensitive and whitespace-tolerant. */
+const IMPORTANT_ANNOTATION = /!\s*important\b/i;
+
+const OUTLINE_PROPERTIES = ["outline", "outline-width", "outline-style"];
+
+/**
+ * The subproperty candidates one declaration contributes. The `outline`
+ * shorthand contributes to BOTH width and style, resetting to the CSS initial
+ * value whichever of them it does not name; a longhand contributes only to its
+ * own subproperty. Colour tokens are ignored and never corrupt the parse.
+ */
+const outlineCandidates = ({ property, value }: { property: string; value: string }) => {
+  if (property === "outline") {
+    let width: number | null = null;
+    let style: string | null = null;
+    for (const token of value.split(/\s+/).filter(Boolean)) {
+      const lower = token.toLowerCase();
+      if (OUTLINE_STYLES.includes(lower)) style = lower;
+      else if (lower in OUTLINE_WIDTH_KEYWORDS) width = OUTLINE_WIDTH_KEYWORDS[lower];
       else {
-        width = cssLength(value.trim());
-        if (width === null) unresolved = `outline-width: ${value}`;
+        const length = cssLength(token);
+        if (length !== null) width = length;
       }
-    } else if (property === "outline-style") {
-      touched = true;
-      style = value.trim().toLowerCase();
-      if (!OUTLINE_STYLES.includes(style)) unresolved = `outline-style: ${value}`;
     }
+    return [
+      { subproperty: "width", value: width === null ? OUTLINE_INITIAL.width : width },
+      { subproperty: "style", value: style === null ? OUTLINE_INITIAL.style : style },
+    ];
   }
-
-  const resolvedWidth = width === null ? OUTLINE_WIDTH_KEYWORDS.medium : width;
-  const resolvedStyle = style === null ? "none" : style;
-  const visible =
-    touched &&
-    unresolved === null &&
-    resolvedStyle !== "none" &&
-    resolvedStyle !== "hidden" &&
-    resolvedWidth > 0;
-  return {
-    touched,
-    unresolved,
-    width: resolvedWidth,
-    style: resolvedStyle,
-    visible,
-    suppressed: touched && !visible,
-  };
+  if (property === "outline-width") {
+    const lower = value.trim().toLowerCase();
+    const width = lower in OUTLINE_WIDTH_KEYWORDS ? OUTLINE_WIDTH_KEYWORDS[lower] : cssLength(value.trim());
+    return width === null ? [] : [{ subproperty: "width", value: width }];
+  }
+  if (property === "outline-style") {
+    return [{ subproperty: "style", value: value.trim().toLowerCase() }];
+  }
+  return [];
 };
 
 const INTERACTIVE_ELEMENTS = ["a", "button", "input", "select", "textarea"];
@@ -900,34 +890,167 @@ const nodesFromCompound = (simples): unknown[] => {
 const isInteractiveNode = (node) =>
   (node.type !== null && INTERACTIVE_ELEMENTS.includes(node.type)) || node.attributes.has("tabindex");
 
-/** Every parsed `:focus-visible` selector in the component, in source order.
- *  Parsing happens once; anything uninterpretable is reported, not skipped. */
-const FOCUS_RULES = COMPONENT_RULES.filter((rule) => rule.selector.includes(":focus-visible")).map(
-  (rule) => ({
-    selector: rule.selector,
-    declarations: rule.declarations,
-    selectors: splitSelectorList(rule.selector).map((part) => ({
-      text: part,
-      compounds: splitCompounds(part).map(parseCompound),
-    })),
-  }),
-);
+/**
+ * Specificity, as the tuple (ids, classes/attributes/pseudo-classes, types).
+ * Source order decides only AFTER specificity, which is why a selector that
+ * merely reads as narrower is not necessarily the one the browser applies:
+ * `:is()` contributes the specificity of its MOST specific argument, so
+ * `.psadj :is(a, button, input, [tabindex]):focus-visible` scores (0,3,0)
+ * — higher than `.psadj__toolbar button:focus-visible` at (0,2,1).
+ */
+const compareSpecificity = (left: number[], right: number[]) =>
+  left[0] - right[0] || left[1] - right[1] || left[2] - right[2];
 
-for (const rule of FOCUS_RULES) {
-  for (const parsed of rule.selectors) {
-    assert.ok(
-      parsed.compounds.length > 0 && parsed.compounds.every((compound) => compound !== null),
-      `the bounded focus model cannot interpret the protected selector "${parsed.text}"; extend the model rather than skipping the rule`,
-    );
+const specificityOfCompound = (simples): number[] => {
+  const total = [0, 0, 0];
+  for (const simple of simples) {
+    if (simple.kind === "class" || simple.kind === "attr" || simple.kind === "focus") total[1] += 1;
+    else if (simple.kind === "type") total[2] += 1;
+    else if (simple.kind === "is") {
+      let best = [0, 0, 0];
+      for (const alternative of simple.alternatives) {
+        const candidate = specificityOfCompound(alternative);
+        if (compareSpecificity(candidate, best) > 0) best = candidate;
+      }
+      total[0] += best[0];
+      total[1] += best[1];
+      total[2] += best[2];
+    }
   }
-}
+  return total;
+};
 
-/** A selector part whose SUBJECT carries `:focus-visible` — the ones that style
- *  the focused element itself. */
-const focusSubjectSelectors = (rule) =>
-  rule.selectors.filter((parsed) =>
-    parsed.compounds[parsed.compounds.length - 1].some((simple) => simple.kind === "focus"),
+/** A whole selector branch: descendant compounds simply sum. */
+const specificityOf = (compounds): number[] =>
+  compounds.reduce(
+    (total, compound) => {
+      const part = specificityOfCompound(compound);
+      return [total[0] + part[0], total[1] + part[1], total[2] + part[2]];
+    },
+    [0, 0, 0],
   );
+
+/** Cascade position: specificity first, then rule order, then declaration order. */
+const compareCascade = (left, right) =>
+  compareSpecificity(left.specificity, right.specificity) ||
+  left.rule - right.rule ||
+  left.declaration - right.declaration;
+
+/**
+ * Parse a rule list into protected focus rules: every rule mentioning
+ * `:focus-visible`, with each selector-list branch parsed into compounds and
+ * carrying its own specificity. Branches are independent, exactly as in CSS.
+ */
+const focusRulesFrom = (rules) =>
+  rules
+    .map((rule, index) => ({ ...rule, index }))
+    .filter((rule) => rule.selector.includes(":focus-visible"))
+    .map((rule) => ({
+      index: rule.index,
+      selector: rule.selector,
+      declarations: rule.declarations,
+      branches: splitSelectorList(rule.selector).map((part) => {
+        const compounds = splitCompounds(part).map(parseCompound);
+        const usable = compounds.length > 0 && compounds.every((compound) => compound !== null);
+        return { text: part, compounds, specificity: usable ? specificityOf(compounds) : null };
+      }),
+    }));
+
+/**
+ * Everything about a protected focus rule set this bounded model refuses to
+ * evaluate. Each of these FAILS CLOSED rather than being skipped or assumed
+ * visible: unsupported selector syntax, an `!important` annotation the bounded
+ * contract does not authorize, and any outline value that cannot be resolved
+ * statically. Declarations are already comment-stripped, so a comment cannot
+ * hide an annotation, and nothing outside a parsed protected declaration is
+ * ever inspected.
+ */
+const focusModelDefects = (focusRules): string[] => {
+  const defects: string[] = [];
+  for (const rule of focusRules) {
+    for (const branch of rule.branches) {
+      if (branch.specificity === null) {
+        defects.push(
+          `the bounded focus model cannot interpret the protected selector "${branch.text}"; extend the model rather than skipping the rule`,
+        );
+      }
+    }
+    for (const { property, value } of rule.declarations) {
+      if (IMPORTANT_ANNOTATION.test(value)) {
+        defects.push(
+          `"${rule.selector}" declares "${property}: ${value}"; the bounded focus contract does not authorize !important declarations`,
+        );
+        continue;
+      }
+      if (!OUTLINE_PROPERTIES.includes(property)) continue;
+      if (DYNAMIC_VALUE.test(value)) {
+        defects.push(`"${rule.selector}" declares an unresolvable "${property}: ${value}"`);
+        continue;
+      }
+      if (
+        property === "outline-width" &&
+        !(value.trim().toLowerCase() in OUTLINE_WIDTH_KEYWORDS) &&
+        cssLength(value.trim()) === null
+      ) {
+        defects.push(`"${rule.selector}" declares an uninterpretable width "${value}"`);
+      }
+      if (property === "outline-style" && !OUTLINE_STYLES.includes(value.trim().toLowerCase())) {
+        defects.push(`"${rule.selector}" declares an uninterpretable style "${value}"`);
+      }
+    }
+  }
+  return defects;
+};
+
+/** A branch whose SUBJECT carries `:focus-visible` — the ones that style the
+ *  focused element itself rather than a descendant of it. */
+const focusSubjectBranches = (rule) =>
+  rule.branches.filter(
+    (branch) =>
+      branch.specificity !== null &&
+      branch.compounds[branch.compounds.length - 1].some((simple) => simple.kind === "focus"),
+  );
+
+/**
+ * The browser-effective outline for one target. Width and style are cascaded
+ * INDEPENDENTLY, each won by the candidate with the greatest
+ * (specificity, rule order, declaration order). Flattening declarations into
+ * source order — the previous model — is not the cascade and produced both
+ * false passes and false failures.
+ */
+const resolveOutline = (focusRules, target) => {
+  const winners: Record<string, { value: unknown; at: unknown }> = { width: null, style: null };
+  for (const rule of focusRules) {
+    const matching = focusSubjectBranches(rule).filter((branch) =>
+      selectorMatchesTarget(branch.compounds, target.chain),
+    );
+    if (matching.length === 0) continue;
+    let specificity = [0, 0, 0];
+    for (const branch of matching) {
+      if (compareSpecificity(branch.specificity, specificity) > 0) specificity = branch.specificity;
+    }
+    rule.declarations.forEach((declaration, declarationIndex) => {
+      for (const candidate of outlineCandidates(declaration)) {
+        const at = { specificity, rule: rule.index, declaration: declarationIndex };
+        const current = winners[candidate.subproperty];
+        if (current === null || compareCascade(at, current.at) >= 0) {
+          winners[candidate.subproperty] = { value: candidate.value, at };
+        }
+      }
+    });
+  }
+  const width = winners.width === null ? OUTLINE_INITIAL.width : winners.width.value;
+  const style = winners.style === null ? OUTLINE_INITIAL.style : winners.style.value;
+  const declared = winners.width !== null || winners.style !== null;
+  return {
+    declared,
+    width,
+    style,
+    visible: declared && style !== "none" && style !== "hidden" && width > 0,
+  };
+};
+
+const FOCUS_RULES = focusRulesFrom(COMPONENT_RULES);
 
 /** The component root. Every rule in this stylesheet is scoped beneath it, and
  *  the markup renders the whole product inside `<section class="psadj">`. */
@@ -936,7 +1059,7 @@ const PSADJ_ROOT = elementNode(null, ["psadj"]);
 /** Representative protected targets: the interactive contexts the component
  *  actually renders, plus one derived from every interactive focus selector the
  *  stylesheet itself declares, so a newly added focus rule is protected too. */
-const focusTargets = () => {
+const focusTargetsFor = (focusRules) => {
   const targets: { name: string; chain: unknown[] }[] = [
     { name: "an anchor inside .psadj", chain: [PSADJ_ROOT, elementNode("a")] },
     { name: "a button inside .psadj", chain: [PSADJ_ROOT, elementNode("button")] },
@@ -959,9 +1082,9 @@ const focusTargets = () => {
     },
   ];
 
-  for (const rule of FOCUS_RULES) {
-    for (const parsed of focusSubjectSelectors(rule)) {
-      const chains = parsed.compounds.reduce(
+  for (const rule of focusRules) {
+    for (const branch of focusSubjectBranches(rule)) {
+      const chains = branch.compounds.reduce(
         (accumulated, compound) =>
           nodesFromCompound(compound).flatMap((node) =>
             accumulated.map((chain) => [...chain, node]),
@@ -971,21 +1094,18 @@ const focusTargets = () => {
       for (const chain of chains) {
         if (!isInteractiveNode(chain[chain.length - 1])) continue;
         const rooted = chain[0].classes.has("psadj") ? chain : [PSADJ_ROOT, ...chain];
-        targets.push({ name: `"${parsed.text}"`, chain: rooted });
+        targets.push({ name: `"${branch.text}"`, chain: rooted });
       }
     }
   }
   return targets;
 };
 
-/** Declarations of every focus rule that applies to a target, in source order,
- *  composed rather than reset per rule. */
-const applicableFocusDeclarations = (target) =>
-  FOCUS_RULES.filter((rule) =>
-    focusSubjectSelectors(rule).some((parsed) =>
-      selectorMatchesTarget(parsed.compounds, target.chain),
-    ),
-  ).flatMap((rule) => rule.declarations);
+/** Build a complete bounded focus model from raw CSS, for the fixtures below. */
+const focusModelOf = (styleSheet: string) => {
+  const focusRules = focusRulesFrom(parseStyleRules(styleSheet));
+  return { focusRules, defects: focusModelDefects(focusRules), targets: focusTargetsFor(focusRules) };
+};
 
 // The model must never silently collapse: an empty or truncated rule list would
 // make every effective-value assertion below vacuously true.
@@ -1055,78 +1175,178 @@ test("a polite live region announces status, selection, and toggle state", () =>
 test("a visible focus indicator is defined for every interactive element", () => {
   assert.ok(/:focus-visible/.test(component));
 
-  const focusRules = COMPONENT_RULES.filter((rule) => rule.selector.includes(":focus-visible"));
-  assert.ok(focusRules.length > 0, "the component must define at least one :focus-visible rule");
+  // --- the bounded cascade model, pinned before it is relied upon ------------
+  //
+  // Specificity decides before source order. `:is()` contributes its MOST
+  // specific argument, so a selector that merely reads as narrower is not
+  // necessarily the one the browser applies.
+  const specificityText = (selector: string) =>
+    specificityOf(splitCompounds(selector).map(parseCompound)).join(",");
+  assert.equal(specificityText(".psadj :is(a, button, input, [tabindex]):focus-visible"), "0,3,0");
+  assert.equal(specificityText(".psadj .psadj__toolbar button:focus-visible"), "0,3,1");
+  assert.equal(specificityText(".psadj button:focus-visible"), "0,2,1");
+  assert.equal(specificityText(".psadj__toolbar button:focus-visible"), "0,2,1");
+  assert.equal(specificityText(".psadj [tabindex]:focus-visible"), "0,3,0");
+  assert.equal(specificityText("*:focus-visible"), "0,1,0");
 
-  // The helper reads EFFECTIVE outline state, so these hold by construction and
-  // a shorthand or longhand suppression cannot slip past the assertions below.
-  assert.equal(effectiveOutline([{ property: "outline", value: "3px solid currentColor" }]).visible, true);
-  for (const suppression of [
-    { property: "outline", value: "none" },
-    { property: "outline", value: "0" },
-    { property: "outline", value: "0 solid currentColor" },
-    { property: "outline-width", value: "0" },
-    { property: "outline-width", value: "0px" },
-    { property: "outline-style", value: "none" },
-    { property: "outline-style", value: "hidden" },
+  const GENERAL = `.psadj :is(a, button, input, [tabindex]):focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }`;
+  const outlineFor = (styleSheet: string, targetName: string) => {
+    const model = focusModelOf(styleSheet);
+    assert.deepEqual(model.defects, [], `fixture stylesheet is not evaluable: ${model.defects[0]}`);
+    const target = model.targets.find((entry) => entry.name === targetName);
+    assert.ok(target, `fixture target ${targetName} was not derived`);
+    return resolveOutline(model.focusRules, target);
+  };
+  const TOOLBAR = "a toolbar button inside .psadj";
+  const BUTTON = "a button inside .psadj";
+  const INPUT = "an input inside .psadj";
+  const TABINDEX = "a [tabindex] element inside .psadj";
+
+  // S1 — an EARLIER higher-specificity suppression still wins. Source order
+  //      would wrongly let the later general rule paint an outline the browser
+  //      never shows.
+  assert.equal(
+    outlineFor(
+      `.psadj .psadj__toolbar button:focus-visible { outline-width: 0; }\n${GENERAL}`,
+      TOOLBAR,
+    ).visible,
+    false,
+    "S1: a higher-specificity suppression must win and remove the focus outline",
+  );
+
+  // S2 — a lower-specificity suppression does not defeat a stronger positive
+  //      rule, and a higher-specificity positive refinement still applies.
+  const s2 = `${GENERAL}
+    .psadj button:focus-visible { outline-width: 0; }
+    .psadj .psadj__toolbar button:focus-visible { outline-width: 4px; }`;
+  assert.equal(outlineFor(s2, BUTTON).visible, true, "S2: the stronger general rule wins");
+  assert.equal(outlineFor(s2, TOOLBAR).visible, true, "S2: the toolbar refinement wins");
+
+  // S3 — at EQUAL specificity, source order decides, in both directions.
+  const equal = ".psadj :is(a, button, input, [tabindex]):focus-visible";
+  assert.equal(
+    outlineFor(`${equal} { outline-width: 0; }\n${GENERAL}`, BUTTON).visible,
+    true,
+    "S3: at equal specificity a later positive declaration wins",
+  );
+  assert.equal(
+    outlineFor(`${GENERAL}\n${equal} { outline-width: 0; }`, BUTTON).visible,
+    false,
+    "S3: at equal specificity a later zero suppresses the focus outline",
+  );
+
+  // S4 — `:is()` specificity is NOT the matched alternative. The general rule
+  //      scores (0,3,0) and defeats the textually narrower (0,2,1) suppression,
+  //      so the outline survives. The previous model failed this benign case.
+  assert.equal(
+    outlineFor(`${GENERAL}\n.psadj__toolbar button:focus-visible { outline-width: 0; }`, TOOLBAR)
+      .visible,
+    true,
+    "S4: :is() takes its most specific argument, so the general rule still wins",
+  );
+
+  // S5 — shorthand and longhand cascade per subproperty, by specificity.
+  assert.equal(
+    outlineFor(
+      `.psadj .psadj__toolbar button:focus-visible { outline: 0; }\n${GENERAL}\n.psadj__toolbar button:focus-visible { outline-width: 4px; }`,
+      TOOLBAR,
+    ).visible,
+    false,
+    "S5A: the strongest shorthand suppression wins both subproperties",
+  );
+  const s5b = `${GENERAL}
+    .psadj button:focus-visible { outline: 0; }
+    .psadj .psadj__toolbar button:focus-visible { outline: 4px solid currentColor; }`;
+  assert.equal(outlineFor(s5b, BUTTON).visible, true, "S5B: the general rule protects a button");
+  assert.equal(outlineFor(s5b, TOOLBAR).visible, true, "S5B: the strongest positive rule wins");
+
+  // A lower-specificity later suppression the general rule defeats stays
+  // visible; an EQUAL-specificity later suppression does not.
+  assert.equal(
+    outlineFor(`${GENERAL}\n.psadj input:focus-visible { outline-width: 0; }`, INPUT).visible,
+    true,
+    "a weaker later zero does not remove the focus outline",
+  );
+  assert.equal(
+    outlineFor(`${GENERAL}\n.psadj [tabindex]:focus-visible { outline-width: 0; }`, TABINDEX)
+      .visible,
+    false,
+    "an equal-specificity later zero suppresses the focus outline",
+  );
+
+  // Shorthand reset semantics, per subproperty.
+  for (const [shorthand, width, style] of [
+    ["outline: 3px solid currentColor", 3, "solid"],
+    ["outline: 0", 0, "none"],
+    ["outline: none", 3, "none"],
+    ["outline: solid", 3, "solid"],
   ]) {
-    assert.equal(
-      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, suppression]).visible,
-      false,
-      `a later ${suppression.property}: ${suppression.value} suppresses the focus outline`,
-    );
+    const resolved = outlineFor(`.psadj button:focus-visible { ${shorthand}; }`, BUTTON);
+    assert.equal(resolved.width, width, `${shorthand} resolves width ${width}`);
+    assert.equal(resolved.style, style, `${shorthand} resolves style ${style}`);
   }
-  // A later POSITIVE partial override refines the outline; it does not remove
-  // it. This is the case the previous per-selector model got wrong.
+
+  // Positive refinements remain visible; every suppressing form does not.
   for (const refinement of [
-    { property: "outline-width", value: "4px" },
-    { property: "outline-width", value: "2px" },
-    { property: "outline-width", value: "thick" },
-    { property: "outline-style", value: "dashed" },
-    { property: "outline-style", value: "dotted" },
+    "outline-width: 4px",
+    "outline-width: 2px",
+    "outline-width: thick",
+    "outline-style: dashed",
+    "outline-style: dotted",
+    "outline: 4px dashed rgb(1, 2, 3)",
   ]) {
     assert.equal(
-      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, refinement]).visible,
+      outlineFor(`${GENERAL}\n${equal} { ${refinement}; }`, BUTTON).visible,
       true,
-      `a later ${refinement.property}: ${refinement.value} must remain visible`,
+      `a later ${refinement} must remain visible`,
     );
   }
-  // An unresolvable dynamic value fails closed rather than being assumed
-  // visible, in the shorthand and in either longhand.
-  for (const dynamic of [
-    { property: "outline", value: "var(--focus-outline)" },
-    { property: "outline-width", value: "var(--w)" },
-    { property: "outline-width", value: "calc(1px * 0)" },
-    { property: "outline-style", value: "var(--s)" },
+  for (const suppression of [
+    "outline: none",
+    "outline: 0",
+    "outline: 0 solid currentColor",
+    "outline-width: 0",
+    "outline-width: 0px",
+    "outline-style: none",
+    "outline-style: hidden",
   ]) {
     assert.equal(
-      effectiveOutline([{ property: "outline", value: "3px solid currentColor" }, dynamic]).visible,
+      outlineFor(`${GENERAL}\n${equal} { ${suppression}; }`, BUTTON).visible,
       false,
-      `an unresolvable ${dynamic.property}: ${dynamic.value} must not be assumed visible`,
+      `a later ${suppression} suppresses the focus outline`,
     );
   }
 
-  // Equivalent positive longhands, and reordering that preserves the effective
-  // state, both still pass.
-  assert.equal(
-    effectiveOutline([
-      { property: "outline-width", value: "3px" },
-      { property: "outline-style", value: "solid" },
-      { property: "outline-color", value: "currentColor" },
-    ]).visible,
-    true,
-  );
-  assert.equal(
-    effectiveOutline([
-      { property: "outline-offset", value: "2px" },
-      { property: "outline", value: "3px solid currentColor" },
-    ]).visible,
-    true,
+  // Unsupported syntax, unresolvable values and `!important` all FAIL CLOSED:
+  // they are reported as defects, never skipped and never assumed visible.
+  for (const unevaluable of [
+    ".psadj > button:focus-visible { outline: 3px solid currentColor; }",
+    `${GENERAL}\n.psadj input:focus-visible { outline-width: var(--w); }`,
+    `${GENERAL}\n.psadj input:focus-visible { outline-width: calc(1px * 0); }`,
+    `${GENERAL}\n.psadj input:focus-visible { outline-style: var(--s); }`,
+    `${GENERAL}\n.psadj input:focus-visible { outline: 0 !important; }`,
+    `${GENERAL}\n.psadj input:focus-visible { outline-width: 0 ! IMPORTANT; }`,
+    `${GENERAL}\n.psadj input:focus-visible { outline-style: none!important; }`,
+  ]) {
+    assert.ok(
+      focusModelOf(unevaluable).defects.length > 0,
+      `the bounded model must fail closed on: ${unevaluable.split("\n").pop()}`,
+    );
+  }
+  // …while ordinary colour functions and the real stylesheet do not.
+  assert.deepEqual(focusModelOf(`${GENERAL}\n${equal} { outline: 2px solid rgb(0, 0, 0); }`).defects, []);
+
+  // --- the component's own protected focus contract -------------------------
+  assert.deepEqual(
+    focusModelDefects(FOCUS_RULES),
+    [],
+    "the component's protected focus rules must be fully evaluable",
   );
 
-  // The selector model must resolve the rules that APPLY to each element, not
-  // the rules that share a selector string.
-  const targets = focusTargets();
+  const targets = focusTargetsFor(FOCUS_RULES);
   assert.ok(targets.length >= 6, `only ${targets.length} protected focus targets were derived`);
   assert.ok(
     targets.some((target) => target.name.includes("toolbar")),
@@ -1134,30 +1354,29 @@ test("a visible focus indicator is defined for every interactive element", () =>
   );
 
   for (const target of targets) {
-    const outline = effectiveOutline(applicableFocusDeclarations(target));
+    const outline = resolveOutline(FOCUS_RULES, target);
     assert.ok(
-      outline.touched,
+      outline.declared,
       `no applicable :focus-visible rule establishes an outline for ${target.name}`,
-    );
-    assert.ok(
-      !outline.suppressed,
-      `an applicable rule removes the focus outline for ${target.name} (width ${outline.width}, style ${outline.style})`,
     );
     assert.ok(
       outline.visible,
       `${target.name} must paint a focus outline, got width ${outline.width} style ${outline.style}`,
     );
   }
+  assert.deepEqual(
+    targets.filter((target) => !resolveOutline(FOCUS_RULES, target).visible).map((t) => t.name),
+    [],
+    "no applicable rule removes the focus outline from a protected interactive target",
+  );
 
-  // The composition really is cross-selector, not per-selector-string: a rule
-  // whose selector never mentions the toolbar still applies to a toolbar
-  // button, which is exactly why a narrower rule setting one longhand inherits
-  // the style already established instead of resetting it.
+  // The composition really is cross-selector: a rule whose selector never
+  // mentions the toolbar still applies to a toolbar button.
   const toolbar = targets.find((target) => target.name.includes("toolbar"));
   assert.ok(toolbar, "the toolbar-button target must exist");
   const toolbarRules = FOCUS_RULES.filter((rule) =>
-    focusSubjectSelectors(rule).some((parsed) =>
-      selectorMatchesTarget(parsed.compounds, toolbar.chain),
+    focusSubjectBranches(rule).some((branch) =>
+      selectorMatchesTarget(branch.compounds, toolbar.chain),
     ),
   );
   assert.ok(toolbarRules.length > 0, "no focus rule applies to a toolbar button");
@@ -1169,7 +1388,7 @@ test("a visible focus indicator is defined for every interactive element", () =>
   // The rendered-record rule styles the descendant rect, so it is never treated
   // as the focused element's own outline contract.
   assert.ok(
-    focusRules.some((rule) => rule.selector.includes(".psadj-node:focus-visible")),
+    FOCUS_RULES.some((rule) => rule.selector.includes(".psadj-node:focus-visible")),
     "the rendered-record focus rule must still exist",
   );
 });
