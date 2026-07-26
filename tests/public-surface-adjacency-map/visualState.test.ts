@@ -327,7 +327,20 @@ test("98 — halo parameters are constants and no code path computes one", () =>
   const haloRule = /\.psadj-node__halo\s*\{([^}]*)\}/.exec(componentCode);
   assert.ok(haloRule, "the halo rule must exist");
   assert.ok(/stroke-width:\s*1\.5/.test(haloRule[1]), "one constant stroke width");
-  assert.ok(/stroke:\s*var\(--accent\)/.test(haloRule[1]), "one constant colour token");
+  // The hue is now a per-state token, so focus, hover and selection are told
+  // apart from each other. It is still a TOKEN — never computed, never derived
+  // from any data value — and the halo GEOMETRY is identical in all three
+  // states, which is what this check has always protected.
+  assert.ok(
+    /stroke:\s*var\(--halo-color, var\(--focus\)\)/.test(haloRule[1]),
+    "the halo colour must be a token with a token fallback",
+  );
+  assert.ok(!/calc\(|attr\(/.test(haloRule[1]), "no halo parameter may be computed");
+  const stateColours = [...componentCode.matchAll(/--halo-color:\s*var\((--[\w-]+)\)/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(stateColours, ["--hover", "--focus", "--selection"]);
+  assert.equal(new Set(stateColours).size, 3, "the three states must be visually distinct");
   assert.equal(new Set([...componentCode.matchAll(/psadj-node__halo" r="([\d.]+)"/g)].map((m) => m[1])).size, 1);
   assert.ok(!/halo/.test(clientCode), "the client must never compute a halo value");
 });
@@ -344,7 +357,18 @@ test("99 — no blur rule targets record text, glyph geometry or active edges", 
 });
 
 test("100 — inactive opacity is constant and inactive records stay reachable", () => {
-  assert.ok(/\[data-inactive="true"\]\s*\{\s*opacity:\s*0\.28/.test(componentCode));
+  // A legibility FLOOR rather than one pinned magic number: the value was
+  // raised with the darker observatory field, because the same fraction reads
+  // dimmer against blue-black than against the previous warm charcoal. The
+  // guarantee is that inactive records stay readable while still reading as
+  // de-emphasised.
+  const inactiveRule = /\.psadj-node\[data-inactive="true"\]\s*\{[^}]*opacity:\s*([\d.]+)/.exec(
+    componentCode,
+  );
+  assert.ok(inactiveRule, "the inactive record rule must declare one constant opacity");
+  const inactiveOpacity = Number(inactiveRule[1]);
+  assert.ok(inactiveOpacity >= 0.35, `inactive records must stay legible, got ${inactiveOpacity}`);
+  assert.ok(inactiveOpacity < 1, "inactive records must still read as de-emphasised");
   // Nothing removes an inactive record from the focus order or the record list.
   const inactiveRules = [...componentCode.matchAll(/\[data-inactive="true"\][^{}]*\{([^}]*)\}/g)];
   assert.ok(inactiveRules.length > 0);
@@ -706,6 +730,40 @@ test("145 — wrap rules are declared and the grid collapses below 640px", () =>
   const narrow = componentCode.slice(componentCode.indexOf("@media (max-width: 640px)"));
   assert.ok(narrow.length > 0, "the breakpoint must exist");
   assert.ok(/\.psadj__grid\s*\{\s*grid-template-columns:\s*1fr;/.test(narrow));
+
+  // D18 — responsive role labels.
+  //
+  // The viewBox is fixed, so a label's rendered size is its logical size times
+  // the SVG's on-screen scale. That scale falls as low as 0.21, which renders
+  // the 13-unit desktop label at about 3 CSS pixels. These bands raise the
+  // logical size as the scale falls, and move the label outward past the orbit
+  // where a large label has room — the annulus between the separator ring and
+  // the role halo is only 31 units wide.
+  assert.ok(
+    /@media \(max-width: 1199px\)[\s\S]{0,240}?\.psadj-role-label\s*\{[^}]*font-size:\s*24px/.test(
+      componentCode,
+    ),
+    "the intermediate label band must be declared",
+  );
+  assert.ok(
+    /@media \(max-width: 899px\)[\s\S]{0,240}?\.psadj-role-label\s*\{[^}]*font-size:\s*38px/.test(
+      componentCode,
+    ),
+    "the compact label band must be declared",
+  );
+  assert.ok(
+    /transform:\s*translate\(var\(--psadj-label-shift-x, 0\), var\(--psadj-label-shift-y, 0\)\)/.test(
+      componentCode,
+    ),
+    "the compact bands must move the label outward",
+  );
+  // The shift is authored per label from its own radius vector, so it stays on
+  // the label's own angle and the label-to-role association is unambiguous.
+  assert.ok(/const COMPACT_ROLE_LABEL_R = 486;/.test(component));
+  assert.ok(/COMPACT_ROLE_LABEL_R \/ ROLE_LABEL_R - 1/.test(component));
+  assert.ok(/style=\{compactLabelShift\(label\)\}/.test(component));
+  // The wide regime is untouched, so 1200px and 1440px render as reviewed.
+  assert.ok(/\.psadj__canvas \.psadj-role-label\s*\{[^}]*font-size:\s*13px/.test(componentCode));
 });
 
 // ---------------------------------------------------------------------------

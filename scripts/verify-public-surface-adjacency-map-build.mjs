@@ -859,13 +859,25 @@ await check("PSADJ-19 the route width and responsive grid are emitted", () => {
     [/max-width:\s*100%/, "max-width: 100% on the SVG"],
     [/overflow-wrap:\s*anywhere/, "wrap rule"],
     [/@media\s*\(max-width:\s*640px\)/, "the 640px breakpoint"],
+    // D18 responsive role labels: both bands, and the outward shift that gives
+    // an enlarged label room outside the orbit.
+    [/@media\s*\(max-width:\s*1199px\)/, "the 1199px label band"],
+    [/@media\s*\(max-width:\s*899px\)/, "the 899px label band"],
+    [/--psadj-label-shift-x/, "the per-label outward shift"],
   ];
   const missing = required.filter(([pattern]) => !pattern.test(all)).map(([, label]) => label);
   if (missing.length > 0) throw new Error(`missing emitted CSS: ${missing.join(" | ")}`);
   if (/main\.main--psadj-expanded\s*\{[^}]*max-width:\s*1200px/.test(all)) {
     throw new Error("the superseded 1200px route width is still emitted");
   }
-  return `${required.length} emitted CSS contracts present`;
+
+  // Every role label must carry its own shift, or the compact bands would move
+  // some labels and leave others behind.
+  const shifted = [...html.matchAll(/data-psadj-role-label="[^"]+"[^>]*--psadj-label-shift-x:/g)];
+  if (shifted.length !== 3) {
+    throw new Error(`${shifted.length} of 3 role labels carry an outward shift`);
+  }
+  return `${required.length} emitted CSS contracts present; 3 role labels carry an outward shift`;
 });
 
 // ---------------------------------------------------------------------------
