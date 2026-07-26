@@ -52,9 +52,9 @@ import {
   formatLogicalNumber,
   GRAPH_RECORD_ORDER,
   groupArcPath,
-  ROLE_LABEL_R,
   SEPARATOR_RING_R,
   VIEWBOX,
+  type LayoutPoint,
 } from "../lib/public-surface-adjacency-map/layout.ts";
 import { DECOR_MARKS } from "../lib/public-surface-adjacency-map/decor.ts";
 
@@ -109,6 +109,21 @@ const orbit = computeRoleOrbit(snapshot.nodes);
 const graphRecordOrder = GRAPH_RECORD_ORDER(snapshot.nodes);
 
 const pointOf = new Map([...radial.positions, ...orbit.positions]);
+
+/**
+ * The authored coordinate for one record.
+ *
+ * Every record in `GRAPH_RECORD_ORDER` belongs to exactly one of the two
+ * coordinate spaces, so a miss is impossible by construction. It throws rather
+ * than falling back, because this route is prerendered: a record without a
+ * coordinate must fail the build, never render a control at an invented
+ * position.
+ */
+const pointFor = (id: string): LayoutPoint => {
+  const point = pointOf.get(id);
+  if (!point) throw new Error(`no authored coordinate for record ${id}`);
+  return point;
+};
 
 const fmt = formatLogicalNumber;
 
@@ -316,7 +331,7 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
                    order is prohibited. -->
               <g data-psadj-layer="nodes">
                 {graphRecordOrder.map((node) => {
-                  const point = pointOf.get(node.id);
+                  const point = pointFor(node.id);
                   const role = node.visualization_role;
                   return (
                     <g

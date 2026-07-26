@@ -32,7 +32,7 @@ import {
   SAME_GROUP_BULGE_R,
   SEPARATOR_RING_R,
 } from "../../src/lib/public-surface-adjacency-map/layout.ts";
-import { DECOR_MARKS, DECOR_VIGNETTE } from "../../src/lib/public-surface-adjacency-map/decor.ts";
+import { DECOR_MARKS } from "../../src/lib/public-surface-adjacency-map/decor.ts";
 import { resolveEmphasis } from "../../src/lib/public-surface-adjacency-map/emphasis.ts";
 import { resolveReadoutLabel } from "../../src/lib/public-surface-adjacency-map/layout.ts";
 import {
@@ -201,7 +201,8 @@ test("89 — decor.ts imports no dataset, snapshot or layout module", () => {
 
 test("90 — the exported marks are a frozen array of numeric literals", () => {
   assert.ok(Object.isFrozen(DECOR_MARKS));
-  assert.ok(Object.isFrozen(DECOR_VIGNETTE));
+  // Each mark is frozen too, so no consumer can mutate one in place.
+  for (const mark of DECOR_MARKS) assert.ok(Object.isFrozen(mark));
   for (const mark of DECOR_MARKS) {
     for (const key of ["x", "y", "r", "opacity"]) {
       assert.equal(typeof mark[key], "number", key);
@@ -209,10 +210,8 @@ test("90 — the exported marks are a frozen array of numeric literals", () => {
     }
   }
   // Every value in the committed array is a literal, never an expression.
-  const arrayBody = decorCode.slice(
-    decorCode.indexOf("DECOR_MARKS"),
-    decorCode.indexOf("DECOR_VIGNETTE"),
-  );
+  const arrayBody = decorCode.slice(decorCode.indexOf("DECOR_MARKS"));
+  assert.ok(arrayBody.includes("Object.freeze"), "the committed array must be frozen in source");
   assert.ok(!/[a-zA-Z_$][\w$]*\s*\(/.test(arrayBody.replace(/Object\.freeze\s*\(/g, "")));
 });
 

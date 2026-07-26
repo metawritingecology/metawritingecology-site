@@ -71,11 +71,3 @@ export const DECOR_MARKS: readonly DecorMark[] = Object.freeze([
   Object.freeze({ x: 903.0, y: 289.0, r: 1.9, opacity: 0.29 }),
   Object.freeze({ x: 618.0, y: 941.0, r: 2.1, opacity: 0.37 }),
 ]);
-
-/** Static vignette geometry. Fixed, decorative, dataset-independent. */
-export const DECOR_VIGNETTE = Object.freeze({
-  cx: 500,
-  cy: 500,
-  innerR: 300,
-  outerR: 720,
-});
