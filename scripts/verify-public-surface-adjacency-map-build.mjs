@@ -819,21 +819,32 @@ await check("PSADJ-21 no prohibited runtime surface appears in the route's own o
     readFileSync(file, "utf8").includes("/public-surface-map/expanded/data/"),
   );
   if (bundles.length === 0) throw new Error("no client bundle references the expanded data routes");
-  const scripts = bundles.map((file) => readFileSync(file, "utf8"));
-  const bundle = [html, ...scripts].join("\n");
+  const scripts = bundles.map((file) => readFileSync(file, "utf8")).join("\n");
 
-  const prohibited = [
+  // Each token is scanned where it could actually originate from THIS product.
+  // The rendered page necessarily also carries the shared site chrome, which is
+  // not this route's output and not this package's to police; scanning the whole
+  // document would report another surface's code as an adjacency violation.
+  const inMarkup = [
+    [/codepen\.io|cdpn\.io|cpwebassets\.com/i, "a CodePen reference"],
+    [/<canvas\b/i, "a Canvas element"],
+    [/<iframe\b|<embed\b|<object\b/i, "an embedded external runtime surface"],
+  ];
+  const inBundle = [
     [/codepen\.io|cdpn\.io|cpwebassets\.com/i, "a CodePen reference"],
     [/WebGLRenderer|WebGL2?RenderingContext/, "a WebGL renderer or context"],
     [/getContext\s*\(\s*["'`]\s*(?:experimental-)?webgl/i, "a WebGL context request"],
-    [/<canvas\b/i, "a Canvas element"],
     [/requestAnimationFrame|cancelAnimationFrame/, "an animation frame loop"],
     [/Math\.random|crypto\.getRandomValues|randomUUID/, "a random source"],
     [/ResizeObserver/, "a ResizeObserver"],
   ];
-  const found = prohibited.filter(([pattern]) => pattern.test(bundle)).map(([, label]) => label);
+
+  const found = [
+    ...inMarkup.filter(([pattern]) => pattern.test(html)).map(([, label]) => `${label} in the route markup`),
+    ...inBundle.filter(([pattern]) => pattern.test(scripts)).map(([, label]) => `${label} in the route bundle`),
+  ];
   if (found.length > 0) throw new Error(`prohibited in build output: ${found.join(" | ")}`);
-  return `${prohibited.length} prohibited runtime surfaces absent from ${scripts.length + 1} artifact(s)`;
+  return `${inMarkup.length} markup and ${inBundle.length} runtime prohibitions absent from ${bundles.length} route bundle(s)`;
 });
 
 // ---------------------------------------------------------------------------

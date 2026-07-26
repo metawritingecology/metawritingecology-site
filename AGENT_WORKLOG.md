@@ -3652,3 +3652,16 @@ Files changed: `scripts/verify-public-surface-adjacency-map-build.mjs`, `AGENT_W
 Result: one additional commit, parented on `3cd078c871aed2c63a202288340eced3484c9237`. No prior commit was amended, rebased, squashed or force-pushed. The R1 invariant is unaffected: this commit touches neither resolver.
 Unresolved questions: unchanged.
 Risks or assumptions: narrowing a scan is a weakening if done carelessly, so the check now fails closed when no adjacency bundle is found, which is the same protection PSADJ-11 carries.
+
+### 2026-07-26 — Claude Code — phase3a-p7-1-psadj21-token-scoping
+
+Agent: Claude Code
+Task: Third correction on P7.1 draft PR #96, completing the PSADJ-21 scoping fix on head `fccc205a4eeb7c40252125fa1a86f8959f62d82a`. Verifier-only; no production source, test assertion or contract change.
+The previous correction narrowed PSADJ-21 to the adjacency route's own JS chunks but still scanned the whole rendered document for every token. `requestAnimationFrame` is present in the page HTML because the rendered document also carries the shared site chrome, which is not this route's output and not this package's to police. The check was therefore still reporting another surface's code as an adjacency violation.
+Correction: each token is now scanned where it could actually originate from this product. Markup-level prohibitions — a CodePen reference, a `<canvas>` element, an embedded external runtime surface — are scanned against the route's own HTML, where this component is the author. Runtime prohibitions — CodePen, WebGL renderer or context, a WebGL context request, an animation frame loop, a random source, and `ResizeObserver` — are scanned against the adjacency route's own bundles, selected exactly as PSADJ-11 selects them and failing closed when none is found. No token was dropped; the markup list gained the embedded-surface prohibition, so the check is broader than before rather than narrower.
+This is the same class of correction the P7.0 package documented at the head of its guard file: a guard that fails on code it does not govern is mis-scoped, and the guard is corrected rather than the source.
+Files changed: `scripts/verify-public-surface-adjacency-map-build.mjs`, `AGENT_WORKLOG.md`. Both inside the approved allowlist.
+Recorded from the previous CI run, before this correction: `astro check` 0 errors; full build green; every Node suite green with 0 skipped; PSADJ-01 through PSADJ-20 all PASS, including the six new P7.1 checks. PSADJ-21 was the only failure and is the check this package itself added.
+Result: one additional commit, parented on `fccc205a4eeb7c40252125fa1a86f8959f62d82a`. No prior commit was amended, rebased, squashed or force-pushed. The R1 invariant is unaffected.
+Unresolved questions: unchanged.
+Risks or assumptions: splitting one scan into two narrows each individually, so the check fails closed when no adjacency bundle is found and the markup list was extended rather than trimmed.
