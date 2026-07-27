@@ -21,7 +21,7 @@
     "@astrojs/check": "0.9.9",
     "@types/d3-selection": "3.0.11",
     "fast-xml-parser": "5.9.3",
-    "wrangler": "4.88.0"
+    "wrangler": "4.114.0"
   },
   "engines": {
     "node": ">=22"
