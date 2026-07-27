@@ -44,6 +44,8 @@ For document-level source traversal, use the canonical [Reading Paths](https://g
 
 Those paths are public navigation only. They do not establish formal conceptual relations, ontology, priority, hierarchy, or Registry status.
 
+These paths also do not establish formal dependency. For the distinction between candidate and confirmed relations, see [Boundary-Preserving Use Conditions](/boundary-preserving-use-conditions/).
+
 Earlier Medium companion texts remain legacy public surfaces rather than the current source-reading layer.
 
 ### Boundary-Oriented Source Routes
