@@ -542,16 +542,58 @@ await check("20 Phase 2B-1 viewport navigation is bundled, bounded, and transien
   ];
 
   const offenders = [];
+
+  // Clauses (c) and (d) are product-wide and remain scanned across every
+  // emitted bundle, unchanged in effect.
   for (const file of files) {
     const text = readFileSync(file, "utf8");
-    for (const marker of [
-      ...forbiddenPersistence,
-      ...forbiddenModules,
-      ...forbiddenGestures,
-    ]) {
+    for (const marker of [...forbiddenPersistence, ...forbiddenModules]) {
       if (text.includes(marker)) offenders.push(`${marker} in ${file}`);
     }
   }
+
+  // Clause (e) is an AUTHORITY MAP contract: this product reaches every
+  // viewport operation through a native control, so it installs no gesture
+  // listener. It is therefore scanned over the Authority Map's OWN emitted
+  // bundle(s), identified by a POSITIVE predicate — the `data-psam-*` viewport
+  // markers clause (a) above already requires — and never by excluding another
+  // product's filename. An unrelated approved surface that legitimately owns
+  // wheel or pointer listeners in its own bundle is not this check's subject.
+  const AUTHORITY_BUNDLE_MARKERS = ["data-psam-viewport", "psam__layer--viewport"];
+  const isAuthorityBundle = (text) =>
+    AUTHORITY_BUNDLE_MARKERS.some((marker) => text.includes(marker));
+
+  const authorityBundles = files.filter((file) => isAuthorityBundle(readFileSync(file, "utf8")));
+  // Fail closed: an empty identified set would make clause (e) vacuous.
+  if (authorityBundles.length === 0) {
+    throw new Error(
+      "no Authority Map client bundle could be identified; clause (e) cannot be scoped and must not pass vacuously",
+    );
+  }
+  for (const file of authorityBundles) {
+    const text = readFileSync(file, "utf8");
+    for (const marker of forbiddenGestures) {
+      if (text.includes(marker)) offenders.push(`${marker} in ${file}`);
+    }
+  }
+
+  // Positive control: an Authority Map bundle carrying a gesture listener is
+  // identified AND flagged, so the prohibition is still load-bearing.
+  const syntheticAuthority = 'data-psam-viewport addEventListener("wheel", f)';
+  if (!isAuthorityBundle(syntheticAuthority)) {
+    throw new Error("the Authority Map identification predicate failed its positive control");
+  }
+  if (!forbiddenGestures.some((marker) => syntheticAuthority.includes(marker))) {
+    throw new Error("the gesture prohibition failed its positive control");
+  }
+  // Negative control: an unrelated bundle with the SAME listeners but no
+  // Authority Map marker is not identified, so it cannot fail this contract.
+  const syntheticAdjacency =
+    'data-psadj-viewport addEventListener("wheel", f) addEventListener("pointerdown", g)';
+  if (isAuthorityBundle(syntheticAdjacency)) {
+    throw new Error("an unrelated bundle was misidentified as an Authority Map bundle");
+  }
+
   if (offenders.length) throw new Error(offenders.join("; "));
 
   // (f) No unsafe HTML-writing path in the Phase 2B-1 sources. Same rationale
@@ -595,7 +637,7 @@ await check("20 Phase 2B-1 viewport navigation is bundled, bounded, and transien
     throw new Error("viewport control group is missing its accessible name");
   }
 
-  return "viewport bundled locally; no added D3 package; no persistence/telemetry/service worker; no gesture-only path; no HTML writing";
+  return `viewport bundled locally; no added D3 package; no persistence/telemetry/service worker; no gesture-only path in ${authorityBundles.length} identified Authority Map bundle(s); no HTML writing`;
 });
 
 await check("21 Phase 2B-2 spatial keyboard navigation is bundled, geometry-bound, and navigation-only", () => {

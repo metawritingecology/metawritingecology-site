@@ -710,7 +710,7 @@ await check("PSADJ-14 the frozen 30-record product is unchanged", async () => {
     "src/pages/public-surface-map/data/snapshots/[snapshotId].json.ts":
       "99a83371f00d780469c9452398f1a7941fd46816",
     "src/components/PublicSurfaceAuthorityMap.astro": "e04ebc307d801acb878e2a6a0795ece1ac746762",
-    "scripts/verify-public-surface-map-build.mjs": "de691294e9ff70e69a39113f361058d4dd11f50f",
+    "scripts/verify-public-surface-map-build.mjs": "22ec8d5a8ddf350cc487e02d0f594bca19f6df35",
   };
   for (const rel of frozen) {
     const blob = await gitBlobSha1Hex(readBytes(p(rel)));

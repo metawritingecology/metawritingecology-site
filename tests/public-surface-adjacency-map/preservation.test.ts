@@ -146,9 +146,9 @@ const FROZEN_IDENTITIES = [
   },
   {
     path: "scripts/verify-public-surface-map-build.mjs",
-    byteLength: 31519,
-    sha256: "0a248c87794c3ab9ea5994cc79dc258c4638eb9f14fcf4aeee3b58a8fafb02cb",
-    gitBlob: "de691294e9ff70e69a39113f361058d4dd11f50f"
+    byteLength: 33920,
+    sha256: "8f87c5a6e27da358d160feab241032d05d3996b604af69c6ec9f4c3d690362fb",
+    gitBlob: "22ec8d5a8ddf350cc487e02d0f594bca19f6df35"
   }
 ];
 
