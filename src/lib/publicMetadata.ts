@@ -194,7 +194,7 @@ function zh(genre: string = DEFAULT_GENRE): RouteMetadataPolicy {
 }
 
 export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolicy>> = {
-  // --- 40 indexable routes -------------------------------------------------
+  // --- 41 indexable routes -------------------------------------------------
   "/": en(),
   "/about/": en(),
   "/ai-readable-knowledge-architecture/": en("AI-readable boundary page"),
@@ -220,6 +220,7 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/fiction/the-house-without-evidence/": en(),
   "/fiction/the-office-of-allocated-meaning/": en(),
   "/fiction/the-repair-of-neglected-wings/": en(),
+  "/human-governed-ai-workflows/": en(),
   "/interpretation-boundaries/": en("Public boundary page"),
   "/llms-boundary/": en("AI-readable boundary page"),
   "/models/": en("Classification-aware conceptual navigation"),
