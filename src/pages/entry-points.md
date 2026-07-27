@@ -44,6 +44,8 @@ For document-level source traversal, use the canonical [Reading Paths](https://g
 
 Those paths are public navigation only. They do not establish formal conceptual relations, ontology, priority, hierarchy, or Registry status.
 
+These paths also do not establish formal dependency. For the distinction between candidate and confirmed relations, see [Boundary-Preserving Use Conditions](/boundary-preserving-use-conditions/).
+
 Earlier Medium companion texts remain legacy public surfaces rather than the current source-reading layer.
 
 ### Boundary-Oriented Source Routes
@@ -67,3 +69,7 @@ The site paths below remain thematic orientation routes across six recurring zon
 ### Path 3 — Starting from platforms, AI, and machine-mediated conditions
 
 **Post-Human Syntax / AI / Algorithmic Language** → **Observation / Error / Legibility** → **Decision / Boundary / Risk** → **Systems / Exchange / Burden Transfer** → **Field / Topology / Pressure** → **Drift / Reconstruction / Repositioning**
+
+## Applied Evidence
+
+- [View public AI workflow cases](/human-governed-ai-workflows/) — Three bounded public cases on authority boundaries, artifact-scoped provenance, and delegated execution.
