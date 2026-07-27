@@ -63,6 +63,20 @@ export const SOURCE_NAMED_TOGGLE_LABEL = "Source-declared adjacency";
 export const NAVIGATION_TOGGLE_LABEL = "Provisional navigation adjacency";
 
 /**
+ * The five approved P7.2 viewport-operation labels.
+ *
+ * Each is a single exported string literal and is never duplicated inline in
+ * the component or the route. The ambiguous single-operation reset wording that
+ * P7.1 prohibited is deliberately still absent: it was never approved, and it
+ * stays prohibited.
+ */
+export const ZOOM_OUT_LABEL = "Zoom Out";
+export const ZOOM_IN_LABEL = "Zoom In";
+export const FIT_ALL_LABEL = "Fit All";
+export const RESET_EXPLORATION_LABEL = "Reset Exploration";
+export const FOCUS_RECORD_LABEL = "Focus Record";
+
+/**
  * Neutral text for the visual label readout, shown when no record is focused,
  * hovered or selected. The readout is a duplicate visual aid and never the only
  * surface for any value.

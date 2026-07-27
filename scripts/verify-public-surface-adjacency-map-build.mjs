@@ -103,10 +103,10 @@ const DIST_SITEMAP_DIR = p("dist");
  * This is a GATE, not a message. Printing `results.length` cannot detect a
  * silently deleted registration, because the printed number simply shrinks with
  * it. The gate below compares the executed identifier sequence against
- * `PSADJ-01 … PSADJ-21` exactly, so removing a registration, bypassing one,
+ * `PSADJ-01 … PSADJ-24` exactly, so removing a registration, bypassing one,
  * reordering two, or padding the count with a duplicate all fail the verifier.
  */
-const EXPECTED_PSADJ_CHECKS = 21;
+const EXPECTED_PSADJ_CHECKS = 24;
 const EXPECTED_PSADJ_IDS = Array.from(
   { length: EXPECTED_PSADJ_CHECKS },
   (_, index) => `PSADJ-${String(index + 1).padStart(2, "0")}`,
@@ -710,7 +710,7 @@ await check("PSADJ-14 the frozen 30-record product is unchanged", async () => {
     "src/pages/public-surface-map/data/snapshots/[snapshotId].json.ts":
       "99a83371f00d780469c9452398f1a7941fd46816",
     "src/components/PublicSurfaceAuthorityMap.astro": "e04ebc307d801acb878e2a6a0795ece1ac746762",
-    "scripts/verify-public-surface-map-build.mjs": "de691294e9ff70e69a39113f361058d4dd11f50f",
+    "scripts/verify-public-surface-map-build.mjs": "22ec8d5a8ddf350cc487e02d0f594bca19f6df35",
   };
   for (const rel of frozen) {
     const blob = await gitBlobSha1Hex(readBytes(p(rel)));
@@ -827,17 +827,31 @@ await check("PSADJ-17 the label readout is a non-live visual element", () => {
 // PSADJ-18 — two functional controls, and no deferred control or placeholder
 // ---------------------------------------------------------------------------
 
-await check("PSADJ-18 exactly two toolbar controls and no deferred control", () => {
+await check("PSADJ-18 the final toolbar renders exactly seven functional controls", () => {
   const html = readFileSync(DIST_PAGE, "utf8");
   const toggles = [...html.matchAll(/data-psadj-toggle="([a-z_]+)"/g)].map((m) => m[1]);
   if (toggles.length !== 2 || toggles[0] !== "source_named_adjacency" || toggles[1] !== "navigation_adjacency") {
     throw new Error(`expected exactly the two edge-class toggles, found ${toggles.join(", ")}`);
   }
-  for (const deferred of ["Zoom Out", "Zoom In", "Fit All", "Reset Exploration", "Focus Record", "Reset view"]) {
-    if (html.includes(deferred)) throw new Error(`${deferred} is deferred to P7.2 and must not render`);
+  // P7.2: the five approved actions render, in the approved order.
+  const actions = [...html.matchAll(/data-psadj-action="([a-z-]+)"/g)].map((m) => m[1]);
+  const expected = "zoom-out,zoom-in,fit-all,reset-exploration,focus-record";
+  if (actions.join(",") !== expected) {
+    throw new Error(`expected the five approved actions, found ${actions.join(", ")}`);
   }
-  if (/aria-disabled/.test(html)) throw new Error("no placeholder control may be aria-disabled");
-  return "2 functional controls, 0 deferred controls, 0 placeholders";
+  for (const label of ["Zoom Out", "Zoom In", "Fit All", "Reset Exploration", "Focus Record"]) {
+    if (!html.includes(label)) throw new Error(`${label} must render in P7.2`);
+  }
+  // RETAINED: the unapproved wording variant, and aria-disabled, stay absent.
+  if (html.includes("Reset view")) throw new Error("the unapproved reset wording must not render");
+  if (/aria-disabled/.test(html)) throw new Error("no control may be aria-disabled");
+  // Native disabled is admissible on at most one control, and only Focus Record.
+  const disabled = [...html.matchAll(/<button[^>]*?(?<![\w-])disabled(?![\w-])[^>]*>/g)];
+  if (disabled.length > 1) throw new Error("at most one control may be disabled");
+  if (disabled.length === 1 && !/focus-record/.test(disabled[0][0])) {
+    throw new Error("only Focus Record may be disabled");
+  }
+  return `2 toggles + 5 actions = 7 functional controls, ${disabled.length} natively disabled`;
 });
 
 // ---------------------------------------------------------------------------
@@ -881,10 +895,10 @@ await check("PSADJ-19 the route width and responsive grid are emitted", () => {
 });
 
 // ---------------------------------------------------------------------------
-// PSADJ-20 — grouping arcs at the fixed radius, non-interactive
+// PSADJ-20 — grouping arcs at the fixed radius, now keyboard-operable
 // ---------------------------------------------------------------------------
 
-await check("PSADJ-20 grouping arcs use the fixed radius and stay non-interactive", () => {
+await check("PSADJ-20 grouping arcs use the fixed radius and are keyboard-operable", () => {
   const html = readFileSync(DIST_PAGE, "utf8");
   const arcs = [...html.matchAll(/data-psadj-arc="([^"]+)"[^>]*d="([^"]+)"/g)];
   if (arcs.length !== 7) throw new Error(`expected 7 grouping arcs, found ${arcs.length}`);
@@ -898,14 +912,16 @@ await check("PSADJ-20 grouping arcs use the fixed radius and stay non-interactiv
       throw new Error(`the ${key} arc is not serialized to three decimals: ${d}`);
     }
   }
-  // Non-interactive in P7.1: no arc is focusable or exposes control semantics.
-  if (/data-psadj-arc="[^"]*"[^>]*tabindex/.test(html)) {
-    throw new Error("a grouping arc is focusable, which is P7.2 behaviour");
+  // P7.2: every arc is a keyboard-operable control. The `d` bytes above are
+  // unchanged, so promoting the arc did not move any geometry.
+  const focusable = [...html.matchAll(/data-psadj-arc="[^"]*"[^>]*tabindex="0"/g)];
+  if (focusable.length !== 7) {
+    throw new Error(`expected 7 focusable arcs, found ${focusable.length}`);
   }
-  if (/data-psadj-arc="[^"]*"[^>]*role="button"/.test(html)) {
-    throw new Error("a grouping arc exposes control semantics, which is P7.2 behaviour");
+  if (/data-psadj-arc="[^"]*"[^>]*aria-hidden/.test(html)) {
+    throw new Error("an arc control must not be aria-hidden");
   }
-  return `7 arcs at radius ${radius}, all non-interactive`;
+  return `7 arcs at radius ${radius}, all keyboard-operable`;
 });
 
 // ---------------------------------------------------------------------------
@@ -1067,6 +1083,90 @@ await check("PSADJ-21 route output is deterministic and free of prohibited runti
 });
 
 // ---------------------------------------------------------------------------
+// PSADJ-22 — emitted control surface (C leg of canonical 196, 197, 198)
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-22 the emitted toolbar carries seven wired controls and one native disabled", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const toggles = [...html.matchAll(/data-psadj-toggle="([a-z_]+)"/g)].map((m) => m[1]);
+  const actions = [...html.matchAll(/data-psadj-action="([a-z-]+)"/g)].map((m) => m[1]);
+  if (toggles.length !== 2) throw new Error(`expected 2 toggles, found ${toggles.length}`);
+  if (actions.length !== 5) throw new Error(`expected 5 actions, found ${actions.length}`);
+  if (toggles.length + actions.length !== 7) throw new Error("the toolbar must carry seven controls");
+  // Every approved label is present as visible text.
+  for (const label of ["Zoom Out", "Zoom In", "Fit All", "Reset Exploration", "Focus Record"]) {
+    if (!html.includes(`>${label}<`)) throw new Error(`${label} must render as visible text`);
+  }
+  if (html.includes("Reset view")) throw new Error("the unapproved reset wording must not render");
+  if (/aria-disabled/.test(html)) throw new Error("no control may be aria-disabled");
+  return `7 emitted controls: ${toggles.join(", ")} + ${actions.join(", ")}`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-23 — emitted viewport structure and arc controls (C leg of 193–195)
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-23 one viewport wrapper, decor outside it, seven named arc controls", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const wrappers = [...html.matchAll(/data-psadj-viewport/g)];
+  if (wrappers.length !== 1) throw new Error(`expected 1 viewport wrapper, found ${wrappers.length}`);
+  // The wrapper is emitted at the identity transform.
+  if (!/data-psadj-viewport[^>]*transform="translate\(0\.000,0\.000\) scale\(1\.000\)"/.test(html)) {
+    throw new Error("the viewport wrapper must be emitted at the identity transform");
+  }
+  // decor is authored OUTSIDE the wrapper, so it can never be transformed.
+  const decorIndex = html.indexOf('data-psadj-layer="decor"');
+  const wrapperIndex = html.indexOf("data-psadj-viewport");
+  if (decorIndex === -1 || decorIndex > wrapperIndex) {
+    throw new Error("the decor layer must be emitted outside the viewport wrapper");
+  }
+  // Every arc exposes a complete accessible name.
+  const named = [...html.matchAll(/data-psadj-arc="([^"]+)"[^>]*aria-label="([^"]+)"/g)];
+  if (named.length !== 7) throw new Error(`expected 7 named arc controls, found ${named.length}`);
+  for (const [, key, label] of named) {
+    if (!label.includes(key)) throw new Error(`the ${key} arc name omits its grouping label`);
+  }
+  return `1 wrapper at identity, decor outside, 7 named arc controls`;
+});
+
+// ---------------------------------------------------------------------------
+// PSADJ-24 — emitted stroke and serializer contracts
+// ---------------------------------------------------------------------------
+
+await check("PSADJ-24 non-scaling stroke is emitted and no second serializer ships", () => {
+  const html = readFileSync(DIST_PAGE, "utf8");
+  const css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
+  const sheets = clientCssFiles().map((file) => readFileSync(file, "utf8")).join("\n");
+  const all = `${css}\n${sheets}`;
+  if (!/vector-effect:\s*non-scaling-stroke/.test(all)) {
+    throw new Error("the edge rule must declare vector-effect: non-scaling-stroke");
+  }
+  // The route's OWN bundles only — resolved through the route's chunk graph, so
+  // an unrelated page's code can never satisfy or fail this check.
+  const bundles = routeReachableArtifacts()
+    .filter((name) => name.endsWith(".js"))
+    .map((name) => readFileSync(p(`dist/_astro/${name}`), "utf8"))
+    .join("\n");
+  for (const forbidden of ["Intl.NumberFormat", "toLocaleString"]) {
+    if (bundles.includes(forbidden)) throw new Error(`${forbidden} is a second serializer`);
+  }
+  const fixedCalls = [...bundles.matchAll(/toFixed\(\s*3\s*\)/g)];
+  if (fixedCalls.length > 1) {
+    throw new Error(`expected at most one three-decimal serializer, found ${fixedCalls.length}`);
+  }
+  // Non-vacuity: the single serializer demonstrably RAN, so a build that
+  // shipped no serializer at all cannot pass this check by finding nothing.
+  const arcs = [...html.matchAll(/data-psadj-arc="[^"]+"[^>]*d="([^"]+)"/g)].map((m) => m[1]);
+  if (arcs.length !== 7) throw new Error(`expected 7 serialized arcs, found ${arcs.length}`);
+  for (const d of arcs) {
+    if (!/^M -?\d+\.\d{3} -?\d+\.\d{3} A 370\.000 370\.000 /.test(d)) {
+      throw new Error(`an arc is not three-decimal serialized at radius 370: ${d}`);
+    }
+  }
+  return `non-scaling stroke emitted, 7 arcs three-decimal, ${fixedCalls.length} runtime serializer`;
+});
+
+// ---------------------------------------------------------------------------
 
 for (const line of results) console.log(line);
 
@@ -1079,6 +1179,7 @@ for (const line of results) console.log(line);
 // one, so it catches a deleted registration, a bypassed registration, a
 // reordering, and a duplicate added merely to restore the count. A registered
 // check that FAILED still fails the verifier independently, below.
+
 
 const executedIds = results.map((line) => {
   const match = /^(?:PASS|FAIL)\s+(PSADJ-\d{2})\b/.exec(line);

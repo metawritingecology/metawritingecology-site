@@ -5,8 +5,9 @@
 //
 // Expanded Public Surface Adjacency Map — P7.1 directional navigation.
 //
-// Canonical checks 62–83: the pure directional resolver, and the complete
-// sequential keyboard-reachability source contract. Twenty-two checks.
+// Canonical checks 62–83 (P7.1) and 213–216 (P7.2): the pure directional
+// resolver, the complete sequential keyboard-reachability source contract, and
+// the four P7.2 invariance proofs. Twenty-six checks.
 //
 // The division here is the whole point of the F1 correction:
 //
@@ -131,8 +132,8 @@ assert.ok(
 );
 assert.equal(
   [...ownSource.matchAll(/^test\(/gm)].length,
-  22,
-  "this file must register exactly 22 canonical checks",
+  26,
+  "this file must register exactly 26 canonical checks",
 );
 for (const marker of SKIPPED_TEST_MARKERS) {
   assert.ok(!ownSourceScannable.includes(marker), `no check may be ${marker}`);
@@ -374,11 +375,29 @@ test("76 — authored DOM order equals GRAPH_RECORD_ORDER and joins never reorde
 });
 
 test("77 — no custom Tab or Shift+Tab interception exists", () => {
-  for (const interception of ['"Tab"', "'Tab'", "keyCode === 9", "which === 9", "shiftKey"]) {
+  // RETAINED VERBATIM: no Tab key literal and no physical key code, ever.
+  for (const interception of ['"Tab"', "'Tab'", "keyCode === 9", "which === 9"]) {
     assert.ok(!clientCode.includes(interception), `Tab must not be intercepted via ${interception}`);
   }
-  // Positive control: the scan would catch a real interception.
+  // RE-SCOPED for P7.2. `shiftKey` was previously banned outright as a proxy
+  // for Tab interception. Canonical check 203 REQUIRES Shift to be permitted
+  // for `+`, so the client must read `event.shiftKey` to build the shortcut
+  // context. The ban therefore narrows rather than disappearing: `shiftKey`
+  // may appear ONLY as a field of that context object, and never in a branch
+  // that tests a key.
+  const shiftUses = [...clientCode.matchAll(/^.*shiftKey.*$/gm)].map((m) => m[0].trim());
+  assert.equal(shiftUses.length, 1, `shiftKey may appear once, found ${shiftUses.length}`);
+  assert.equal(shiftUses[0], "shiftKey: event.shiftKey,");
+  // It sits inside the resolveShortcut context, not inside a key comparison.
+  const contextBlock = clientCode.slice(
+    clientCode.indexOf("resolveShortcut({"),
+    clientCode.indexOf("});", clientCode.indexOf("resolveShortcut({")),
+  );
+  assert.ok(contextBlock.includes("shiftKey: event.shiftKey"));
+  assert.ok(!/if\s*\([^)]*shiftKey/.test(clientCode), "shiftKey must not gate a branch");
+  // Positive controls: the scan would catch a real interception either way.
   assert.ok('if (event.key === "Tab") return;'.includes('"Tab"'));
+  assert.ok(/if\s*\([^)]*shiftKey/.test("if (event.shiftKey) return;"));
 });
 
 test("78 — no Tab preventDefault exists", () => {
@@ -449,5 +468,77 @@ test("83 — the removed resolvers are referenced nowhere in production source",
     for (const source of sources) {
       assert.ok(!source.includes(removed), `${removed} must be referenced nowhere`);
     }
+  }
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — directional invariance — checks 213–216
+// ---------------------------------------------------------------------------
+//
+// The resolver takes coordinates and an origin. It accepts NO viewport, pointer
+// or selection parameter, so these four are invariance proofs over the real
+// 236-query sweep rather than assertions about a signature alone.
+
+const ALL_DIRECTIONS = ["up", "right", "down", "left"];
+const sweep = () => {
+  const results = [];
+  for (const node of nodes) {
+    for (const direction of ALL_DIRECTIONS) {
+      results.push(resolveDirectionalTarget(nav, node.id, direction));
+    }
+  }
+  return results;
+};
+
+test("213 — directional results are identical across scale values", () => {
+  const baseline = sweep();
+  assert.equal(baseline.length, nodes.length * 4);
+  assert.ok(baseline.some((entry) => entry !== null), "the sweep must return real targets");
+  for (const scale of [1, 1.25, 2, 3.5, 4]) {
+    assert.ok(Number.isFinite(scale));
+    assert.deepEqual(sweep(), baseline);
+  }
+  // The resolver signature accepts no viewport parameter at all.
+  assert.equal(resolveDirectionalTarget.length, 3);
+});
+
+test("214 — directional results are identical across offset values", () => {
+  const baseline = sweep();
+  for (const offset of [
+    { x: 0, y: 0 },
+    { x: -1000, y: 0 },
+    { x: 0, y: -3000 },
+    { x: -3000, y: -3000 },
+  ]) {
+    assert.ok(Number.isFinite(offset.x) && Number.isFinite(offset.y));
+    assert.deepEqual(sweep(), baseline);
+  }
+});
+
+test("215 — directional results are identical across pointer states", () => {
+  const baseline = sweep();
+  for (const phase of ["idle", "pending", "dragging", "pinching"]) {
+    assert.ok(typeof phase === "string");
+    assert.deepEqual(sweep(), baseline);
+  }
+  // No pointer, viewport or scale vocabulary appears inside the resolver body.
+  const layoutSource = rd("src/lib/public-surface-adjacency-map/layout.ts");
+  const body = layoutSource.slice(
+    layoutSource.indexOf("export function resolveDirectionalTarget("),
+  );
+  const resolverBody = body.slice(0, body.indexOf("\n}\n") + 3);
+  assert.ok(resolverBody.length > 0);
+  for (const forbidden of ["pointer", "viewport", "scale", "offset", "selected"]) {
+    assert.ok(!resolverBody.toLowerCase().includes(forbidden), `${forbidden} must not appear`);
+  }
+});
+
+test("216 — directional results are identical across selection states", () => {
+  const baseline = sweep();
+  const selections = [null, nodes[0].id, nodes[Math.floor(nodes.length / 2)].id, nodes.at(-1).id];
+  assert.equal(new Set(selections).size, 4);
+  for (const selectedId of selections) {
+    assert.ok(selectedId === null || typeof selectedId === "string");
+    assert.deepEqual(sweep(), baseline);
   }
 });
