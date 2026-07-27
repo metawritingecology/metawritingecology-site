@@ -36,4 +36,8 @@ They help readers, citation systems, crawlers, and archives find public material
 
 A public record can support discovery, citation, and persistence.
 
+For public source and citation traversal, use [Publications](/publications/) for source-linked publication records and the [Citation Guide](/citation-guide/) for citation guidance.
+
+This traversal does not establish validity, completeness, reproducibility, or a complete research workflow.
+
 It should not be treated as the complete archive, complete registry, full authority map, or full internal method.
