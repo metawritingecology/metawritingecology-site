@@ -124,4 +124,28 @@ After any change, update AGENT_WORKLOG.md with:
 - unresolved questions
 - risks or assumptions
 
+## Worklog Governance
+
+`AGENT_WORKLOG.md` is the single active append target for agent worklog entries.
+
+Agents must preserve historical worklog entries byte-for-byte. Historical entries are evidence of the state and authorization at the time they were written; they must not be rewritten, reordered, summarized, normalized, or deleted to match later repository, PR, deployment, or author-status changes.
+
+Before the first modification of `AGENT_WORKLOG.md` in each task, run a read-only local/remote inventory of other project work when remote evidence is available. Exclude the current branch. Exclude routine bot/dependency branches from the normal feature-work gate unless the task concerns dependency integration; list them separately as the dependency queue.
+
+Classify relevant non-bot work as one of: `completed_pushed_unmerged`, `in_progress`, `hold`, `merged_directly`, `merged_via_pr_or_squash`, `ambiguous`, or `author_status_unknown`.
+
+Do not rely only on ancestry checks. A branch tip that is not an ancestor of `main` may still have been merged by PR or squash merge. Prefer PR merge metadata, then patch/tree equivalence, then direct ancestry, then explicit author/worklog status, then branch age/name/workstream clues. Weak evidence must produce `ambiguous`, not an unmerged-work claim.
+
+If any relevant non-bot work is classified as `completed_pushed_unmerged`, `ambiguous`, or `author_status_unknown`, stop before the first worklog write and ask the author whether to include that work in the current integration cycle, continue separately, classify it as `in_progress` or `hold`, or stop and process the existing work first.
+
+Author-declared `in_progress` or `hold` work must be listed but does not repeatedly block unrelated work. Reconfirm only when `main` advances in a relevant way, the branch or PR state changes, an integration operation occurs, or the previous inventory is no longer current.
+
+If GitHub or PR state is unavailable, distinguish available remote branch evidence from unavailable PR state. Report uncertainty instead of inferring PR status. Unknown PR state blocks only when the work is otherwise relevant and lacks current author status.
+
+The pre-append inventory is advisory evidence only. It does not authorize merge, conflict resolution, PR creation, publication, deployment, branch deletion, or status promotion.
+
+Review `AGENT_WORKLOG.md` rollover eligibility at 4,000 lines, do not normally exceed 5,000 lines without explicit author deferral, and also review after a major integration cycle or quarterly, whichever trigger occurs first. Execute rollover only as a separate authorized task after `main` is stable. Archived worklogs are immutable historical evidence. `AGENT_WORKLOG.md` remains the current append target after rollover.
+
+When available, run `node scripts/check-agent-worklog-governance.mjs` as read-only validation evidence. Its output does not determine author status, merge readiness, integration priority, or authorization.
+
 The user remains final authority for public release, naming, classification, relation confirmation, top navigation, and merge / publication decisions.

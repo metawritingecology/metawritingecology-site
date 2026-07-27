@@ -23,6 +23,10 @@ Operational reminder:
 - code/operators: preserve `!=` and `!==`
 - before committing prose edits, scan touched content files for literal `!=`
 
+## Worklog Governance
+
+Follow the canonical worklog governance, pre-append inventory gate, historical-entry protection, and rollover policy in `AGENTS.md`. `AGENT_WORKLOG.md` is the only active append target; archived logs, when present, are immutable historical evidence and must not be edited.
+
 Before finishing, report:
 - files changed
 - what was implemented
