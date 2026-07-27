@@ -77,9 +77,14 @@ import {
   SCOPE_STATEMENT,
   ABOUT_SUMMARY,
   CENTRAL_STATEMENT_LINES,
+  FIT_ALL_LABEL,
+  FOCUS_RECORD_LABEL,
   GRAPH_REGION_LABEL,
   GROUP_ARC_STATEMENT,
   NAVIGATION_TOGGLE_LABEL,
+  RESET_EXPLORATION_LABEL,
+  ZOOM_IN_LABEL,
+  ZOOM_OUT_LABEL,
   RECORD_ORDER_DISCLAIMER,
   ROLE_ORBIT_CAPTION,
   ROLE_ORBIT_LABELS,
@@ -233,6 +238,17 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
           <span>{NAVIGATION_TOGGLE_LABEL}</span>
         </label>
       </fieldset>
+      <!-- P7.2 viewport operations. Five native buttons, each with its handler,
+           state and — for Focus Record — its native disabled behaviour wired in
+           the same package. Fit All is a viewport operation only; Focus Record
+           is the only action that centres an individual record. -->
+      <div class="psadj__actions" role="group" aria-label="Viewport operations">
+        <button type="button" class="psadj__action" data-psadj-action="zoom-out">{ZOOM_OUT_LABEL}</button>
+        <button type="button" class="psadj__action" data-psadj-action="zoom-in">{ZOOM_IN_LABEL}</button>
+        <button type="button" class="psadj__action" data-psadj-action="fit-all">{FIT_ALL_LABEL}</button>
+        <button type="button" class="psadj__action" data-psadj-action="reset-exploration">{RESET_EXPLORATION_LABEL}</button>
+        <button type="button" class="psadj__action" data-psadj-action="focus-record" disabled>{FOCUS_RECORD_LABEL}</button>
+      </div>
       <p class="psadj__controls-note">
         Showing or hiding an edge class reveals or hides already-defined edges only.
         It never moves a record, changes a record size, or changes any ordering.
@@ -297,13 +313,18 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
             </g>
 
             <!-- The viewport wrapper is a transform container, not a rendering
-                 layer. P7.1 writes no transform onto it. -->
-            <g data-psadj-viewport>
+                 layer. It is the ONLY element the client writes a transform to,
+                 and it is authored at the identity transform. The decor layer
+                 sits outside it and is never transformed. -->
+            <g data-psadj-viewport transform="translate(0.000,0.000) scale(1.000)">
               <!-- Layer 2 — edges. Populated by keyed join; a render filter only. -->
               <g data-psadj-layer="edges"></g>
 
-              <!-- Layer 3 — grouping arcs. Rendered, NON-INTERACTIVE in P7.1:
-                   no listener, no tabindex, no control role, no placeholder. -->
+              <!-- Layer 3 — grouping arcs. Keyboard-operable controls in P7.2:
+                   focusable, button role, full grouping label as accessible
+                   name. The component binds NO inline listener; the client
+                   binds by delegation. Activation fits the sector and changes
+                   the viewport transform only — the `d` bytes are untouched. -->
               <g data-psadj-layer="arcs">
                 <circle
                   class="psadj-separator"
@@ -316,8 +337,11 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
                   <path
                     class="psadj-arc"
                     data-psadj-arc={group.key}
+                    data-psadj-arc-action="fit-group"
+                    tabindex="0"
+                    role="button"
+                    aria-label={`${group.key}. Grouping sector.`}
                     d={groupArcPath(group)}
-                    aria-hidden="true"
                   />
                 ))}
                 {radial.groups.map((group) => (
@@ -413,6 +437,10 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
              surfaces remain each node's accessible name, the details panel, the
              complete 59-record list and the status live region. -->
         <p data-psadj-label-readout aria-hidden="true"></p>
+        <!-- P7.2 pointer tooltip. A SEPARATE, additional visual aid: it never
+             replaces the persistent readout above, and it carries no role, no
+             aria-live and no aria-atomic. -->
+        <p class="psadj__tooltip" data-psadj-tooltip data-visible="false" aria-hidden="true"></p>
       </div>
 
       <div class="psadj__details" data-psadj-details hidden>
@@ -993,6 +1021,11 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
   .psadj__canvas .psadj-edge {
     fill: none;
     opacity: 0.12;
+    /* Device-stable stroke width across the whole 1.0-4.0 scale range. Without
+       this the authored 0.9/0.8 logical widths would thicken with zoom. It
+       governs STROKE only: text inside the wrapper still scales, which is why
+       label legibility under scale is observed under D14. */
+    vector-effect: non-scaling-stroke;
   }
 
   .psadj__canvas .psadj-edge--source_named_adjacency {
@@ -1199,6 +1232,48 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
     .psadj__canvas .psadj-role-label {
       font-size: 38px;
     }
+  }
+
+  /* P7.2 viewport operations. Native buttons; Focus Record uses the native
+     disabled attribute, never aria-disabled, so sequential focus skips it. */
+  .psadj__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.75rem;
+  }
+
+  .psadj__action {
+    min-height: 44px;
+    padding: 0 14px;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .psadj__action:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* The P7.2 pointer tooltip. A duplicate visual aid only: it never replaces
+     the persistent readout, is never focusable and intercepts no pointer. */
+  .psadj__tooltip {
+    margin: 0.25rem 0 0;
+    min-height: 1.25em;
+    font-size: 0.85rem;
+    color: var(--muted);
+    pointer-events: none;
+    overflow-wrap: anywhere;
+  }
+
+  /* Opacity, not `visibility`, so the reserved line height never shifts the
+     layout as the tooltip appears and disappears. */
+  .psadj__tooltip[data-visible="false"] {
+    opacity: 0;
   }
 
   /* The visual label readout: never focusable, never a pointer target. */

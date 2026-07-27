@@ -5,7 +5,10 @@
 //
 // Expanded Public Surface Adjacency Map — P7.1 visual state and composition.
 //
-// Canonical checks 84–129 and 138–151: layer structure, the decorative
+// Canonical checks 84–129 and 138–151 (P7.1), plus 183, 185–199, 206 and
+// 217–222 (P7.2). Eighty-three checks.
+//
+// P7.1 scope: layer structure, the decorative
 // background, glow and visual state, neighbourhood emphasis, the two-control
 // toolbar and the absence of every deferred control, the label-readout element
 // contract and its precedence, non-interactive grouping arcs, route width and
@@ -132,8 +135,8 @@ assert.ok(
 );
 assert.equal(
   [...ownSource.matchAll(/^test\(/gm)].length,
-  60,
-  "this file must register exactly 60 canonical checks",
+  83,
+  "this file must register exactly 83 canonical checks",
 );
 for (const marker of SKIPPED_TEST_MARKERS) {
   assert.ok(!ownSourceScannable.includes(marker), `no check may be ${marker}`);
@@ -165,9 +168,12 @@ test("85 — the layers appear in the required order", () => {
 test("86 — exactly one viewport wrapper exists", () => {
   const wrappers = [...componentCode.matchAll(/data-psadj-viewport/g)];
   assert.equal(wrappers.length, 1);
-  // P7.1 writes no transform onto it; that is P7.2 work.
-  assert.ok(!/data-psadj-viewport[^>]*transform/.test(componentCode));
-  assert.ok(!/data-psadj-viewport/.test(clientCode), "the client never touches the wrapper");
+  // P7.2: the wrapper is AUTHORED at the identity transform, and it is the one
+  // and only element the client ever writes a transform to.
+  assert.ok(/data-psadj-viewport transform="translate\(0\.000,0\.000\) scale\(1\.000\)"/.test(componentCode));
+  const wrapperWrites = [...clientCode.matchAll(/setAttribute\("transform"/g)];
+  assert.equal(wrapperWrites.length, 1, "exactly one transform write site");
+  assert.ok(/querySelector<SVGGElement>\("\[data-psadj-viewport\]"\)/.test(clientCode));
 });
 
 test("87 — the wrapper contains the edges, arcs, centre and nodes layers", () => {
@@ -519,19 +525,64 @@ test("105 — exactly two functional toolbar controls are rendered", () => {
     componentCode.indexOf("data-psadj-controls"),
     componentCode.indexOf("psadj__grid"),
   );
-  assert.ok(!/<button/.test(toolbar), "the P7.1 toolbar renders no button");
+  // P7.2: exactly five viewport buttons, in the approved order.
+  const actions = [...toolbar.matchAll(/data-psadj-action="([a-z-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(actions, [
+    "zoom-out",
+    "zoom-in",
+    "fit-all",
+    "reset-exploration",
+    "focus-record",
+  ]);
+  assert.equal([...toolbar.matchAll(/<button/g)].length, 5, "exactly five viewport buttons");
+  assert.ok(toolbar.length > 0, "the toolbar slice must be non-empty");
+  // Every one is wired.
+  assert.ok(/\[data-psadj-action\]/.test(clientCode));
+  assert.ok(/button\.addEventListener\("click"/.test(clientCode));
 });
 
-test("106 — none of the five deferred controls is rendered", () => {
-  for (const control of DEFERRED_CONTROLS) {
-    assert.ok(!component.includes(control), `${control} must not be rendered in P7.1`);
-    assert.ok(!client.includes(control), `${control} must not be wired in P7.1`);
+test("106 — the five approved controls are rendered and the unapproved wording is absent", () => {
+  // P7.2: the five approved labels are REQUIRED, and each must come from a
+  // publicWording constant rather than an inline duplicate (guard 10(h)).
+  const wording = rd("src/lib/public-surface-adjacency-map/publicWording.ts");
+  const APPROVED = [
+    ["Zoom Out", "ZOOM_OUT_LABEL"],
+    ["Zoom In", "ZOOM_IN_LABEL"],
+    ["Fit All", "FIT_ALL_LABEL"],
+    ["Reset Exploration", "RESET_EXPLORATION_LABEL"],
+    ["Focus Record", "FOCUS_RECORD_LABEL"],
+  ];
+  for (const [label, token] of APPROVED) {
+    // The label is an approved constant…
+    assert.ok(wording.includes(`export const ${token} = "${label}"`), `${token} must be approved`);
+    // …the component INTERPOLATES it…
+    assert.ok(componentCode.includes(`{${token}}`), `${token} must be interpolated`);
+    // …and never duplicates the literal inline, per guard 10(h).
+    assert.ok(!componentCode.includes(`>${label}<`), `${label} must not be inlined`);
   }
+  // RETAINED: the unapproved wording variant stays prohibited everywhere.
+  assert.ok(!component.includes("Reset view"));
+  assert.ok(!client.includes("Reset view"));
+  // Positive control: the scan would catch it.
+  assert.ok('<button>Reset view</button>'.includes("Reset view"));
 });
 
-test("107 — no disabled or hidden placeholder exists for a deferred control", () => {
+test("107 — native disabled is bounded to Focus Record and aria-disabled stays absent", () => {
+  // RETAINED VERBATIM: aria-disabled is never the mechanism.
   assert.ok(!/aria-disabled/.test(componentCode));
-  assert.ok(!/\bdisabled\b/.test(componentCode), "no control is rendered disabled in P7.1");
+  // RE-SCOPED: exactly one control may be rendered disabled, and it must be
+  // Focus Record. A component with NO disabled control also fails, so the check
+  // cannot be satisfied by removing the feature.
+  const disabledButtons = [...componentCode.matchAll(/<button[^>]*?(?<![\w-])disabled(?![\w-])[^>]*>/g)];
+  assert.equal(disabledButtons.length, 1, "exactly one control may be rendered disabled");
+  assert.ok(/data-psadj-action="focus-record"/.test(disabledButtons[0][0]));
+  // Scoped to the MARKUP: `.psadj__action:disabled` is a style rule, not a
+  // rendered disabled control, and must not be read as one.
+  const outsideButtons = markup.replace(/<button[\s\S]*?<\/button>/g, "");
+  assert.ok(
+    !/(?<![\w-])disabled(?![\w-])/.test(outsideButtons),
+    "disabled is admissible only on a button",
+  );
   // Only the three progressive-enhancement regions start hidden.
   const hiddenTargets = [
     ...componentCode.matchAll(/data-psadj-(\w+)[^>]*?(?<![\w-])hidden(?![\w-])/g),
@@ -539,9 +590,12 @@ test("107 — no disabled or hidden placeholder exists for a deferred control", 
   assert.deepEqual([...new Set(hiddenTargets)].sort(), ["canvas", "controls", "details"]);
 });
 
-test("108 — the client contains no handler or dead branch for a P7.2 surface", () => {
+test("108 — the P7.2 viewport surface is implemented, and stays element-scoped", () => {
+  const viewportCode = rd("src/lib/public-surface-adjacency-map/viewport.ts");
+
+  // (a) The eight viewport functions are REQUIRED exports of viewport.ts, and
+  //     each must actually be wired in the client. An unused import fails.
   for (const symbol of [
-    "viewport.ts",
     "clampScale",
     "stepScale",
     "zoomAbout",
@@ -550,21 +604,49 @@ test("108 — the client contains no handler or dead branch for a P7.2 surface",
     "fitLogicalBounds",
     "resetTransform",
     "transformAttr",
+  ]) {
+    assert.ok(
+      viewportCode.includes(`export function ${symbol}`),
+      `${symbol} must be exported by viewport.ts`,
+    );
+  }
+  assert.ok(clientCode.includes("public-surface-adjacency-map/viewport.ts"));
+  for (const wired of ["stepScale", "zoomAbout", "centreOn", "fitLogicalBounds", "resetTransform", "transformAttr"]) {
+    assert.ok(clientCode.includes(`${wired}(`), `${wired} must be called, not merely imported`);
+  }
+
+  // (b) The event surface is REQUIRED, and every listener binds to the CANVAS.
+  //     Asserting the binding target is what makes a move to `window` fail even
+  //     though the event name would still be present.
+  for (const listener of [
     "wheel",
     "pointerdown",
     "pointermove",
     "pointerup",
     "pointercancel",
-    "setPointerCapture",
     "lostpointercapture",
   ]) {
-    assert.ok(!clientCode.includes(symbol), `${symbol} is P7.2 and must be absent`);
+    assert.ok(
+      new RegExp(`canvas\\.addEventListener\\(\\s*"${listener}"`).test(clientCode),
+      `${listener} must bind to the canvas, not to a global`,
+    );
   }
-  for (const shortcut of ['=== "+"', '=== "-"', '=== "0"']) {
-    assert.ok(!clientCode.includes(shortcut), `${shortcut} is a P7.2 shortcut`);
+  assert.ok(clientCode.includes("setPointerCapture"));
+  assert.ok(/\{ passive: false \}/.test(clientCode), "wheel must bind with passive: false");
+
+  // (c) Shortcut resolution lives in viewport.ts and reads event.key.
+  for (const shortcut of ['"+"', '"-"', '"0"']) {
+    assert.ok(viewportCode.includes(shortcut), `${shortcut} must be resolved in viewport.ts`);
   }
+  assert.ok(!/keyCode|\bwhich\b/.test(stripComments(viewportCode)));
+
+  // (d) RETAINED UNCHANGED — pointer capture makes a global listener
+  //     unnecessary, so introducing one would be a regression, not a feature.
   assert.ok(!/document\.addEventListener/.test(clientCode));
   assert.ok(!/window\.addEventListener/.test(clientCode));
+  // Positive controls for clause (d).
+  assert.ok(/window\.addEventListener/.test('window.addEventListener("pointermove", f)'));
+  assert.ok(/document\.addEventListener/.test('document.addEventListener("keydown", f)'));
 });
 
 // ---------------------------------------------------------------------------
@@ -741,10 +823,18 @@ test("129 — grouping arcs and labels are rendered and non-interactive", () => 
   assert.ok(/radial\.groups\.map/.test(componentCode), "all seven groupings are rendered");
   assert.equal(layout.groups.length, 7);
   const arcsLayer = componentCode.slice(layerIndex("arcs"), layerIndex("centre"));
-  assert.ok(!/tabindex/.test(arcsLayer), "an arc must not be focusable in P7.1");
-  assert.ok(!/role="button"/.test(arcsLayer), "an arc must not be a control in P7.1");
+  assert.ok(arcsLayer.length > 0, "the arcs slice must be non-empty");
+  // P7.2: every arc is a keyboard-operable control.
+  assert.ok(/tabindex="0"/.test(arcsLayer), "every arc is focusable in P7.2");
+  assert.ok(/role="button"/.test(arcsLayer));
+  assert.ok(/aria-label=/.test(arcsLayer));
+  assert.ok(
+    !/data-psadj-arc="[^"]*"[^>]*aria-hidden/.test(componentCode),
+    "an arc control must not be aria-hidden",
+  );
+  // RETAINED: the component binds no inline listener; the client delegates.
   assert.ok(!/addEventListener/.test(arcsLayer));
-  assert.ok(!/data-psadj-arc/.test(clientCode), "the client must not bind an arc");
+  assert.ok(/data-psadj-arc-action/.test(clientCode), "the client binds arcs by delegation");
 });
 
 test("138 — no unresolved arc-radius owner-decision marker remains", () => {
@@ -912,4 +1002,318 @@ test("151 — the orbit caption is verbatim and concept labels are not rendered 
   const nodesLayer = componentCode.slice(layerIndex("nodes"));
   assert.ok(!/display_label\}<\/text>/.test(nodesLayer), "no concept label is drawn on the ring");
   assert.ok(RECORD_ORDER_DISCLAIMER.includes("does not indicate hierarchy"));
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — Fit All and Reset Exploration state contracts — checks 183, 185, 186
+// ---------------------------------------------------------------------------
+
+const ACTION_LOOP = 'for (const button of container.querySelectorAll<HTMLButtonElement>("[data-psadj-action]"))';
+const actionHandler = clientCode.slice(
+  clientCode.indexOf(ACTION_LOOP),
+  clientCode.indexOf("function syncFocusRecord()"),
+);
+
+test("183 — Fit All preserves selection, details, readout, emphasis and edge visibility", () => {
+  assert.ok(actionHandler.length > 0);
+  const fitAllBranch = actionHandler.slice(
+    actionHandler.indexOf('action === "fit-all"'),
+    actionHandler.indexOf('action === "reset-exploration"'),
+  );
+  assert.ok(fitAllBranch.includes("fitAll()"));
+  // It writes ONLY the viewport; none of the five preserved surfaces appears.
+  for (const preserved of ["selectedId", "visible", "hoveredId", "focusedId", "renderDetails", "resolveEmphasis"]) {
+    assert.ok(!fitAllBranch.includes(preserved), `Fit All must not touch ${preserved}`);
+  }
+});
+
+test("185 — Reset Exploration clears selection and emphasis and falls back through the precedence", () => {
+  const reset = actionHandler.slice(
+    actionHandler.indexOf('action === "reset-exploration"'),
+    actionHandler.indexOf('action === "focus-record"'),
+  );
+  assert.ok(reset.includes("state.selectedId = null"));
+  assert.ok(reset.includes("resetTransform()"));
+  // Hover is NOT cleared: the §7.2 resolver decides the readout on its own.
+  assert.ok(!reset.includes("state.hoveredId"), "hover must not be cleared");
+  assert.ok(/resolveReadoutLabel/.test(clientCode), "the precedence resolver is retained");
+});
+
+test("186 — Reset Exploration restores canonical edge defaults and touches no data surface", () => {
+  const reset = actionHandler.slice(
+    actionHandler.indexOf('action === "reset-exploration"'),
+    actionHandler.indexOf('action === "focus-record"'),
+  );
+  assert.ok(reset.includes("source_named_adjacency: true"));
+  assert.ok(reset.includes("navigation_adjacency: false"));
+  for (const forbidden of ["bootRuntimeLoader", "location", "history", "fetch(", "pushState"]) {
+    assert.ok(!reset.includes(forbidden), `Reset Exploration must not use ${forbidden}`);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — Focus Record — checks 187–192
+// ---------------------------------------------------------------------------
+
+const focusRecordBranch = actionHandler.slice(actionHandler.indexOf('action === "focus-record"'));
+
+test("187 — the native disabled binding derives from selection state", () => {
+  const sync = clientCode.slice(
+    clientCode.indexOf("function syncFocusRecord()"),
+    clientCode.indexOf('"wheel",'),
+  );
+  assert.ok(sync.includes("button.disabled = state.selectedId === null"));
+  // The expression reads ONLY selectedId.
+  for (const other of ["hoveredId", "focusedId", "visible", "viewport"]) {
+    assert.ok(!sync.includes(other), `the disabled binding must not read ${other}`);
+  }
+});
+
+test("188 — the handler contains the defensive no-selection guard", () => {
+  assert.ok(focusRecordBranch.includes("if (!state.selectedId) return;"));
+  // The guard precedes every effect in that branch.
+  assert.ok(
+    focusRecordBranch.indexOf("if (!state.selectedId) return;") <
+      focusRecordBranch.indexOf("centreOn("),
+  );
+});
+
+test("189 — the no-selection branch performs no centring, state change or announcement", () => {
+  const guardIndex = focusRecordBranch.indexOf("if (!state.selectedId) return;");
+  const beforeGuard = focusRecordBranch.slice(0, guardIndex);
+  for (const effect of ["centreOn(", "announce(", "state.viewport =", "selectNode("]) {
+    assert.ok(!beforeGuard.includes(effect), `${effect} must not run without a selection`);
+  }
+});
+
+test("190 — the selected state enables the control by removing native disabled", () => {
+  assert.ok(/data-psadj-action="focus-record" disabled/.test(markup), "authored disabled");
+  assert.ok(clientCode.includes("button.disabled = state.selectedId === null"));
+  // aria-disabled is never the mechanism, anywhere.
+  assert.ok(!/aria-disabled/.test(componentCode));
+  assert.ok(!/aria-disabled/.test(clientCode));
+});
+
+test("191 — Focus Record is the only individual-record centring caller", () => {
+  const calls = [...clientCode.matchAll(/centreOn\(/g)];
+  assert.equal(calls.length, 1, "exactly one centreOn call site");
+  assert.ok(focusRecordBranch.includes("centreOn("));
+});
+
+test("192 — selection never invokes centring", () => {
+  // Neither the click nor the Enter/Space selection path writes the viewport.
+  const clickBlock = clientCode.slice(
+    clientCode.indexOf('canvas.addEventListener("click"'),
+    clientCode.indexOf(ACTION_LOOP),
+  );
+  const selectIndex = clickBlock.indexOf("selectNode(state, id)");
+  assert.ok(selectIndex > 0);
+  assert.ok(!clickBlock.slice(selectIndex).includes("centreOn("));
+  // And a pointerdown on a record or an arc returns BEFORE any capture, so
+  // selecting can never begin a viewport gesture either.
+  const down = clientCode.slice(
+    clientCode.indexOf('canvas.addEventListener("pointerdown"'),
+    clientCode.indexOf('canvas.addEventListener("pointermove"'),
+  );
+  assert.ok(down.indexOf("pointerTargetKind") < down.indexOf("setPointerCapture"));
+  assert.ok(/!== "background"\) return;/.test(down));
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — grouping-arc activation — checks 193–195
+// ---------------------------------------------------------------------------
+
+const activateBlock = clientCode.slice(
+  clientCode.indexOf("function activateGroupingArc("),
+  clientCode.indexOf("function selectNode("),
+);
+
+test("193 — activation invokes group-bounds fitting only", () => {
+  assert.ok(activateBlock.includes("computeGroupingFitBounds("));
+  assert.ok(activateBlock.includes("fitLogicalBounds("));
+  // No selection, classification or layout function is called.
+  for (const forbidden of ["selectNode", "resolveEmphasis", "computeRadialLayout", "announce("]) {
+    assert.ok(!activateBlock.includes(forbidden), `activation must not call ${forbidden}`);
+  }
+  // The empty-group result returns BEFORE any transform is produced.
+  assert.ok(activateBlock.indexOf("if (!bounds.ok) return;") < activateBlock.indexOf("fitLogicalBounds("));
+  assert.ok(!/state\.viewport = resetTransform\(\)/.test(activateBlock), "no identity assignment");
+});
+
+test("194 — activation preserves selection, edge visibility, details and emphasis", () => {
+  for (const preserved of ["selectedId", "state.visible", "renderDetails", "resolveEmphasis"]) {
+    assert.ok(!activateBlock.includes(preserved), `activation must not touch ${preserved}`);
+  }
+  // It writes the viewport and nothing else.
+  assert.ok(activateBlock.includes("state.viewport = fitLogicalBounds"));
+});
+
+test("195 — arcs expose keyboard-operable control semantics with the full grouping label", () => {
+  const arcsLayer = componentCode.slice(layerIndex("arcs"), layerIndex("centre"));
+  assert.ok(/tabindex="0"/.test(arcsLayer));
+  assert.ok(/role="button"/.test(arcsLayer));
+  // The accessible name contains the COMPLETE grouping label.
+  assert.ok(/aria-label=\{`\$\{group\.key\}\./.test(arcsLayer));
+  assert.equal(layout.groups.length, 7);
+  // Enter and Space both activate, via the client's keydown delegation.
+  assert.ok(/data-psadj-arc-action/.test(clientCode));
+  assert.ok(/event\.key === "Enter" \|\| event\.key === " "/.test(clientCode));
+  // SUPPORTING: the arc `d` expression is untouched, so the emitted path bytes
+  // are byte-identical to the accepted P7.1 baseline.
+  assert.ok(/d=\{groupArcPath\(group\)\}/.test(componentCode));
+  for (const group of layout.groups) assert.equal(group.radius, GROUP_ARC_R);
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — final toolbar — checks 196–198
+// ---------------------------------------------------------------------------
+
+const toolbarSlice = componentCode.slice(
+  componentCode.indexOf("data-psadj-controls"),
+  componentCode.indexOf("psadj__grid"),
+);
+
+test("196 — the final toolbar contains exactly seven functional controls", () => {
+  const toggles = [...toolbarSlice.matchAll(/data-psadj-toggle="([a-z_]+)"/g)];
+  const actions = [...toolbarSlice.matchAll(/data-psadj-action="([a-z-]+)"/g)];
+  assert.equal(toggles.length, 2);
+  assert.equal(actions.length, 5);
+  assert.equal(toggles.length + actions.length, 7);
+  // Every one is wired.
+  assert.ok(/input\.addEventListener\("change"/.test(clientCode));
+  assert.ok(/button\.addEventListener\("click"/.test(clientCode));
+});
+
+test("197 — no ambiguous Reset view control or string exists", () => {
+  assert.ok(!component.includes("Reset view"));
+  assert.ok(!client.includes("Reset view"));
+  assert.ok(!rd("src/lib/public-surface-adjacency-map/publicWording.ts").includes("Reset view"));
+  assert.ok("<button>Reset view</button>".includes("Reset view"));
+});
+
+test("198 — each new control has markup, handler, state and disabled state in this package", () => {
+  for (const action of ["zoom-out", "zoom-in", "fit-all", "reset-exploration", "focus-record"]) {
+    assert.ok(toolbarSlice.includes(`data-psadj-action="${action}"`), `${action} markup`);
+    assert.ok(actionHandler.includes(`"${action}"`), `${action} handler`);
+  }
+  // No rendered control lacks a bound handler.
+  assert.ok(/for \(const button of container\.querySelectorAll/.test(clientCode));
+  // The disabled-state contract ships in the same package.
+  assert.ok(clientCode.includes("function syncFocusRecord()"));
+  assert.ok(/data-psadj-action="focus-record" disabled/.test(markup));
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — shortcut scope, client legs — checks 199 and 206
+// ---------------------------------------------------------------------------
+
+test("199 — no document-level or window-level shortcut listener is installed", () => {
+  assert.ok(!/document\.addEventListener/.test(clientCode));
+  assert.ok(!/window\.addEventListener/.test(clientCode));
+  // Extended in P7.2 to pointer and wheel listeners: pointer capture makes a
+  // global listener unnecessary, so one would be a regression.
+  for (const event of ["wheel", "pointermove", "pointerup", "pointercancel"]) {
+    assert.ok(!new RegExp(`window\\.addEventListener\\(\\s*"${event}"`).test(clientCode));
+    assert.ok(new RegExp(`canvas\\.addEventListener\\(\\s*"${event}"`).test(clientCode));
+  }
+  // Positive controls.
+  assert.ok(/window\.addEventListener/.test('window.addEventListener("pointermove", f)'));
+  assert.ok(/document\.addEventListener/.test('document.addEventListener("keydown", f)'));
+});
+
+test("206 — preventDefault only for eligible handled shortcuts, and Tab is never intercepted", () => {
+  const keydown = clientCode.slice(
+    clientCode.indexOf('canvas.addEventListener("keydown"'),
+    clientCode.indexOf('details.addEventListener("keydown"'),
+  );
+  // The shortcut preventDefault sits INSIDE the non-null operation branch.
+  const branch = keydown.slice(keydown.indexOf("if (operation) {"), keydown.indexOf("const arcKey"));
+  assert.ok(branch.includes("event.preventDefault();"));
+  // Shortcut resolution precedes the record-only gate, which is retained verbatim.
+  assert.ok(keydown.indexOf("resolveShortcut({") < keydown.indexOf("if (!currentId) return;"));
+  assert.ok(keydown.includes("if (!currentId) return;"));
+  // Wheel binds with passive:false and only prevents inside its eligibility branch.
+  const wheel = clientCode.slice(
+    clientCode.indexOf('"wheel",'),
+    clientCode.indexOf('canvas.addEventListener("pointerdown"'),
+  );
+  assert.ok(wheel.includes("{ passive: false }"));
+  assert.ok(wheel.indexOf("if (!eligible) return;") < wheel.indexOf("event.preventDefault();"));
+  // Tab is never named anywhere in the client.
+  assert.ok(!clientCode.includes('"Tab"'));
+});
+
+// ---------------------------------------------------------------------------
+// P7.2 — non-adoption and readout retention — checks 217–222
+// ---------------------------------------------------------------------------
+
+const pointerPath = clientCode + rd("src/lib/public-surface-adjacency-map/viewport.ts");
+
+test("217 — no easing, inertia, momentum or velocity token in the pointer path", () => {
+  for (const token of ["easing", "inertia", "momentum", "velocity"]) {
+    assert.ok(!stripComments(pointerPath).toLowerCase().includes(token), `${token} is not adopted`);
+  }
+  // Positive control for each.
+  for (const token of ["easing", "inertia", "momentum", "velocity"]) {
+    assert.ok(`const ${token} = 0.9;`.includes(token));
+  }
+});
+
+test("218 — no pointer-lock request", () => {
+  for (const token of ["requestPointerLock", "pointerlockchange", "pointerLockElement", "exitPointerLock"]) {
+    assert.ok(!pointerPath.includes(token), `${token} is not adopted`);
+  }
+});
+
+test("219 — no rotation is applied to data space", () => {
+  const writers = stripComments(clientCode);
+  assert.ok(!/rotate\(/.test(writers), "no rotation in any transform writer");
+  assert.ok(!/matrix\(/.test(writers));
+  // The only transform written is translate+scale.
+  assert.ok(/translate\(\$\{x\},\$\{y\}\) scale\(\$\{s\}\)/.test(rd("src/lib/public-surface-adjacency-map/viewport.ts")));
+});
+
+test("220 — no transform-writing code path references the decor layer", () => {
+  const writer = clientCode.slice(
+    clientCode.indexOf("function writeViewportTransform("),
+    clientCode.indexOf("function finalizePointer("),
+  );
+  assert.ok(writer.length > 0);
+  assert.ok(writer.includes("[data-psadj-viewport]"));
+  assert.ok(!writer.includes("decor"), "the transform writer must not reference decor");
+  // decor is authored OUTSIDE the wrapper, so it can never be transformed.
+  assert.ok(layerIndex("decor") < componentCode.indexOf("data-psadj-viewport"));
+});
+
+test("221 — the <p> readout still exists and focus and selection paths still populate it", () => {
+  assert.ok(readoutTag.startsWith("<p "));
+  assert.ok(readoutTag.includes("data-psadj-label-readout"));
+  assert.ok(readoutTag.includes('aria-hidden="true"'));
+  assert.ok(/function renderReadout\(/.test(clientCode));
+  // focusin and the selection paths still call the renderer.
+  const focusin = clientCode.slice(clientCode.indexOf('canvas.addEventListener("focusin"'));
+  assert.ok(focusin.slice(0, 400).includes("renderReadout("));
+  assert.ok(/selectNode\(state, currentId\);\n      syncFocusRecord\(\);\n      renderDetails/.test(clientCode));
+});
+
+test("222 — no role, aria-live or aria-atomic is added to the readout, and the tooltip does not replace it", () => {
+  for (const forbidden of ["role=", "aria-live", "aria-atomic", "tabindex"]) {
+    assert.ok(!readoutTag.includes(forbidden), `the readout must not carry ${forbidden}`);
+  }
+  // The tooltip is a DISTINCT element and carries no readout attribute.
+  const tooltipIndex = componentCode.indexOf("data-psadj-tooltip");
+  assert.notEqual(tooltipIndex, -1, "the tooltip element must exist");
+  assert.notEqual(tooltipIndex, readoutIndex);
+  const tooltipTag = componentCode.slice(
+    componentCode.lastIndexOf("<", tooltipIndex),
+    componentCode.indexOf(">", tooltipIndex) + 1,
+  );
+  assert.ok(!tooltipTag.includes("data-psadj-label-readout"));
+  for (const forbidden of ["role=", "aria-live", "aria-atomic"]) {
+    assert.ok(!tooltipTag.includes(forbidden), `the tooltip must not carry ${forbidden}`);
+  }
+  assert.ok(tooltipTag.includes('aria-hidden="true"'));
+  // The readout is still written, and the tooltip writes a separate element.
+  assert.ok(/readout\.textContent = resolveReadoutLabel/.test(clientCode));
+  assert.ok(/tooltip\.textContent = label/.test(clientCode));
 });

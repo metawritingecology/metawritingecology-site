@@ -1055,21 +1055,25 @@ const INTERACTION_ASSERTION_FLOOR = 220;
  * What remains is P7.2 only, and the list is extended rather than merely
  * trimmed, so the forward boundary is tighter than it was.
  */
+/**
+ * The forward boundary now points at P7.3, not P7.2.
+ *
+ * The list is REPLACED, never emptied: the module-level assertion below fails
+ * at import if it is cleared or shrunk, so a later package cannot satisfy this
+ * guard by deleting its contents.
+ */
 const FUTURE_IMPLEMENTATION_TOKENS = [
-  "viewport.ts",
-  "fitLogicalBounds",
-  "clampScale",
-  "stepScale",
-  "zoomAbout",
-  "clampOffset",
-  "centreOn",
-  "resetTransform",
-  "transformAttr",
-  "Reset Exploration",
-  "Focus Record",
-  "Fit All",
-  "Zoom In",
-  "Zoom Out",
+  "chord.ts",
+  "PublicSurfaceAdjacencyChord",
+  "public-surface-adjacency-chord",
+  "d3-chord",
+  "chordLayout",
+  "ribbonPath",
+  "computeChordGroups",
+  "Chord view",
+  "Group view",
+  "multi-circle",
+  "concentric prototype",
 ];
 
 /** Markers that would mean a test is skipped, deferred or expected to fail. */
@@ -1097,10 +1101,90 @@ assert.ok(
   ownSourceScannable.length < ownSource.length,
   "the self-scan must strip this file's own prohibition vocabularies",
 );
+
+assert.ok(
+  FUTURE_IMPLEMENTATION_TOKENS.length >= 8,
+  "the forward-prohibition list must never be emptied",
+);
 assert.ok(
   ownSourceScannable.includes('test("guard 13 — '),
   "the self-scan must leave the guard registrations intact",
 );
+
+/**
+ * The P7.3 PRODUCTION-SOURCE scan.
+ *
+ * Scan A (inside guard 13) stops the two named TEST files from depending on a
+ * future implementation. This scan has the other half of the job: it stops
+ * actual P7.3 adoption anywhere in production source.
+ *
+ * Entries carry BOTH a repository-relative path and raw UTF-8 content, and the
+ * failure predicate is `path.includes(token) || content.includes(token)`. A
+ * content-only scan would miss a tracked but EMPTY file whose FILENAME alone
+ * carries a prohibited token — which is exactly how a P7.3 module would first
+ * appear in the tree.
+ */
+const PRODUCTION_SURFACE_ROOTS = ["src", "scripts"];
+
+const productionEntries = (() => {
+  const entries = [];
+  const visit = (rel) => {
+    for (const name of readdirSync(p(rel)).sort()) {
+      const child = `${rel}/${name}`;
+      if (statSync(p(child)).isDirectory()) {
+        visit(child);
+        continue;
+      }
+      const ext = child.slice(child.lastIndexOf("."));
+      const admissible =
+        (child.startsWith("src/") && [".ts", ".astro", ".md"].includes(ext)) ||
+        (child.startsWith("scripts/") && ext === ".mjs");
+      if (!admissible) continue;
+      let content;
+      try {
+        content = readFileSync(p(child), "utf8");
+      } catch (error) {
+        // A path we cannot read is a scan FAILURE, never a silent skip.
+        throw new Error(`production entry unreadable: ${child} (${error.message})`);
+      }
+      if (content.includes("�")) {
+        throw new Error(`production entry is not valid UTF-8 text: ${child}`);
+      }
+      entries.push({ path: child, content });
+    }
+  };
+  for (const dir of PRODUCTION_SURFACE_ROOTS) visit(dir);
+  entries.push({ path: "package.json", content: readFileSync(p("package.json"), "utf8") });
+  return entries;
+})();
+
+const assertNoP73TokensInProduction = () => {
+  // A broken enumeration must FAIL, not silently pass by scanning nothing.
+  assert.ok(productionEntries.length >= 50, `production surface too small: ${productionEntries.length}`);
+  assert.ok(productionEntries.some((entry) => entry.path === "package.json"));
+  assert.ok(productionEntries.every((entry) => typeof entry.content === "string"));
+
+  const match = (entry, token) => {
+    const inPath = entry.path.includes(token);
+    const inContent = entry.content.includes(token);
+    if (!inPath && !inContent) return null;
+    return inPath && inContent ? "both" : inPath ? "path" : "content";
+  };
+
+  for (const token of FUTURE_IMPLEMENTATION_TOKENS) {
+    // Four positive controls per token, so BOTH arms of the disjunction are
+    // proven live and the predicate cannot degenerate.
+    assert.equal(match({ path: `src/${token}`, content: "" }, token), "path");
+    assert.equal(match({ path: "src/x.ts", content: `const a = "${token}";` }, token), "content");
+    assert.equal(match({ path: `src/${token}`, content: token }, token), "both");
+    assert.equal(match({ path: "src/x.ts", content: "clean" }, token), null);
+
+    for (const entry of productionEntries) {
+      const where = match(entry, token);
+      assert.equal(where, null, `P7.3 token "${token}" found in ${entry.path} (${where})`);
+    }
+  }
+};
 
 test("guard 13 — interaction assertions retargeted without semantic loss", () => {
   const interaction = rd(INTERACTION_TEST);
@@ -1317,4 +1401,9 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
   // (e) This guard suite itself covers all thirteen canonical guards.
   assert.equal(P7_0_GUARDS.length, 13);
   assert.equal([...ownSource.matchAll(/^test\("guard /gm)].length, 13);
+
+  // The P7.3 PRODUCTION-SOURCE scan runs as a sub-assertion of this guard, so
+  // the file still registers exactly 13 guards while covering both halves of
+  // the forward boundary: tests here, production source below.
+  assertNoP73TokensInProduction();
 });

@@ -30,9 +30,19 @@
 //   - arrow keys are a local spatial accelerator resolved purely from
 //     coordinates. A null result changes nothing at all.
 //
-// P7.1 contains no viewport implementation: no zoom, pan, drag, pinch, pointer
-// capture, grouping-arc activation, or +/-/0 shortcut, and no placeholder or
-// dead branch for any of them.
+// P7.2 viewport contract:
+//   - `reducePointer` from `viewport.ts` is the SOLE pointer-state and
+//     pointer-derived viewport transition authority. Down, move and every
+//     terminal route pass through it; this module never re-implements pointer
+//     removal or phase settling;
+//   - a transform is written to the ONE authored `[data-psadj-viewport]`
+//     wrapper and nowhere else. The decor layer is outside it and is never
+//     referenced by a transform path;
+//   - only the graph BACKGROUND may begin a pan or a pinch. A pointerdown on a
+//     record or a grouping arc returns before any capture;
+//   - every pointer listener binds to the canvas. Pointer capture is what makes
+//     that sufficient, so no window- or document-level listener is installed;
+//   - grouping-arc activation fits the sector and changes the viewport only.
 
 import { select } from "d3-selection";
 
@@ -46,7 +56,10 @@ import {
 } from "../lib/public-surface-adjacency-map/contract.ts";
 import {
   buildDirectionalIndex,
+  CENTRE_X,
+  CENTRE_Y,
   computeEdgeRouting,
+  computeRadialLayout,
   directionForKey,
   firstReachableId,
   GRAPH_RECORD_ORDER,
@@ -54,8 +67,28 @@ import {
   resolveDirectionalTarget,
   resolveReadoutLabel,
   type DirectionalIndex,
+  type RadialLayout,
   type RoutedEdge,
 } from "../lib/public-surface-adjacency-map/layout.ts";
+import {
+  applyShortcut,
+  centreOn,
+  computeGroupingFitBounds,
+  fitAll,
+  fitLogicalBounds,
+  idlePointerState,
+  reducePointer,
+  resetTransform,
+  resolveShortcut,
+  stepScale,
+  tooltipRect,
+  transformAttr,
+  zoomAbout,
+  type GroupFitInput,
+  type PointerState,
+  type PointerTerminalKind,
+  type ViewportState,
+} from "../lib/public-surface-adjacency-map/viewport.ts";
 import { resolveEmphasis } from "../lib/public-surface-adjacency-map/emphasis.ts";
 import {
   FALLBACK_STATUS_LABEL,
@@ -80,6 +113,52 @@ interface ViewState {
   focusedId: string | null;
   hoveredId: string | null;
   statusLabel: string;
+  // P7.2 siblings. No existing field is renamed, retyped or reordered.
+  radial: RadialLayout;
+  viewport: ViewportState;
+  pointer: PointerState;
+}
+
+/**
+ * Which kind of thing a pointer went down on.
+ *
+ * ONLY `background` may begin a pan or a pinch. A pointerdown on a record or a
+ * grouping arc returns before any capture or viewport work, so their existing
+ * activation paths keep behaving exactly as they did in P7.1.
+ */
+function pointerTargetKind(
+  canvas: HTMLElement,
+  target: EventTarget | null,
+): "record" | "grouping-arc" | "background" | "outside" {
+  const element = target instanceof Element ? target : null;
+  if (!element || !canvas.contains(element)) return "outside";
+  if (element.closest("[data-psadj-node]")) return "record";
+  if (element.closest("[data-psadj-arc-action]")) return "grouping-arc";
+  return "background";
+}
+
+/**
+ * Release a pointer capture at most once, and never throw on a stale id.
+ */
+function safeReleaseCapture(canvas: HTMLElement, id: number): void {
+  const element = canvas as HTMLElement & {
+    hasPointerCapture?: (pointerId: number) => boolean;
+    releasePointerCapture?: (pointerId: number) => void;
+  };
+  if (typeof element.hasPointerCapture !== "function") return;
+  if (!element.hasPointerCapture(id)) return;
+  element.releasePointerCapture?.(id);
+}
+
+/** Logical viewBox coordinates for a pointer event, before the viewport transform. */
+function logicalPoint(canvas: HTMLElement, event: PointerEvent | WheelEvent): { x: number; y: number } {
+  const svg = canvas.querySelector("svg");
+  const rect = (svg ?? canvas).getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return { x: CENTRE_X, y: CENTRE_Y };
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * 1000,
+    y: ((event.clientY - rect.top) / rect.height) * 1000,
+  };
 }
 
 // --- Boot -------------------------------------------------------------------
@@ -106,6 +185,7 @@ function enhance(container: HTMLElement): void {
   const details = container.querySelector<HTMLElement>("[data-psadj-details]");
   const live = container.querySelector<HTMLElement>("[data-psadj-live]");
   const readout = container.querySelector<HTMLElement>("[data-psadj-label-readout]");
+  const tooltip = container.querySelector<HTMLElement>("[data-psadj-tooltip]");
   const runtimeStatus = container.querySelector<HTMLElement>("[data-psadj-runtime-status]");
   const noscriptNote = container.querySelector<HTMLElement>("[data-psadj-noscript]");
   if (!canvas || !controls || !details || !live) return;
@@ -146,6 +226,39 @@ function enhance(container: HTMLElement): void {
   // authored record controls is native browser behaviour over authored DOM
   // order, and intercepting it would replace a guarantee with an imitation.
   canvas.addEventListener("keydown", (event) => {
+    // Viewport shortcuts resolve FIRST and require no focused record, so `+`,
+    // `-` and `0` work from the background, an arc or a record alike. The
+    // record-only gate below is retained verbatim and still guards every
+    // branch that genuinely needs a focused record.
+    const shortcutTarget = event.target as HTMLElement | null;
+    const operation = resolveShortcut({
+      key: event.key,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      altKey: event.altKey,
+      shiftKey: event.shiftKey,
+      withinGraphRegion: shortcutTarget ? canvas.contains(shortcutTarget) : false,
+      expandedMapActive: true,
+      targetTagName: shortcutTarget?.tagName ?? "",
+      targetIsContentEditable: shortcutTarget?.isContentEditable === true,
+      targetIsButtonActivating:
+        shortcutTarget?.tagName === "BUTTON" && (event.key === "Enter" || event.key === " "),
+    });
+    if (operation) {
+      state.viewport = applyShortcut(state.viewport, operation);
+      writeViewportTransform(canvas, state.viewport);
+      event.preventDefault();
+      return;
+    }
+
+    const arcKey = shortcutTarget?.closest<SVGPathElement>("[data-psadj-arc-action]")?.dataset
+      .psadjArc;
+    if (arcKey && (event.key === "Enter" || event.key === " " || event.key === "Spacebar")) {
+      activateGroupingArc(canvas, state, arcKey);
+      event.preventDefault();
+      return;
+    }
+
     const target = event.target as HTMLElement | null;
     const currentId = target?.closest<SVGGElement>("[data-psadj-node]")?.dataset.psadjNode;
     if (!currentId) return;
@@ -157,6 +270,7 @@ function enhance(container: HTMLElement): void {
     }
     if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
       selectNode(state, currentId);
+      syncFocusRecord();
       renderDetails(details, state);
       drawGraph(canvas, state);
       renderReadout(readout, state);
@@ -206,13 +320,144 @@ function enhance(container: HTMLElement): void {
   });
 
   canvas.addEventListener("click", (event) => {
+    // One-shot drag suppression. A gesture that crossed the drag threshold
+    // leaves the verdict at "drag" through terminal cleanup; the click it
+    // produces is consumed here, the verdict resets, and the NEXT click
+    // behaves normally. Cancel and lost clear the verdict instead, so no
+    // stale suppression can swallow an unrelated click.
+    if (state.pointer.verdict === "drag") {
+      state.pointer = { ...state.pointer, verdict: "none" };
+      event.preventDefault();
+      return;
+    }
+
+    const arcKey = (event.target as HTMLElement | null)?.closest<SVGPathElement>(
+      "[data-psadj-arc-action]",
+    )?.dataset.psadjArc;
+    if (arcKey) {
+      activateGroupingArc(canvas, state, arcKey);
+      return;
+    }
+
     const group = (event.target as HTMLElement | null)?.closest<SVGGElement>("[data-psadj-node]");
     const id = group?.dataset.psadjNode;
     if (!id) return;
     selectNode(state, id);
+    syncFocusRecord();
     render();
     focusNode(canvas, id);
     announce(live, state, `${labelOf(state, id)} selected.`);
+  });
+
+  // --- P7.2 viewport operations ---------------------------------------------
+  for (const button of container.querySelectorAll<HTMLButtonElement>("[data-psadj-action]")) {
+    const action = button.dataset.psadjAction;
+    button.addEventListener("click", () => {
+      if (action === "zoom-out" || action === "zoom-in") {
+        state.viewport = applyShortcut(state.viewport, action);
+      } else if (action === "fit-all") {
+        // A viewport operation ONLY: selection, details, readout, emphasis and
+        // edge-class visibility are all preserved.
+        state.viewport = fitAll();
+      } else if (action === "reset-exploration") {
+        state.viewport = resetTransform();
+        state.selectedId = null;
+        state.visible = { source_named_adjacency: true, navigation_adjacency: false };
+        for (const input of container.querySelectorAll<HTMLInputElement>("[data-psadj-toggle]")) {
+          const edgeClass = input.dataset.psadjToggle as AdjacencyEdgeClass;
+          if (EDGE_CLASSES.includes(edgeClass)) input.checked = state.visible[edgeClass];
+        }
+        render();
+        syncFocusRecord();
+        // Hover is NOT cleared: the readout falls back through the existing
+        // focus > hover > selection > neutral precedence on its own.
+        return;
+      } else if (action === "focus-record") {
+        // Defensive no-selection guard: returns without centring, without any
+        // viewport or selection change, and without an announcement.
+        if (!state.selectedId) return;
+        const point = state.radial.positions.get(state.selectedId);
+        if (!point) return;
+        state.viewport = centreOn(state.viewport.scale, point.cx, point.cy);
+      } else {
+        return;
+      }
+      writeViewportTransform(canvas, state.viewport);
+    });
+  }
+
+  /** Focus Record is enabled exactly when a record is selected. */
+  function syncFocusRecord(): void {
+    const button = container.querySelector<HTMLButtonElement>('[data-psadj-action="focus-record"]');
+    if (button) button.disabled = state.selectedId === null;
+  }
+
+  // --- Wheel zoom -----------------------------------------------------------
+  canvas.addEventListener(
+    "wheel",
+    (event) => {
+      const eligible =
+        canvas.contains(event.target as Node) ||
+        (document.activeElement !== null && canvas.contains(document.activeElement));
+      if (!eligible) return;
+      const point = logicalPoint(canvas, event);
+      const anchorX = (point.x - state.viewport.offsetX) / state.viewport.scale;
+      const anchorY = (point.y - state.viewport.offsetY) / state.viewport.scale;
+      const next = stepScale(state.viewport.scale, event.deltaY < 0 ? 1 : -1);
+      state.viewport = zoomAbout(state.viewport, next, anchorX, anchorY);
+      writeViewportTransform(canvas, state.viewport);
+      event.preventDefault();
+    },
+    { passive: false },
+  );
+
+  // --- Pointer lifecycle ----------------------------------------------------
+  canvas.addEventListener("pointerdown", (event) => {
+    // Only the graph background may begin a pan or a pinch. A record or an arc
+    // returns here, before any capture, suppression or viewport work.
+    if (pointerTargetKind(canvas, event.target) !== "background") return;
+    canvas.setPointerCapture(event.pointerId);
+    const point = logicalPoint(canvas, event);
+    const next = reducePointer(state.pointer, state.viewport, {
+      type: "down",
+      id: event.pointerId,
+      x: point.x,
+      y: point.y,
+    });
+    state.pointer = next.pointer;
+    state.viewport = next.viewport;
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!state.pointer.pointers.some((live) => live.id === event.pointerId)) return;
+    const point = logicalPoint(canvas, event);
+    const before = state.viewport;
+    const next = reducePointer(state.pointer, state.viewport, {
+      type: "move",
+      id: event.pointerId,
+      x: point.x,
+      y: point.y,
+    });
+    state.pointer = next.pointer;
+    state.viewport = next.viewport;
+    // Write the transform only when the returned viewport actually changed.
+    if (
+      next.viewport.scale !== before.scale ||
+      next.viewport.offsetX !== before.offsetX ||
+      next.viewport.offsetY !== before.offsetY
+    ) {
+      writeViewportTransform(canvas, state.viewport);
+    }
+  });
+
+  canvas.addEventListener("pointerup", (event) => {
+    finalizePointer(canvas, state, event.pointerId, "up");
+  });
+  canvas.addEventListener("pointercancel", (event) => {
+    finalizePointer(canvas, state, event.pointerId, "cancel");
+  });
+  canvas.addEventListener("lostpointercapture", (event) => {
+    finalizePointer(canvas, state, event.pointerId, "lost");
   });
 
   // --- Readout state ---------------------------------------------------------
@@ -242,6 +487,7 @@ function enhance(container: HTMLElement): void {
     if (!id || id === state.hoveredId) return;
     state.hoveredId = id;
     renderReadout(readout, state);
+    renderTooltip(tooltip, canvas, state, event, id);
   });
 
   canvas.addEventListener("pointerout", (event) => {
@@ -249,6 +495,7 @@ function enhance(container: HTMLElement): void {
     if (next && next.closest("[data-psadj-node]")) return;
     state.hoveredId = null;
     renderReadout(readout, state);
+    hideTooltip(tooltip);
   });
 
   render();
@@ -262,9 +509,17 @@ function enhance(container: HTMLElement): void {
       return; // bundled fallback retained, untouched and un-mixed
     }
     // Atomic activation: ONE fully verified snapshot replaces the whole view.
+    // The visitor's explicit choices survive; transient pointer state does not.
     const next = buildState(result.snapshot, RUNTIME_STATUS_LABEL);
     next.visible = { ...state.visible };
+    next.viewport = { ...state.viewport };
+    for (const live of [...state.pointer.pointers]) {
+      finalizePointer(canvas, state, live.id, "runtime-cancel");
+    }
+    next.pointer = idlePointerState();
     Object.assign(state, next);
+    writeViewportTransform(canvas, state.viewport);
+    syncFocusRecord();
     if (runtimeStatus) runtimeStatus.textContent = RUNTIME_STATUS_LABEL;
     render();
     announce(live, state, RUNTIME_STATUS_LABEL + ".");
@@ -285,7 +540,84 @@ function buildState(snapshot: AdjacencySnapshot, statusLabel: string): ViewState
     focusedId: null,
     hoveredId: null,
     statusLabel,
+    radial: computeRadialLayout(snapshot.nodes),
+    viewport: resetTransform(),
+    pointer: idlePointerState(),
   };
+}
+
+// --- Viewport plumbing ------------------------------------------------------
+
+/**
+ * The ONLY transform write in this module, and it targets the ONE authored
+ * viewport wrapper. The decor layer sits outside that wrapper and is never
+ * referenced here, so decoration cannot be dragged along with the data space.
+ */
+function writeViewportTransform(canvas: HTMLElement, viewport: ViewportState): void {
+  const wrapper = canvas.querySelector<SVGGElement>("[data-psadj-viewport]");
+  if (wrapper) wrapper.setAttribute("transform", transformAttr(viewport));
+}
+
+/**
+ * Close one logical pointer lifecycle, exactly once.
+ *
+ * `reducePointer` is the SOLE transition authority: this function never removes
+ * a pointer or settles a phase itself. The reducer closes the id BEFORE the
+ * capture release, so the `lostpointercapture` the release causes — whether it
+ * arrives before or after this function returns — finds the id already closed
+ * and is absorbed as a no-op. Correctness does not depend on that ordering.
+ */
+function finalizePointer(
+  canvas: HTMLElement,
+  state: ViewState,
+  id: number,
+  kind: PointerTerminalKind,
+): void {
+  if (!state.pointer.pointers.some((live) => live.id === id)) return;
+  const next = reducePointer(state.pointer, state.viewport, { type: kind, id });
+  state.pointer = next.pointer;
+  state.viewport = next.viewport;
+  safeReleaseCapture(canvas, id);
+}
+
+/**
+ * Locate a grouping's already-computed presentation geometry.
+ *
+ * The grouping key is used HERE and only here, purely to find the geometry. The
+ * pure constructor downstream receives coordinates and four numbers — never the
+ * key, a record, an edge or any semantic field.
+ */
+function resolveGroupFitInput(radial: RadialLayout, key: string): GroupFitInput | null {
+  const span = radial.groups.find((group) => group.key === key);
+  if (!span) return null;
+  const members = radial.concepts
+    .filter((record) => record.node.grouping === key)
+    .map((record) => ({ x: record.x, y: record.y }));
+  return {
+    members,
+    arc: {
+      centreX: CENTRE_X,
+      centreY: CENTRE_Y,
+      startAngle: span.startAngle,
+      endAngle: span.endAngle,
+    },
+  };
+}
+
+/**
+ * Grouping-arc activation: group-bounds fitting ONLY.
+ *
+ * On an empty group this returns without producing a ViewportState, without
+ * assigning a transform, without rendering and without announcing, so a zoomed
+ * view stays exactly where it was.
+ */
+function activateGroupingArc(canvas: HTMLElement, state: ViewState, key: string): void {
+  const input = resolveGroupFitInput(state.radial, key);
+  if (!input) return;
+  const bounds = computeGroupingFitBounds(input);
+  if (!bounds.ok) return;
+  state.viewport = fitLogicalBounds(bounds.bounds);
+  writeViewportTransform(canvas, state.viewport);
 }
 
 function selectNode(state: ViewState, id: string): void {
@@ -379,6 +711,44 @@ function renderReadout(readout: HTMLElement | null, state: ViewState): void {
     labels: state.labels,
     neutralText: READOUT_NEUTRAL_TEXT,
   });
+}
+
+/**
+ * The pointer tooltip.
+ *
+ * A DUPLICATE visual aid. It never replaces the persistent `<p>` readout, it
+ * carries no role, no aria-live and no aria-atomic, and it is written with
+ * `textContent` only. Its rectangle comes from the pure `tooltipRect`, which
+ * receives a label, a measured extent, the pointer anchor and the container —
+ * never a record's semantic fields.
+ */
+function renderTooltip(
+  tooltip: HTMLElement | null,
+  canvas: HTMLElement,
+  state: ViewState,
+  event: PointerEvent,
+  id: string,
+): void {
+  if (!tooltip) return;
+  const label = state.labels.get(id) ?? id;
+  const container = canvas.getBoundingClientRect();
+  const rect = tooltipRect(
+    label,
+    { width: Math.min(label.length * 7 + 16, container.width), height: 22 },
+    event.clientX - container.left,
+    event.clientY - container.top,
+    { x: 0, y: 0, width: container.width, height: container.height },
+  );
+  tooltip.textContent = label;
+  tooltip.dataset.visible = "true";
+  tooltip.style.setProperty("--psadj-tooltip-x", `${rect.x}px`);
+  tooltip.style.setProperty("--psadj-tooltip-y", `${rect.y}px`);
+}
+
+function hideTooltip(tooltip: HTMLElement | null): void {
+  if (!tooltip) return;
+  tooltip.textContent = "";
+  tooltip.dataset.visible = "false";
 }
 
 function renderDetails(details: HTMLElement, state: ViewState): void {
