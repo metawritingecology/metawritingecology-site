@@ -37,7 +37,11 @@ import {
   /* Route-specific width/padding only. Applies solely to this child route
      because no other route renders <main class="main--psadj-expanded">. */
   main.main--psadj-expanded {
-    max-width: 1200px;
+    /* P7.1: the 880px canvas plus the 280-340px docked details panel, their
+       gap and the route padding cannot fit 1200px. Route-local only — no
+       global width token is touched, and /public-surface-map/interactive/
+       keeps its own 1200px. */
+    max-width: 1440px;
     padding-left: clamp(16px, 4vw, 24px);
     padding-right: clamp(16px, 4vw, 24px);
   }
