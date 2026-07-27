@@ -67,3 +67,7 @@ The site paths below remain thematic orientation routes across six recurring zon
 ### Path 3 — Starting from platforms, AI, and machine-mediated conditions
 
 **Post-Human Syntax / AI / Algorithmic Language** → **Observation / Error / Legibility** → **Decision / Boundary / Risk** → **Systems / Exchange / Burden Transfer** → **Field / Topology / Pressure** → **Drift / Reconstruction / Repositioning**
+
+## Applied Evidence
+
+- [View public AI workflow cases](/human-governed-ai-workflows/) — Three bounded public cases on authority boundaries, artifact-scoped provenance, and delegated execution.
