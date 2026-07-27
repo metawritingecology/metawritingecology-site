@@ -49,3 +49,60 @@ export const NOT_CLAIMS: readonly string[] = [
 /** The concise scope statement rendered above the boundary banner. */
 export const SCOPE_STATEMENT =
   "This page shows selected public-document visualization membership: the public documents chosen for this visualization, and the adjacency written in or recorded about those documents.";
+
+// --- P7.1 graph wording -----------------------------------------------------
+//
+// Added by P7.1 and used by the radial view. Wording only: nothing here asserts
+// a Registry status, a classification, a relation validity, or an authority.
+
+/** Accessible name of the graph region. */
+export const GRAPH_REGION_LABEL = "Radial adjacency constellation";
+
+/** The two functional edge-class toggle labels. */
+export const SOURCE_NAMED_TOGGLE_LABEL = "Source-declared adjacency";
+export const NAVIGATION_TOGGLE_LABEL = "Provisional navigation adjacency";
+
+/**
+ * Neutral text for the visual label readout, shown when no record is focused,
+ * hovered or selected. The readout is a duplicate visual aid and never the only
+ * surface for any value.
+ */
+export const READOUT_NEUTRAL_TEXT =
+  "Focus or hover a record to read its complete label.";
+
+/** The public role-orbit caption, rendered verbatim. */
+export const ROLE_ORBIT_CAPTION = "Context records · outside the semantic layout";
+
+/** Written role labels for the outer orbit. Words, never colour alone. */
+export const ROLE_ORBIT_LABELS: Readonly<Record<string, string>> = {
+  orientation: "orientation",
+  boundary: "boundary",
+  anchor: "anchor",
+};
+
+/** Summary of the collapsed about-region. */
+export const ABOUT_SUMMARY = "About this view";
+
+/**
+ * The exact two lines of the path-free central region. No third line, no
+ * record, no glyph, no legend, no count, no logo, no decoration.
+ */
+export const CENTRAL_STATEMENT_LINES: readonly string[] = [
+  "Navigation grouping only",
+  "No hierarchy, ranking, or authority",
+];
+
+/** The approved grouping-arc statement, rendered verbatim wherever arcs appear. */
+export const GROUP_ARC_STATEMENT =
+  "Group arc length reflects the number of displayed records only. It does not indicate importance, authority, classification strength, or relation strength.";
+
+/**
+ * The required visible boundary statement wherever record order is described.
+ * Record order is lexical determinism only.
+ */
+export const RECORD_ORDER_DISCLAIMER =
+  "Record order is a lexical contract derived from display labels and record identifiers. It does not indicate hierarchy, authority, priority, or importance.";
+
+/** Caption for the separator ring between the semantic layout and the orbit. */
+export const SEPARATOR_CAPTION =
+  "The dashed ring separates the semantic layout from the context records outside it.";

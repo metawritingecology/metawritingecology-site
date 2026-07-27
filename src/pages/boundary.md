@@ -10,6 +10,8 @@ This website is a public orientation surface for Meta-Writing Ecology.
 
 It provides selected public entry points for readers, researchers, citation systems, crawlers, and people arriving through fiction or public records.
 
+The public surfaces are selective rather than exhaustive. They publish substantial translated material sufficient for bounded conceptual, structural, and case-based interpretation, while withholding the internal operating layers required to reconstruct the full working system.
+
 ## What This Site Includes
 
 - Public orientation pages
