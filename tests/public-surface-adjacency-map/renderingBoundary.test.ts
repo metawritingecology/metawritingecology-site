@@ -205,7 +205,7 @@ const pageCode = stripComments(page);
 
 // The stripper must leave executable code intact and must really remove prose,
 // or every comment-stripped assertion below would be meaningless.
-assert.ok(layoutCode.includes("export function computeSemanticLayout"));
+assert.ok(layoutCode.includes("export function computeRadialLayout"));
 assert.ok(clientCode.includes("function enhance("));
 assert.ok(componentCode.includes("{APPROVED_TITLE}"));
 assert.ok(layoutSource.includes("centrality") && !layoutCode.includes("centrality"));
@@ -318,6 +318,27 @@ const inspectTestFile = (relativePath: string) => {
   ts.forEachChild(source, visit);
 
   return { text, tests, assertions: tests.flatMap((entry) => entry.assertions) };
+};
+
+/**
+ * Slice one `export function <name>(…) { … }` body out of the layout module by
+ * matching braces. Returned text is EXECUTABLE code: comments are already gone,
+ * because the slice is taken from the comment-stripped source.
+ */
+const layoutFunctionBody = (name: string): string => {
+  const start = layoutCode.indexOf(`export function ${name}(`);
+  assert.notEqual(start, -1, `layout.ts must export ${name}`);
+  const open = layoutCode.indexOf("{", layoutCode.indexOf(")", start));
+  assert.notEqual(open, -1, `no body for ${name}`);
+  let depth = 0;
+  for (let i = open; i < layoutCode.length; i += 1) {
+    if (layoutCode[i] === "{") depth += 1;
+    else if (layoutCode[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return layoutCode.slice(open, i + 1);
+    }
+  }
+  return assert.fail(`unbalanced braces in ${name}`);
 };
 
 /**
@@ -687,9 +708,69 @@ test("guard 10 — retained semantic and security guarantees", () => {
       assert.ok(!code.includes(forbidden), `${forbidden} must not appear in ${name}`);
     }
   }
-  // …and the layout module has no edge input at all, so no edge-derived value
-  // can reach a coordinate even indirectly.
-  assert.ok(!/\bedges\b/.test(layoutCode), "the layout module must take no edge input");
+  //     …and the COORDINATE PRODUCERS take no edge input, so no edge-derived
+  //     value can reach a record coordinate even indirectly.
+  //
+  //     Scope note. This guard originally read "the layout module must take no
+  //     edge input", which was true only while the module computed nothing but
+  //     coordinates. P7.1 adds edge SORTING, BUCKETING and LANE ASSIGNMENT to
+  //     the same module, because a chord is a function of the two records it
+  //     connects — so a module-wide ban would now reject the canonical
+  //     specification rather than a violation. The guard is therefore re-scoped
+  //     to what it was always protecting: nothing that determines WHERE a record
+  //     sits may read an edge. Routing may read edges; producers may not.
+  //
+  //     Re-scoping is the honest fix. Renaming a parameter to slip past the
+  //     regex would leave the guard passing while its real subject went
+  //     unprotected.
+  const takesEdgeInput = (body: string) => /\bedges\b|\bAdjacencyEdge\b/.test(body);
+
+  const COORDINATE_PRODUCERS = [
+    "CONCEPT_GROUP_ORDER", // grouping keys, from which every sector derives
+    "CONCEPT_ORDER", // canonical concept order -> concept ring index
+    "ROLE_ORBIT_ORDER", // canonical role order -> role orbit index
+    "GRAPH_RECORD_ORDER", // the complete canonical record order
+    "computeRadialLayout", // concept coordinates and grouping spans
+    "computeRoleOrbit", // role coordinates and role-label anchors
+    "groupArcPath", // grouping-arc geometry
+    "buildDirectionalIndex", // the coordinate table navigation reads
+  ];
+  for (const name of COORDINATE_PRODUCERS) {
+    assert.ok(
+      !takesEdgeInput(layoutFunctionBody(name)),
+      `${name} is a coordinate producer and must take no edge input`,
+    );
+  }
+
+  //     The split must be REAL, not vacuous. Routing genuinely does consume
+  //     edges, so if these ever stopped doing so the guard above would be
+  //     passing over a module that no longer routes anything.
+  for (const name of ["assignLanes", "computeEdgeRouting"]) {
+    assert.ok(
+      takesEdgeInput(layoutFunctionBody(name)),
+      `${name} is a routing function and is expected to consume edges`,
+    );
+  }
+
+  //     Decisive mutation: an edge-dependent coordinate producer must fail.
+  //     The mutation is applied to the REAL producer body and is asserted to
+  //     have actually changed it, so this cannot pass on a no-op edit.
+  const producer = layoutFunctionBody("computeRadialLayout");
+  const mutated = producer.replace(
+    "const order = CONCEPT_ORDER(nodes);",
+    "const order = CONCEPT_ORDER(nodes); const bias = edges.length;",
+  );
+  assert.notEqual(mutated, producer, "the coordinate-producer mutation must apply");
+  assert.ok(!takesEdgeInput(producer), "the unmutated producer must pass");
+  assert.ok(
+    takesEdgeInput(mutated),
+    "an edge-dependent coordinate producer must fail this guard",
+  );
+  //     …and the same for a producer that merely accepts an edge parameter.
+  assert.ok(
+    takesEdgeInput("(nodes: readonly AdjacencyNode[], edges: readonly AdjacencyEdge[]) => {}"),
+    "a producer that accepts an edge parameter must fail this guard",
+  );
 
   // (b) No unsafe HTML path anywhere in production source.
   for (const forbidden of ["innerHTML", "outerHTML", "insertAdjacentHTML", "document.write"]) {
@@ -836,13 +917,28 @@ test("guard 10 — retained semantic and security guarantees", () => {
 test("guard 11 — no ResizeObserver", () => {
   clean("ResizeObserver in production source:", scan(String.raw`ResizeObserver`));
 
-  // The EXISTING window resize implementation is unchanged by P7.0. Its removal
-  // is P7.1 work, so this guard must not pass because the responsive behaviour
-  // was deleted here.
-  assert.ok(
-    /window\.addEventListener\("resize"/.test(client),
-    "the existing resize listener must remain untouched in P7.0",
+  // Re-scoped at P7.1. Until P7.1 the client re-laid-out the graph on a window
+  // resize, so this guard pinned that listener in place to prove the responsive
+  // behaviour had not simply been deleted. P7.1 removes the listener because
+  // responsiveness is now entirely static — a fixed logical viewBox plus CSS —
+  // so the guard now bans BOTH observers and resize listeners, and proves the
+  // static mechanism is actually present rather than absent.
+  clean(
+    "window resize listener in production source:",
+    scan(String.raw`addEventListener\(\s*["']resize["']`),
   );
+
+  // Positive control: the pattern really does catch a resize listener.
+  assert.ok(
+    /addEventListener\(\s*["']resize["']/.test('window.addEventListener("resize", handler)'),
+  );
+
+  // …and the static replacement is present, so this guard cannot pass because
+  // responsive behaviour was dropped altogether.
+  assert.ok(component.includes("preserveAspectRatio"), "the fixed viewBox fit must be declared");
+  assert.ok(/max-width:\s*100%/.test(component), "the SVG must be width-constrained by CSS");
+  assert.ok(/@media \(max-width: 640px\)/.test(component), "the responsive breakpoint must remain");
+  assert.ok(/grid-template-columns:\s*1fr/.test(component), "the single-column collapse must remain");
 });
 
 // ---------------------------------------------------------------------------
@@ -934,31 +1030,46 @@ const INTERACTION_TEST = "tests/public-surface-adjacency-map/interaction.test.ts
  * one out, comment one out, or delete it.
  */
 const PROTECTED_TESTS: [string, number][] = [
-  ["edge classes are distinguished by pattern and marker, not color alone", 17],
+  ["edge classes are distinguished by pattern and marker, not color alone", 21],
   ["a visible focus indicator is defined for every interactive element", 36],
-  ["the layout is usable at narrow mobile width", 8],
+  ["the layout is usable at narrow mobile width", 9],
 ];
 
 /** Active assertions across every test in `interaction.test.ts`. Recomputed
  *  from the parse tree after each correction: a stale floor stops pinning the
  *  state it is supposed to protect, which is how a removed assertion slipped
  *  past once already. */
-const INTERACTION_ASSERTION_FLOOR = 201;
+const INTERACTION_ASSERTION_FLOOR = 220;
 
-/** Tokens that would mean a test depends on P7.1 or P7.2 implementation. */
+/**
+ * Tokens that would mean a test depends on implementation that does not exist
+ * yet.
+ *
+ * Re-scoped at P7.1. This list is a FORWARD prohibition, so it names only what
+ * is still unbuilt. The P7.1 vocabulary — the radial producers, the canonical
+ * orders, the directional resolver, the grouping-arc constant, the label
+ * readout and the route width — has now landed, is asserted by the three P7.1
+ * suites, and is therefore no longer "future": keeping it here would forbid
+ * P7.1 from describing its own implemented behaviour.
+ *
+ * What remains is P7.2 only, and the list is extended rather than merely
+ * trimmed, so the forward boundary is tighter than it was.
+ */
 const FUTURE_IMPLEMENTATION_TOKENS = [
-  "GROUP_ARC_R",
-  "computeRadialLayout",
-  "computeRoleOrbit",
+  "viewport.ts",
   "fitLogicalBounds",
-  "ROLE_ORBIT_ORDER",
-  "GRAPH_RECORD_ORDER",
-  "resolveDirectionalTarget",
-  "data-psadj-label-readout",
-  "1440px",
+  "clampScale",
+  "stepScale",
+  "zoomAbout",
+  "clampOffset",
+  "centreOn",
+  "resetTransform",
+  "transformAttr",
   "Reset Exploration",
   "Focus Record",
   "Fit All",
+  "Zoom In",
+  "Zoom Out",
 ];
 
 /** Markers that would mean a test is skipped, deferred or expected to fail. */
@@ -1113,8 +1224,13 @@ test("guard 13 — interaction assertions retargeted without semantic loss", () 
     ["the canvas Escape no-op guard", /closest<SVGGElement>/],
     ["the complete no-JavaScript fallback", /data-psadj-record-list/],
     ["reduced motion is honoured", /prefers-reduced-motion/],
-    ["responsive layout resolves a usable column count", /columnsForWidth/],
-    ["…and keeps every concept record at every column count", /responsive\.nodes\.length/],
+    // Re-scoped at P7.1 alongside the layout change. The guarantee is unchanged
+    // — the layout stays usable at narrow width and never drops a record — but
+    // it is now carried by the responsive grid and the fixed logical viewBox
+    // rather than by a resolved column count, because `columnsForWidth` no
+    // longer exists.
+    ["responsive layout collapses to a single column", /psadj__grid/],
+    ["…and keeps every concept record at every width", /concepts\.length/],
   ];
   for (const [guarantee, pattern] of RETAINED) {
     assert.ok(pattern.test(asserted), `retargeting dropped the guarantee: ${guarantee}`);

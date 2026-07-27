@@ -24,17 +24,18 @@ import {
   EDGE_CLASS_DEFAULT_VISIBLE,
 } from "../../src/lib/public-surface-adjacency-map/contract.ts";
 import {
-  ADJACENCY_LAYOUT_METRICS,
-  buildNavigationIndex,
-  columnsForWidth,
+  buildDirectionalIndex,
   compareNodes,
-  computeFixedBands,
-  computeSemanticLayout,
+  computeRadialLayout,
+  computeRoleOrbit,
   directionForKey,
   firstReachableId,
-  GROUP_REGION_WIDTH,
+  GRAPH_RECORD_ORDER,
+  HIT_R,
   lastReachableId,
-  resolveSpatialTarget,
+  resolveDirectionalTarget,
+  RING_R,
+  ROLE_ORBIT_R,
   shortenLabel,
   SPATIAL_DIRECTIONS,
 } from "../../src/lib/public-surface-adjacency-map/layout.ts";
@@ -58,29 +59,20 @@ const component = rd("src/components/PublicSurfaceAdjacencyMap.astro");
 const client = rd("src/scripts/public-surface-adjacency-map.ts");
 const page = rd("src/pages/public-surface-map/expanded/index.astro");
 
-const layout = (columns = 3) => computeSemanticLayout(concepts, { columnsPerBand: columns });
-const bands = (columns = 3) => computeFixedBands(bandNodes, { columnsPerBand: columns });
-const navIndex = (columns = 3) => buildNavigationIndex(layout(columns), bands(columns));
+const layout = () => computeRadialLayout(snapshot.nodes);
+const bands = () => computeRoleOrbit(snapshot.nodes);
+const navIndex = () => buildDirectionalIndex(snapshot.nodes);
 
 const serialize = (l) =>
   JSON.stringify({
-    width: l.width,
-    height: l.height,
-    columnsPerBand: l.columnsPerBand,
     groups: l.groups,
-    nodes: l.nodes.map((n) => ({
+    concepts: l.concepts.map((n) => ({
       id: n.id,
-      groupKey: n.groupKey,
-      bandIndex: n.bandIndex,
-      columnIndex: n.columnIndex,
-      rowIndex: n.rowIndex,
+      groupKey: n.node.grouping,
+      orderIndex: n.orderIndex,
+      theta: n.theta,
       x: n.x,
       y: n.y,
-      width: n.width,
-      height: n.height,
-      cx: n.cx,
-      cy: n.cy,
-      labelLines: n.labelLines,
     })),
   });
 
@@ -90,9 +82,9 @@ const serialize = (l) =>
 
 test("exactly the 49 concept records enter the semantic layout", () => {
   const l = layout();
-  assert.equal(l.nodes.length, 49);
-  assert.equal(new Set(l.nodes.map((n) => n.id)).size, 49);
-  for (const entry of l.nodes) {
+  assert.equal(l.concepts.length, 49);
+  assert.equal(new Set(l.concepts.map((n) => n.id)).size, 49);
+  for (const entry of l.concepts) {
     assert.equal(entry.node.visualization_role, "concept");
     assert.equal(entry.node.semantic_layout_participation, true);
   }
@@ -101,34 +93,41 @@ test("exactly the 49 concept records enter the semantic layout", () => {
 
 test("the 10 fixed-band records sit outside the semantic layout", () => {
   const b = bands();
-  assert.equal(b.items.length, 10);
+  assert.equal(b.roles.length, 10);
   assert.deepEqual(
-    b.bands.map((band) => [band.role, band.count]),
+    b.labels.map((label) => [label.role, label.count]),
     [
       ["orientation", 2],
       ["boundary", 7],
       ["anchor", 1],
     ],
   );
-  const semanticIds = new Set(layout().nodes.map((n) => n.id));
-  for (const item of b.items) {
+  const semanticIds = new Set(layout().concepts.map((n) => n.id));
+  for (const item of b.roles) {
     assert.ok(!semanticIds.has(item.id));
     assert.equal(item.node.semantic_layout_participation, false);
   }
 });
 
 test("a fixed-band record cannot be forced into the semantic layout", () => {
-  assert.throws(() => computeSemanticLayout(snapshot.nodes), /non-participating record/);
-  assert.throws(() => computeFixedBands(snapshot.nodes), /semantic-layout record/);
+  // The two coordinate spaces are separated by ROLE, not by a caller promise:
+  // each producer selects its own records, so a fixed-band record can never
+  // acquire a concept-ring coordinate and vice versa.
+  const conceptIds = new Set(computeRadialLayout(snapshot.nodes).concepts.map((n) => n.id));
+  const roleIds = new Set(computeRoleOrbit(snapshot.nodes).roles.map((n) => n.id));
+  for (const node of bandNodes) assert.ok(!conceptIds.has(node.id), node.id);
+  for (const node of concepts) assert.ok(!roleIds.has(node.id), node.id);
+  assert.equal(conceptIds.size + roleIds.size, 59);
 });
 
 test("fixed-band records contribute nothing to concept positions", () => {
-  // The semantic layout is computed from the concept records alone; adding or
-  // removing fixed-band records cannot change a single coordinate because they
-  // are never an input to it.
-  const withAll = serialize(computeSemanticLayout(concepts, { columnsPerBand: 3 }));
-  const again = serialize(computeSemanticLayout([...concepts].reverse(), { columnsPerBand: 3 }));
+  // Concept coordinates are computed from the concept records alone; adding,
+  // removing or reordering fixed-band records cannot change a single
+  // coordinate because they are never an input to that space.
+  const withAll = serialize(computeRadialLayout(snapshot.nodes));
+  const again = serialize(computeRadialLayout([...snapshot.nodes].reverse()));
   assert.equal(withAll, again, "input order must not affect the layout either");
+  assert.equal(serialize(computeRadialLayout(concepts)), withAll);
 });
 
 test("no fixed-band record is ever a semantic edge endpoint", () => {
@@ -180,17 +179,23 @@ test("node positions cannot change from edge visibility alone", () => {
   // Structural proof: the layout function has NO edge parameter, and the toggle
   // handler never recomputes the layout.
   const layoutSource = rd("src/lib/public-surface-adjacency-map/layout.ts");
-  assert.ok(!/edges/.test(layoutSource.split("export function computeSemanticLayout")[1].split("\n}\n")[0]));
+  assert.ok(
+    !/edges/.test(layoutSource.split("export function computeRadialLayout")[1].split("\n}\n")[0]),
+  );
 
   const toggleHandler = client.slice(
     client.indexOf('input.addEventListener("change"'),
     client.indexOf("// --- Keyboard interaction"),
   );
-  assert.ok(!/computeSemanticLayout|computeFixedBands|relayout|buildNavigationIndex/.test(toggleHandler));
+  assert.ok(
+    !/computeRadialLayout|computeRoleOrbit|computeEdgeRouting|buildDirectionalIndex/.test(
+      toggleHandler,
+    ),
+  );
 
   // Behavioural proof: the same records produce byte-identical coordinates
   // regardless of which edges a caller intends to draw.
-  assert.equal(serialize(layout(3)), serialize(layout(3)));
+  assert.equal(serialize(layout()), serialize(layout()));
 });
 
 test("no toggle exists for governance, source-use, or confirmed relations", () => {
@@ -209,28 +214,39 @@ test("no toggle exists for governance, source-use, or confirmed relations", () =
 // ---------------------------------------------------------------------------
 
 test("node size is constant per presentation role and never data derived", () => {
-  const l = layout();
-  const widths = new Set(l.nodes.map((n) => n.width));
-  const heights = new Set(l.nodes.map((n) => n.height));
-  assert.deepEqual([...widths], [ADJACENCY_LAYOUT_METRICS.NODE_WIDTH]);
-  assert.deepEqual([...heights], [ADJACENCY_LAYOUT_METRICS.NODE_HEIGHT]);
+  // Every glyph is inscribed in ONE box and every record carries the same hit
+  // radius, so footprint can encode neither degree nor grouping size. The
+  // authored markup is the proof: one halo radius, one hit radius, and glyph
+  // geometry that is literal in every branch.
+  const haloRadii = new Set([...component.matchAll(/psadj-node__halo" r="([\d.]+)"/g)].map((m) => m[1]));
+  const hitRadii = new Set([...component.matchAll(/psadj-node__hit" r="([\d.]+)"/g)].map((m) => m[1]));
+  assert.deepEqual([...haloRadii], ["14"]);
+  assert.deepEqual([...hitRadii], [String(HIT_R)]);
 
+  // Concept and role records sit on their own single radius apiece.
+  const l = layout();
+  const conceptRadii = new Set(
+    l.concepts.map((n) => Math.round(Math.hypot(n.x - 500, n.y - 500) * 1e6) / 1e6),
+  );
+  assert.deepEqual([...conceptRadii], [RING_R]);
   const b = bands();
-  assert.deepEqual([...new Set(b.items.map((i) => i.width))], [ADJACENCY_LAYOUT_METRICS.BAND_ITEM_WIDTH]);
-  assert.deepEqual([...new Set(b.items.map((i) => i.height))], [ADJACENCY_LAYOUT_METRICS.BAND_ITEM_HEIGHT]);
+  const roleRadii = new Set(
+    b.roles.map((n) => Math.round(Math.hypot(n.x - 500, n.y - 500) * 1e6) / 1e6),
+  );
+  assert.deepEqual([...roleRadii], [ROLE_ORBIT_R]);
 });
 
 test("labels come from the dataset only, never from a filename", () => {
-  const l = layout();
-  for (const entry of l.nodes) {
-    const expected = shortenLabel(entry.node.display_label);
-    assert.deepEqual([...entry.labelLines], [...expected.lines]);
-    assert.equal(entry.node.display_label_source, "registry_name");
-    // A label line is never the repository path.
-    assert.ok(!entry.labelLines.includes(entry.node.repository_path));
+  for (const node of snapshot.nodes) {
+    assert.equal(node.display_label_source, "registry_name");
+    // A shortened label is never the repository path.
+    const shortened = shortenLabel(node.display_label);
+    assert.ok(!shortened.lines.includes(node.repository_path), node.id);
   }
-  // The accessible name carries the FULL untruncated label.
-  assert.ok(/\$\{visual\.node\.display_label\}/.test(client));
+  // The accessible name carries the FULL untruncated label plus the role, and
+  // it is authored in the component rather than assembled at runtime.
+  assert.ok(/aria-label=\{`\$\{node\.display_label\}\. \$\{role\} record\.`\}/.test(component));
+  assert.ok(!/display_label\.slice/.test(component), "an accessible name is never truncated");
 });
 
 test("no centrality, degree, rank, or importance is computed anywhere", () => {
@@ -283,27 +299,31 @@ test("dataset strings are written as text, never as raw HTML", () => {
 // ---------------------------------------------------------------------------
 
 test("every one of the 59 records is keyboard reachable", () => {
+  // Retargeted at P7.1. Complete keyboard reachability is NATIVE SEQUENTIAL
+  // traversal over all 59 authored record controls, not arrow traversal — the
+  // arrow-reachability claim this test once made was independently refuted
+  // (maximum 55 of 59, and no starting record reaches all 59), so asserting it
+  // would pin an unsatisfiable requirement.
   const index = navIndex();
-  assert.equal(index.length, 59);
+  assert.equal(index.order.length, 59);
 
-  const start = firstReachableId(index);
-  const reached = new Set([start]);
-  let frontier = [start];
-  while (frontier.length > 0) {
-    const next = [];
-    for (const id of frontier) {
-      for (const direction of SPATIAL_DIRECTIONS) {
-        const target = resolveSpatialTarget(index, id, direction);
-        if (target && !reached.has(target)) {
-          reached.add(target);
-          next.push(target);
-        }
-      }
-    }
-    frontier = next;
+  // Every record is authored as its own control, in canonical order…
+  const authored = [...component.matchAll(/data-psadj-node=\{node\.id\}/g)];
+  assert.equal(authored.length, 1, "controls are authored by one mapped template");
+  assert.ok(/GRAPH_RECORD_ORDER\(snapshot\.nodes\)/.test(component));
+  assert.deepEqual(
+    index.order.map((entry) => entry.id),
+    GRAPH_RECORD_ORDER(snapshot.nodes).map((node) => node.id),
+  );
+
+  // …each one focusable, with none removed from the sequential order.
+  assert.ok(/tabindex="0"/.test(component));
+  assert.ok(!/tabindex="-1"/.test(component), "no record may leave the sequential focus order");
+
+  // …and Tab is never intercepted, so the browser's own guarantee holds.
+  for (const interception of ['"Tab"', "keyCode === 9", "which === 9"]) {
+    assert.ok(!client.includes(interception), `Tab must not be intercepted via ${interception}`);
   }
-  assert.equal(reached.size, 59, "arrow keys must reach every record");
-  for (const node of index) assert.ok(reached.has(node.id), node.id);
 });
 
 test("Home and End reach the first and last record deterministically", () => {
@@ -312,40 +332,49 @@ test("Home and End reach the first and last record deterministically", () => {
   const last = lastReachableId(index);
   assert.ok(first && last);
   assert.notEqual(first, last);
+  // They are the ends of the canonical record order, not of a render order.
+  const canonical = GRAPH_RECORD_ORDER(snapshot.nodes);
+  assert.equal(first, canonical[0].id);
+  assert.equal(last, canonical[canonical.length - 1].id);
   // Stable across repeated calls and across input order.
-  assert.equal(firstReachableId([...index].reverse()), first);
-  assert.equal(lastReachableId([...index].reverse()), last);
+  assert.equal(firstReachableId(buildDirectionalIndex([...snapshot.nodes].reverse())), first);
+  assert.equal(lastReachableId(buildDirectionalIndex([...snapshot.nodes].reverse())), last);
 });
 
 test("arrow-key movement is deterministic and locale independent", () => {
   const index = navIndex();
-  for (const node of index) {
+  const reversed = buildDirectionalIndex([...snapshot.nodes].reverse());
+  for (const node of index.order) {
     for (const direction of SPATIAL_DIRECTIONS) {
-      const a = resolveSpatialTarget(index, node.id, direction);
-      const b = resolveSpatialTarget([...index].reverse(), node.id, direction);
+      const a = resolveDirectionalTarget(index, node.id, direction);
+      const b = resolveDirectionalTarget(reversed, node.id, direction);
       assert.equal(a, b, `${node.id} ${direction}`);
     }
   }
 });
 
 test("arrow-key movement over hand-written indices", () => {
-  const grid = [
-    { id: "a", bandIndex: 0, columnIndex: 0, rowIndex: 0 },
-    { id: "b", bandIndex: 0, columnIndex: 0, rowIndex: 1 },
-    { id: "c", bandIndex: 0, columnIndex: 1, rowIndex: 0 },
-    { id: "d", bandIndex: 1, columnIndex: 0, rowIndex: 0 },
+  // A hand-built cross: one record at the centre and one in each direction.
+  const entry = (id, x, y, orderIndex) => ({ id, orderIndex, x, y });
+  const order = [
+    entry("centre", 500, 500, 0),
+    entry("above", 500, 400, 1),
+    entry("below", 500, 600, 2),
+    entry("leftward", 400, 500, 3),
+    entry("rightward", 600, 500, 4),
   ];
-  assert.equal(resolveSpatialTarget(grid, "a", "down"), "b");
-  assert.equal(resolveSpatialTarget(grid, "b", "up"), "a");
-  assert.equal(resolveSpatialTarget(grid, "a", "right"), "c");
-  assert.equal(resolveSpatialTarget(grid, "c", "left"), "a");
-  assert.equal(resolveSpatialTarget(grid, "b", "down"), "d");
-  assert.equal(resolveSpatialTarget(grid, "d", "up"), "b");
-  // Focus never wraps: there is no target past an edge.
-  assert.equal(resolveSpatialTarget(grid, "a", "up"), null);
-  assert.equal(resolveSpatialTarget(grid, "c", "right"), null);
-  assert.equal(resolveSpatialTarget(grid, "d", "down"), null);
-  assert.equal(resolveSpatialTarget(grid, "missing", "up"), null);
+  const grid = { order, points: new Map(order.map((e) => [e.id, e])) };
+
+  assert.equal(resolveDirectionalTarget(grid, "centre", "up"), "above");
+  assert.equal(resolveDirectionalTarget(grid, "centre", "down"), "below");
+  assert.equal(resolveDirectionalTarget(grid, "centre", "left"), "leftward");
+  assert.equal(resolveDirectionalTarget(grid, "centre", "right"), "rightward");
+  // Focus never wraps: there is no target past an edge, and null is normal.
+  assert.equal(resolveDirectionalTarget(grid, "above", "up"), null);
+  assert.equal(resolveDirectionalTarget(grid, "below", "down"), null);
+  assert.equal(resolveDirectionalTarget(grid, "leftward", "left"), null);
+  assert.equal(resolveDirectionalTarget(grid, "rightward", "right"), null);
+  assert.equal(resolveDirectionalTarget(grid, "missing", "up"), null);
 });
 
 test("arrow keys map to directions and nothing else does", () => {
@@ -409,7 +438,13 @@ test("a keydown listener is attached specifically to the details panel", () => {
       `${wrongTarget} must not capture keydown`,
     );
   }
-  assert.ok(/window\.addEventListener\("resize"/.test(client), "the resize listener is unchanged");
+  // Retargeted at P7.1: the responsive `resize` listener is GONE, because
+  // responsiveness is now a fixed logical viewBox plus CSS. So no window-level
+  // listener of any kind remains here.
+  assert.ok(
+    !/window\.addEventListener\(/.test(client),
+    "no window-level listener may remain in the client",
+  );
 });
 
 test("details Escape returns focus to the selected node and is otherwise a no-op", () => {
@@ -483,8 +518,12 @@ test("the canvas keyboard behavior is unchanged and independent", () => {
   assert.ok(/firstReachableId\(state\.navigation\)/.test(body));
   assert.ok(/lastReachableId\(state\.navigation\)/.test(body));
   assert.ok(/directionForKey\(event\.key\)/.test(body));
-  assert.ok(/resolveSpatialTarget\(state\.navigation, currentId, direction\)/.test(body));
+  assert.ok(/resolveDirectionalTarget\(state\.navigation, currentId, direction\)/.test(body));
   assert.ok(/selectNode\(state, currentId\)/.test(body));
+  // Exactly one directional resolver is consulted, and Tab is not among the
+  // keys this listener handles at all.
+  assert.equal([...body.matchAll(/resolveDirectionalTarget\(/g)].length, 1);
+  assert.ok(!body.includes('"Tab"'));
   // It still only acts on events originating inside a rendered graph node —
   // which is exactly why the details panel needs its own listener.
   assert.ok(/closest<SVGGElement>\("\[data-psadj-node\]"\)/.test(body));
@@ -1173,10 +1212,15 @@ const atRuleBody = (source: string, prelude: RegExp): string => {
 // ---------------------------------------------------------------------------
 
 test("every rendered record is focusable with a button role and a pressed state", () => {
-  assert.ok(/\.attr\("tabindex", 0\)/.test(client));
-  assert.ok(/\.attr\("role", "button"\)/.test(client));
-  assert.ok(/aria-pressed/.test(client));
-  assert.ok(/data-selected/.test(client));
+  // Authored in the component at P7.1, because sequential Tab order follows
+  // authored DOM order and cannot be left to a runtime append loop.
+  assert.ok(/tabindex="0"/.test(component));
+  assert.ok(/role="button"/.test(component));
+  assert.ok(/aria-pressed="false"/.test(component));
+  assert.ok(/data-selected="false"/.test(component));
+  // The client updates that state without ever creating or reordering a control.
+  assert.ok(/setAttribute\("aria-pressed"/.test(client));
+  assert.ok(/setAttribute\("data-selected"/.test(client));
 });
 
 test("all controls are native elements", () => {
@@ -1189,9 +1233,12 @@ test("all controls are native elements", () => {
 });
 
 test("the graphic carries a title and description", () => {
-  assert.ok(/\.append\("title"\)/.test(client));
-  assert.ok(/\.append\("desc"\)/.test(client));
-  assert.ok(/\.attr\("aria-label", "Expanded public surface adjacency graph"\)/.test(client));
+  // Authored server-side at P7.1, so both are present in the emitted HTML
+  // rather than appearing only once the client has run.
+  assert.ok(/<title>/.test(component));
+  assert.ok(/<desc>/.test(component));
+  assert.ok(/aria-label=\{GRAPH_REGION_LABEL\}/.test(component));
+  assert.ok(/role="group"/.test(component));
 });
 
 test("a polite live region announces status, selection, and toggle state", () => {
@@ -1463,25 +1510,50 @@ test("edge classes are distinguished by pattern and marker, not color alone", ()
     `the source-named edge class must stay solid: ${named.reason}`,
   );
 
-  // …and the distinction is never carried by colour: neither class sets a hue
-  // of its own in any rule, so both render in the one shared stroke colour.
+  // …and the distinction is never carried by colour ALONE.
+  //
+  // Retargeted at P7.1, which assigns each class an approved hue as a SECONDARY
+  // cue. The guarantee was never "no colour anywhere" — it is that a visitor who
+  // cannot distinguish the two hues can still tell the classes apart. So the
+  // assertion is now the stronger, more direct one: strip every colour
+  // declaration from both class rules and they must STILL differ, and they must
+  // still differ specifically in the dash channel.
+  const nonColourDeclarations = (selectorPart: string) => {
+    const rules = COMPONENT_RULES.filter((rule) => rule.selector.includes(selectorPart));
+    assert.ok(rules.length > 0, `${selectorPart} must declare a rule of its own`);
+    return rules
+      .flatMap((rule) => rule.declarations)
+      .filter((declaration) => !["stroke", "fill", "color"].includes(declaration.property))
+      .map((declaration) => `${declaration.property}:${declaration.value}`)
+      .sort()
+      .join(";");
+  };
+  const namedNonColour = nonColourDeclarations(SOURCE_NAMED_EDGE_CLASS);
+  const navigationNonColour = nonColourDeclarations(NAVIGATION_EDGE_CLASS);
+  assert.notEqual(
+    namedNonColour,
+    navigationNonColour,
+    "with colour removed the two edge classes must still differ",
+  );
+  assert.ok(/stroke-dasharray/.test(navigationNonColour), "navigation keeps its dash pattern");
+  assert.ok(!/stroke-dasharray/.test(namedNonColour), "source-named keeps no dash pattern");
+
+  // Neither class paints a fill of its own; the shared rule owns that.
   for (const [name, selector] of [
     ["source-named", SOURCE_NAMED_EDGE_CLASS],
     ["navigation", NAVIGATION_EDGE_CLASS],
   ]) {
-    for (const property of ["stroke", "fill", "color"]) {
-      assert.equal(
-        effectiveValue(selector, property),
-        null,
-        `the ${name} edge class must not carry its own ${property}`,
-      );
-    }
+    assert.equal(
+      effectiveValue(selector, "fill"),
+      null,
+      `the ${name} edge class must not carry its own fill`,
+    );
   }
   const sharedEdgeRule = COMPONENT_RULES.find((rule) => rule.selector.trim().endsWith(".psadj-edge"));
   assert.ok(sharedEdgeRule, "both classes must inherit one shared edge rule");
   assert.equal(
-    sharedEdgeRule.declarations.find((declaration) => declaration.property === "stroke")?.value,
-    "currentColor",
+    sharedEdgeRule.declarations.find((declaration) => declaration.property === "fill")?.value,
+    "none",
     "the shared edge rule carries the one stroke colour",
   );
 
@@ -1512,49 +1584,36 @@ test("the layout is usable at narrow mobile width", () => {
     "the narrow-width rule must collapse the description grids to one column",
   );
 
-  const groupCount = new Set(concepts.map((node) => node.grouping)).size;
+  // Retargeted at P7.1. Responsiveness is no longer a resolved column count —
+  // it is a fixed logical viewBox plus CSS — but the guarantee is unchanged:
+  // the layout stays usable at narrow width and never drops a record.
 
-  // However narrow the viewport, the resolved column count stays usable: a
-  // whole number, at least one, and never more than there are groups.
-  for (const width of [1, 16, 64, 200, 320, 576, 640, 960, 1200, 1920, 4096]) {
-    const resolved = columnsForWidth(width, groupCount);
-    assert.ok(Number.isInteger(resolved), `width ${width} must resolve to a whole number`);
-    assert.ok(resolved >= 1 && resolved <= groupCount, `width ${width} resolved to ${resolved}`);
-  }
-
-  // A narrower viewport never resolves to MORE columns than a wider one.
-  for (let width = 1; width <= 4096; width += 7) {
-    assert.ok(
-      columnsForWidth(width, groupCount) <= columnsForWidth(width + 7, groupCount),
-      `the column count must not decrease as width grows, at width ${width}`,
-    );
-  }
-
-  // One group column always fits: a viewport wide enough for exactly one group
-  // region resolves to exactly one column. Derived from the layout module's own
-  // constants, so no pixel literal is pinned here.
-  assert.equal(
-    columnsForWidth(GROUP_REGION_WIDTH + ADJACENCY_LAYOUT_METRICS.CANVAS_PADDING * 2, groupCount),
-    1,
+  // The two-column graph grid collapses to one column at the same breakpoint,
+  // so the docked details panel moves BELOW the canvas instead of overflowing.
+  assert.ok(
+    /\.psadj__grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 880px\) minmax\(280px, 340px\)/.test(
+      component,
+    ),
+    "the wide grid must declare the approved tracks",
+  );
+  assert.ok(
+    /\.psadj__grid\s*\{\s*grid-template-columns:\s*1fr;/.test(narrowRule),
+    "the narrow-width rule must collapse .psadj__grid to one column",
   );
 
-  // An unknown or non-positive width falls back to the full group count — never
-  // to zero columns and never to an unrenderable layout.
-  for (const unknown of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
-    assert.equal(columnsForWidth(unknown, groupCount), groupCount, `width ${unknown}`);
-  }
+  // Nothing may force body-level horizontal overflow: the canvas column can
+  // shrink, and the SVG is width-constrained rather than fixed.
+  assert.ok(/min-width:\s*0/.test(component), "the canvas column must be allowed to shrink");
+  assert.ok(/max-width:\s*100%/.test(component), "the SVG must be width-constrained");
+  assert.ok(/overflow-wrap:\s*anywhere/.test(component), "long labels must wrap");
 
-  // Responsiveness is a presentation parameter ONLY: every concept record is
-  // present at every resolvable column count, and none is ever dropped.
-  for (let columns = 1; columns <= groupCount; columns += 1) {
-    const responsive = computeSemanticLayout(concepts, { columnsPerBand: columns });
-    assert.equal(responsive.nodes.length, concepts.length, `columns ${columns}`);
-    assert.equal(
-      new Set(responsive.nodes.map((node) => node.id)).size,
-      concepts.length,
-      `columns ${columns}`,
-    );
-  }
+  // The geometry is width-independent by construction: one fixed logical
+  // viewport, scaled by the browser, so no record is dropped or repositioned at
+  // any viewport width.
+  assert.ok(/preserveAspectRatio="xMidYMid meet"/.test(component));
+  const responsive = computeRadialLayout(snapshot.nodes);
+  assert.equal(responsive.concepts.length, concepts.length);
+  assert.equal(new Set(responsive.concepts.map((node) => node.id)).size, concepts.length);
 });
 
 // ---------------------------------------------------------------------------
@@ -1567,7 +1626,12 @@ test("the server-rendered fallback lists every record and is not behind a JS con
   assert.ok(/allRecords\.map\(\(node\) =>/.test(component));
   // The list section carries no `hidden` attribute and no JS-only gate; the
   // only server-hidden elements are the progressive-enhancement regions.
-  const hiddenTargets = [...component.matchAll(/data-psadj-(\w+)[^>]*hidden/g)].map((m) => m[1]);
+  // The BOOLEAN `hidden` attribute only. `aria-hidden` is a different contract
+  // — it removes decoration from the accessibility tree without hiding anything
+  // from a sighted visitor — so the lookbehind keeps it out of this scan.
+  const hiddenTargets = [...component.matchAll(/data-psadj-(\w+)[^>]*?(?<![\w-])hidden(?![\w-])/g)].map(
+    (m) => m[1],
+  );
   for (const target of hiddenTargets) {
     assert.ok(
       ["controls", "canvas", "details"].includes(target),
@@ -1598,10 +1662,21 @@ test("the fallback record order is deterministic and carries no hierarchy claim"
 
 test("the client never removes the server-rendered fallback", () => {
   assert.ok(!/record-list[\s\S]{0,80}remove\(\)/.test(client));
-  // The only cleared subtree is the canvas the client itself owns.
-  const removals = [...client.matchAll(/selectAll\("\*"\)\.remove\(\)/g)];
-  assert.equal(removals.length, 1);
-  assert.ok(/const host = select\(canvas\);\s*host\.selectAll\("\*"\)\.remove\(\)/.test(client));
+  // Retargeted at P7.1: there is no teardown at all any more. The SVG, its
+  // layers and all 59 record controls are authored server-side, so a wholesale
+  // clear would destroy the very DOM order that carries sequential Tab
+  // traversal — and would drop focus on every redraw.
+  const teardowns = [...client.matchAll(/selectAll\("\*"\)\.remove\(\)/g)];
+  assert.equal(teardowns.length, 0, "no full-subtree teardown may remain");
+  assert.ok(!/\.innerHTML\s*=/.test(client), "no subtree may be cleared through innerHTML");
+  // The only removal is the exit selection of the keyed EDGE join, which owns
+  // nothing authored and no record control.
+  const removals = [...client.matchAll(/exit\) => exit\.remove\(\)/g)];
+  assert.equal(removals.length, 1, "only the keyed edge join may remove anything");
+  assert.ok(
+    !/\[data-psadj-node\][^\n]*remove\(\)/.test(client),
+    "a record control is never removed",
+  );
 });
 
 // ---------------------------------------------------------------------------
