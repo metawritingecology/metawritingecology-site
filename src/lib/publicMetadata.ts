@@ -231,6 +231,7 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/public-surface-map/": en(),
   "/public-version-notes/": en(),
   "/publications/": en("Publication and citation record"),
+  "/reading-public-surfaces/": en(),
   "/site-notes/": en(),
   "/surfaces/": en(),
   "/three-questions/": en(),

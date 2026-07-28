@@ -49,7 +49,7 @@ const INTERACTIVE = "/public-surface-map/interactive/";
 const EXPANDED = "/public-surface-map/expanded/";
 
 // The two noindex interactive previews. Every other registered route is one of
-// the 41 indexable routes.
+// the 42 indexable routes.
 const NOINDEX_PREVIEWS = [INTERACTIVE, EXPANDED];
 const registeredRoutes = getRegisteredRoutes();
 const indexableRegistered = registeredRoutes.filter((r) => !NOINDEX_PREVIEWS.includes(r));
@@ -73,8 +73,8 @@ test("approved production origin equals Package C PRODUCTION_ORIGIN", () => {
 
 // --- 1 / 3: registration count and cardinality -----------------------------
 
-test("registry has exactly 41 indexable routes and 2 interactive noindex routes", () => {
-  assert.equal(indexableRegistered.length, 41);
+test("registry has exactly 42 indexable routes and 2 interactive noindex routes", () => {
+  assert.equal(indexableRegistered.length, 42);
   for (const route of NOINDEX_PREVIEWS) {
     const policy = getRoutePolicy(route);
     assert.ok(policy, route);
@@ -85,8 +85,8 @@ test("registry has exactly 41 indexable routes and 2 interactive noindex routes"
     assert.equal(policy.structuredData.type, "WebPage", route);
     assert.equal(policy.language, "en", route);
   }
-  // total registered = 43
-  assert.equal(registeredRoutes.length, 43);
+  // total registered = 44
+  assert.equal(registeredRoutes.length, 44);
   // Each noindex preview is registered exactly once.
   for (const route of NOINDEX_PREVIEWS) {
     assert.equal(registeredRoutes.filter((r) => r === route).length, 1, route);
@@ -397,6 +397,43 @@ test("no forbidden metadata keys appear anywhere in the JSON-LD graph", () => {
         `${route} emits banned key ${banned}`
       );
     }
+  }
+});
+
+// --- 20b: named regression for the public recovery guide -------------------
+
+// The recovery guide restates existing public reading boundaries. It must never
+// become a carrier for authority, registry, classification, or relation state.
+// The global forbidden-key sweep above already covers every route; this named
+// case exists so that a future regression on THIS page fails with a message
+// pointing at the page rather than at "some route in the graph".
+test("recovery guide route emits no authority/registry/classification JSON-LD key", () => {
+  const route = "/reading-public-surfaces/";
+  const policy = getRoutePolicy(route);
+  assert.ok(policy, "recovery guide route is registered");
+  assert.equal(policy.language, "en");
+  assert.equal(policy.canonical.kind, "self");
+  assert.equal(policy.indexing.kind, "indexable");
+  assert.equal(policy.structuredData.enabled, true);
+  // No new structured genre: the route carries the default orientation genre.
+  assert.equal(policy.structuredData.genre, "Public orientation surface");
+
+  const serialized = JSON.stringify(buildJsonLd(resolvePublicMetadata(input(route)), ORIGIN));
+  for (const forbidden of [
+    "authority",
+    "registry",
+    "classification",
+    "relation",
+    "ontology",
+    "status",
+    "publication",
+    "visibility",
+    "archive"
+  ]) {
+    assert.ok(
+      !new RegExp(`"${forbidden}"\\s*:`, "i").test(serialized),
+      `recovery guide emits forbidden key ${forbidden}`
+    );
   }
 });
 
