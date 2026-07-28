@@ -194,7 +194,7 @@ function zh(genre: string = DEFAULT_GENRE): RouteMetadataPolicy {
 }
 
 export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolicy>> = {
-  // --- 41 indexable routes -------------------------------------------------
+  // --- 42 indexable routes -------------------------------------------------
   "/": en(),
   "/about/": en(),
   "/ai-readable-knowledge-architecture/": en("AI-readable boundary page"),
