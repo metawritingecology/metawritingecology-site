@@ -22,8 +22,8 @@ jobs:
       contents: read
     steps:
       - name: Check out workflow website commit without credentials
-        # actions/checkout v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        # actions/checkout v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
           path: website
@@ -63,8 +63,8 @@ jobs:
       - name: Check out exact public source commit without credentials
         id: source_checkout
         continue-on-error: true
-        # actions/checkout v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        # actions/checkout v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: metawritingecology/meta-writing-ecology
           ref: ${{ inputs.SOURCE_COMMIT_APPROVED_FOR_GENERATION }}
@@ -143,8 +143,8 @@ jobs:
       pull-requests: write
     steps:
       - name: Check out exact workflow website commit
-        # actions/checkout v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        # actions/checkout v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
           path: website
