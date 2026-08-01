@@ -54,6 +54,8 @@ const jsonLd = buildJsonLd(metadata, siteOrigin);
 
     <meta name="description" content={metadata.description} />
 
+    <meta name="psadj-deployment-commit" content={__PSADJ_DEPLOYMENT_COMMIT__} />
+
     {metadata.robots && <meta name="robots" content={metadata.robots} />}
 
     {metadata.canonicalUrl && <link rel="canonical" href={metadata.canonicalUrl} />}

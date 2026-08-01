@@ -3908,3 +3908,26 @@ Build / tests run: `pnpm run check` **exit 0**, 0 failing lines. verify:public-s
 Result: The Authority Map gesture contract is now enforced against its own bundle by positive identification rather than a directory-wide scan. Mutation controls confirm it is load-bearing: injecting `addEventListener("wheel")`, or `("pointerdown")` plus `("pointermove")`, into the Authority Map bundle each fails check 20 by path; the adjacency bundle keeps all three listeners and passes. Unique changed-file count from the frozen base is exactly 13. `interaction.test.ts` is byte-identical (blob c41a8d98… at base and now) and still 39/39; its contingency never fired.
 Unresolved questions: None blocking. One environment-dependent skip remains in `test:indexing-discovery` — "verifier traversal: a real unreadable nested directory (chmod)" — because this process runs as root and chmod 000 stays readable. That suite is untouched by P7.2 and the skip is pre-existing; CI reports 0 skipped.
 Risks or assumptions: Baseline frozen at 5271c03c6f6e2cc7624fcd283c006dad02b56c0f. No dependency, lockfile, route, dataset, authority-map source or adjacency implementation source changed in this commit. DEVIATION FROM THE RULING, reported for review: the ruling specified Commit C would contain exactly three files, on the basis of my earlier report that `preservation.test.ts` was the only record pinning the corrected verifier. That diagnosis was incomplete — a second record exists in PSADJ-14 inside `scripts/verify-public-surface-adjacency-map-build.mjs`. That file is already required path 9 of the authorized 11 and was already changed in Commit B, so no additional path is required and the unique 13-file boundary is preserved exactly; only Commit C's own file count is four rather than three.
+
+### 2026-08-01 - Codex - integrate REV10 deployment metadata into PR #101
+
+Agent: Codex
+Task: Add immutable deployment commit metadata to the P7.2 implementation branch used for the REV10 deployment and update the existing draft PR #101 without changing the physical evidence package.
+Files changed:
+- astro.config.mjs - resolve and validate PSADJ_DEPLOYMENT_COMMIT, defaulting to Git HEAD, and inject the value as a compile-time constant.
+- src/layouts/BaseLayout.astro - emit the immutable psadj-deployment-commit meta tag.
+- src/env.d.ts - declare the compile-time deployment constant.
+- AGENT_WORKLOG.md - append this entry.
+Validation:
+- PR #101 head was verified as 44f90001ec2cc8629c5aee3dfc692b1933b45f50 before integration.
+- The REV10 formal D2(b) evidence review is PASS and no physical session was rerun.
+- node --check astro.config.mjs passed.
+- PSADJ_DEPLOYMENT_COMMIT=44f90001ec2cc8629c5aee3dfc692b1933b45f50 pnpm run build passed.
+- pnpm run check:astro passed with 0 errors, 0 warnings, and 6 existing hints.
+- pnpm run check:ts passed.
+- pnpm run test:metadata-contract passed: 26/26.
+- pnpm run test:metadata-verifier-lifecycle passed 3/5 tests; 2 Windows-only cases failed because the test spawns `npx` while this environment exposes `npx.cmd` and reports spawn npx ENOENT.
+Unresolved questions:
+- PR #101 remains a draft and conflicting with main; no approval, merge, or ready-for-review action is taken here.
+Risks or assumptions:
+- The metadata implementation is integrated on top of the existing PR head. Deployment identity remains an explicit full SHA supplied through PSADJ_DEPLOYMENT_COMMIT when a deployment is built.
