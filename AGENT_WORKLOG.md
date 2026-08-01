@@ -3959,3 +3959,7 @@ Validation:
 Disposition:
 - PR #101 remains blocked pending independent review, a clean-head deployment, and a new deployment-identity evidence session.
 - D3 physical pinch work remains on hold. No physical touch testing was authorized or performed in this correction.
+
+### 2026-08-01 - Codex - test pipeline compatibility correction
+
+The deployment identity regression test was renamed from `tests/deployment-identity.test.mjs` to `tests/deployment-identity.test.ts` to satisfy the repository Node test-script boundary. Its check command was moved to the end of the existing pipeline so the historical check sequence remains an unchanged prefix. Test behavior and production logic are unchanged.
