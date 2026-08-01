@@ -443,6 +443,12 @@ export interface PointerState {
   readonly startOffsetY: number;
   readonly pinchBaselineDistance: number | null;
   readonly pinchBaselineScale: number | null;
+  readonly pinchBaselineMidpointX: number | null;
+  readonly pinchBaselineMidpointY: number | null;
+  readonly pinchBaselineOffsetX: number | null;
+  readonly pinchBaselineOffsetY: number | null;
+  readonly pinchBaselineAnchorX: number | null;
+  readonly pinchBaselineAnchorY: number | null;
   readonly verdict: PointerVerdict;
 }
 
@@ -463,6 +469,12 @@ export function idlePointerState(): PointerState {
     startOffsetY: 0,
     pinchBaselineDistance: null,
     pinchBaselineScale: null,
+    pinchBaselineMidpointX: null,
+    pinchBaselineMidpointY: null,
+    pinchBaselineOffsetX: null,
+    pinchBaselineOffsetY: null,
+    pinchBaselineAnchorX: null,
+    pinchBaselineAnchorY: null,
     verdict: "none",
   };
 }
@@ -540,6 +552,12 @@ export function reducePointer(
           pointers: next,
           pinchBaselineDistance: pinch.distance,
           pinchBaselineScale: viewport.scale,
+          pinchBaselineMidpointX: pinch.midX,
+          pinchBaselineMidpointY: pinch.midY,
+          pinchBaselineOffsetX: viewport.offsetX,
+          pinchBaselineOffsetY: viewport.offsetY,
+          pinchBaselineAnchorX: (pinch.midX - viewport.offsetX) / viewport.scale,
+          pinchBaselineAnchorY: (pinch.midY - viewport.offsetY) / viewport.scale,
         },
         viewport,
       };
@@ -555,6 +573,12 @@ export function reducePointer(
         startOffsetY: viewport.offsetY,
         pinchBaselineDistance: null,
         pinchBaselineScale: null,
+        pinchBaselineMidpointX: null,
+        pinchBaselineMidpointY: null,
+        pinchBaselineOffsetX: null,
+        pinchBaselineOffsetY: null,
+        pinchBaselineAnchorX: null,
+        pinchBaselineAnchorY: null,
         verdict: "none",
       },
       viewport,
@@ -573,16 +597,25 @@ export function reducePointer(
       const pinch = pinchFrom(moved[0] as LivePointer, moved[1] as LivePointer);
       const baseDistance = pointer.pinchBaselineDistance;
       const baseScale = pointer.pinchBaselineScale;
-      if (baseDistance === null || baseScale === null || baseDistance === 0) {
+      const baseAnchorX = pointer.pinchBaselineAnchorX;
+      const baseAnchorY = pointer.pinchBaselineAnchorY;
+      if (
+        baseDistance === null ||
+        baseScale === null ||
+        baseAnchorX === null ||
+        baseAnchorY === null ||
+        baseDistance === 0
+      ) {
         return { pointer: { ...pointer, pointers: moved }, viewport };
       }
       const nextScale = clampScale((baseScale * pinch.distance) / baseDistance);
-      // Anchor is the CONTENT point currently under the pinch midpoint.
-      const anchorX = (pinch.midX - viewport.offsetX) / viewport.scale;
-      const anchorY = (pinch.midY - viewport.offsetY) / viewport.scale;
       return {
         pointer: { ...pointer, pointers: moved },
-        viewport: zoomAbout(viewport, nextScale, anchorX, anchorY),
+        viewport: clampOffset(
+          nextScale,
+          pinch.midX - nextScale * baseAnchorX,
+          pinch.midY - nextScale * baseAnchorY,
+        ),
       };
     }
 
@@ -656,6 +689,12 @@ export function reducePointer(
       startOffsetY: viewport.offsetY,
       pinchBaselineDistance: null,
       pinchBaselineScale: null,
+      pinchBaselineMidpointX: null,
+      pinchBaselineMidpointY: null,
+      pinchBaselineOffsetX: null,
+      pinchBaselineOffsetY: null,
+      pinchBaselineAnchorX: null,
+      pinchBaselineAnchorY: null,
       verdict: clearedVerdict,
     },
     viewport,

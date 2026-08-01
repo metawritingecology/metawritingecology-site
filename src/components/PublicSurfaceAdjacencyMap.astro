@@ -425,6 +425,9 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
               </g>
             </g>
           </svg>
+          <!-- P7.2 pointer tooltip. It is positioned inside the canvas so the
+               pure clamped coordinates are applied to the rendered surface. -->
+          <p class="psadj__tooltip" data-psadj-tooltip data-visible="false" aria-hidden="true"></p>
         </div>
 
         <!-- Visual label readout. Immediately after the SVG, inside the graph
@@ -437,10 +440,6 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
              surfaces remain each node's accessible name, the details panel, the
              complete 59-record list and the status live region. -->
         <p data-psadj-label-readout aria-hidden="true"></p>
-        <!-- P7.2 pointer tooltip. A SEPARATE, additional visual aid: it never
-             replaces the persistent readout above, and it carries no role, no
-             aria-live and no aria-atomic. -->
-        <p class="psadj__tooltip" data-psadj-tooltip data-visible="false" aria-hidden="true"></p>
       </div>
 
       <div class="psadj__details" data-psadj-details hidden>
@@ -815,12 +814,15 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
 
   .psadj__canvas-column {
     min-width: 0;
+    position: relative;
   }
 
   .psadj__canvas {
     border: 1px solid currentColor;
     border-radius: 4px;
     min-width: 0;
+    position: relative;
+    touch-action: none;
     /* Archival mineral / volcanic graphite field. Route-local: this literal
        exists only so the framed area matches the SVG before the SVG paints. */
     background: #24211d;
@@ -1262,8 +1264,12 @@ const safeHref = (node: { canonical_public_url: string; repository_path: string 
   /* The P7.2 pointer tooltip. A duplicate visual aid only: it never replaces
      the persistent readout, is never focusable and intercepts no pointer. */
   .psadj__tooltip {
-    margin: 0.25rem 0 0;
+    position: absolute;
+    left: var(--psadj-tooltip-x, 0px);
+    top: var(--psadj-tooltip-y, 0px);
+    margin: 0;
     min-height: 1.25em;
+    max-width: calc(100% - 0.5rem);
     font-size: 0.85rem;
     color: var(--muted);
     pointer-events: none;

@@ -647,6 +647,30 @@ test("108 — the P7.2 viewport surface is implemented, and stays element-scoped
   // Positive controls for clause (d).
   assert.ok(/window\.addEventListener/.test('window.addEventListener("pointermove", f)'));
   assert.ok(/document\.addEventListener/.test('document.addEventListener("keydown", f)'));
+
+  const canvasCss = componentCode.slice(
+    componentCode.indexOf(".psadj__canvas {"),
+    componentCode.indexOf(".psadj__details {"),
+  );
+  assert.match(canvasCss, /touch-action:\s*none/);
+  assert.equal((componentCode.match(/touch-action:\s*none/g) ?? []).length, 1);
+  assert.ok(!/(?:^|\s)(?:html|body)\s*\{[^}]*touch-action:/s.test(componentCode));
+
+  const tooltipCss = componentCode.slice(
+    componentCode.indexOf(".psadj__tooltip {"),
+    componentCode.indexOf(".psadj__tooltip[data-visible=\"false\"] {"),
+  );
+  assert.match(tooltipCss, /position:\s*absolute/);
+  assert.match(tooltipCss, /left:\s*var\(--psadj-tooltip-x/);
+  assert.match(tooltipCss, /top:\s*var\(--psadj-tooltip-y/);
+  assert.match(tooltipCss, /pointer-events:\s*none/);
+
+  const pointerMove = clientCode.slice(
+    clientCode.indexOf('canvas.addEventListener("pointermove"'),
+    clientCode.indexOf('canvas.addEventListener("pointerup"'),
+  );
+  assert.ok(pointerMove.includes("renderTooltip(tooltip, canvas, state, event, hoverId)"));
+  assert.ok(pointerMove.indexOf("renderTooltip(") < pointerMove.indexOf("if (!state.pointer.pointers"));
 });
 
 // ---------------------------------------------------------------------------

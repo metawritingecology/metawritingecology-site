@@ -429,6 +429,11 @@ function enhance(container: HTMLElement): void {
   });
 
   canvas.addEventListener("pointermove", (event) => {
+    const hoverId = (event.target as HTMLElement | null)?.closest<SVGGElement>("[data-psadj-node]")
+      ?.dataset.psadjNode;
+    if (event.pointerType !== "touch" && hoverId) {
+      renderTooltip(tooltip, canvas, state, event, hoverId);
+    }
     if (!state.pointer.pointers.some((live) => live.id === event.pointerId)) return;
     const point = logicalPoint(canvas, event);
     const before = state.viewport;

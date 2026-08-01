@@ -3931,3 +3931,31 @@ Unresolved questions:
 - PR #101 remains a draft and conflicting with main; no approval, merge, or ready-for-review action is taken here.
 Risks or assumptions:
 - The metadata implementation is integrated on top of the existing PR head. Deployment identity remains an explicit full SHA supplied through PSADJ_DEPLOYMENT_COMMIT when a deployment is built.
+
+### 2026-08-01 - Codex - correct PR #101 deployment identity and desktop touch review blockers
+
+Agent: Codex
+Task: Apply the bounded correction requested by review. Bind deployment metadata to the exact clean Git HEAD, add negative identity tests, correct pinch midpoint translation, scope touch-action to the graph canvas, and wire tooltip coordinates to the rendered tooltip during pointer movement. No deployment or physical touch testing was performed.
+Files changed:
+- astro.config.mjs - use the shared clean-head deployment identity resolver.
+- scripts/lib/deployment-identity.mjs - require readable Git HEAD, clean status, and exact override equality.
+- tests/deployment-identity.test.mjs - cover clean head, wrong SHA, dirty tree, malformed SHA, and missing Git identity.
+- src/lib/public-surface-adjacency-map/viewport.ts - preserve pinch baseline midpoint, offsets, and content anchor for combined translation and scaling.
+- tests/public-surface-adjacency-map/viewport.test.ts - cover same-distance translation, combined translation and scaling, and event order independence.
+- src/components/PublicSurfaceAdjacencyMap.astro - scope touch-action to the canvas and position the tooltip inside the canvas.
+- src/scripts/public-surface-adjacency-map.ts - refresh tooltip position during pointer movement.
+- tests/public-surface-adjacency-map/visualState.test.ts - assert scoped touch-action, tooltip positioning, and movement wiring.
+- package.json - register the deployment identity test in the check sequence.
+- AGENT_WORKLOG.md - append this entry only.
+Validation:
+- node --check astro.config.mjs passed.
+- node --check scripts/lib/deployment-identity.mjs passed.
+- node --check tests/deployment-identity.test.mjs passed.
+- test:deployment-identity passed 5/5.
+- test:adjacency-viewport passed 44/44.
+- test:adjacency-visual-state passed 83/83.
+- git diff --check passed.
+- Astro and TypeScript checks intentionally stop on the dirty working tree until this correction is committed; this is the new fail-closed gate.
+Disposition:
+- PR #101 remains blocked pending independent review, a clean-head deployment, and a new deployment-identity evidence session.
+- D3 physical pinch work remains on hold. No physical touch testing was authorized or performed in this correction.

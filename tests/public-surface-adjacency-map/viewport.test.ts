@@ -685,6 +685,12 @@ test("208 — pointer-state transition reducer for down, move, up, cancel and lo
                 pointers: [{ id: 1, x: 10, y: 10 }, { id: 2, x: 40, y: 10 }],
                 pinchBaselineDistance: 30,
                 pinchBaselineScale: 1,
+                pinchBaselineMidpointX: 25,
+                pinchBaselineMidpointY: 10,
+                pinchBaselineOffsetX: 0,
+                pinchBaselineOffsetY: 0,
+                pinchBaselineAnchorX: 25,
+                pinchBaselineAnchorY: 10,
               }
             : { ...idle, phase, pointers: [{ id: 1, x: 10, y: 10 }] };
       const result = reducePointer(seed, v0, { type, id: 1, x: 12, y: 12 });
@@ -703,6 +709,12 @@ test("208 — pointer-state transition reducer for down, move, up, cancel and lo
     pointers: [{ id: 1, x: 400, y: 500 }, { id: 2, x: 600, y: 500 }],
     pinchBaselineDistance: 200,
     pinchBaselineScale: 1,
+    pinchBaselineMidpointX: 500,
+    pinchBaselineMidpointY: 500,
+    pinchBaselineOffsetX: 0,
+    pinchBaselineOffsetY: 0,
+    pinchBaselineAnchorX: 500,
+    pinchBaselineAnchorY: 500,
   };
   const survived = reducePointer(pinch, v0, { type: "up", id: 1 });
   assert.equal(survived.pointer.phase, "pending");
@@ -710,6 +722,12 @@ test("208 — pointer-state transition reducer for down, move, up, cancel and lo
   assert.equal(survived.pointer.originX, 600);
   assert.equal(survived.pointer.pinchBaselineDistance, null);
   assert.equal(survived.pointer.pinchBaselineScale, null);
+  assert.equal(survived.pointer.pinchBaselineMidpointX, null);
+  assert.equal(survived.pointer.pinchBaselineMidpointY, null);
+  assert.equal(survived.pointer.pinchBaselineOffsetX, null);
+  assert.equal(survived.pointer.pinchBaselineOffsetY, null);
+  assert.equal(survived.pointer.pinchBaselineAnchorX, null);
+  assert.equal(survived.pointer.pinchBaselineAnchorY, null);
   const delayed = reducePointer(survived.pointer, survived.viewport, { type: "lost", id: 1 });
   assert.equal(JSON.stringify(delayed.pointer), JSON.stringify(survived.pointer));
   assert.equal(JSON.stringify(delayed.viewport), JSON.stringify(survived.viewport));
@@ -731,12 +749,95 @@ test("209 — pinch midpoint and scale come from two current pointer positions",
     pointers: [a, b],
     pinchBaselineDistance: 200,
     pinchBaselineScale: 1,
+    pinchBaselineMidpointX: 300,
+    pinchBaselineMidpointY: 400,
+    pinchBaselineOffsetX: 0,
+    pinchBaselineOffsetY: 0,
+    pinchBaselineAnchorX: 300,
+    pinchBaselineAnchorY: 400,
   };
   const spread = reducePointer(seeded, resetTransform(), { type: "move", id: 2, x: 600, y: 400 });
   // Distance doubled from 200 to 400, so the scale doubles from 1 to 2.
   assert.ok(near(spread.viewport.scale, 2, 1e-9));
   assert.equal(spread.pointer.pointers.length, 2);
   assert.equal(spread.pointer.pointers[1].x, 600);
+});
+
+test("209a - same-distance two-pointer translation moves the viewport with the midpoint", () => {
+  const initial = { scale: 2, offsetX: -400, offsetY: -300 };
+  const first = reducePointer(idlePointerState(), initial, {
+    type: "down",
+    id: 1,
+    x: 300,
+    y: 300,
+  });
+  const pinch = reducePointer(first.pointer, first.viewport, {
+    type: "down",
+    id: 2,
+    x: 500,
+    y: 300,
+  });
+  const movedFirst = reducePointer(pinch.pointer, pinch.viewport, {
+    type: "move",
+    id: 1,
+    x: 400,
+    y: 400,
+  });
+  const movedBoth = reducePointer(movedFirst.pointer, movedFirst.viewport, {
+    type: "move",
+    id: 2,
+    x: 600,
+    y: 400,
+  });
+  assert.equal(movedBoth.viewport.scale, 2);
+  assert.equal(movedBoth.viewport.offsetX, -300);
+  assert.equal(movedBoth.viewport.offsetY, -200);
+});
+
+test("209b - pinch translation and scaling share the original midpoint anchor", () => {
+  const initial = { scale: 2, offsetX: -400, offsetY: -300 };
+  const first = reducePointer(idlePointerState(), initial, {
+    type: "down",
+    id: 1,
+    x: 300,
+    y: 300,
+  });
+  const pinch = reducePointer(first.pointer, first.viewport, {
+    type: "down",
+    id: 2,
+    x: 500,
+    y: 300,
+  });
+  const movedFirst = reducePointer(pinch.pointer, pinch.viewport, {
+    type: "move",
+    id: 1,
+    x: 350,
+    y: 350,
+  });
+  const movedBoth = reducePointer(movedFirst.pointer, movedFirst.viewport, {
+    type: "move",
+    id: 2,
+    x: 650,
+    y: 350,
+  });
+  assert.equal(movedBoth.viewport.scale, 3);
+  assert.equal(movedBoth.viewport.offsetX, -700);
+  assert.equal(movedBoth.viewport.offsetY, -550);
+});
+
+test("209c - pinch final state is independent of pointer move event order", () => {
+  const initial = { scale: 2, offsetX: -400, offsetY: -300 };
+  const build = () => {
+    const one = reducePointer(idlePointerState(), initial, { type: "down", id: 1, x: 300, y: 300 });
+    return reducePointer(one.pointer, one.viewport, { type: "down", id: 2, x: 500, y: 300 });
+  };
+  const firstOrder = build();
+  const firstMoved = reducePointer(firstOrder.pointer, firstOrder.viewport, { type: "move", id: 1, x: 350, y: 350 });
+  const firstFinal = reducePointer(firstMoved.pointer, firstMoved.viewport, { type: "move", id: 2, x: 650, y: 350 });
+  const secondOrder = build();
+  const secondMoved = reducePointer(secondOrder.pointer, secondOrder.viewport, { type: "move", id: 2, x: 650, y: 350 });
+  const secondFinal = reducePointer(secondMoved.pointer, secondMoved.viewport, { type: "move", id: 1, x: 350, y: 350 });
+  assert.deepEqual(secondFinal.viewport, firstFinal.viewport);
 });
 
 test("210 — tooltip-rectangle calculation is clamped to a supplied container rectangle", () => {
