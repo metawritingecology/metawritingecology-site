@@ -3934,3 +3934,12 @@ Files changed: .github/workflows/ci.yml, .github/workflows/public-surface-candid
 Build / tests run: pnpm.cmd install --frozen-lockfile completed. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg setup-node pin audit passed with three updated comments. git diff origin/main...HEAD --check passed.
 Unresolved questions: GitHub Actions CI must confirm the updated setup-node action on all three uses.
 Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comments. No production workflow was dispatched.
+
+### 2026-08-01 - Codex - update-checkout-20260801
+
+Agent: Codex
+Task: Recreate the actions/checkout dependency update from current main on owner branch chore/update-checkout-20260801. All four checkout pins and audit-readable comments changed from v4.2.2 to v7.0.1. The old Dependabot branch was not rewritten.
+Files changed: .github/workflows/ci.yml, .github/workflows/public-surface-candidate-generation.yml, and AGENT_WORKLOG.md. No dependency guard, package manifest, lockfile, HANDOFF.md, production publishing workflow, or public content changed.
+Build / tests run: pnpm.cmd install --frozen-lockfile completed. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg checkout pin audit passed with four updated comments. git diff origin/main...HEAD --check passed.
+Unresolved questions: GitHub Actions CI must confirm the updated checkout action on all four uses.
+Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comments. No production workflow was dispatched.
