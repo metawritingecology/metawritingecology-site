@@ -3916,6 +3916,34 @@ Preservation verification: committed starting AGENT_WORKLOG.md blob at HEAD was 
 Result: Change Set A instruction implementation is present in exactly the authorized four paths. Rollover remains recommended but was not executed. Archive creation, docs/worklogs/README.md, README pointer, tests, package changes, workflow changes, public route/content changes, D3 / P7.x work, Dependabot processing, deployment-provenance review, and cross-repository propagation remain deferred.
 Unresolved questions: local gh authentication is invalid, so the new script demonstrates GitHub-unavailable behavior by reporting pr_state_unavailable; manual PR metadata for the gate was obtained through read-only GitHub API/connector evidence instead. Full pnpm validation remains blocked locally by pnpm ignored native build scripts unless the author separately authorizes the dependency-build approval path or CI validates the branch.
 Risks or assumptions: the validation script intentionally does not produce governance classifications such as completed_pushed_unmerged, in_progress, hold, ambiguous, or author_status_unknown. Some surviving remote branch tips are not locally classifiable by ancestry alone; that evidence is advisory and was not treated as an unmerged-work claim. Repository evidence is not live deployment evidence, and no ready, approval, merge, publication, manual deployment, production deployment, branch deletion, or worklog archive action occurred.
+
+### 2026-08-01 - Codex - update-download-artifact-current-main-20260801
+
+Agent: Codex
+Task: Recreate the actions/download-artifact dependency update from current main on owner branch chore/update-download-artifact-20260801-current-main. The pinned action changed from v4.3.0 to v8.0.1 in .github/workflows/public-surface-candidate-generation.yml, including the audit-readable version comment. The old Dependabot branch was not rewritten.
+Files changed: .github/workflows/public-surface-candidate-generation.yml and AGENT_WORKLOG.md. No dependency guard, package manifest, lockfile, HANDOFF.md, production publishing workflow, or public content changed.
+Build / tests run: pnpm.cmd install --frozen-lockfile completed after local CI-mode dependency installation and approved native build scripts. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg action pin audit passed. git diff origin/main...HEAD --check passed. Artifact upload/download round-trip contract was checked locally: producer and consumer use the same artifact name public-surface-candidate-data and path candidate-artifact; no production workflow was run.
+Unresolved questions: GitHub Actions CI must confirm the updated download action in the hosted runner and confirm the artifact round trip.
+Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comment. The workflow remains manually gated and was not dispatched.
+
+### 2026-08-01 - Codex - update-setup-node-20260801
+
+Agent: Codex
+Task: Recreate the actions/setup-node dependency update from current main on owner branch chore/update-setup-node-20260801. All three setup-node pins and audit-readable comments changed from v4.4.0 to v7.0.0. The old Dependabot branch was not rewritten.
+Files changed: .github/workflows/ci.yml, .github/workflows/public-surface-candidate-generation.yml, and AGENT_WORKLOG.md. No dependency guard, package manifest, lockfile, HANDOFF.md, production publishing workflow, or public content changed.
+Build / tests run: pnpm.cmd install --frozen-lockfile completed. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg setup-node pin audit passed with three updated comments. git diff origin/main...HEAD --check passed.
+Unresolved questions: GitHub Actions CI must confirm the updated setup-node action on all three uses.
+Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comments. No production workflow was dispatched.
+
+### 2026-08-01 - Codex - update-checkout-20260801
+
+Agent: Codex
+Task: Recreate the actions/checkout dependency update from current main on owner branch chore/update-checkout-20260801. All four checkout pins and audit-readable comments changed from v4.2.2 to v7.0.1. The old Dependabot branch was not rewritten.
+Files changed: .github/workflows/ci.yml, .github/workflows/public-surface-candidate-generation.yml, and AGENT_WORKLOG.md. No dependency guard, package manifest, lockfile, HANDOFF.md, production publishing workflow, or public content changed.
+Build / tests run: pnpm.cmd install --frozen-lockfile completed. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg checkout pin audit passed with four updated comments. git diff origin/main...HEAD --check passed.
+Unresolved questions: GitHub Actions CI must confirm the updated checkout action on all four uses.
+Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comments. No production workflow was dispatched.
+
 ### 2026-08-01 - Codex - update-upload-artifact-20260801
 
 Agent: Codex
