@@ -3925,3 +3925,12 @@ Files changed: .github/workflows/public-surface-candidate-generation.yml and AGE
 Build / tests run: pnpm.cmd install --frozen-lockfile completed after local CI-mode dependency installation and approved native build scripts. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg action pin audit passed. git diff origin/main...HEAD --check passed. Artifact upload/download round-trip contract was checked locally: producer and consumer use the same artifact name public-surface-candidate-data and path candidate-artifact; no production workflow was run.
 Unresolved questions: GitHub Actions CI must confirm the updated download action in the hosted runner and confirm the artifact round trip.
 Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comment. The workflow remains manually gated and was not dispatched.
+
+### 2026-08-01 - Codex - update-setup-node-20260801
+
+Agent: Codex
+Task: Recreate the actions/setup-node dependency update from current main on owner branch chore/update-setup-node-20260801. All three setup-node pins and audit-readable comments changed from v4.4.0 to v7.0.0. The old Dependabot branch was not rewritten.
+Files changed: .github/workflows/ci.yml, .github/workflows/public-surface-candidate-generation.yml, and AGENT_WORKLOG.md. No dependency guard, package manifest, lockfile, HANDOFF.md, production publishing workflow, or public content changed.
+Build / tests run: pnpm.cmd install --frozen-lockfile completed. pnpm.cmd run check was executed and remained blocked by a Windows esbuild access-denied failure while resolving aria-query and axobject-query package files; CI validation is required. rg setup-node pin audit passed with three updated comments. git diff origin/main...HEAD --check passed.
+Unresolved questions: GitHub Actions CI must confirm the updated setup-node action on all three uses.
+Risks or assumptions: The source Dependabot commit was cherry-picked and amended only to update the human-readable version comments. No production workflow was dispatched.
