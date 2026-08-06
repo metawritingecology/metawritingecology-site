@@ -158,6 +158,10 @@ A Public Slice assembles a small number of repository states into a bounded read
 
 [Enter Public Slice — 25 July 2026](/artistic-research/public-slice/2026-07-25/)
 
+A slice may hold a measurement rather than a sequence of states. The slice below counts what the working corpus held at a fixed cut-off: words written, posts published, and AI tokens logged, each month set against its own base month. It is a snapshot of activity, not an account of the work. It measures no quality, no difficulty and no effect, and the three series are never summed.
+
+[Enter Public Slice — 31 July 2026](/artistic-research/public-slice/2026-07-31/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.
