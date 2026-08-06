@@ -145,12 +145,12 @@ test("the JSON endpoints are extension-bearing and never enter the sitemap", () 
   }
 });
 
-test("route counts were updated mechanically: 41 indexable, 2 noindex previews", () => {
+test("route counts were updated mechanically: 42 indexable, 2 noindex previews", () => {
   const routes = getRegisteredRoutes();
   const noindex = routes.filter((route) => getRoutePolicy(route).indexing.kind === "noindex");
   assert.deepEqual(noindex.sort(), [EXPANDED_ROUTE, AUTHORITY_ROUTE].sort());
-  assert.equal(routes.length - noindex.length, 41);
-  assert.equal(routes.length, 43);
+  assert.equal(routes.length - noindex.length, 42);
+  assert.equal(routes.length, 44);
 });
 
 test("the source route file and the exclusion list agree", () => {
