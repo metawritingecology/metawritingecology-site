@@ -43,14 +43,17 @@ type Measurement = {
 // Evidence URLs are written as complete literal strings. The link verifier
 // resolves occurrences statically and fails closed on an interpolated URL, so
 // no base constant is composed here.
-const REPO = "metawritingecology/metawritingecology-site";
+const REPO = "metawritingecology/meta-writing-ecology";
 
-// The commit that adds the two data files, earlier on this same branch. This
-// repository merges rather than squashes - every recent branch head is an
-// ancestor of main - so this sha stays reachable once the pull request lands.
-// If it is ever squash-merged instead, these pins must be re-aimed.
-const COMMIT = "d291a7a121a1eed45dc646b22718135722c15688";
-const COMMITTED_AT = "2026-08-06T11:06:31+08:00";
+// The commit that adds the two data files, in the source repository. They are
+// committed there rather than beside this page because this repository's
+// ALLOWED_GITHUB_REPOS contract permits public source links to that repository
+// only, and human-governed-ai-workflows.astro states the same rule in published
+// words: website-repository files are referred to by visible path, without a
+// GitHub URL. That pull request must land before this one, or these pins name a
+// commit that is not yet public.
+const COMMIT = "fd30bc693e83c3d6f9a882b791d597f57403c716";
+const COMMITTED_AT = "2026-08-06T12:33:00+08:00";
 
 const MEASUREMENTS: readonly Measurement[] = [
   {
@@ -63,8 +66,8 @@ const MEASUREMENTS: readonly Measurement[] = [
       timestamp: COMMITTED_AT,
       paths: [
         {
-          path: "src/data/mwe-development-rate/monthly_development_rate.csv",
-          url: "https://github.com/metawritingecology/metawritingecology-site/blob/d291a7a121a1eed45dc646b22718135722c15688/src/data/mwe-development-rate/monthly_development_rate.csv"
+          path: "visualizations/mwe-development-rate/monthly_development_rate.csv",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/fd30bc693e83c3d6f9a882b791d597f57403c716/visualizations/mwe-development-rate/monthly_development_rate.csv"
         }
       ]
     },
@@ -81,8 +84,8 @@ const MEASUREMENTS: readonly Measurement[] = [
       timestamp: COMMITTED_AT,
       paths: [
         {
-          path: "src/data/mwe-development-rate/monthly_development_rate.csv",
-          url: "https://github.com/metawritingecology/metawritingecology-site/blob/d291a7a121a1eed45dc646b22718135722c15688/src/data/mwe-development-rate/monthly_development_rate.csv"
+          path: "visualizations/mwe-development-rate/monthly_development_rate.csv",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/fd30bc693e83c3d6f9a882b791d597f57403c716/visualizations/mwe-development-rate/monthly_development_rate.csv"
         }
       ]
     },
@@ -99,8 +102,8 @@ const MEASUREMENTS: readonly Measurement[] = [
       timestamp: COMMITTED_AT,
       paths: [
         {
-          path: "src/data/mwe-development-rate/monthly_development_rate.csv",
-          url: "https://github.com/metawritingecology/metawritingecology-site/blob/d291a7a121a1eed45dc646b22718135722c15688/src/data/mwe-development-rate/monthly_development_rate.csv"
+          path: "visualizations/mwe-development-rate/monthly_development_rate.csv",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/fd30bc693e83c3d6f9a882b791d597f57403c716/visualizations/mwe-development-rate/monthly_development_rate.csv"
         }
       ]
     },
@@ -117,8 +120,8 @@ const MEASUREMENTS: readonly Measurement[] = [
       timestamp: COMMITTED_AT,
       paths: [
         {
-          path: "src/data/mwe-development-rate/monthly_development_rate.csv",
-          url: "https://github.com/metawritingecology/metawritingecology-site/blob/d291a7a121a1eed45dc646b22718135722c15688/src/data/mwe-development-rate/monthly_development_rate.csv"
+          path: "visualizations/mwe-development-rate/monthly_development_rate.csv",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/fd30bc693e83c3d6f9a882b791d597f57403c716/visualizations/mwe-development-rate/monthly_development_rate.csv"
         }
       ]
     },
@@ -135,8 +138,8 @@ const MEASUREMENTS: readonly Measurement[] = [
       timestamp: COMMITTED_AT,
       paths: [
         {
-          path: "src/data/mwe-development-rate/summary.json",
-          url: "https://github.com/metawritingecology/metawritingecology-site/blob/d291a7a121a1eed45dc646b22718135722c15688/src/data/mwe-development-rate/summary.json"
+          path: "visualizations/mwe-development-rate/summary.json",
+          url: "https://github.com/metawritingecology/meta-writing-ecology/blob/fd30bc693e83c3d6f9a882b791d597f57403c716/visualizations/mwe-development-rate/summary.json"
         }
       ]
     },
@@ -477,8 +480,8 @@ measure quality, difficulty, or how much of the work was thinking rather than ty
             </p>
             <p>
               The corpus measured is a private working corpus. What is public is
-              the result: the two data files committed in this repository and
-              pinned below. The corpus itself is not published, and this page is
+              the result: the two data files committed in the source
+              repository and pinned below. The corpus itself is not published, and this page is
               not a route into it.
             </p>
             <p>
