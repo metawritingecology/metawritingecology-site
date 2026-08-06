@@ -184,10 +184,14 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    32f992d2…eed8  184577 bytes  9da220e6…1719
  *    owner-authorized integration 2026-08-06 (scope S1, fast-xml-parser only);
  *    bytes taken from 53ac9a2f, the Dependabot commit whose base lockfile was
- *    byte-identical to main's. */
+ *    byte-identical to main's.
+ *    184379 bytes  0d607ac9…941c
+ *    owner-authorized integration 2026-08-06 (wrangler only); bytes taken from
+ *    6cc72716, the Dependabot commit rebased onto 7341403, whose base lockfile
+ *    was byte-identical to main's. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 184379,
-  sha256: "0d607ac95416c8cbc41f498c97c2cf4ad0b4fa0bda6dd510d05d341190b1941c",
+  byteLength: 194625,
+  sha256: "eae151f1043cf1bce845d8b8d5ac367a9b063e599a66516062b787bcd227c099",
 };
 
 /**
@@ -612,6 +616,9 @@ test("guard 8 — no motion or timer architecture", () => {
 // The only exception is an explicit owner-authorized baseline integration.
 // 2026-08-06, scope S1: fast-xml-parser 5.9.3 -> 5.10.1 (Dependabot #113). No
 // other entry moved, and the runtime dependency list is untouched.
+// 2026-08-06, wrangler 4.88.0 -> 4.118.0 (Dependabot #111). Deploy tooling
+// only. The runtime dependency list is still untouched and has not moved since
+// 32f992d2.
 
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "12.6.12",
@@ -626,7 +633,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.9",
   "@types/d3-selection": "3.0.11",
   "fast-xml-parser": "5.10.1",
-  wrangler: "4.88.0",
+  wrangler: "4.118.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
