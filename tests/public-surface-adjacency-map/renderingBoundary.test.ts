@@ -188,10 +188,15 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    184379 bytes  0d607ac9…941c
  *    owner-authorized integration 2026-08-06 (wrangler only); bytes taken from
  *    6cc72716, the Dependabot commit rebased onto 7341403, whose base lockfile
- *    was byte-identical to main's. */
+ *    was byte-identical to main's.
+ *    194625 bytes  eae151f1…c099
+ *    owner-authorized integration 2026-08-06 (Astro group); bytes taken from
+ *    cf55afbf, the Dependabot commit rebased onto 957b172, whose base lockfile
+ *    was byte-identical to main's. This is the first movement of
+ *    BASELINE_DEPENDENCIES since 32f992d2. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 194625,
-  sha256: "eae151f1043cf1bce845d8b8d5ac367a9b063e599a66516062b787bcd227c099",
+  byteLength: 195305,
+  sha256: "cac0759fe9d8abe28f04c1599f57c36adb62c5ec1d830ba50f0a8f805ab9114c",
 };
 
 /**
@@ -619,18 +624,23 @@ test("guard 8 — no motion or timer architecture", () => {
 // 2026-08-06, wrangler 4.88.0 -> 4.118.0 (Dependabot #111). Deploy tooling
 // only. The runtime dependency list is still untouched and has not moved since
 // 32f992d2.
+// 2026-08-06, Astro group (Dependabot #112): @astrojs/sitemap 3.6.1 -> 3.7.3
+// and @astrojs/check 0.9.9 -> 0.9.10. This is the FIRST movement of
+// BASELINE_DEPENDENCIES since 32f992d2. @astrojs/sitemap generates the public
+// sitemap, so this scope reaches public discovery and was reviewed on generated
+// output, not on a green suite alone.
 
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "12.6.12",
   "@astrojs/mdx": "4.3.13",
-  "@astrojs/sitemap": "3.6.1",
+  "@astrojs/sitemap": "3.7.3",
   astro: "5.16.9",
   "d3-selection": "3.0.0",
   typescript: "5.9.3",
 };
 
 const BASELINE_DEV_DEPENDENCIES = {
-  "@astrojs/check": "0.9.9",
+  "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
   "fast-xml-parser": "5.10.1",
   wrangler: "4.118.0",
