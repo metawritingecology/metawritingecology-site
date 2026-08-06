@@ -3916,3 +3916,22 @@ Preservation verification: committed starting AGENT_WORKLOG.md blob at HEAD was 
 Result: Change Set A instruction implementation is present in exactly the authorized four paths. Rollover remains recommended but was not executed. Archive creation, docs/worklogs/README.md, README pointer, tests, package changes, workflow changes, public route/content changes, D3 / P7.x work, Dependabot processing, deployment-provenance review, and cross-repository propagation remain deferred.
 Unresolved questions: local gh authentication is invalid, so the new script demonstrates GitHub-unavailable behavior by reporting pr_state_unavailable; manual PR metadata for the gate was obtained through read-only GitHub API/connector evidence instead. Full pnpm validation remains blocked locally by pnpm ignored native build scripts unless the author separately authorizes the dependency-build approval path or CI validates the branch.
 Risks or assumptions: the validation script intentionally does not produce governance classifications such as completed_pushed_unmerged, in_progress, hold, ambiguous, or author_status_unknown. Some surviving remote branch tips are not locally classifiable by ancestry alone; that evidence is advisory and was not treated as an unmerged-work claim. Repository evidence is not live deployment evidence, and no ready, approval, merge, publication, manual deployment, production deployment, branch deletion, or worklog archive action occurred.
+
+### 2026-08-01 - Codex - REV10 deployment metadata preflight
+
+Agent: Codex
+Task: Add immutable deployment commit metadata to the shared Astro head and prepare the REV10 deployment for expected commit 44f90001ec2cc8629c5aee3dfc692b1933b45f50.
+Files changed:
+- astro.config.mjs - resolve and validate PSADJ_DEPLOYMENT_COMMIT, defaulting to Git HEAD, and inject the value as a compile-time constant.
+- src/layouts/BaseLayout.astro - emit meta name psadj-deployment-commit in the document head.
+- src/env.d.ts - declare the compile-time deployment constant.
+Tests and checks:
+- git diff --check passed.
+- pnpm.cmd run build passed with PSADJ_DEPLOYMENT_COMMIT set to the expected commit.
+- Built static HTML and the SSR worker chunk both contain the exact expected 40-character SHA.
+- node_modules/.bin/wrangler.CMD deploy --dry-run failed before upload with Cannot read directory ../../.. and Could not resolve dist/_worker.js/index.js.
+- node_modules/.bin/wrangler.CMD deploy failed at the same pre-upload bundling stage; no deployment occurred.
+Unresolved questions:
+- The checkout HEAD is 4916e8f190eed5a76d47c6aa998e0e3e804a6644, not the supplied expected deployment identity. The build used the explicit PSADJ_DEPLOYMENT_COMMIT override as requested for REV10.
+Risks or assumptions:
+- The marker is compile-time immutable in the generated worker. Deployment remains blocked by the local Wrangler Windows bundling failure, so production HTML was not rechecked.

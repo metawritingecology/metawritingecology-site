@@ -2,6 +2,8 @@ import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   PRODUCTION_ORIGIN,
   isSitemapEligible,
@@ -9,12 +11,35 @@ import {
   readDirectSourceLastmod
 } from "./scripts/lib/indexing-discovery-contract.mjs";
 
+const repositoryRoot = fileURLToPath(new URL(".", import.meta.url));
+
+function resolveDeploymentCommit() {
+  const configured = process.env.PSADJ_DEPLOYMENT_COMMIT?.trim();
+  const commit = configured || execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"]
+  }).trim();
+
+  if (!/^[0-9a-f]{40}$/.test(commit)) {
+    throw new Error("PSADJ_DEPLOYMENT_COMMIT must be a full lowercase Git SHA");
+  }
+
+  return commit;
+}
+
+const deploymentCommit = resolveDeploymentCommit();
 const pagesDir = new URL("./src/pages/", import.meta.url);
 
 export default defineConfig({
   site: PRODUCTION_ORIGIN,
   output: "server",
   adapter: cloudflare(),
+  vite: {
+    define: {
+      __PSADJ_DEPLOYMENT_COMMIT__: JSON.stringify(deploymentCommit)
+    }
+  },
   integrations: [
     mdx(),
     sitemap({
