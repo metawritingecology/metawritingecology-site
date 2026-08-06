@@ -175,12 +175,19 @@ const lockfile = rd("pnpm-lock.yaml");
 // change the digest.
 const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 
-/** Authorized baseline `pnpm-lock.yaml` identity at 32f992d2…eed8. If this
- *  fails, the correct response is to restore the lockfile — never to update the
- *  expectation. */
+/** Authorized baseline `pnpm-lock.yaml` identity. If this fails, the correct
+ *  response is to restore the lockfile — never to update the expectation. The
+ *  only exception is an explicit owner-authorized baseline integration, which
+ *  moves the lockfile, the manifest and this expectation in one commit.
+ *
+ *  Baseline history:
+ *    32f992d2…eed8  184577 bytes  9da220e6…1719
+ *    owner-authorized integration 2026-08-06 (scope S1, fast-xml-parser only);
+ *    bytes taken from 53ac9a2f, the Dependabot commit whose base lockfile was
+ *    byte-identical to main's. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 184577,
-  sha256: "9da220e6781fa9bf636fe2f2540dd1a40dad2ed44a031afd86f099ab8c041719",
+  byteLength: 184379,
+  sha256: "0d607ac95416c8cbc41f498c97c2cf4ad0b4fa0bda6dd510d05d341190b1941c",
 };
 
 /**
@@ -602,6 +609,9 @@ test("guard 8 — no motion or timer architecture", () => {
 // P7.0 may add SCRIPTS only. Captured from the authorized baseline
 // 32f992d28f7c84d21c7af5a2ca5430d5fb63eed8. If one of these fails, the correct
 // response is to restore the dependency lists — never to update the expectation.
+// The only exception is an explicit owner-authorized baseline integration.
+// 2026-08-06, scope S1: fast-xml-parser 5.9.3 -> 5.10.1 (Dependabot #113). No
+// other entry moved, and the runtime dependency list is untouched.
 
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "12.6.12",
@@ -615,7 +625,7 @@ const BASELINE_DEPENDENCIES = {
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.9",
   "@types/d3-selection": "3.0.11",
-  "fast-xml-parser": "5.9.3",
+  "fast-xml-parser": "5.10.1",
   wrangler: "4.88.0",
 };
 
