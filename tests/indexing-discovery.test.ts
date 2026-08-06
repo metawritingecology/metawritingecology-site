@@ -1828,10 +1828,10 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 41 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 42 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 41);
+  assert.equal(expected.size, 42);
   assert.ok(expected.has("/about/"));
   assert.ok(expected.has("/"));
   assert.ok(!expected.has("/language-pressure-test-lab-prototype/"));

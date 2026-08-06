@@ -37,6 +37,7 @@ This view uses selected public-document visualization membership only. It is not
 - [About the System](/about/) gives a concise identity and scope note.
 - [Entry Surfaces](/surfaces/) describes the public fiction, system, corpus-facing, and platform entry surfaces.
 - [Public Boundary](/boundary/) states what the public website includes and what it does not include.
+- [Reading Public Surfaces: Support, Limits, and Return](/reading-public-surfaces/) consolidates existing public reading limits and return routes without creating new authority claims.
 - [Public Site Notes](/site-notes/) records public-facing website updates.
 - [Public Version Notes](/public-version-notes/) explains public surface and version boundaries.
 
