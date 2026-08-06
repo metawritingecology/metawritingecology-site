@@ -12,13 +12,13 @@
   "dependencies": {
     "@astrojs/cloudflare": "12.6.12",
     "@astrojs/mdx": "4.3.13",
-    "@astrojs/sitemap": "3.6.1",
+    "@astrojs/sitemap": "3.7.3",
     "astro": "5.16.9",
     "d3-selection": "3.0.0",
     "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.9",
+    "@astrojs/check": "0.9.10",
     "@types/d3-selection": "3.0.11",
     "fast-xml-parser": "5.10.1",
     "wrangler": "4.118.0"
