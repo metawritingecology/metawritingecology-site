@@ -115,7 +115,8 @@ import "../../../styles/global.css";
     .synthesis h2{margin-top:8px;max-width:31ch;font-size:clamp(1.45rem,3vw,2rem)}
     .question{margin-top:20px;max-width:44rem;font-size:1.04rem}
     .question strong{font-weight:600;color:var(--text)}
-    .permissions{margin-top:24px;border-top:1px solid var(--line)}
+    .permissions-scope{margin-top:22px;color:var(--muted);font-size:.82rem}
+    .permissions{margin-top:10px;border-top:1px solid var(--line)}
     .permission{display:grid;grid-template-columns:105px 1fr;gap:18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:.88rem}
     .permission strong{color:var(--link);font-weight:650}
     .permission span{color:var(--muted)}
@@ -144,7 +145,7 @@ import "../../../styles/global.css";
     <p class="framing">Four fixed repository states are assembled here into a bounded reading of public form, permission, preservation and formal authority. The evidence establishes each state at a fixed commit; the synthesis is an authored reading of them.</p>
     <div class="date-row">
       <div><span>Slice date</span>7 August 2026</div>
-      <div><span>Evidence states</span>30 June–27 July 2026</div>
+      <div><span>Evidence states</span>30 June–27 July 2026, UTC+8</div>
       <div><span>Indexing</span>noindex / bounded reading</div>
     </div>
   </header>
@@ -162,7 +163,7 @@ import "../../../styles/global.css";
     <article class="state" id="anchor">
       <aside class="state-meta"><div class="state-num">01</div><div class="state-verb">Anchor</div><div class="state-date">30 June 2026</div></aside>
       <div>
-        <h2>A public anchor becomes a defined public object</h2>
+        <h2>At this commit, a Public Anchor has a defined scaffold and schema</h2>
         <p class="state-summary">A Public Anchor scaffold and schema are introduced: a named, citable, source-visible record that declares its own scope and non-scope.</p>
 
         <figure>
@@ -177,7 +178,7 @@ import "../../../styles/global.css";
         <div class="raw"><strong>553b341b0b28</strong><span>PUBLIC_ANCHOR_SCHEMA.md</span><span>SOURCE_BOUNDARY_STATEMENT.md</span><span>CITATION.cff</span></div>
 
         <dl class="reading">
-          <div class="reading-row"><dt>Observed state</dt><dd>At this commit a Public Anchor scaffold and schema are present, and they declare scope and non-scope explicitly. For this layer, visibility alone is not treated as sufficient.</dd></div>
+          <div class="reading-row"><dt>Observed state</dt><dd>At this commit a Public Anchor scaffold and schema are present, and they declare scope and non-scope explicitly. For public anchors, visibility alone is not treated as sufficient.</dd></div>
           <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The shift is not that publicness as a whole becomes defined, but that the conditions for one kind of public object are formalized.</dd></div>
           <div class="reading-row reading-limit"><dt>Limit</dt><dd>This commit establishes a scaffold and schema. It does not demonstrate a complete population of mature anchor instances or define the whole public surface.</dd></div>
         </dl>
@@ -186,10 +187,10 @@ import "../../../styles/global.css";
     </article>
 
     <article class="state" id="freeze">
-      <aside class="state-meta"><div class="state-num">02</div><div class="state-verb">Freeze</div><div class="state-date">25 July 2026</div></aside>
+      <aside class="state-meta"><div class="state-num">02</div><div class="state-verb">Freeze</div><div class="state-date">25 July 2026, 21:24 UTC+8</div></aside>
       <div>
-        <h2>A generated view becomes a historical object</h2>
-        <p class="state-summary">The tracked 30-record authority-map artifact is made verify-only. Later tooling may check its pinned identity, but cannot silently regenerate it in place.</p>
+        <h2>At this commit, the generated view is documented as a historical artifact</h2>
+        <p class="state-summary">The tracked 30-record authority-map artifact is made verify-only. Later tooling may check its pinned identity; regeneration in place is outside the documented operations.</p>
 
         <figure>
           <div class="figure-label">Archival operation</div>
@@ -198,7 +199,7 @@ import "../../../styles/global.css";
             <div class="freeze-node"><svg class="lock" viewBox="0 0 42 42" aria-hidden="true"><path d="M13 18v-5a8 8 0 0 1 16 0v5"/><rect x="9" y="18" width="24" height="18" rx="4"/></svg><strong>30-record artifact</strong><span>historical / pinned</span></div>
             <div class="freeze-node"><strong>verification</strong><span>read / compare / write nothing</span></div>
           </div>
-          <figcaption>Generation authority is withdrawn from this historical artifact while verification remains available.</figcaption>
+          <figcaption>Verification is the only documented operation on this historical artifact.</figcaption>
         </figure>
 
         <div class="identity"><b>records</b> 30 &nbsp;&nbsp; <b>bytes</b> 92903<br><b>sha256</b> 3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea<br><b>mode</b> verify-only &nbsp;&nbsp; <b>write</b> nothing</div>
@@ -214,7 +215,7 @@ import "../../../styles/global.css";
     </article>
 
     <article class="state" id="accumulate">
-      <aside class="state-meta"><div class="state-num">03</div><div class="state-verb">Accumulate</div><div class="state-date">25 July 2026</div></aside>
+      <aside class="state-meta"><div class="state-num">03</div><div class="state-verb">Accumulate</div><div class="state-date">25 July 2026, 23:04 UTC+8</div></aside>
       <div>
         <h2>A later visualization state is documented beside the frozen one</h2>
         <p class="state-summary">A 59-record adjacency dataset is documented as a separate visualization product. It does not replace, supersede, correct or deprecate the frozen 30-node product.</p>
@@ -222,7 +223,7 @@ import "../../../styles/global.css";
         <figure>
           <div class="figure-label">Temporal coexistence</div>
           <div class="coexist-figure">
-            <div class="co-state"><div class="co-count">30</div><h3>Frozen authority-map artifact</h3><p>historical / immutable / independently verifiable</p></div>
+            <div class="co-state"><div class="co-count">30</div><h3>Frozen authority-map artifact</h3><p>historical / pinned / independently verifiable</p></div>
             <div class="co-mid">stands beside<br>not over</div>
             <div class="co-state"><div class="co-count">59</div><h3>Expanded adjacency dataset</h3><p>separate product / later selection / prepared data</p></div>
           </div>
@@ -243,7 +244,7 @@ import "../../../styles/global.css";
     <article class="state" id="recompose">
       <aside class="state-meta"><div class="state-num">04</div><div class="state-verb">Recompose</div><div class="state-date">27 July 2026</div></aside>
       <div>
-        <h2>The interface changes shape without being granted additional formal authority</h2>
+        <h2>At this commit, the interface's form is not assigned formal authority</h2>
         <p class="state-summary">The expanded public surface becomes a deterministic radial interface with authored record order, keyboard navigation, grouping arcs and routed edges. Rendering constraints limit what geometry, ordering and colour are permitted to formally encode.</p>
 
         <figure>
@@ -270,9 +271,9 @@ import "../../../styles/global.css";
         <dl class="reading">
           <div class="reading-row"><dt>Observed state</dt><dd>At this commit the prepared relation data is rendered as a spatially navigable radial interface with deterministic layout, authored DOM order, grouping arcs, edge routing and keyboard movement.</dd></div>
           <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Visual form becomes part of the research problem: the implementation constrains what the interface may formally encode without claiming control over how viewers perceive hierarchy or authority.</dd></div>
-          <div class="reading-row reading-limit"><dt>Limit</dt><dd>These safeguards constrain formal encoding, not perception. Responsive legibility and spatial navigation remain properties of the encounter rather than proofs of semantic neutrality.</dd></div>
+          <div class="reading-row reading-limit"><dt>Limit</dt><dd>The implementation does not confirm relations, establish ontology or assign conceptual priority. These safeguards constrain formal encoding, not perception. Responsive legibility and spatial navigation remain properties of the encounter rather than proofs of semantic neutrality.</dd></div>
         </dl>
-        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>8261b7c505a17bd907a5c8dbcd30ea2b07115f46</code></p><p><strong>Files:</strong> <code>src/components/PublicSurfaceAdjacencyMap.astro</code>, <code>src/lib/public-surface-adjacency-map/layout.ts</code></p><p>This state is in the website repository rather than the source repository, so the commit and paths are given for location rather than as source links.</p><p>The implementation does not confirm relations, establish ontology or assign conceptual priority.</p></div></details>
+        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>8261b7c505a17bd907a5c8dbcd30ea2b07115f46</code></p><p><strong>Files:</strong> <code>src/components/PublicSurfaceAdjacencyMap.astro</code>, <code>src/lib/public-surface-adjacency-map/layout.ts</code></p><p>This state is in the website repository rather than the source repository, so the commit and paths are given for location rather than as source links.</p></div></details>
       </div>
     </article>
   </section>
@@ -281,11 +282,12 @@ import "../../../styles/global.css";
     <div class="label">Selected reading</div>
     <h2 id="synthesis-title">What is a public form permitted to do — and what must it not claim?</h2>
     <p class="question">The four states can be read together through a shared constraint: <strong>how can a changing system make bounded parts of itself encounterable without allowing each new public form to stand in for the whole?</strong></p>
+    <p class="permissions-scope">Across the four repository states examined here:</p>
     <div class="permissions">
       <div class="permission"><strong>Anchor</strong><span>may become findable, but not stand for the whole.</span></div>
       <div class="permission"><strong>Freeze</strong><span>may remain verifiable, but not be rewritten.</span></div>
       <div class="permission"><strong>Accumulate</strong><span>may be joined by a later state, but not automatically superseded.</span></div>
-      <div class="permission"><strong>Recompose</strong><span>may reorganize attention, but not thereby acquire formal semantic authority.</span></div>
+      <div class="permission"><strong>Recompose</strong><span>may reorganize the arrangement of the presented material, but not thereby acquire formal semantic authority.</span></div>
     </div>
     <p class="formula"><strong>Reading shorthand:</strong><span>public form × permission × authority ceiling</span></p>
     <p class="boundary-note">This synthesis is a reading across four specific repository states. Chronological order does not establish causation, and one demonstrated instance does not automatically become a system-wide principle.</p>
