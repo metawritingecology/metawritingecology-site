@@ -51,6 +51,8 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   "/artistic-research/public-slice/2026-07-25/",
   // noindex,nofollow bounded public slice, corpus measurement (not in feed)
   "/artistic-research/public-slice/2026-07-31/",
+  // noindex,nofollow bounded public slice, permission reading (not in feed)
+  "/artistic-research/public-slice/2026-08-07/",
   // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
   "/public-surface-map/expanded/"
 ]);

@@ -162,6 +162,10 @@ A slice may hold a measurement rather than a sequence of states. The slice below
 
 [Enter Public Slice — 31 July 2026](/artistic-research/public-slice/2026-07-31/)
 
+Public forms can also be read through the permissions attached to them. This slice brings together four fixed repository states: a Public Anchor scaffold that declares its own boundary; a generated visualization made verify-only as historical material; a later visualization product documented beside rather than over that frozen artifact; and a radial interface whose rendering constraints limit what the new form is permitted to formally encode. The repository evidence establishes each state at a fixed commit. Their relation is an authored reading rather than a repository fact.
+
+[Enter Public Slice — 7 August 2026](/artistic-research/public-slice/2026-08-07/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

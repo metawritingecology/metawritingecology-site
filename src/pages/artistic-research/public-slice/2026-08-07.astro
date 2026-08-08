@@ -1,0 +1,300 @@
+---
+import "../../../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Public Slice — 2026-08-07</title>
+  <meta name="description" content="A bounded artistic-research reading of four repository-grounded states in public form, permission, preservation and formal authority." />
+  <style>
+    :root { --deep:#15130f; --raised:#24211c; --max:920px; }
+    *{box-sizing:border-box}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
+    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    a:hover{color:var(--link-hover)}
+    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    p{margin:0}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
+    main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
+    .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
+    .kicker{color:var(--link);margin-bottom:14px}
+    .label{color:var(--muted)}
+
+    .slice-head{max-width:760px;padding-bottom:42px;border-bottom:1px solid var(--line)}
+    .slice-head h1{font-size:clamp(2rem,5vw,3.45rem);letter-spacing:-.04em;max-width:16ch;color:var(--accent)}
+    .framing{margin-top:20px;max-width:42rem;font-size:1.04rem}
+    .date-row{display:flex;gap:34px;flex-wrap:wrap;margin-top:26px;color:var(--muted);font-size:.88rem}
+    .date-row span{display:block;margin-bottom:2px;color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+
+    .slice-index{margin-top:26px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .slice-index ol{display:grid;grid-template-columns:repeat(4,1fr);list-style:none;margin:0;padding:0}
+    .slice-index li+li{border-left:1px solid var(--line)}
+    .slice-index a{display:flex;align-items:center;gap:9px;padding:12px 10px;color:var(--text);text-decoration:none;font-size:.84rem}
+    .slice-index a:hover{background:var(--deep)}
+    .slice-index b{color:var(--link);font-size:.76rem;font-weight:650;letter-spacing:.05em}
+
+    .sequence{margin-top:42px}
+    .state{scroll-margin-top:20px;display:grid;grid-template-columns:132px minmax(0,1fr);gap:30px;padding:54px 0 64px;border-top:1px solid var(--line)}
+    .state:first-child{border-top:0}
+    .state-meta{position:sticky;top:24px;align-self:start}
+    .state-num{color:var(--link);font-size:.78rem;font-weight:650;letter-spacing:.08em}
+    .state-verb{margin-top:7px;color:var(--link);font-size:.8rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase}
+    .state-date{margin-top:8px;color:var(--muted);font-size:.78rem;line-height:1.45}
+    .state h2{max-width:31ch;font-size:clamp(1.45rem,3vw,2rem);letter-spacing:-.02em}
+    .state-summary{margin-top:13px;max-width:45rem}
+
+    figure{margin:30px 0 0}
+    figcaption{margin-top:10px;max-width:46rem;color:var(--muted);font-size:.8rem;line-height:1.5}
+    .figure-label{margin-bottom:10px;color:var(--muted);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+
+    .anchor-figure{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .anchor-side{padding:20px 18px 22px 0}
+    .anchor-side+ .anchor-side{padding-left:24px;border-left:2px solid var(--accent)}
+    .anchor-side h3{font-size:.9rem;color:var(--link)}
+    .anchor-side ul{margin:9px 0 0;padding-left:1.05rem;color:var(--muted);font-size:.91rem}
+    .anchor-side li{margin:4px 0}
+
+    .freeze-figure{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;min-height:124px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .freeze-node{text-align:center;padding:20px 12px}
+    .freeze-node strong{display:block;color:var(--text);font-size:1rem}
+    .freeze-node span{display:block;margin-top:4px;color:var(--muted);font-size:.78rem}
+    .freeze-node:nth-child(2){border-left:1px solid var(--line);border-right:1px solid var(--line)}
+    .lock{width:42px;height:42px;margin:0 auto 8px}
+    .lock path,.lock rect{stroke:var(--link);fill:none;stroke-width:2}
+
+    .identity{margin-top:14px;padding:12px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);font-size:.79rem;line-height:1.65;overflow-wrap:anywhere}
+    .identity b{color:var(--text);font-weight:500}
+
+    .coexist-figure{display:grid;grid-template-columns:1fr 120px 1fr;align-items:stretch;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .co-state{padding:22px 0}
+    .co-state:last-child{text-align:right}
+    .co-count{color:var(--text);font-size:3rem;font-weight:600;line-height:1}
+    .co-state h3{margin-top:8px;font-size:.95rem}
+    .co-state p{margin-top:5px;color:var(--muted);font-size:.82rem}
+    .co-mid{display:grid;place-items:center;border-left:1px solid var(--line);border-right:1px solid var(--line);color:var(--link);text-align:center;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;line-height:1.55}
+    .prepared-note{margin-top:10px;color:var(--muted);font-size:.78rem}
+
+    .radial-figure{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0 8px}
+    .radial-figure svg{display:block;width:100%;height:auto;max-height:380px}
+    .r-edge{stroke:#50493e;stroke-width:1.15;fill:none;opacity:.95}
+    .r-ring{stroke:#4a443a;stroke-width:1.35;fill:none}
+    .r-ring-a{stroke:var(--link);stroke-width:2;fill:none}
+    .r-node{fill:var(--surface);stroke:#b4aa9a;stroke-width:1.45}
+    .r-node-a{fill:var(--surface);stroke:var(--link);stroke-width:1.8}
+    .r-label{fill:var(--muted);font-size:10px;letter-spacing:.08em}
+    .r-label-a{fill:var(--link);font-size:10px;letter-spacing:.08em;font-weight:700}
+    .authority-line{margin-top:12px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;color:var(--muted);font-size:.76rem}
+    .authority-line::before{content:"";height:1px;background:var(--link)}
+
+    .raw{margin-top:17px;display:flex;gap:10px 18px;flex-wrap:wrap;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.75rem}
+    .raw strong{color:var(--text);font-weight:500}
+    .raw a{font-family:inherit}
+
+    .reading{margin-top:24px}
+    .reading-row{display:grid;grid-template-columns:142px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+    .reading-row:last-child{border-bottom:1px solid var(--line)}
+    .reading-row dt{color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .reading-row dd{margin:0;max-width:46rem}
+    .reading-row.reading-interpretation dd{color:var(--text)}
+    .reading-row.reading-interpretation dt{color:var(--link)}
+    .reading-row.reading-limit dd{color:var(--muted);font-size:.91rem}
+
+    details{margin-top:15px}
+    summary{cursor:pointer;width:fit-content;color:var(--link);font-size:.85rem;font-weight:600}
+    .evidence{margin-top:11px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.83rem;overflow-wrap:anywhere}
+    .evidence p+p{margin-top:7px}
+    .evidence strong{color:var(--text);font-weight:500}
+
+    .synthesis{margin-top:18px;padding-top:46px;border-top:1px solid var(--line)}
+    .synthesis h2{margin-top:8px;max-width:31ch;font-size:clamp(1.45rem,3vw,2rem)}
+    .question{margin-top:20px;max-width:44rem;font-size:1.04rem}
+    .question strong{font-weight:600;color:var(--text)}
+    .permissions-scope{margin-top:22px;color:var(--muted);font-size:.82rem}
+    .permissions{margin-top:10px;border-top:1px solid var(--line)}
+    .permission{display:grid;grid-template-columns:105px 1fr;gap:18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+    .permission strong{color:var(--link);font-weight:650}
+    .permission span{color:var(--muted)}
+    .formula{margin-top:18px;color:var(--muted);font-size:.82rem}
+    .formula span{display:block;margin-top:3px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted)}
+    .boundary-note{margin-top:20px;max-width:48rem;color:var(--muted);font-size:.85rem}
+    .return{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);font-size:.9rem}
+    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+
+    @media(max-width:760px){
+      main{padding:50px 18px 74px}.slice-head h1{font-size:2.2rem}.slice-index ol{grid-template-columns:1fr 1fr}.slice-index li:nth-child(3){border-left:0;border-top:1px solid var(--line)}.slice-index li:nth-child(4){border-top:1px solid var(--line)}
+      .state{grid-template-columns:1fr;gap:13px;padding:44px 0 50px}.state-meta{position:static;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.state-verb,.state-date{margin-top:0}
+      .anchor-figure{grid-template-columns:1fr}.anchor-side+ .anchor-side{padding-left:0;border-left:0;border-top:2px solid var(--accent)}
+      .freeze-figure{grid-template-columns:1fr}.freeze-node:nth-child(2){border-left:0;border-right:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+      .coexist-figure{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "mid mid";column-gap:16px}.co-state:first-child{grid-area:left}.co-state:last-child{grid-area:right;text-align:right}.co-mid{grid-area:mid;min-height:34px;border-left:0;border-right:0;border-top:1px solid var(--line);border-bottom:0}.co-count{font-size:2.45rem}.co-state h3{font-size:.88rem}.co-state p{font-size:.76rem}
+      .reading-row{grid-template-columns:1fr;gap:4px}.permission{grid-template-columns:82px 1fr}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="slice-head">
+    <p class="kicker">Artistic Research / Public Slice</p>
+    <h1>Public Slice — 2026-08-07</h1>
+    <p class="framing">Four fixed repository states are assembled here into a bounded reading of public form, permission, preservation and formal authority. The evidence establishes each state at a fixed commit; the synthesis is an authored reading of them.</p>
+    <div class="date-row">
+      <div><span>Slice date</span>7 August 2026</div>
+      <div><span>Evidence states</span>30 June–27 July 2026, UTC+8</div>
+      <div><span>Indexing</span>noindex / bounded reading</div>
+    </div>
+  </header>
+
+  <nav class="slice-index" aria-label="Four states">
+    <ol>
+      <li><a href="#anchor"><b>01</b> Anchor</a></li>
+      <li><a href="#freeze"><b>02</b> Freeze</a></li>
+      <li><a href="#accumulate"><b>03</b> Accumulate</a></li>
+      <li><a href="#recompose"><b>04</b> Recompose</a></li>
+    </ol>
+  </nav>
+
+  <section class="sequence" aria-label="Four repository-grounded states">
+    <article class="state" id="anchor">
+      <aside class="state-meta"><div class="state-num">01</div><div class="state-verb">Anchor</div><div class="state-date">30 June 2026</div></aside>
+      <div>
+        <h2>At this commit, a Public Anchor has a defined scaffold and schema</h2>
+        <p class="state-summary">A Public Anchor scaffold and schema are introduced: a named, citable, source-visible record that declares its own scope and non-scope.</p>
+
+        <figure>
+          <div class="figure-label">Boundary as form</div>
+          <div class="anchor-figure">
+            <div class="anchor-side"><h3>May provide</h3><ul><li>public name and classification status</li><li>minimal formulation and related terms</li><li>citation and source-navigation placement</li></ul></div>
+            <div class="anchor-side"><h3>Must not stand for</h3><ul><li>the full model or complete protocol</li><li>the full internal registry or working corpus</li><li>a replacement for source-level reading</li></ul></div>
+          </div>
+          <figcaption>The line is not decoration: this reading treats the declared boundary itself as part of the public object.</figcaption>
+        </figure>
+
+        <div class="raw"><strong>553b341b0b28</strong><span>PUBLIC_ANCHOR_SCHEMA.md</span><span>SOURCE_BOUNDARY_STATEMENT.md</span><span>CITATION.cff</span></div>
+
+        <dl class="reading">
+          <div class="reading-row"><dt>Observed state</dt><dd>At this commit a Public Anchor scaffold and schema are present, and they declare scope and non-scope explicitly. For public anchors, visibility alone is not treated as sufficient.</dd></div>
+          <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The shift is not that publicness as a whole becomes defined, but that the conditions for one kind of public object are formalized.</dd></div>
+          <div class="reading-row reading-limit"><dt>Limit</dt><dd>This commit establishes a scaffold and schema. It does not demonstrate a complete population of mature anchor instances or define the whole public surface.</dd></div>
+        </dl>
+        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>553b341b0b2840633b5ea33410bec0527679d58d</code> &mdash; <a href="https://github.com/metawritingecology/meta-writing-ecology/tree/553b341b0b2840633b5ea33410bec0527679d58d/public-anchors">browse <code>public-anchors/</code> at this commit</a></p><p><strong>Files:</strong> <a href="https://github.com/metawritingecology/meta-writing-ecology/blob/553b341b0b2840633b5ea33410bec0527679d58d/public-anchors/PUBLIC_ANCHOR_SCHEMA.md">PUBLIC_ANCHOR_SCHEMA.md</a>, <a href="https://github.com/metawritingecology/meta-writing-ecology/blob/553b341b0b2840633b5ea33410bec0527679d58d/public-anchors/SOURCE_BOUNDARY_STATEMENT.md">SOURCE_BOUNDARY_STATEMENT.md</a>, <a href="https://github.com/metawritingecology/meta-writing-ecology/blob/553b341b0b2840633b5ea33410bec0527679d58d/CITATION.cff">CITATION.cff</a></p><p>Public visibility does not equal full release; citation availability does not equal source completeness.</p></div></details>
+      </div>
+    </article>
+
+    <article class="state" id="freeze">
+      <aside class="state-meta"><div class="state-num">02</div><div class="state-verb">Freeze</div><div class="state-date">25 July 2026, 21:24 UTC+8</div></aside>
+      <div>
+        <h2>At this commit, the generated view is documented as a historical artifact</h2>
+        <p class="state-summary">The tracked 30-record authority-map artifact is made verify-only. Later tooling may check its pinned identity; regeneration in place is outside the documented operations.</p>
+
+        <figure>
+          <div class="figure-label">Archival operation</div>
+          <div class="freeze-figure">
+            <div class="freeze-node"><strong>generator</strong><span>generation capability</span></div>
+            <div class="freeze-node"><svg class="lock" viewBox="0 0 42 42" aria-hidden="true"><path d="M13 18v-5a8 8 0 0 1 16 0v5"/><rect x="9" y="18" width="24" height="18" rx="4"/></svg><strong>30-record artifact</strong><span>historical / pinned</span></div>
+            <div class="freeze-node"><strong>verification</strong><span>read / compare / write nothing</span></div>
+          </div>
+          <figcaption>Verification is the only documented operation on this historical artifact.</figcaption>
+        </figure>
+
+        <div class="identity"><b>records</b> 30 &nbsp;&nbsp; <b>bytes</b> 92903<br><b>sha256</b> 3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea<br><b>mode</b> verify-only &nbsp;&nbsp; <b>write</b> nothing</div>
+        <div class="raw"><strong>77f97de50612</strong><span>30 records</span><span>verify-only</span><span>writes nothing</span></div>
+
+        <dl class="reading">
+          <div class="reading-row"><dt>Observed state</dt><dd>At this commit the tracked visualization is declared verify-only: its identity values are pinned, and the documented operations read and compare it but write nothing.</dd></div>
+          <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Preservation is expressed as a permission boundary: future tooling retains the right to verify this past state, but not the right to rewrite it.</dd></div>
+          <div class="reading-row reading-limit"><dt>Limit</dt><dd>This establishes historical isolation for this artifact and these repository operations. It is not, by itself, a general archival policy for all MWE material.</dd></div>
+        </dl>
+        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>77f97de50612360de48b78b6364f29ef74499900</code> &mdash; <a href="https://github.com/metawritingecology/meta-writing-ecology/tree/77f97de50612360de48b78b6364f29ef74499900/visualizations/public-surface-authority-map">browse <code>public-surface-authority-map/</code> at this commit</a></p><p><strong>File:</strong> <a href="https://github.com/metawritingecology/meta-writing-ecology/blob/77f97de50612360de48b78b6364f29ef74499900/visualizations/public-surface-authority-map/README.md">public-surface-authority-map/README.md</a></p></div></details>
+      </div>
+    </article>
+
+    <article class="state" id="accumulate">
+      <aside class="state-meta"><div class="state-num">03</div><div class="state-verb">Accumulate</div><div class="state-date">25 July 2026, 23:04 UTC+8</div></aside>
+      <div>
+        <h2>A later visualization state is documented beside the frozen one</h2>
+        <p class="state-summary">A 59-record adjacency dataset is documented as a separate visualization product. It does not replace, supersede, correct or deprecate the frozen 30-node product.</p>
+
+        <figure>
+          <div class="figure-label">Temporal coexistence</div>
+          <div class="coexist-figure">
+            <div class="co-state"><div class="co-count">30</div><h3>Frozen authority-map artifact</h3><p>historical / pinned / independently verifiable</p></div>
+            <div class="co-mid">stands beside<br>not over</div>
+            <div class="co-state"><div class="co-count">59</div><h3>Expanded adjacency dataset</h3><p>separate product / later selection / prepared data</p></div>
+          </div>
+          <p class="prepared-note">At this commit the 59-record product is prepared data only; no page publication has occurred.</p>
+          <figcaption>The page leaves both states visible at once because coexistence, rather than replacement, is the material under examination.</figcaption>
+        </figure>
+
+        <div class="raw"><strong>39c7f8b37ba5</strong><span>30 frozen</span><span>59 separate product</span><span>does not supersede</span></div>
+        <dl class="reading">
+          <div class="reading-row"><dt>Observed state</dt><dd>At this commit a 59-record visualization product is documented beside the frozen 30-node product rather than as its replacement.</dd></div>
+          <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Within this visualization lineage, a later visualization state can be added without retroactively erasing the earlier artifact.</dd></div>
+          <div class="reading-row reading-limit"><dt>Limit</dt><dd>Coexistence is established for these two products. The later product is prepared data at this commit, and this does not establish a rule that every future representation must be preserved.</dd></div>
+        </dl>
+        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>39c7f8b37ba5a63716fcf71b721a4270982a1d6a</code> &mdash; <a href="https://github.com/metawritingecology/meta-writing-ecology/tree/39c7f8b37ba5a63716fcf71b721a4270982a1d6a/visualizations/public-surface-adjacency-map">browse <code>public-surface-adjacency-map/</code> at this commit</a></p><p><strong>File:</strong> <a href="https://github.com/metawritingecology/meta-writing-ecology/blob/39c7f8b37ba5a63716fcf71b721a4270982a1d6a/visualizations/public-surface-adjacency-map/README.md">public-surface-adjacency-map/README.md</a></p><p>Registry selection and visualization membership remain separate contracts; visual position and membership do not imply formal classification or authority.</p></div></details>
+      </div>
+    </article>
+
+    <article class="state" id="recompose">
+      <aside class="state-meta"><div class="state-num">04</div><div class="state-verb">Recompose</div><div class="state-date">27 July 2026</div></aside>
+      <div>
+        <h2>At this commit, the interface's form is not assigned formal authority</h2>
+        <p class="state-summary">The expanded public surface is presented as a deterministic radial interface with authored record order, keyboard navigation, grouping arcs and routed edges. Rendering constraints limit what geometry, ordering and colour are permitted to formally encode.</p>
+
+        <figure>
+          <div class="figure-label">Page-local schematic / not repository evidence</div>
+          <div class="radial-figure">
+            <svg viewBox="0 0 760 360" role="img" aria-labelledby="rt rd">
+              <title id="rt">Schematic of a radial public-surface encounter</title>
+              <desc id="rd">A radial field of nodes and selected edges, followed by an authority ceiling line. The diagram is an authored schematic and not a reproduction of repository pixels.</desc>
+              <g>
+                <circle class="r-ring-a" cx="380" cy="174" r="42"/><circle class="r-ring" cx="380" cy="174" r="82"/><circle class="r-ring" cx="380" cy="174" r="122"/>
+                <path class="r-edge" d="M380 52 Q430 115 496 112"/><path class="r-edge" d="M496 112 Q458 178 500 235"/><path class="r-edge" d="M500 235 Q425 236 414 294"/><path class="r-edge" d="M414 294 Q365 242 303 283"/><path class="r-edge" d="M303 283 Q300 212 256 232"/><path class="r-edge" d="M256 232 Q310 170 259 116"/><path class="r-edge" d="M259 116 Q333 126 380 52"/>
+                <path class="r-edge" d="M380 132 L496 112"/><path class="r-edge" d="M380 132 L256 232"/><path class="r-edge" d="M380 216 L500 235"/><path class="r-edge" d="M380 216 L259 116"/>
+                <circle class="r-node-a" cx="380" cy="52" r="6"/><circle class="r-node" cx="438" cy="67" r="5"/><circle class="r-node-a" cx="496" cy="112" r="6"/><circle class="r-node" cx="513" cy="174" r="5"/><circle class="r-node-a" cx="500" cy="235" r="6"/><circle class="r-node" cx="463" cy="276" r="5"/><circle class="r-node-a" cx="414" cy="294" r="6"/><circle class="r-node" cx="350" cy="298" r="5"/><circle class="r-node-a" cx="303" cy="283" r="6"/><circle class="r-node" cx="270" cy="260" r="5"/><circle class="r-node-a" cx="256" cy="232" r="6"/><circle class="r-node" cx="245" cy="174" r="5"/><circle class="r-node-a" cx="259" cy="116" r="6"/><circle class="r-node" cx="306" cy="74" r="5"/>
+                <circle class="r-node-a" cx="380" cy="132" r="5"/><circle class="r-node" cx="422" cy="150" r="5"/><circle class="r-node" cx="426" cy="198" r="5"/><circle class="r-node-a" cx="380" cy="216" r="5"/><circle class="r-node" cx="338" cy="198" r="5"/><circle class="r-node" cx="338" cy="150" r="5"/>
+                <text x="380" y="178" text-anchor="middle" class="r-label-a">RADIAL</text><text x="380" y="193" text-anchor="middle" class="r-label">INTERFACE</text>
+              </g>
+            </svg>
+          </div>
+          <div class="authority-line">formal authority ceiling</div>
+          <figcaption>The rendering constraints bound what the interface formally encodes; they do not establish how viewers will perceive hierarchy or authority.</figcaption>
+        </figure>
+
+        <div class="raw"><strong>8261b7c505a1</strong><span>deterministic layout</span><span>authored order</span><span>formal encoding constrained</span></div>
+        <dl class="reading">
+          <div class="reading-row"><dt>Observed state</dt><dd>At this commit the prepared relation data is rendered as a spatially navigable radial interface with deterministic layout, authored DOM order, grouping arcs, edge routing and keyboard movement.</dd></div>
+          <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Visual form becomes part of the research problem: the implementation constrains what the interface may formally encode without claiming control over how viewers perceive hierarchy or authority.</dd></div>
+          <div class="reading-row reading-limit"><dt>Limit</dt><dd>The implementation does not confirm relations, establish ontology or assign conceptual priority. These safeguards constrain formal encoding, not perception. Responsive legibility and spatial navigation remain properties of the encounter rather than proofs of semantic neutrality.</dd></div>
+        </dl>
+        <details><summary>Repository evidence</summary><div class="evidence"><p><strong>Commit:</strong> <code>8261b7c505a17bd907a5c8dbcd30ea2b07115f46</code></p><p><strong>Files:</strong> <code>src/components/PublicSurfaceAdjacencyMap.astro</code>, <code>src/lib/public-surface-adjacency-map/layout.ts</code></p><p>This state is in the website repository rather than the source repository, so the commit and paths are given for location rather than as source links.</p></div></details>
+      </div>
+    </article>
+  </section>
+
+  <section class="synthesis" aria-labelledby="synthesis-title">
+    <div class="label">Selected reading</div>
+    <h2 id="synthesis-title">What is a public form permitted to do — and what must it not claim?</h2>
+    <p class="question">The four states can be read together through a shared constraint: <strong>how can a changing system make bounded parts of itself encounterable without allowing each new public form to stand in for the whole?</strong></p>
+    <p class="permissions-scope">Across the four repository states examined here:</p>
+    <div class="permissions">
+      <div class="permission"><strong>Anchor</strong><span>may become findable, but not stand for the whole.</span></div>
+      <div class="permission"><strong>Freeze</strong><span>may remain verifiable, while the documented tooling is not permitted to rewrite it.</span></div>
+      <div class="permission"><strong>Accumulate</strong><span>may be joined by a later state, but not automatically superseded.</span></div>
+      <div class="permission"><strong>Recompose</strong><span>may reorganize the arrangement of the presented material, but not thereby acquire formal semantic authority.</span></div>
+    </div>
+    <p class="formula"><strong>Reading shorthand:</strong><span>public form × permission × authority ceiling</span></p>
+    <p class="boundary-note">This synthesis is a reading across four specific repository states. Chronological order does not establish causation, and one demonstrated instance does not automatically become a system-wide principle.</p>
+  </section>
+
+  <nav class="return" aria-label="Return"><a href="/artistic-research/">Return to Artistic Research</a></nav>
+</main>
+<footer>Public repository evidence ≠ the reading presented here. Page-local figures are authored reading devices unless explicitly identified as repository evidence.</footer>
+</body>
+</html>
