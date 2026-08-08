@@ -4176,3 +4176,24 @@ Tests and build checks at the pushed commit: `pnpm run build` exit 0; `pnpm run 
 Unresolved questions: `test:metadata-verifier-lifecycle` and `verify:metadata-build` have never run anywhere. They fail locally with `spawn npx ENOENT` identically to a clean `main`, and this push exists so that CI can be the first place they run. No screenshot of the deployed page exists; the only renders are of a derivative in a browser at desktop width, and print, forced-colors and viewports below 585 CSS pixels remain unexercised. Whether this pull request is marked ready, reviewed or merged is an author decision not taken here. Rollover: this file remains past the 4,000-line review trigger and under the 5,000-line ceiling that author deferral permits; the reconfirmation raised in four previous entries is still outstanding.
 
 Risks or assumptions: opening a pull request makes this branch and its diff visible to anyone with repository access; it does not publish the page, which stays `noindex, nofollow` and unreachable from `main` until a merge and a deployment that are separate author decisions. No classification, naming, registry, relation, ontology or public/private boundary decision was made in this entry.
+
+### 2026-08-08 - Claude Code - claude/public-slice-2026-08-07 - correction: the pull request published the page
+
+Agent: Claude Code, model `claude-opus-5[1m]`.
+Task: Correct a false statement in the previous entry. No file other than this one is changed, and nothing about the deployed state was altered.
+
+**The correction.** The previous entry states that opening a pull request "does not publish the page, which stays `noindex, nofollow` and unreachable from `main` until a merge and a deployment that are separate author decisions". The second half of that sentence is false for this repository. The page is live at `https://metawritingecology.org/artistic-research/public-slice/2026-08-07/`, and the parent Artistic Research page links to it, while `origin/main` is unchanged at `e3f71a8` and PR #118 is still an unmerged draft. The author confirmed the page in a private browsing window, so it is not a local cache.
+
+**How.** The Cloudflare check attached to the pull request names its environment in its own URL - `.../metawritingecology-site/production/builds/...` - and the apex domain now serves content that exists only on this branch, since the Artistic Research paragraph and link are not on `main`. A successful pull-request build in this repository deploys to production. Nothing in this session ran a deploy command; `wrangler deploy --dry-run` in CI is a dry run.
+
+**What is deployed** is the current page, not an earlier one: the three wording fixes of 2026-08-08 are present in the served HTML and none of the superseded phrases is.
+
+**Exposure, measured.** The served page carries `<meta name="robots" content="noindex, nofollow">`; the live `sitemap-0.xml` has 42 `<loc>` entries and this route is absent from it, as is the 2026-07-31 slice route; `robots.txt` allows crawling generally, so the page-level directive is what governs. The page is therefore publicly reachable and publicly linked, and not indexable. That is the state the design intended after publication. What differs from the plan is when it happened, and that no author decision stood between the push and it happening.
+
+**What this changes for future work.** "Push now and decide about publication later" is not an available state in this repository. The gate that matters is before the push, not before the merge. This applies to every stream that targets this repository, not only to this one.
+
+Not done, deliberately: no rollback, no merge, no deployment, no change to the page. Rolling production back and merging are both author acts.
+
+Unresolved questions: whether to accept publication and merge #118 so that `main` matches what is served, or to roll the production deployment back in the Cloudflare dashboard and leave #118 a draft. Both are author decisions. Everything carried in the previous entry remains carried: no screenshot of the deployed page has been taken, print, forced-colors and sub-585px viewports are unexercised, and the worklog rollover reconfirmation is outstanding.
+
+Risks or assumptions: this entry corrects a record, not a page. The historical entry is left byte-unchanged, as `AGENTS.md` requires.
