@@ -4197,3 +4197,27 @@ Not done, deliberately: no rollback, no merge, no deployment, no change to the p
 Unresolved questions: whether to accept publication and merge #118 so that `main` matches what is served, or to roll the production deployment back in the Cloudflare dashboard and leave #118 a draft. Both are author decisions. Everything carried in the previous entry remains carried: no screenshot of the deployed page has been taken, print, forced-colors and sub-585px viewports are unexercised, and the worklog rollover reconfirmation is outstanding.
 
 Risks or assumptions: this entry corrects a record, not a page. The historical entry is left byte-unchanged, as `AGENTS.md` requires.
+
+### 2026-08-10 - Claude Code - REV10 deployment metadata and governance publication
+
+Agent: Claude Code
+Task: Merge REV10 deployment metadata (uncommitted from 2026-08-01, local only on rev10-deployment-metadata branch) with governance document publication (CLAIM_DISCIPLINE_STATEMENT.md, modified from 2026-08-06 Codex review) into a single PR and branch. Authorized scope: apply REV10's four-file changes, publish CLAIM_DISCIPLINE_STATEMENT.md to docs/, record combined work in one worklog entry, run pre-append governance gate, commit and push to new feature branch, open PR. Not authorized: merge, rebase, force-push, or any decision about REVIEW_LOOP_CASE.md or OPERATING_PRINCIPLES.md, which remain private/frozen.
+
+Files changed:
+- astro.config.mjs +25 — resolve PSADJ_DEPLOYMENT_COMMIT from environment or git HEAD, validate full 40-char SHA, inject as __PSADJ_DEPLOYMENT_COMMIT__ compile-time constant to Vite define plugin.
+- src/env.d.ts +1 — new file, declare __PSADJ_DEPLOYMENT_COMMIT__ string constant.
+- src/layouts/BaseLayout.astro +2 — emit meta[name="psadj-deployment-commit"] with the deployment commit SHA into document head, placed after the description meta tag.
+- docs/CLAIM_DISCIPLINE_STATEMENT.md (new file) — add governance discipline statement (8/6 modified version with 13 Codex-applied corrections). Declares how the site handles checkable claims vs. private accounts, points to three public implementations, and discloses placement limits.
+- AGENT_WORKLOG.md — this entry, append-only, +21 lines.
+
+Build / tests run:
+- node scripts/check-agent-worklog-governance.mjs — exit 0; active-log-notice present, AGENTS.md pointer confirmed, remote branch evidence available, rollover below_review_threshold.
+- pnpm run build — exit 0; no errors.
+- pnpm run check:astro — 0 errors, 0 warnings.
+- pnpm run test:indexing-discovery — all passed.
+
+Result: REV10 and governance publication merged in single feature branch codex/rev10-governance-publication, ready for PR. CLAIM_DISCIPLINE_STATEMENT.md published to docs/.
+
+Unresolved questions: Trailer policy for commits (Co-Authored-By / Claude-Session); whether docs/ is correct home for CLAIM_DISCIPLINE_STATEMENT.md. Final wording and placement remain author decisions.
+
+Risks or assumptions: Deployment marker is compile-time immutable but does not establish chain of custody after publication. CLAIM_DISCIPLINE effectiveness depends on three implementations remaining public.
