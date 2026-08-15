@@ -17,6 +17,8 @@ Through continuous writing, reflection, and conceptual modeling, the project exp
 
 Meta-Writing Ecology functions primarily as an ongoing writing and research system rather than a formalized service structure.
 
+This page describes that system. It is not a point of entry into a service structure, and it is not a complete record of what the system contains. For what the public site does and does not include, see [Public Boundary](/boundary/).
+
 Limited external exchange may occur where existing language proves insufficient, where structural conditions resist straightforward description, or where new framing is required across writing, research, systems, platforms, and AI-mediated language environments.
 
 This is particularly relevant in cases involving semantic drift, classification drift, legibility problems, abstraction failure, interpretive mismatch, unstable event classification, and difficulty maintaining knowledge representation across changing contexts.
