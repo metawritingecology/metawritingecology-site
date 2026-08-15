@@ -193,10 +193,13 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    owner-authorized integration 2026-08-06 (Astro group); bytes taken from
  *    cf55afbf, the Dependabot commit rebased onto 957b172, whose base lockfile
  *    was byte-identical to main's. This is the first movement of
- *    BASELINE_DEPENDENCIES since 32f992d2. */
+ *    BASELINE_DEPENDENCIES since 32f992d2.
+ *    195305 bytes  4cf2381c…4b67
+ *    owner-authorized integration 2026-08-16 (wrangler 4.118.0 -> 4.121.0,
+ *    Dependabot #121); deploy tooling only, runtime deps unchanged. */
 const LOCKFILE_IDENTITY = {
   byteLength: 195305,
-  sha256: "cac0759fe9d8abe28f04c1599f57c36adb62c5ec1d830ba50f0a8f805ab9114c",
+  sha256: "4cf2381c33d8a1430f6566ae939581c2a5a97080decfe3323746dbe6df5a4b67",
 };
 
 /**
@@ -629,6 +632,9 @@ test("guard 8 — no motion or timer architecture", () => {
 // BASELINE_DEPENDENCIES since 32f992d2. @astrojs/sitemap generates the public
 // sitemap, so this scope reaches public discovery and was reviewed on generated
 // output, not on a green suite alone.
+// 2026-08-16, wrangler 4.118.0 -> 4.121.0 (Dependabot #121). Deploy tooling
+// only (workerd, miniflare, unenv-preset moved with it). Runtime dependency
+// list untouched; 0 prohibited packages.
 
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "12.6.12",
@@ -643,7 +649,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
   "fast-xml-parser": "5.10.1",
-  wrangler: "4.118.0",
+  wrangler: "4.121.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
