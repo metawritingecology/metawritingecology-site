@@ -14,28 +14,30 @@ It is intended to be readable by human visitors, crawlers, archives, and AI-medi
 
 ## Local setup
 
+This project is pinned to pnpm 10.34.5 via the `packageManager` field. Use pnpm, not npm.
+
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Run a local development server:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Build the site:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Run project checks:
 
 ```bash
-npm run check
+pnpm run check
 ```
 
 ## Deployment caution
@@ -56,3 +58,7 @@ Generated or local build folders include:
 - `node_modules/`
 
 Source content should be edited in `src/`, `public/`, and configuration files as appropriate.
+
+## License
+
+Unless a file header names a different Creative Commons license, materials in this repository are licensed under [CC BY 4.0](./LICENSE). See [NOTICE](./NOTICE).
