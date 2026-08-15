@@ -10,6 +10,7 @@ const { entry, compact = false } = Astro.props;
 ---
 
 <article
+  id={entry.id}
   class:list={["diagnostic-card", { "diagnostic-card--compact": compact }]}
   data-category={entry.category}
 >
