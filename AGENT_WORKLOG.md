@@ -4285,3 +4285,45 @@ The guard is also not vacuous, which is worth recording separately: it failed on
 Unresolved questions: For author review, not blocking. Whether the frozen `BASE_PIPELINE` list in `preservation.test.ts` should ever grow to include later additions is an author decision; this correction deliberately does not touch that test, because editing a guard to admit the change it just rejected is the wrong direction.
 
 Risks or assumptions: `test:human-governed` now runs later in the chain than first intended, after the three `verify:*` steps rather than before them. Nothing in it depends on their output and nothing in them depends on it. The pull request remains a draft and unmerged; merge is an author decision.
+
+### 2026-08-15 - Claude Code - claude/windows-npx-spawn-fix - resolve the Wrangler and Astro CLI entry points instead of spawning shell shims
+
+Agent: Claude Code, model `claude-opus-5[1m]`, running on the physical desktop account.
+
+Task: Make `pnpm run check` completable on Windows. Two call sites spawned an extensionless shell shim - `npx` and `node_modules/.bin/astro` - which Windows cannot execute directly, so `spawn` failed with ENOENT and the `&&` chain stopped at step 5 of 32.
+
+Base and head: branch `claude/windows-npx-spawn-fix` created from `origin/main` equal to 30bfed3b79435d2b3d8aa4e695b010661f69333e, verified clean before editing. One implementation commit.
+
+Files changed: `scripts/verify-metadata-build.mjs` and `tests/metadata-verifier-lifecycle.test.ts`, plus this worklog entry. 46 insertions, 5 deletions. No test assertion was weakened, removed or exempted; no dependency was added; no route, page, contract, manifest or public surface was touched.
+
+File identities, recomputed here after the change (LF throughout, zero CR bytes): `scripts/verify-metadata-build.mjs` 28,942 B 654 ln sha256 prefix d1f241e8c8ae, from 27,609 B 630 ln f709b85f58d5; `tests/metadata-verifier-lifecycle.test.ts` 11,508 B 289 ln 45754d2f5787, from 10,508 B 272 ln e3ea93219971.
+
+The defect: `withLocalServer` in the verifier spawned `npx wrangler dev ...`, and `ensureBuild` in the lifecycle test spawned `node_modules/.bin/astro build`. On POSIX both are executable files. On Windows neither is - the executable forms are `npx.cmd` and `astro.CMD`, and a bare `spawn` of the extensionless name resolves to nothing. The result was `Error: spawn npx ENOENT`, errno -4058, two of five lifecycle tests failing in about 20 milliseconds each because they never started anything.
+
+The fix resolves each CLI through its own package's `bin` field and runs the resulting `.js` entry with `process.execPath`. That entry is a real file on every platform. Both helpers fail closed with a named error if the package declares no `bin` or the resolved entry is missing.
+
+This is not a new idiom introduced for this fix, and that was verified rather than claimed: `scripts/verify-public-surface-adjacency-map-build.mjs` lines 219-224 already resolve the Astro CLI by exactly this pattern - `createRequire`, `resolve("astro/package.json")`, read `bin`, join against the package directory - and `execFileSync(process.execPath, [astroBinaryPath(), "build"])` at line 1020. The change makes the two remaining call sites consistent with the two that were already correct.
+
+The defect class is now closed rather than the reported instance: a repository-wide scan of `scripts`, `tests`, root `*.mjs`, `package.json` and `.github` for `"npx"`, `'npx'` or `node_modules/.bin` returns zero remaining occurrences. Four files now use the resolved-entry idiom; before this change two of the four did.
+
+Tests and build checks run. Before, on clean `origin/main`: `pnpm run test:metadata-verifier-lifecycle` 3 pass 2 fail, `spawn npx ENOENT`, the two failures returning in 24.4 ms and 18.2 ms. After, on this branch: 5 pass 0 fail, with those same two tests now taking 4,000.8 ms and 3,244.2 ms - they are executing the Wrangler lifecycle they are named for rather than aborting before it starts, which is the difference between a repaired test and a silenced one.
+
+Then the whole suite, which is the point of the change: `pnpm run check` run from PowerShell completed with exit code 0. All 30 pnpm scripts plus `astro build` and `wrangler deploy --dry-run` executed; 2,878 lines of output contain zero `not ok`, zero `# fail N` and zero `ELIFECYCLE`; Wrangler genuinely ran ("Total Upload: 1350.49 KiB / gzip: 268.85 KiB", "--dry-run: exiting now"); the final step reported "verify-public-surface-adjacency-map-build: all 21 checks passed". This is the first recorded completion of the full check suite on Windows.
+
+One environmental condition found while measuring, reported and NOT fixed because it is outside this change and outside the repository. Run from Git Bash rather than PowerShell, `test:orchestration` fails 22 of 29 with `tar: Cannot connect to C: resolve failed`. `/usr/bin/tar` there is GNU tar 1.35, which reads a `C:\...` argument as a `host:path` remote specification; PowerShell resolves `tar` to `C:\WINDOWS\system32\tar.exe` and the same tests pass. This was proven not to be caused by this change: with the change stashed and the working tree byte-identical to `origin/main`, the same shell reproduces the identical 22 failures. It is a shell-selection condition, not a Windows condition and not a repository defect.
+
+Also verified, since a fix that repairs one platform by breaking another is not a fix: `process.execPath` and a resolved `.js` entry are portable, and the identical idiom in the adjacency verifier already passes on `ubuntu-latest` in existing CI. This pull request's own CI run is the direct measurement.
+
+Pre-append inventory: reconfirmed rather than reused. The previous inventory in this repository was taken at 2026-08-15T01:35Z; pull request #122 has been opened since, which is an integration operation and a trigger to reconfirm. `origin/main` unchanged at 30bfed3b. Open pull requests: #122 (draft, this session's, touching `LICENSE`, `NOTICE`, `README.md`, `package.json`, `src/pages/models.md`, `src/pages/about.md` - no overlap with this change set) and #121 (dependabot, dependency queue, listed separately and not treated as feature work). The three branches classified `ambiguous` / `author_status_unknown` in that inventory - `claude/p7-1-implementation-plan-7t42ah`, `codex/update-site-from-meta-writing-ecology`, `fix-public-surface-metadata-and-crawler-files` - have unchanged tips (d29c847, 8b3ab85, 729455b) and the author's standing 2026-08-15 ruling that they continue SEPARATELY still applies, so it is recorded rather than re-asked. None of the three touches either file in this change set; the overlap count is zero for each. No prior worklog entry was altered, reordered, summarized, normalized or removed; this entry is appended, and the file's prior state was snapshotted byte-for-byte before the append (595,584 bytes, 4,223 lines, sha256 prefix 2ce57551).
+
+Worklog rollover: reviewed and reported eligible, not executed. 4,223 lines before this append, above the 4,000-line review trigger and below the 5,000-line ceiling.
+
+Symbol hygiene: the six literal ASCII `!=` in `scripts/verify-metadata-build.mjs` are comparison operators in executable code, which AGENTS.md explicitly excludes from replacement. They are pre-existing - six before the change, six after, and zero on any line this change adds.
+
+Scope: no MWE authority-level decision was made or implied. No classification, relation status, candidate-to-confirmed promotion, Registry status, naming, ontology, priority or OSF-priority decision. No public page, route, navigation surface, boundary statement, registry, evidence, schema or manifest was touched. This change alters how two processes are started and nothing about what they verify.
+
+Result: `pnpm run check` completes on Windows. Before this, a contributor on Windows could not run the repository's own verification at all past step 5 of 32, which meant local results could not be compared with continuous integration and the two lifecycle tests reported as failures for a reason that had nothing to do with the code under test.
+
+Unresolved questions: For author review, not blocking. The Git Bash `tar` condition above remains open and is not a repository matter; whoever runs the suite on Windows should use PowerShell, and nothing in the repository currently says so. Whether that belongs in the README is an author decision and was not made here.
+
+Risks or assumptions: The pull request is opened as a draft and left unmerged; merge is an author decision. The two helper functions read each package's `bin` field at run time, so a future dependency that ships without a `bin` entry would fail closed with a named error rather than silently - that is intended, but it does move a failure from install time to run time.

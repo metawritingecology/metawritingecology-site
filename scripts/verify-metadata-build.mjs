@@ -19,8 +19,10 @@
 // self-referential.
 
 import { spawn } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { createServer } from "node:net";
+import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -278,6 +280,28 @@ function killTree(child) {
   }
 }
 
+/**
+ * The Wrangler CLI entry point, resolved through the package's own `bin` field
+ * rather than a shell shim, so the local worker runs on this exact pinned
+ * install. Fails closed if it cannot be resolved.
+ *
+ * Resolving the JS entry and running it with `process.execPath` (the same idiom
+ * the adjacency verifier uses for the Astro CLI) is also the only portable way
+ * to start it: a bare `npx` / `node_modules/.bin/wrangler` is an extensionless
+ * shim that Windows cannot execute directly, so `spawn` fails with ENOENT
+ * there. This path is a real `.js` file on every platform.
+ */
+function wranglerBinaryPath() {
+  const require_ = createRequire(import.meta.url);
+  const manifestPath = require_.resolve("wrangler/package.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const bin = typeof manifest.bin === "string" ? manifest.bin : manifest.bin?.wrangler;
+  if (!bin) throw new Error("the Wrangler package declares no `bin` entry; cannot start the local worker");
+  const resolved = join(manifestPath.slice(0, manifestPath.length - "package.json".length), bin);
+  if (!existsSync(resolved)) throw new Error(`the Wrangler CLI entry is missing: ${resolved}`);
+  return resolved;
+}
+
 // Bounded local-worker readiness probe. Each individual attempt is bounded by
 // `readinessFetchTimeoutMs`; the overall loop is bounded by `readinessTotalMs`.
 // A timeout (or any error) on one attempt is swallowed and the loop continues to
@@ -322,9 +346,9 @@ async function withLocalServer(fn, options) {
     readinessIntervalMs = READINESS_INTERVAL_MS
   } = options;
   const child = spawn(
-    "npx",
+    process.execPath,
     [
-      "wrangler",
+      wranglerBinaryPath(),
       "dev",
       "--local",
       "--ip",
