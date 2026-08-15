@@ -20,8 +20,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { connect, createServer as createNetServer } from "node:net";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -113,13 +115,28 @@ function neverReadyFetch() {
     });
 }
 
+// The Astro CLI entry point, resolved through the package's own `bin` field and
+// run with `process.execPath`, matching the idiom the adjacency verifier uses.
+// A `node_modules/.bin` shim is extensionless and cannot be spawned directly on
+// Windows (ENOENT); the resolved `.js` entry is portable.
+function astroBinaryPath() {
+  const require_ = createRequire(import.meta.url);
+  const manifestPath = require_.resolve("astro/package.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const bin = typeof manifest.bin === "string" ? manifest.bin : manifest.bin?.astro;
+  if (!bin) throw new Error("the Astro package declares no `bin` entry; cannot build");
+  const resolved = join(manifestPath.slice(0, manifestPath.length - "package.json".length), bin);
+  if (!existsSync(resolved)) throw new Error(`the Astro CLI entry is missing: ${resolved}`);
+  return resolved;
+}
+
 // Build the SSR dist once if it is not already present (the check chain builds
 // before this suite runs; a standalone run builds on demand). Returns true when
 // dist is available.
 function ensureBuild() {
   const worker = fileURLToPath(new URL("dist/_worker.js/index.js", REPO_ROOT));
   if (existsSync(worker)) return true;
-  const res = spawnSync("node_modules/.bin/astro", ["build"], {
+  const res = spawnSync(process.execPath, [astroBinaryPath(), "build"], {
     cwd: fileURLToPath(REPO_ROOT),
     stdio: "ignore"
   });
