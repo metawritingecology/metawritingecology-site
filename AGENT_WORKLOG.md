@@ -4263,3 +4263,25 @@ Result: the repository states its license in the conventional place, its README 
 Unresolved questions: For author review, not blocking. Steps 6 through 33 of `pnpm run check` are unmeasured locally for the Windows reason above and this pull request's continuous integration run is the first measurement. The three separately-continuing branches remain unresolved as work, by author ruling. Software dual-licensing for code versus content is undeclared and remains an author decision. The homepage item delivered alongside these six was returned before landing and is not in this change set.
 
 Risks or assumptions: The pull request is opened as a draft and left unmerged; merge is an author decision. Wiring `test:human-governed` into `check` makes 30 previously-inert assertions blocking, which is the intent but does change what a red `check` can mean. Whether GitHub's license detector recognizes this exact `legalcode.txt` body was not measured; the file is the official text either way.
+
+### 2026-08-15 - Claude Code - claude/public-hygiene-license-notice-docs - correction: the new check step was inserted inside a frozen pipeline prefix
+
+Agent: Claude Code, model `claude-opus-5[1m]`, running on the physical desktop account. Second commit on the same branch, correcting the entry directly above.
+
+Task: Move `pnpm run test:human-governed` out of the frozen prefix of the `check` pipeline, after continuous integration on pull request #122 rejected its placement.
+
+What happened: the first commit inserted the new step between `pnpm run test:indexing-discovery` and `pnpm run verify:public-surface-map`, which is position 18 of 21. `tests/public-surface-adjacency-map/preservation.test.ts:211` asserts that a twenty-entry `BASE_PIPELINE` is an UNMODIFIED PREFIX of `scripts.check`, via `assert.ok(pkg.scripts.check.startsWith(BASE_PIPELINE.join(" && ")))`. Inserting anywhere before the twentieth entry breaks that assertion regardless of what is inserted. Site CI run 31857633217 failed on exactly that test - 7 of 8 passing in that file, `not ok 5 - the whole existing check pipeline is preserved in order`.
+
+The correction: the step now sits immediately after `pnpm run verify:metadata-build`, which is the last entry of the frozen prefix, and before `pnpm run test:adjacency-contract`. The chain is 33 steps and `test:human-governed` is step 21. Nothing else in `package.json` changed; the diff is one line replaced by one line. `test:human-governed` remains a script key in its own right.
+
+Files changed: `package.json` only, plus this worklog entry. `package.json` 5,033 B, sha256 4ddc6057869be9b6431693344b083d31c986fcba7a5f1dbacdf6c15dda776bb2, recomputed here after the edit; the superseded content was deae18709677c6af86e95c668faf6978ebc433b568459576a6261194f8a4cabc and was snapshotted before the change.
+
+Tests run after the correction: `pnpm run test:adjacency-preservation` 8 pass 0 fail, including the assertion that had failed; `pnpm run test:human-governed` 30 pass 0 fail, so the gate the first commit set out to connect is still connected.
+
+What this says about the review that approved the change, recorded rather than omitted: the reviewer ran `test:human-governed` alone, confirmed 30 pass, and concluded the change was safe. That measured whether the newly wired test passes. It did not measure whether the repository permits the pipeline to be modified at that position, and a guard existed for precisely that question. Running one test file is not running the suite, and the difference is not academic - it is this entry. Continuous integration found in one run what local single-test verification could not.
+
+The guard is also not vacuous, which is worth recording separately: it failed on a real, specific, non-obvious violation the first time anything tried to modify the pipeline.
+
+Unresolved questions: For author review, not blocking. Whether the frozen `BASE_PIPELINE` list in `preservation.test.ts` should ever grow to include later additions is an author decision; this correction deliberately does not touch that test, because editing a guard to admit the change it just rejected is the wrong direction.
+
+Risks or assumptions: `test:human-governed` now runs later in the chain than first intended, after the three `verify:*` steps rather than before them. Nothing in it depends on their output and nothing in them depends on it. The pull request remains a draft and unmerged; merge is an author decision.
