@@ -56,6 +56,7 @@ A summary, label, index entry, or visible interface may help access a structure 
 
 ### Read next
 
+- [Readable but Mislocated](/diagnostic-entry-layer/#readable-but-mislocated)
 - [Models](/models/)
 - [Atlas](/atlas/)
 - [AI-Readable Knowledge Architecture](/ai-readable-knowledge-architecture/)
@@ -92,6 +93,7 @@ Circulation should not be treated as establishment.
 
 ### Read next
 
+- [Movement Before Recognition](/diagnostic-entry-layer/#movement-before-recognition)
 - [Models](/models/)
 - [Atlas](/atlas/)
 - [Public Anchor Index](/public-anchors/)
@@ -131,6 +133,7 @@ A public anchor may make a term visible without releasing the full operational m
 
 ### Read next
 
+- [Summary / Source Boundary](/diagnostic-entry-layer/#summary-source-boundary)
 - [Public Anchor Index](/public-anchors/)
 - [Models](/models/)
 - [Atlas](/atlas/)

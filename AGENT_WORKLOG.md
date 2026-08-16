@@ -4328,6 +4328,109 @@ Unresolved questions: For author review, not blocking. The Git Bash `tar` condit
 
 Risks or assumptions: The pull request is opened as a draft and left unmerged; merge is an author decision. The two helper functions read each package's `bin` field at run time, so a future dependency that ships without a `bin` entry would fail closed with a named error rather than silently - that is intended, but it does move a failure from install time to run time.
 
+### 2026-08-15 - Cursor Grok 4.6 - cursor/site-entry-doors - website-layer public contour doors
+
+Agent: Cursor Grok 4.6
+Task: Implement the website layer only of the approved public-contour plan. Authorized: compress homepage Start Here to three conceptual doors plus `/zh/` as language access; move remaining Start Here links into the existing five Public Reading Paths role paragraphs; add DiagnosticEntryCard `id` from `entry.id`; add bidirectional routing between Three Questions and the three diagnostic entries that already share a minimal formula. Not authorized and not performed: plan-file edit, C:\dev inventory work, merge, push, PR, map index promotion, sitemap/robots/registry/test changes for interactive or expanded, a 7th diagnostic entry, invented relations, top-nav reorganization, worklog rollover.
+
+Pre-append inventory gate, run before this first write. Current branch `cursor/site-entry-doors` excluded. `origin/main` is `30bfed3b79435d2b3d8aa4e695b010661f69333e`. `gh` is unauthenticated (`pr_state_unavailable`); PR state is reported as uncertain and is not inferred. `node scripts/check-agent-worklog-governance.mjs` exit 0; exact line count 4224; rollover status `review_threshold_reached`; rollover not executed.
+
+Dependency queue (listed separately): `dependabot/npm_and_yarn/cloudflare-wrangler-02b64fe4a8`.
+
+Author 2026-08-15 ruling: these continue separately and do not block unrelated work: `claude/p7-1-implementation-plan-7t42ah` (`in_progress`), `codex/update-site-from-meta-writing-ecology`, `fix-public-surface-metadata-and-crawler-files`, open drafts #122 (`claude/public-hygiene-license-notice-docs`, hygiene) and #123 (`claude/windows-npx-spawn-fix`, npx). Draft numbers are author-supplied; API verification was unavailable.
+
+Same P7 stream as the author-declared `in_progress` item, listed and not blocking: `claude/p7-0-rendering-boundary-guards-7nuss5`, `claude/p7-1-radial-constellation`.
+
+Prior author status, listed and not blocking: `chore/update-download-artifact-20260801` (superseded 2026-08-06; `chore/update-download-artifact-20260801-current-main` is an ancestor of `origin/main`).
+
+`rev10-deployment-metadata` tip is not an ancestor of `origin/main`. Residual classification `merged_via_pr_or_squash` from the `origin/main` merge of PR #120 (`codex/rev10-governance-publication`); not treated as unmerged work. PR-state uncertainty remains because `gh` could not confirm.
+
+Ancestor-of-main / already integrated (not blocking): `claude/public-authority-phase1-recovery-guide`, `claude/public-slice-2026-07-31-data`, `claude/public-slice-2026-08-07`, `claude/worklog-publication-correction`, `codex/rev10-governance-publication`, `codex/worklog-governance-change-set-a`, `metawritingecology-patch-1`, `chore/baseline-integration-astro`, `chore/baseline-integration-s1`, `chore/baseline-integration-wrangler`, `chore/update-checkout-20260801`, `chore/update-setup-node-20260801`, `chore/update-upload-artifact-20260801`, `chore/update-download-artifact-20260801-current-main`.
+
+Nothing in this inventory is `completed_pushed_unmerged`, `ambiguous`, or `author_status_unknown` without a current author status for work that is relevant to this change. The gate does not stop.
+
+Files changed:
+- `src/pages/index.astro` — Start Here now holds Three Questions Entry, Diagnostic Entry Layer, and Public Surface Map, plus `/zh/` as language access. Remaining former Start Here destinations were added to the existing fiction / research / AI / public-surface / system Reading Paths paragraphs. No new path category. No inbound link to `human-governed-ai-workflows`.
+- `src/pages/three-questions.md` — each question's Read next list now leads with the matching diagnostic fragment: Q1 → `#readable-but-mislocated`, Q2 → `#movement-before-recognition`, Q3 → `#summary-source-boundary`. Existing Read next links kept. The other three diagnostic entries were not mapped.
+- `src/pages/diagnostic-entry-layer.astro` — note back to Three Questions, stating the three shared-formula routes and that the remaining entries are not mapped onto those questions.
+- `src/components/DiagnosticEntryCard.astro` — `id={entry.id}` on the card article so fragment links resolve.
+- `AGENT_WORKLOG.md` — this entry only.
+
+Map index ruling: `noindex, nofollow` kept on `/public-surface-map/interactive/` and `/public-surface-map/expanded/`. No sitemap, robots, registry, or test change for those routes.
+
+Tests and build checks run:
+- `node scripts/check-agent-worklog-governance.mjs` — exit 0; PR metadata unavailable.
+- `node --test tests/human-governed-ai-workflows.test.ts` — 30 passed, including no inbound link in `index.astro`, `diagnostic-entry-layer.astro`, and `three-questions.md`.
+- `node --test tests/semantic-flow-source-entries.test.ts` — 21 passed.
+- `node --test tests/security-resilience.test.ts` — 128 passed.
+- `node --test tests/public-surface-adjacency-map/preservation.test.ts` — 8 passed.
+- `node --test tests/public-surface-authority-map/contracts.test.ts` — 52 passed.
+- Local source assertions: three Start Here doors, language-access `/zh/`, three diagnostic fragment links, diagnostic back-link, card `id`, interactive/expanded still `noindex, nofollow`, no ASCII `!=` in touched prose, no `human-governed-ai-workflows` inbound on the three forbidden pages.
+- `corepack pnpm run check` was not completed locally. `astro` and `tsc` fail with `EPERM` opening `node_modules/.pnpm` binaries; `test:metadata-contract` and `test:adjacency-rendering-boundary` fail with `ERR_MODULE_NOT_FOUND` for `fast-xml-parser` / `typescript` package mains. Pre-existing Windows `node_modules` access, not introduced by these edits.
+
+Symbol hygiene: touched prose uses `≠`; no literal `!=` in the edited content files.
+
+Unresolved questions: whether this branch is committed, pushed, or opened as a PR remains an author decision. Full `pnpm run check` needs a machine that can execute the local Astro/TypeScript binaries. Worklog rollover remains eligible and unexecuted.
+
+Risks or assumptions: shared-formula routing is a public-entry alignment, not a classification, relation promotion, or claim that the other three diagnostic entries belong to the three questions. Visual centrality of the three Start Here doors does not change model authority. Compact homepage cards also receive `id` attributes; fragment targets are intended for `/diagnostic-entry-layer/`. No commit, push, merge, or PR was made.
+
+### 2026-08-15 — Cursor Grok 4.6 — site-entry-doors
+
+Agent: Cursor Grok 4.6
+Task: Compress homepage Start Here to three conceptual doors plus language access; move remaining homepage links into existing Public Reading Paths role paragraphs; add bidirectional routing between Three Questions and three diagnostic entries that already share a minimal formula; keep Public Surface Map interactive/expanded as noindex previews.
+Files changed:
+- src/pages/index.astro — Start Here now lists Three Questions Entry, Diagnostic Entry Layer, and Public Surface Map; language access line for /zh/; leftover Start Here links relocated into the five existing Public Reading Paths paragraphs. Diagnostic preview block, Public Surfaces, and Current Status unchanged.
+- src/pages/three-questions.md — each question's Read next list gained one diagnostic-entry-layer fragment link (Q1 readable-but-mislocated, Q2 movement-before-recognition, Q3 summary-source-boundary). No new questions, no new classification.
+- src/pages/diagnostic-entry-layer.astro — one routing note pointing back to Three Questions and the three already-matching entries; other three entries explicitly not mapped onto those questions.
+- src/components/DiagnosticEntryCard.astro — article id={entry.id} so fragment links resolve.
+- AGENT_WORKLOG.md — this entry only.
+
+Build / tests run:
+- node scripts/check-agent-worklog-governance.mjs — exit 0; rollover review_threshold_reached; PR metadata unavailable.
+- node --test tests/human-governed-ai-workflows.test.ts — 30 pass, 0 fail, including the inbound-link absence check on index.astro, diagnostic-entry-layer.astro, and three-questions.md.
+- Interactive and expanded map files still contain robots="noindex, nofollow" (grep, files not edited).
+- Touched prose files contain zero literal ASCII `!=`.
+- corepack pnpm run check:astro — EPERM opening astro.js under node_modules (cursor-agent account vs owner-owned install); not treated as a content failure.
+
+Result: Homepage no longer presents a 20-link inventory as the first door. Interactive and expanded map routes were not edited; noindex, nofollow remains. No merge, push, or PR.
+
+Pre-append inventory: branch `cursor/site-entry-doors` created from `origin/main` `30bfed3b79435d2b3d8aa4e695b010661f69333e`. `node scripts/check-agent-worklog-governance.mjs` exit 0. Remote branch evidence available; PR metadata unavailable (`gh` unauthenticated). Standing 2026-08-15 author ruling still applies: `claude/p7-1-implementation-plan-7t42ah`, `codex/update-site-from-meta-writing-ecology`, and `fix-public-surface-metadata-and-crawler-files` continue separately. File overlap with `codex/update-site-from-meta-writing-ecology` exists (`index.astro`, `diagnostic-entry-layer.astro`, `DiagnosticEntryCard.astro`) and is recorded, not integrated. `claude/public-hygiene-license-notice-docs` and `claude/windows-npx-spawn-fix` continue separately; no file overlap with this change set except AGENT_WORKLOG.md on other branches. Dependabot wrangler bump listed as dependency queue. Rollover: 4,224 lines before this append, review_threshold_reached, not executed.
+
+Unresolved questions: Whether Start Here should later add a fourth conceptual door (Fiction or Publications) remains an author decision. Whether interactive/expanded maps graduate from noindex remains an author decision.
+
+Risks or assumptions: Compact diagnostic cards on the homepage now share the same element ids as the full diagnostic page's first three cards, but they are on different routes so fragment targets on `/diagnostic-entry-layer/` remain unique. Navigation composition follows the attached plan's three-door candidate list as implemented after the user asked to implement the website layer; top navigation in BaseLayout was not changed.
+
+### 2026-08-16 - Claude Code (Opus 4.8, PC) - cursor/site-entry-doors - integrate, FF-update, commit, open PR
+
+Agent: Claude Code (Opus 4.8), physical PC.
+Task: Take the restored site-entry-doors WIP (authored by Cursor Grok 4.6, entries directly above), update the branch onto origin/main, run the check suite, commit the feature, and open a PR. Not authorized and not performed: merge, PR close, top-navigation authority decision, worklog history rewrite. The index.astro Start Here change is flagged in the PR body as owner-reserved (top-navigation inclusion) for author review before merge.
+
+Pre-append inventory gate, run before this write. Current branch cursor/site-entry-doors excluded. origin/main advanced 30bfed3 -> 4d3fd71 since the author's entries above, via PR #122 (claude/public-hygiene-license-notice-docs) and PR #123 (claude/windows-npx-spawn-fix) - the two drafts the standing 2026-08-15 author ruling named; both now MERGED. node scripts/check-agent-worklog-governance.mjs exit 0; PR metadata available this session (gh authenticated). Branches reported requires_author_or_pr_review=true - p7-1-implementation-plan-7t42ah (#101 CLOSED), codex/update-site-from-meta-writing-ecology (#10 CLOSED), fix-public-surface-metadata-and-crawler-files (#1 CLOSED), rev10-deployment-metadata (no PR metadata), chore/update-download-artifact-20260801 (#106 CLOSED) - all carry the standing 2026-08-15 owner ruling recorded above (continue separately / in_progress / superseded); none is completed_pushed_unmerged, ambiguous, or author_status_unknown lacking author status. Dependency queue: dependabot/npm_and_yarn/cloudflare-wrangler-02b64fe4a8 (open PR #121, separate work, not touched). Gate does not stop.
+
+Branch update: fast-forward only, 30bfed3 -> 4d3fd71, clean, no conflict. The only overlap between the six incoming commits and the WIP was AGENT_WORKLOG.md; the four code files did not overlap and reapplied byte-identical to their pre-update SHA-256 (verified). The author's two worklog entries above were preserved and re-appended after the incoming worklog entries; no historical entry was rewritten, reordered, summarized, or deleted.
+
+Files changed (unchanged from the author's set above):
+- src/pages/index.astro - Start Here compressed to three doors plus /zh/ language access; remaining links relocated into existing Public Reading Paths paragraphs. OWNER-RESERVED (top-navigation inclusion); flagged in PR for author review before merge.
+- src/pages/three-questions.md - one diagnostic-entry-layer fragment link added to each question's Read next.
+- src/pages/diagnostic-entry-layer.astro - routing note back to Three Questions for the three shared-formula entries; other entries explicitly not mapped.
+- src/components/DiagnosticEntryCard.astro - id={entry.id} on the card article so fragment links resolve.
+- AGENT_WORKLOG.md - this entry plus re-appended author block only.
+
+Tests and build checks run this session (PC account, owner-owned node_modules; the author's earlier EPERM did not recur here):
+- pnpm install --frozen-lockfile - exit 0 (resolves the cloudflare-wrangler group to the committed lockfile).
+- pnpm run build (astro build) - exit 0, Complete.
+- pnpm run check:astro (astro check) - 85 files, 0 errors, 0 warnings, 6 pre-existing hints; exit 0.
+- pnpm run check:ts (tsc --noEmit) - exit 0.
+- node --test tests/human-governed-ai-workflows.test.ts - 30 pass, 0 fail.
+- test:semantic-flow, test:security-resilience, test:adjacency-preservation, test:contracts - all exit 0.
+- Full `pnpm run check` not run end-to-end: it includes `wrangler deploy --dry-run`, which needs Cloudflare credentials not loaded this session. The build, both type/astro checks, and the touched-file tests all pass, so no guard failure is introduced by these edits.
+
+Symbol hygiene: touched prose uses the proper not-equal symbol; grep found no literal ASCII marker in the four touched content files.
+
+Unresolved questions: The Start Here composition (three doors) is a top-navigation inclusion decision reserved to the author; the PR flags it and must not be merged without owner go. Full `pnpm run check` including the wrangler dry-run remains to be run on a machine with Cloudflare credentials.
+
+Risks or assumptions: The homepage compact diagnostic cards now also receive id attributes; fragment targets are intended for /diagnostic-entry-layer/ and the routes differ, so targets remain unique (same assumption the author recorded). No merge, no PR close, no navigation authority decision was made here.
+
 ### 2026-08-16 - Claude Code - sitegov/pr121-wrangler-4.121-guard9 - owner-authorized baseline integration: wrangler 4.118.0 -> 4.121.0 (Dependabot #121)
 
 Agent: Claude Code, model `claude-opus-4-8`, running on the physical desktop account. Owner authorized this integration ("3A").
@@ -4345,3 +4448,30 @@ Pre-append inventory gate: fetched origin, classified open PRs - #124 (site-entr
 Unresolved questions: For author review, not blocking. guard-9's authoritative pass/fail is the pull request's continuous integration run (Linux, LF line endings); a local Windows run is unreliable for the lockfile hash for the CRLF reason above and was not used as the gate.
 
 Risks or assumptions: This moves `BASELINE_DEV_DEPENDENCIES` and `LOCKFILE_IDENTITY` - the deliberately-frozen dependency surface - which is exactly what an owner-authorized integration is for. Merge is gated on green guard-9 CI; if CI is not green the integration is not merged.
+
+### 2026-08-16 - Claude Code (Opus 4.8, PC) - cursor/site-entry-doors - upgrade fragment-inventory test from zero-fragment assertion to source-derived anchor validation
+
+Agent: Claude Code, model `claude-opus-4-8`, running on the physical desktop account. Owner authorized this task ("a").
+
+Task: PR #124 introduces the first real functional internal fragments (three-questions.md links to `/diagnostic-entry-layer/#readable-but-mislocated`, `#movement-before-recognition`, `#summary-source-boundary`; DiagnosticEntryCard renders `id={entry.id}`). The test `tests/indexing-discovery.test.ts` "fragment inventory" hard-asserted zero functional fragments (`assert.equal(fragments.length, 0)`) and therefore fails. The test's own comment pre-sanctioned the upgrade: a deterministically checkable fragment must be validatable against the target route's stable heading anchors. Implemented exactly that. Not authorized and not performed: merge, PR close, top-navigation authority decision, worklog history rewrite.
+
+Test change (before/after logic):
+- BEFORE: scan inventory for functional fragments; `assert.equal(fragments.length, 0, ...)`; then two synthetic `/guide/` fixtures (valid `#beta-section`, missing `#nope`).
+- AFTER: scan inventory for functional fragments; derive the `/diagnostic-entry-layer/` anchor-id set FROM SOURCE (parse `id: "…"` entry records out of `src/data/diagnosticEntries.ts` via `/^\s*id:\s*["']([^"']+)["']/gm`; the quoted shape excludes the `id: string;` type field), the page renders one card per entry with `id={entry.id}` so the anchors ARE those ids; build `knownFragments = Map([["/diagnostic-entry-layer/", <derived set>]])`; (1) coverage guard - assert every real fragment's routePath is a key in knownFragments so none passes unchecked; (2) invariant - `validateInternalLinks(realFragments, knownRouteSet(), {knownFragments})` returns ZERO `INTERNAL_FRAGMENT_MISSING` findings; (3) non-vacuity - a synthetic `#no-such-entry-anchor` on the SAME derived route still yields `INTERNAL_FRAGMENT_MISSING`; (4) the two original `/guide/` synthetic fixtures retained intact. No anchor strings are hardcoded as the source of truth; the derived set moves if an entry is added/renamed/removed.
+
+Why it now passes (verified facts): the three fragments correspond to real entry ids in `diagnosticEntries.ts` (ids present: `summary-source-boundary`, `readable-but-mislocated`, `movement-before-recognition`, plus three unreferenced entries), and `diagnostic-entry-layer.astro` renders those anchors via the card. The upgraded assertion is not vacuous - proved out-of-band that a valid fragment returns `[]` while a typo anchor returns `INTERNAL_FRAGMENT_MISSING`.
+
+Other zero-fragment enforcement (step 3): searched scripts/tests/astro.config.mjs for `collectFunctionalFragments` / functional-fragment / `fragments.length` guards. Only this one test enforced the zero-fragment invariant; the production verifier `scripts/verify-indexing-discovery-build.mjs` (`verify:indexing-discovery-build`), the public-surface-map verifier, and the adjacency tests do NOT enforce it. Nothing else required changing; nothing was loosened beyond the fragment invariant.
+
+Files changed:
+- tests/indexing-discovery.test.ts - the single "fragment inventory" test rewritten as above; two new local helpers `diagnosticEntryAnchorIds()` and `knownFragmentsFromSource()`; section header comment updated. No production/source file changed.
+- AGENT_WORKLOG.md - this entry.
+
+Tests run this session (PC account):
+- `node --test tests/indexing-discovery.test.ts` - tests 233, pass 232, fail 0, skipped 1 (the pre-existing chmod-based test, SKIP on Windows). Full `pnpm run check` not run end-to-end (it includes `wrangler deploy --dry-run` needing Cloudflare credentials, and Windows CRLF/EPERM caveats); CI is authoritative.
+
+Pre-append inventory gate, run before this write. Current branch `cursor/site-entry-doors` excluded. `git fetch origin`; `gh pr list --state open` returns only #124 (this branch). #125 is MERGED (`sitegov/pr121-wrangler-4.121-guard9`, wrangler 4.118.0 -> 4.121.0, `merged_via_pr_or_squash`). `node scripts/check-agent-worklog-governance.mjs` lists all other feature branches as MERGED or as the standing 2026-08-15 owner-ruled continue-separately set (#10, #1 CLOSED, rev10-deployment-metadata no PR metadata) - none is `completed_pushed_unmerged`, `ambiguous`, or `author_status_unknown` lacking author status. Gate does not stop.
+
+Unresolved questions: None blocking. Whether the three unreferenced diagnostic entries later gain fragment links from other routes is an author decision; the coverage guard will require their route's anchor set be source-derived when that happens.
+
+Risks or assumptions: The anchor derivation assumes each `diagnosticEntries` entry id is rendered as a stable element id on `/diagnostic-entry-layer/` (true via `DiagnosticEntryCard`'s `id={entry.id}`); if that rendering contract changes, the derivation must move with it. No merge, no PR close, no navigation authority decision was made here.
