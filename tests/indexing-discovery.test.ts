@@ -2128,10 +2128,33 @@ test("verifier fixture mutation: a duplicate-attribute noindex source whose URL 
 });
 
 // ===========================================================================
-// Fragment inventory boundary (§ real repository has zero functional fragments)
+// Fragment inventory boundary (§ every real functional fragment must resolve to
+// a source-derived stable anchor on its target route)
 // ===========================================================================
 
-test("fragment inventory: real functional fragment count is recorded; validator exercised synthetically only", () => {
+// Derive the stable anchor-id set of /diagnostic-entry-layer/ FROM SOURCE. The
+// page renders one DiagnosticEntryCard per entry with id={entry.id} (see
+// src/components/DiagnosticEntryCard.astro and src/pages/diagnostic-entry-layer.astro),
+// so the page's anchors ARE the diagnosticEntries ids. Parse them out of the
+// data module rather than hardcoding the strings, so the anchor set tracks the
+// source: add/rename/remove an entry and the valid anchor set moves with it.
+// The `id: "…"` shape (quoted) matches only entry records; the `id: string;`
+// type field carries no quote and is not matched.
+function diagnosticEntryAnchorIds() {
+  const source = rd("src/data/diagnosticEntries.ts");
+  const ids = new Set();
+  for (const m of source.matchAll(/^\s*id:\s*["']([^"']+)["']/gm)) ids.add(m[1]);
+  return ids;
+}
+
+// Map every target route that a real fragment points at to its source-derived
+// stable anchor set. A fragment whose route is absent here would pass
+// validateInternalLinks unchecked, so the test below asserts coverage.
+function knownFragmentsFromSource() {
+  return new Map([["/diagnostic-entry-layer/", diagnosticEntryAnchorIds()]]);
+}
+
+test("fragment inventory: every real functional fragment resolves to a source-derived stable anchor", () => {
   // Scan the real inventory for internal functional fragment references.
   const values = [];
   for (const file of inventoryFiles()) {
@@ -2139,21 +2162,63 @@ test("fragment inventory: real functional fragment count is recorded; validator 
   }
   const fragments = collectFunctionalFragments(values);
 
-  // The current repository contains no functional internal fragment, so
-  // repository-INTEGRATED fragment validation is not exercised; the fragment
-  // validator is exercised only against synthetic fixtures (below and above).
-  assert.equal(fragments.length, 0, `functional fragments present: ${fragments.map((f) => f.href).join(", ")}`);
+  const knownRoutes = knownRouteSet();
+  const knownFragments = knownFragmentsFromSource();
 
-  // Future guard: if a deterministically checkable fragment is introduced, it
-  // must be validatable against the target route's stable heading anchors.
-  const anchors = markdownHeadingSlugs("# Alpha\n\n## Beta Section\n");
-  const knownFragments = new Map([["/guide/", anchors]]);
+  // Coverage guard: every real functional fragment must target a route whose
+  // anchor set is derived from source. Without this, a fragment pointing at a
+  // route we do not derive anchors for would slip through validateInternalLinks
+  // silently. If this fails, extend knownFragmentsFromSource() with that route's
+  // source-derived anchor set — do NOT drop the fragment from validation.
+  for (const f of fragments) {
+    assert.ok(
+      knownFragments.has(f.routePath),
+      `real functional fragment ${f.href} targets ${f.routePath}, which has no source-derived anchor set`
+    );
+  }
+
+  // The invariant: no real functional fragment may point at a non-existent
+  // anchor. Validate the real fragments against the source-derived anchor sets
+  // and require ZERO missing-fragment findings.
+  const missing = validateInternalLinks(
+    fragments.map((f) => f.href),
+    knownRoutes,
+    { knownFragments }
+  ).filter((f) => f.code === "INTERNAL_FRAGMENT_MISSING");
   assert.deepEqual(
-    validateInternalLinks(["/guide/#beta-section"], new Set(["/guide/"]), { knownFragments }),
+    missing,
+    [],
+    `real functional fragments pointing at non-existent anchors: ${missing
+      .map((f) => `${f.href} -> #${f.fragment}`)
+      .join(", ")}`
+  );
+
+  // Prove the check is not vacuous: a fragment pointing at an anchor absent from
+  // the SAME source-derived set is still caught. If the derived set were empty
+  // or the route unmapped, this would silently pass — so a broken real fragment
+  // could never hide behind a passing assertion.
+  assert.ok(diagnosticEntryAnchorIds().size > 0, "expected diagnostic entry anchors to be derivable");
+  assert.equal(
+    validateInternalLinks(["/diagnostic-entry-layer/#no-such-entry-anchor"], knownRoutes, {
+      knownFragments
+    })[0]?.code,
+    "INTERNAL_FRAGMENT_MISSING"
+  );
+
+  // Synthetic-fixture checks (retained): the validator resolves a valid heading
+  // anchor and rejects a missing one against a purely synthetic route/anchor set.
+  const anchors = markdownHeadingSlugs("# Alpha\n\n## Beta Section\n");
+  const syntheticFragments = new Map([["/guide/", anchors]]);
+  assert.deepEqual(
+    validateInternalLinks(["/guide/#beta-section"], new Set(["/guide/"]), {
+      knownFragments: syntheticFragments
+    }),
     []
   );
   assert.equal(
-    validateInternalLinks(["/guide/#nope"], new Set(["/guide/"]), { knownFragments })[0]?.code,
+    validateInternalLinks(["/guide/#nope"], new Set(["/guide/"]), {
+      knownFragments: syntheticFragments
+    })[0]?.code,
     "INTERNAL_FRAGMENT_MISSING"
   );
 });

@@ -4448,3 +4448,30 @@ Pre-append inventory gate: fetched origin, classified open PRs - #124 (site-entr
 Unresolved questions: For author review, not blocking. guard-9's authoritative pass/fail is the pull request's continuous integration run (Linux, LF line endings); a local Windows run is unreliable for the lockfile hash for the CRLF reason above and was not used as the gate.
 
 Risks or assumptions: This moves `BASELINE_DEV_DEPENDENCIES` and `LOCKFILE_IDENTITY` - the deliberately-frozen dependency surface - which is exactly what an owner-authorized integration is for. Merge is gated on green guard-9 CI; if CI is not green the integration is not merged.
+
+### 2026-08-16 - Claude Code (Opus 4.8, PC) - cursor/site-entry-doors - upgrade fragment-inventory test from zero-fragment assertion to source-derived anchor validation
+
+Agent: Claude Code, model `claude-opus-4-8`, running on the physical desktop account. Owner authorized this task ("a").
+
+Task: PR #124 introduces the first real functional internal fragments (three-questions.md links to `/diagnostic-entry-layer/#readable-but-mislocated`, `#movement-before-recognition`, `#summary-source-boundary`; DiagnosticEntryCard renders `id={entry.id}`). The test `tests/indexing-discovery.test.ts` "fragment inventory" hard-asserted zero functional fragments (`assert.equal(fragments.length, 0)`) and therefore fails. The test's own comment pre-sanctioned the upgrade: a deterministically checkable fragment must be validatable against the target route's stable heading anchors. Implemented exactly that. Not authorized and not performed: merge, PR close, top-navigation authority decision, worklog history rewrite.
+
+Test change (before/after logic):
+- BEFORE: scan inventory for functional fragments; `assert.equal(fragments.length, 0, ...)`; then two synthetic `/guide/` fixtures (valid `#beta-section`, missing `#nope`).
+- AFTER: scan inventory for functional fragments; derive the `/diagnostic-entry-layer/` anchor-id set FROM SOURCE (parse `id: "…"` entry records out of `src/data/diagnosticEntries.ts` via `/^\s*id:\s*["']([^"']+)["']/gm`; the quoted shape excludes the `id: string;` type field), the page renders one card per entry with `id={entry.id}` so the anchors ARE those ids; build `knownFragments = Map([["/diagnostic-entry-layer/", <derived set>]])`; (1) coverage guard - assert every real fragment's routePath is a key in knownFragments so none passes unchecked; (2) invariant - `validateInternalLinks(realFragments, knownRouteSet(), {knownFragments})` returns ZERO `INTERNAL_FRAGMENT_MISSING` findings; (3) non-vacuity - a synthetic `#no-such-entry-anchor` on the SAME derived route still yields `INTERNAL_FRAGMENT_MISSING`; (4) the two original `/guide/` synthetic fixtures retained intact. No anchor strings are hardcoded as the source of truth; the derived set moves if an entry is added/renamed/removed.
+
+Why it now passes (verified facts): the three fragments correspond to real entry ids in `diagnosticEntries.ts` (ids present: `summary-source-boundary`, `readable-but-mislocated`, `movement-before-recognition`, plus three unreferenced entries), and `diagnostic-entry-layer.astro` renders those anchors via the card. The upgraded assertion is not vacuous - proved out-of-band that a valid fragment returns `[]` while a typo anchor returns `INTERNAL_FRAGMENT_MISSING`.
+
+Other zero-fragment enforcement (step 3): searched scripts/tests/astro.config.mjs for `collectFunctionalFragments` / functional-fragment / `fragments.length` guards. Only this one test enforced the zero-fragment invariant; the production verifier `scripts/verify-indexing-discovery-build.mjs` (`verify:indexing-discovery-build`), the public-surface-map verifier, and the adjacency tests do NOT enforce it. Nothing else required changing; nothing was loosened beyond the fragment invariant.
+
+Files changed:
+- tests/indexing-discovery.test.ts - the single "fragment inventory" test rewritten as above; two new local helpers `diagnosticEntryAnchorIds()` and `knownFragmentsFromSource()`; section header comment updated. No production/source file changed.
+- AGENT_WORKLOG.md - this entry.
+
+Tests run this session (PC account):
+- `node --test tests/indexing-discovery.test.ts` - tests 233, pass 232, fail 0, skipped 1 (the pre-existing chmod-based test, SKIP on Windows). Full `pnpm run check` not run end-to-end (it includes `wrangler deploy --dry-run` needing Cloudflare credentials, and Windows CRLF/EPERM caveats); CI is authoritative.
+
+Pre-append inventory gate, run before this write. Current branch `cursor/site-entry-doors` excluded. `git fetch origin`; `gh pr list --state open` returns only #124 (this branch). #125 is MERGED (`sitegov/pr121-wrangler-4.121-guard9`, wrangler 4.118.0 -> 4.121.0, `merged_via_pr_or_squash`). `node scripts/check-agent-worklog-governance.mjs` lists all other feature branches as MERGED or as the standing 2026-08-15 owner-ruled continue-separately set (#10, #1 CLOSED, rev10-deployment-metadata no PR metadata) - none is `completed_pushed_unmerged`, `ambiguous`, or `author_status_unknown` lacking author status. Gate does not stop.
+
+Unresolved questions: None blocking. Whether the three unreferenced diagnostic entries later gain fragment links from other routes is an author decision; the coverage guard will require their route's anchor set be source-derived when that happens.
+
+Risks or assumptions: The anchor derivation assumes each `diagnosticEntries` entry id is rendered as a stable element id on `/diagnostic-entry-layer/` (true via `DiagnosticEntryCard`'s `id={entry.id}`); if that rendering contract changes, the derivation must move with it. No merge, no PR close, no navigation authority decision was made here.
