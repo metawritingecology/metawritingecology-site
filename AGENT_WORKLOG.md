@@ -4430,3 +4430,21 @@ Symbol hygiene: touched prose uses the proper not-equal symbol; grep found no li
 Unresolved questions: The Start Here composition (three doors) is a top-navigation inclusion decision reserved to the author; the PR flags it and must not be merged without owner go. Full `pnpm run check` including the wrangler dry-run remains to be run on a machine with Cloudflare credentials.
 
 Risks or assumptions: The homepage compact diagnostic cards now also receive id attributes; fragment targets are intended for /diagnostic-entry-layer/ and the routes differ, so targets remain unique (same assumption the author recorded). No merge, no PR close, no navigation authority decision was made here.
+
+### 2026-08-16 - Claude Code - sitegov/pr121-wrangler-4.121-guard9 - owner-authorized baseline integration: wrangler 4.118.0 -> 4.121.0 (Dependabot #121)
+
+Agent: Claude Code, model `claude-opus-4-8`, running on the physical desktop account. Owner authorized this integration ("3A").
+
+Task: Complete Dependabot #121 (wrangler 4.118.0 -> 4.121.0) through the repository's sanctioned baseline-integration path, so `guard 9 - dependency and lockfile boundary` passes and the update can merge, rather than closing a valid deploy-tooling update.
+
+What happened: #121 was mergeable but blocked because `tests/public-surface-adjacency-map/renderingBoundary.test.ts` pins `BASELINE_DEV_DEPENDENCIES.wrangler` (4.118.0) and `LOCKFILE_IDENTITY.sha256`, and the bump moves both. Per the test's own doctrine and the #115/#116/#117 precedent, the sanctioned response is one owner-authorized integration that moves the lockfile, the manifest and the two baseline expectations together. The bumped `package.json` + `pnpm-lock.yaml` were taken byte-for-byte from the Dependabot branch (staged earlier as the branch's WIP commit). The new lockfile hash was recomputed here from the git blob, not the working tree, to avoid the CRLF trap this repo's history records: `git show <branch>:pnpm-lock.yaml | sha256sum` = 4cf2381c33d8a1430f6566ae939581c2a5a97080decfe3323746dbe6df5a4b67, 195305 bytes - matching the value written into the baseline. `byteLength` was already 195305 and did not move.
+
+The change: `renderingBoundary.test.ts` baseline set to wrangler 4.121.0 and lockfile sha256 4cf2381c...4b67, with dated history comments added to both the `/* LOCKFILE_IDENTITY */` block and the `// BASELINE_DEPENDENCIES` block matching the existing 2026-08-06 entries. Deploy tooling only (workerd, miniflare, unenv-preset moved with wrangler); runtime dependency list untouched; 0 prohibited packages.
+
+Files changed: `package.json` (1 line, wrangler devDependency), `pnpm-lock.yaml` (the wrangler group), `tests/public-surface-adjacency-map/renderingBoundary.test.ts` (two baseline values + two comment blocks), plus this worklog entry.
+
+Pre-append inventory gate: fetched origin, classified open PRs - #124 (site-entry-doors, this session's own feature branch) and #121 (the Dependabot bump being resolved here). No branch carries ambiguous, unmerged-completed, or unknown-author status. Branch rebased onto current origin/main (4d3fd71, PR #123) first; #123 touched none of pnpm-lock/package.json/renderingBoundary, so the integration values remain valid.
+
+Unresolved questions: For author review, not blocking. guard-9's authoritative pass/fail is the pull request's continuous integration run (Linux, LF line endings); a local Windows run is unreliable for the lockfile hash for the CRLF reason above and was not used as the gate.
+
+Risks or assumptions: This moves `BASELINE_DEV_DEPENDENCIES` and `LOCKFILE_IDENTITY` - the deliberately-frozen dependency surface - which is exactly what an owner-authorized integration is for. Merge is gated on green guard-9 CI; if CI is not green the integration is not merged.
