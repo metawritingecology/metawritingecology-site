@@ -50,6 +50,14 @@ The fiction, system, corpus, and platform surfaces should not be collapsed into 
 
 They share a structural pressure field, but each layer has a different function, density, and reading protocol.
 
+## Related / candidate public surfaces
+
+Some independently published surfaces share structural concerns with Meta-Writing Ecology without being confirmed MWE components.
+
+[Lineage-Aware Multi-Agent Governance Surface](https://github.com/metawritingecology/lineage-aware-agent-governance) is an independently published boundary surface concerning routing identity, review independence, convergence, evidence, and retained human authority.
+
+Its presence here indicates public adjacency only. It is a candidate relation as defined in the [Relation Status Guide](https://github.com/metawritingecology/meta-writing-ecology/blob/main/RELATION_STATUS_GUIDE.md). It does not establish MWE component status, Registry status, formal dependency, ontology, or a confirmed conceptual relation, and it is not one of the fiction, system, corpus, and platform surfaces described above.
+
 ## Related boundary pages
 
 - [Interpretation Boundaries](/interpretation-boundaries/)
