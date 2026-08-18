@@ -145,10 +145,17 @@ const FROZEN_IDENTITIES = [
     gitBlob: "6fbe3d5827f412dd07d228a83f066cc8301eb404"
   },
   {
+    // Identity moved 2026-08-18 with the Astro 5 -> 7 migration. Two changes,
+    // both forced by the new build: the client output root moved from `dist/`
+    // to `dist/client/`, and Vite 8's minifier emits backtick string literals
+    // where the old toolchain emitted double quotes - so the bundle-marker
+    // needles became quote-agnostic. That second change also RESTORED the
+    // forbidden-marker assertions, which double-quoted needles had silently
+    // turned vacuous against a backtick bundle.
     path: "scripts/verify-public-surface-map-build.mjs",
-    byteLength: 31519,
-    sha256: "0a248c87794c3ab9ea5994cc79dc258c4638eb9f14fcf4aeee3b58a8fafb02cb",
-    gitBlob: "de691294e9ff70e69a39113f361058d4dd11f50f"
+    byteLength: 32560,
+    sha256: "10f76b8dd0eaa911b2f90192803b504d8333606f3db590e9173b1f794e39c149",
+    gitBlob: "28779cf44a904b4e24473f72506aaa14eed11e26"
   }
 ];
 

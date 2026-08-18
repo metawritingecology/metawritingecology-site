@@ -52,13 +52,13 @@ const SRC_SNAPSHOT = p(
 );
 const SRC_MANIFEST = p("src/data/public-surface-authority-map/runtime-manifest.json");
 
-const DIST_MANIFEST = p("dist/public-surface-map/data/manifest.json");
+const DIST_MANIFEST = p("dist/client/public-surface-map/data/manifest.json");
 const DIST_SNAPSHOT = p(
-  `dist/public-surface-map/data/snapshots/${APPROVED_SNAPSHOT_ID}.json`,
+  `dist/client/public-surface-map/data/snapshots/${APPROVED_SNAPSHOT_ID}.json`,
 );
-const DIST_HEADERS = p("dist/_headers");
-const DIST_INTERACTIVE = p("dist/public-surface-map/interactive/index.html");
-const DIST_ASTRO = p("dist/_astro");
+const DIST_HEADERS = p("dist/client/_headers");
+const DIST_INTERACTIVE = p("dist/client/public-surface-map/interactive/index.html");
+const DIST_ASTRO = p("dist/client/_astro");
 
 const results = [];
 let failed = 0;
@@ -87,12 +87,30 @@ function clientJsFiles() {
   if (!existsSync(DIST_ASTRO)) return [];
   return readdirSync(DIST_ASTRO)
     .filter((f) => f.endsWith(".js"))
-    .map((f) => p(`dist/_astro/${f}`));
+    .map((f) => p(`dist/client/_astro/${f}`));
 }
 
 const srcSnapshotBytes = readBytes(SRC_SNAPSHOT);
 const srcManifestBytes = readBytes(SRC_MANIFEST);
 let manifest;
+
+// Quote-agnostic bundle matching. Vite 8's minifier emits string literals with
+// BACKTICKS where the previous toolchain emitted double quotes (verified
+// 2026-08-18: the bundle contains `ArrowUp` and .attr(`tabindex`,0)). A needle
+// written with double quotes would therefore match nothing - which turns a
+// REQUIRED list into a false failure and, worse, a FORBIDDEN list into a
+// vacuous pass. Every quote character in a needle matches any of the three
+// JavaScript quote styles; every other character is matched literally.
+const RE_SPECIAL = "\^$.*+?()[]{}|/";
+function escapeForRegExp(text) {
+  let out = "";
+  for (const ch of text) out += RE_SPECIAL.includes(ch) ? "\\" + ch : ch;
+  return out;
+}
+function bundleIncludes(text, needle) {
+  const pattern = needle.split('"').map(escapeForRegExp).join("[\"'`]");
+  return new RegExp(pattern).test(text);
+}
 
 await check("01 generated manifest route exists", () => {
   if (!existsSync(DIST_MANIFEST)) throw new Error(`missing ${DIST_MANIFEST}`);
@@ -329,7 +347,7 @@ await check("18 Phase 2B runtime loader is same-origin, bounded, no storage/retr
     "/public-surface-map/data/manifest.json",
     "/public-surface-map/data/snapshots/",
   ];
-  const missing = required.filter((needle) => !combined.includes(needle));
+  const missing = required.filter((needle) => !bundleIncludes(combined, needle));
   if (missing.length) {
     throw new Error(`required same-origin loader route(s) missing: ${missing.join(", ")}`);
   }
@@ -383,7 +401,7 @@ await check("19 Phase 2A D3 map is locally bundled, deterministic, and bounded",
     "psam__group-region",
     "psam__edge--",
   ];
-  const missing = required.filter((needle) => !combined.includes(needle));
+  const missing = required.filter((needle) => !bundleIncludes(combined, needle));
   if (missing.length) {
     throw new Error(`Phase 2A renderer marker(s) missing: ${missing.join(", ")}`);
   }
@@ -479,7 +497,7 @@ await check("20 Phase 2B-1 viewport navigation is bundled, bounded, and transien
     "data-psam-group-jump",
     "data-psam-zoom-level",
   ];
-  const missing = required.filter((needle) => !combined.includes(needle));
+  const missing = required.filter((needle) => !bundleIncludes(combined, needle));
   if (missing.length) {
     throw new Error(`Phase 2B-1 viewport marker(s) missing: ${missing.join(", ")}`);
   }
@@ -622,7 +640,7 @@ await check("21 Phase 2B-2 spatial keyboard navigation is bundled, geometry-boun
     '"Spacebar"',
     "psam__node",
   ];
-  const missing = required.filter((needle) => !combined.includes(needle));
+  const missing = required.filter((needle) => !bundleIncludes(combined, needle));
   if (missing.length) {
     throw new Error(`Phase 2B-2 navigation marker(s) missing: ${missing.join(", ")}`);
   }
@@ -681,7 +699,10 @@ await check("21 Phase 2B-2 spatial keyboard navigation is bundled, geometry-boun
   const offenders = [];
   for (const file of files) {
     const text = readFileSync(file, "utf8");
-    for (const marker of [...forbiddenFocusModel, ...forbiddenRuntime]) {
+    for (const marker of forbiddenFocusModel) {
+      if (bundleIncludes(text, marker)) offenders.push(`${marker} in ${file}`);
+    }
+    for (const marker of forbiddenRuntime) {
       if (text.includes(marker)) offenders.push(`${marker} in ${file}`);
     }
   }
