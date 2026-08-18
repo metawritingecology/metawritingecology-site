@@ -1731,6 +1731,24 @@ test("expanded adjacency view: noindex, excluded, with extension-bearing JSON en
   );
 });
 
+test("public surface case 2026-08-18: standalone noindex page, exact-path excluded", () => {
+  const page = rd("src/pages/artistic-research/public-surface-case/2026-08-18.astro");
+  // Standalone page: hand-written head with a noindex,nofollow robots meta and
+  // no BaseLayout / self-canonical.
+  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(page));
+  assert.ok(!/BaseLayout/.test(page) && !/rel="canonical"/.test(page));
+
+  // The exact route is in the exclusion set and is not sitemap-eligible.
+  const route = "/artistic-research/public-surface-case/2026-08-18/";
+  assert.ok(SITEMAP_EXCLUDED_PATHS.has(route));
+  assert.equal(isSitemapEligible(route), false);
+
+  // Exact-path (not prefix) matching: an adjacent date is NOT auto-excluded.
+  const adjacent = "/artistic-research/public-surface-case/2026-08-19/";
+  assert.ok(!SITEMAP_EXCLUDED_PATHS.has(adjacent));
+  assert.equal(isSitemapEligible(adjacent), true);
+});
+
 // ===========================================================================
 // Windows-safe generated dist path handling
 // ===========================================================================
