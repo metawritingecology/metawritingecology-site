@@ -196,10 +196,17 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    BASELINE_DEPENDENCIES since 32f992d2.
  *    195305 bytes  4cf2381c…4b67
  *    owner-authorized integration 2026-08-16 (wrangler 4.118.0 -> 4.121.0,
- *    Dependabot #121); deploy tooling only, runtime deps unchanged. */
+ *    Dependabot #121); deploy tooling only, runtime deps unchanged.
+ *    195305 bytes  3eb00529…fb41
+ *    owner-authorized integration 2026-08-18 (wrangler 4.121.0 -> 4.123.0,
+ *    Dependabot #126); bytes taken from fbf7b264, whose base lockfile was
+ *    byte-identical to main's. The byte length did NOT move — every changed
+ *    line swapped one version string for another of equal length — so the
+ *    byteLength half of this guard would have passed on its own, and the
+ *    SHA-256 half is what caught the movement. */
 const LOCKFILE_IDENTITY = {
   byteLength: 195305,
-  sha256: "4cf2381c33d8a1430f6566ae939581c2a5a97080decfe3323746dbe6df5a4b67",
+  sha256: "3eb00529a24bbff86a61c9be249f3fbfcbfc00092be11e712c7e5af9cf18fb41",
 };
 
 /**
@@ -635,6 +642,12 @@ test("guard 8 — no motion or timer architecture", () => {
 // 2026-08-16, wrangler 4.118.0 -> 4.121.0 (Dependabot #121). Deploy tooling
 // only (workerd, miniflare, unenv-preset moved with it). Runtime dependency
 // list untouched; 0 prohibited packages.
+// 2026-08-18, wrangler 4.121.0 -> 4.123.0 (Dependabot #126). Deploy tooling
+// only: workerd and its five platform binaries 1.20260804.1 -> 1.20260811.1,
+// miniflare 5.20260804.1-alpha -> 5.20260811.1-alpha, unenv-preset re-pegged to
+// the new workerd. The parsed lockfile package-NAME set is unchanged at 352 --
+// 0 added, 0 removed, only version strings moved -- and 0 prohibited packages.
+// Runtime dependency list untouched.
 
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "12.6.12",
@@ -649,7 +662,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
   "fast-xml-parser": "5.10.1",
-  wrangler: "4.121.0",
+  wrangler: "4.123.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
