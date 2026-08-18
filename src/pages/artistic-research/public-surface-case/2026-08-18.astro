@@ -1,0 +1,251 @@
+---
+import "../../../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Public Surface Case — 2026-08-18</title>
+  <meta name="description" content="A bounded artistic-research reading of how a public controversy can move from public readability toward a performable civic surface. External public-discourse observation, not repository evidence and not event verification." />
+  <style>
+    :root { --deep:#15130f; --raised:#24211c; --max:920px; }
+    *{box-sizing:border-box}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
+    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    a:hover{color:var(--link-hover)}
+    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    p{margin:0}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
+    main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
+    .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
+    .kicker{color:var(--link);margin-bottom:14px}
+    .label{color:var(--muted)}
+
+    .case-head{max-width:760px;padding-bottom:42px;border-bottom:1px solid var(--line)}
+    .case-head h1{font-size:clamp(2rem,5vw,3.45rem);letter-spacing:-.04em;max-width:18ch;color:var(--accent)}
+    .subtitle{margin-top:16px;max-width:44rem;color:var(--muted);font-size:1.05rem}
+    .framing{margin-top:20px;max-width:42rem;font-size:1.04rem}
+    .date-row{display:flex;gap:30px;flex-wrap:wrap;margin-top:26px;color:var(--muted);font-size:.88rem}
+    .date-row span{display:block;margin-bottom:2px;color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .genre{margin-top:18px;padding:12px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);color:var(--muted);font-size:.86rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .genre b{color:var(--text);font-weight:500}
+
+    .flow{margin-top:26px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.7;white-space:pre-wrap}
+
+    .movement{scroll-margin-top:20px;padding:52px 0 8px;border-top:1px solid var(--line)}
+    .movement:first-of-type{border-top:0}
+    .m-num{color:var(--link);font-size:.78rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+    .movement h2{margin-top:10px;max-width:34ch;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.02em}
+    .movement p.lead{margin-top:14px;max-width:46rem}
+    .movement p.note{margin-top:14px;max-width:46rem;color:var(--muted);font-size:.95rem}
+    .candidate{margin-top:8px;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
+    .candidate code{color:var(--accent)}
+
+    .reading{margin-top:22px}
+    .reading-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+    .reading-row:last-child{border-bottom:1px solid var(--line)}
+    .reading-row dt{color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .reading-row dd{margin:0;max-width:46rem}
+    .reading-row.reading-interpretation dd{color:var(--text)}
+    .reading-row.reading-interpretation dt{color:var(--link)}
+    .reading-row.reading-limit dd{color:var(--muted);font-size:.91rem}
+
+    .distinctions{margin-top:18px;padding:14px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);font-size:.82rem;line-height:1.85;white-space:pre-wrap}
+
+    .gloss{margin-top:16px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.9rem}
+    .gloss p+p{margin-top:8px}
+
+    .not-list{margin-top:14px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.8;white-space:pre-wrap}
+
+    .relations{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .relations h3{font-size:.9rem;color:var(--link)}
+    .relations ul{margin:10px 0 0;padding-left:1.05rem;color:var(--muted);font-size:.92rem}
+    .relations li{margin:5px 0}
+    .rel-note{margin-top:16px;max-width:46rem;color:var(--muted);font-size:.82rem}
+
+    details{margin-top:22px}
+    summary{cursor:pointer;width:fit-content;color:var(--link);font-size:.85rem;font-weight:600}
+    .reconstruction{margin-top:12px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+    .reconstruction p+p{margin-top:8px}
+    .reconstruction code{color:var(--accent)}
+    .reconstruction .kw{display:flex;gap:8px 16px;flex-wrap:wrap;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.8rem}
+
+    .sources{margin-top:22px;border-top:1px solid var(--line)}
+    .source{display:grid;grid-template-columns:88px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+    .source strong{color:var(--link);font-weight:650}
+    .source span{color:var(--muted)}
+    .access{margin-top:12px;color:var(--muted);font-size:.8rem}
+
+    .synthesis{margin-top:40px;padding-top:44px;border-top:1px solid var(--line)}
+    .synthesis h2{max-width:34ch;font-size:clamp(1.4rem,3vw,2rem)}
+    .one-sentence{margin-top:20px;max-width:44rem;font-size:1.06rem}
+    .one-sentence strong{color:var(--text);font-weight:600}
+    .boundary-note{margin-top:22px;max-width:48rem;color:var(--muted);font-size:.85rem}
+
+    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+
+    @media(max-width:760px){
+      main{padding:50px 18px 74px}.case-head h1{font-size:2.2rem}
+      .reading-row{grid-template-columns:1fr;gap:4px}
+      .relations{grid-template-columns:1fr;gap:18px}
+      .source{grid-template-columns:1fr;gap:3px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="case-head">
+    <p class="kicker">Artistic Research / Public Surface Case</p>
+    <h1>Semantic Casting: A Public Surface Case</h1>
+    <p class="subtitle">A bounded reading of how public readability can become a performable civic surface.</p>
+    <p class="framing">This page reads a recent Taiwan public-discourse field as an external observation surface. Its object is a time-general mechanism — the move from public readability toward a performable civic surface — not the incident, and not any individual involved.</p>
+    <div class="date-row">
+      <div><span>Case date</span>18 August 2026</div>
+      <div><span>Evidence window</span>13–18 August 2026, UTC+8</div>
+      <div><span>Indexing</span>noindex / bounded reading</div>
+    </div>
+    <p class="genre"><b>Field type</b> — external public-discourse observation (≠ repository evidence). <b>Status</b> — dated, verify-only case specimen (case specimen ≠ event commentary).</p>
+  </header>
+
+  <p class="flow">public controversy
+→ cultural-symbol matching
+→ semantic casting
+→ platform remix
+→ distributed contribution
+→ possible performative civic surface</p>
+
+  <section class="movement" id="frame" aria-labelledby="frame-title">
+    <div class="m-num">Movement 01</div>
+    <h2 id="frame-title">A case specimen, not commentary on an event</h2>
+    <p class="lead">Meta-Writing Ecology does not report on current events and does not take positions on them. This page is a dated, verify-only specimen: it uses one public-discourse field to make a general mechanism observable, and it fixes that reading at a moment in time.</p>
+    <p class="note">It does not track, update, endorse, or adjudicate the field it reads. It does not claim that any proposed performance, festival, or civic action was permitted, finalized, or actually held. The central object is a structural transition, held at arm's length from the private dispute that triggered public circulation.</p>
+    <div class="distinctions">case specimen ≠ event commentary
+dated reading ≠ live tracking
+public readability ≠ factual verification</div>
+  </section>
+
+  <section class="movement" id="source-boundary" aria-labelledby="sb-title">
+    <div class="m-num">Movement 02</div>
+    <h2 id="sb-title">Source boundary: three material layers, kept apart</h2>
+    <p class="lead">The page reads three kinds of material and never collapses them into one another:</p>
+    <div class="distinctions">news snapshots — establish only that a controversy entered public news circulation
+platform-field material — unverified reconstruction of later public coordination
+MWE reading — an authored structural reading, not a repository or registry fact</div>
+    <dl class="reading">
+      <div class="reading-row"><dt>Observed surface</dt><dd>Chinese-language reporting establishes that a divorce-related controversy entered public news circulation and was translated into media, medical, administrative, and legal frames. Separately, public platform discussion connected traditional theatre, local geography, performance planning, food, markets, venues, and administrative questions.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>News circulation and platform coordination are different epistemic layers. The first can be cited as a media snapshot; the second is reconstruction material that no news institution has verified as a completed event.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>This page treats the festivalization layer as platform-field material. It is not evidence that the reconstructed event occurred, and it is not repository evidence in the sense used by other Artistic Research public readings.</dd></div>
+    </dl>
+    <div class="gloss">
+      <p><b>來源邊界（中文簡述）</b></p>
+      <p>本頁使用中文新聞報導作為事件觸發快照，僅能確認爭議曾進入公共新聞流通；不負責證明後續平台現場中的公民劇場或藝術節化已成為完成事件。後續層視為平台現場材料，而非已查證的完成事件。</p>
+      <p>本頁分析對象不是私人爭議本身，而是公共爭議如何進入文化可讀性、平台 remix，以及可能的表演化公民表面。文化配戲是一種公共閱讀機制，而不是事實等同。</p>
+    </div>
+  </section>
+
+  <section class="movement" id="semantic-casting" aria-labelledby="sc-title">
+    <div class="m-num">Movement 03</div>
+    <h2 id="sc-title">Semantic casting</h2>
+    <p class="candidate">candidate term / case-local formulation / not a Registry entry: <code>Semantic Casting</code></p>
+    <p class="lead">Semantic casting names a public reading operation: a group assigns a contemporary event, figure, or relation into an already-legible cultural role — a dramatic pattern, historical story, or familiar template. The point is not that the match is empirically exact. The point is that the template makes the situation immediately readable.</p>
+    <p class="note">A cultural figure can act as a compressed interface — a name that carries a story, a moral direction, expected roles, and a set of possible jokes and actions. Once the casting is accepted, the public no longer has to re-explain the event each time; the template carries enough shared information to make the field transmissible. The same field can support more than one archive at once, so different participants may read it through different templates without agreeing on a single canon. This page describes that multi-archive quality abstractly and does not assign specific cities, figures, or political frames to it.</p>
+    <div class="distinctions">cultural readability ≠ factual verification
+symbolic fit ≠ empirical equivalence
+public recognition ≠ source authority</div>
+  </section>
+
+  <section class="movement" id="performability" aria-labelledby="perf-title">
+    <div class="m-num">Movement 04</div>
+    <h2 id="perf-title">From readability to performability</h2>
+    <p class="candidate">candidate formulations, not Registry entries: <code>Cultural Compression Interface</code>, <code>Civic Meme Materialization</code>, <code>Irreversible Cost Threshold</code></p>
+    <p class="lead">A cultural symbol can carry more public meaning than its surface size suggests; a short name or familiar plot may compress a social relation, a moral conflict, a power arrangement, and a participation cue. This compression lowers explanation cost — and can be mistaken for proof, which is why the source boundary is part of the page rather than an afterthought.</p>
+    <p class="note">A meme remains a discourse object while it circulates as joke, caption, or comment. In the reading offered here, it begins to <em>materialize</em> when participants attach resources to it — a location, a proposed performance, a troupe, money, food, a permit question, a schedule. The reading proposes a threshold at the point where commitments become harder to reverse (payment, booking, venue negotiation, administrative application). This is offered as <em>a proposed threshold in the reading, not an established property of the case</em>: the page does not assert that any such commitment was in fact made.</p>
+    <dl class="reading">
+      <div class="reading-row"><dt>Observed surface</dt><dd>Public discussion moved from naming a frame toward proposing concrete production elements.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The interesting transition is not seriousness but cost: a symbol changes state when it begins to absorb commitments that leave infrastructure traces.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>Whether any irreversible commitment was actually undertaken is exactly what this page does not verify. The threshold is a reading device.</dd></div>
+    </dl>
+  </section>
+
+  <section class="movement" id="circulation" aria-labelledby="circ-title">
+    <div class="m-num">Movement 05</div>
+    <h2 id="circ-title">Circulation, ambiguity, participation</h2>
+    <p class="candidate">candidate formulations, not Registry entries: <code>Distributed Vernacular Political Theatre</code>, <code>Festivalization as Friction Reduction</code>, <code>Ambiguity as Participation Shield</code></p>
+    <p class="lead">The field may also be read as a distributed vernacular performance layer: not something a single artist, institution, or curator designed, but many participants using familiar vernacular forms to turn public conflict into a performable civic surface. This is offered as a possible reading, not an established property of the case.</p>
+    <p class="note">On this reading, a festival frame <em>may</em> reduce the friction of participation. A person need not enter only through direct accusation or explicit declaration; they may enter through watching a performance, sharing a poster, eating at a table, joining a market, or following a livestream. That ambiguity does not remove politics — it redistributes the cost of being seen participating. The mechanism is the object of study; the specific event is only the occasion.</p>
+    <p class="note"><b>What this page is not.</b></p>
+    <div class="not-list">not a claim that the cultural casting is factually correct
+not a moral judgment on any individual
+not a verification of social-media claims
+not an event listing or a campaign page
+not a claim that any one culture uniquely uses templates for public satire</div>
+  </section>
+
+  <section class="movement" id="relations" aria-labelledby="rel-title">
+    <div class="m-num">Relation to Meta-Writing Ecology</div>
+    <h2 id="rel-title">Where this specimen sits</h2>
+    <p class="lead">This slice belongs near the artistic-research interface because it shows public meaning becoming surface. The candidate concepts above are introduced by this case; they are not Registry entries and confer no confirmed relation.</p>
+    <div class="relations">
+      <div>
+        <h3>Existing MWE surfaces (navigation-only)</h3>
+        <ul>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md">False Legibility</a> — warns against treating template fit as truth.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/premature-circulation-model.md">Premature Circulation</a> — relevant where a form circulates before it is verified.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/reference-drift.md">Reference Drift</a> — relevant where frame and evidence drift apart.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Candidate concepts introduced here (not Registry)</h3>
+        <ul>
+          <li>Semantic Casting</li>
+          <li>Cultural Compression Interface</li>
+          <li>Civic Meme Materialization</li>
+          <li>Irreversible Cost Threshold</li>
+          <li>Distributed Vernacular Political Theatre</li>
+          <li>Festivalization as Friction Reduction</li>
+          <li>Ambiguity as Participation Shield</li>
+        </ul>
+      </div>
+    </div>
+    <p class="rel-note">These two columns are placed side by side for reading only. Co-listing is a navigation relation, not a confirmed relation, a formal dependency, or an ontology claim. The candidate concepts are case-local formulations pending user review.</p>
+  </section>
+
+  <section class="movement" id="sources" aria-labelledby="src-title">
+    <div class="m-num">Source snapshots</div>
+    <h2 id="src-title">Event-trigger snapshots and reconstruction path</h2>
+    <p class="lead">The following media snapshots establish only that the controversy entered public news circulation. They do not verify the later platform-field layer.</p>
+    <div class="sources">
+      <div class="source"><strong>CNA</strong><span>2026-08-13 — “陳幸妤：離婚已經蠻久了　一切正常”. Public controversy enters news circulation. <a href="https://www.cna.com.tw/news/aloc/202608130188.aspx">cna.com.tw/news/aloc/202608130188</a></span></div>
+      <div class="source"><strong>CNA</strong><span>2026-08-14 — “陳幸妤離婚事件延燒　台南市衛生局稽查趙建銘診所”. Media gathering; public/private boundary; health-bureau inspection. <a href="https://www.cna.com.tw/news/aloc/202608140205.aspx">cna.com.tw/news/aloc/202608140205</a></span></div>
+      <div class="source"><strong>CNA</strong><span>2026-08-14 — “台南市衛生局稽查趙建銘診所　認定違反醫師法藥師法將裁罰”. Administrative/legal classification enters the field. <a href="https://www.cna.com.tw/news/aloc/202608140332.aspx">cna.com.tw/news/aloc/202608140332</a></span></div>
+      <div class="source"><strong>PTS</strong><span>2026-08-14 — “陳幸妤揭趙建銘居家打針 台南衛生局赴診所調查”. Physician-law frame. <a href="https://news.pts.org.tw/article/822502">news.pts.org.tw/article/822502</a></span></div>
+      <div class="source"><strong>PTS</strong><span>2026-08-14 — “夫妻間贈房離婚不列剩餘財產 專家籲附條件留保障”. Legal-explainer conversion. <a href="https://news.pts.org.tw/article/822501">news.pts.org.tw/article/822501</a></span></div>
+    </div>
+    <p class="access">Links accessed as external event-trigger snapshots; titles retained in Chinese where no verified English report exists. Framed as media snapshots, not endorsements.</p>
+
+    <details>
+      <summary>Reconstruction note (platform-field layer)</summary>
+      <div class="reconstruction">
+        <p>Because the platform-field layer is distributed rather than institutionally reported, its public trace can be reconstructed through a small number of search terms rather than a single authoritative source. Only core keywords are listed; they are offered as a reconstruction path, not as proof.</p>
+        <p class="kw"><code>鍘美藝術節</code><code>台南文藝負心運動</code><code>鍘美案 台南</code></p>
+        <p>These terms are a reconstruction path, not proof that all circulating claims are factually established. 這些關鍵字提供的是公共軌跡重建路徑，不代表其中所有流通說法都已被事實確認。</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="synthesis" aria-labelledby="synthesis-title">
+    <div class="label">One-sentence formulation</div>
+    <h2 id="synthesis-title">What the specimen holds</h2>
+    <p class="one-sentence"><strong>A public symbol becomes performable when enough people can read it, remix it, and attach resources to it before the field closes.</strong></p>
+    <p class="boundary-note">This is a reading across one external public-discourse field, held at a fixed date. It does not confirm the event, and one observed field does not establish a system-wide law. Cultural casting is treated here as a public-reading mechanism, not as factual equivalence.</p>
+  </section>
+</main>
+<footer>External public-discourse observation ≠ repository evidence. Cultural readability ≠ factual verification. This page studies how public meaning becomes surface; it does not report, verify, or endorse the field it reads.</footer>
+</body>
+</html>
