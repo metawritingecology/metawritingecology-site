@@ -1,15 +1,15 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "metawritingecology-site",
-  "main": "dist/_worker.js/index.js",
-  "compatibility_date": "2025-12-01",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-08-01",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist"
+    "directory": "./dist/client"
   },
   "observability": {
     "enabled": true

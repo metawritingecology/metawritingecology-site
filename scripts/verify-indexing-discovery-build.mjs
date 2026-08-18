@@ -709,7 +709,7 @@ export function verifyIndexingDiscoveryBuild({ repoRoot, pagesDir, distDir, test
   // `repoRoot` is the base for any directory not explicitly supplied.
   const rootUrl = repoRoot ? toDirUrl(repoRoot) : new URL("../", import.meta.url);
   const pagesUrl = toDirUrl(pagesDir ?? new URL("src/pages/", rootUrl));
-  const distUrl = toDirUrl(distDir ?? new URL("dist/", rootUrl));
+  const distUrl = toDirUrl(distDir ?? new URL("dist/client/", rootUrl));
   const distDirPath = fileURLToPath(distUrl);
   const distPath = (rel) => fileURLToPath(new URL(rel, distUrl));
 

@@ -197,6 +197,12 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    195305 bytes  4cf2381c…4b67
  *    owner-authorized integration 2026-08-16 (wrangler 4.118.0 -> 4.121.0,
  *    Dependabot #121); deploy tooling only, runtime deps unchanged.
+ *    164655 bytes  347bf010…e493
+ *    owner-authorized integration 2026-08-18 (Astro 5 -> 7 migration: astro
+ *    5.16.9 -> 7.2.2, @astrojs/cloudflare 12.6.12 -> 14.2.1, @astrojs/mdx
+ *    4.3.13 -> 7.0.5, wrangler 4.123.0 -> 4.124.0). BOTH halves of this
+ *    identity move for the first time - byteLength as well as SHA-256 - and
+ *    BASELINE_DEPENDENCIES moves for only the second time since 32f992d2.
  *    195305 bytes  3eb00529…fb41
  *    owner-authorized integration 2026-08-18 (wrangler 4.121.0 -> 4.123.0,
  *    Dependabot #126); bytes taken from fbf7b264, whose base lockfile was
@@ -205,8 +211,8 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    byteLength half of this guard would have passed on its own, and the
  *    SHA-256 half is what caught the movement. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 195305,
-  sha256: "3eb00529a24bbff86a61c9be249f3fbfcbfc00092be11e712c7e5af9cf18fb41",
+  byteLength: 164655,
+  sha256: "347bf0101cf0857f549d0a4489a06459fff9a350ef7104290be2d0a854ace493",
 };
 
 /**
@@ -642,6 +648,16 @@ test("guard 8 — no motion or timer architecture", () => {
 // 2026-08-16, wrangler 4.118.0 -> 4.121.0 (Dependabot #121). Deploy tooling
 // only (workerd, miniflare, unenv-preset moved with it). Runtime dependency
 // list untouched; 0 prohibited packages.
+// 2026-08-18, Astro 5 -> 7 migration. astro 5.16.9 -> 7.2.2 (two majors),
+// @astrojs/cloudflare 12.6.12 -> 14.2.1 (two majors), @astrojs/mdx 4.3.13 ->
+// 7.0.5 (three majors), wrangler 4.123.0 -> 4.124.0 (required: the adapter's
+// @cloudflare/vite-plugin 1.53.0 peers wrangler ^4.124.0). This is the SECOND
+// movement of BASELINE_DEPENDENCIES since 32f992d2 - @astrojs/sitemap in #117
+// was the first - and the first to move runtime packages across a major.
+// @astrojs/markdown-satteri is a required peer of @astrojs/mdx 7.x; pnpm
+// resolved it from astro's own copy, so no root-level entry was added and the
+// declared surface still holds 6 dependencies and 4 devDependencies.
+// 0 prohibited packages.
 // 2026-08-18, wrangler 4.121.0 -> 4.123.0 (Dependabot #126). Deploy tooling
 // only: workerd and its five platform binaries 1.20260804.1 -> 1.20260811.1,
 // miniflare 5.20260804.1-alpha -> 5.20260811.1-alpha, unenv-preset re-pegged to
@@ -650,10 +666,10 @@ test("guard 8 — no motion or timer architecture", () => {
 // Runtime dependency list untouched.
 
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "12.6.12",
-  "@astrojs/mdx": "4.3.13",
+  "@astrojs/cloudflare": "14.2.1",
+  "@astrojs/mdx": "7.0.5",
   "@astrojs/sitemap": "3.7.3",
-  astro: "5.16.9",
+  astro: "7.2.2",
   "d3-selection": "3.0.0",
   typescript: "5.9.3",
 };
@@ -662,7 +678,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
   "fast-xml-parser": "5.10.1",
-  wrangler: "4.123.0",
+  wrangler: "4.124.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [

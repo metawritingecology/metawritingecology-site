@@ -134,7 +134,7 @@ function astroBinaryPath() {
 // before this suite runs; a standalone run builds on demand). Returns true when
 // dist is available.
 function ensureBuild() {
-  const worker = fileURLToPath(new URL("dist/_worker.js/index.js", REPO_ROOT));
+  const worker = fileURLToPath(new URL("dist/server/entry.mjs", REPO_ROOT));
   if (existsSync(worker)) return true;
   const res = spawnSync(process.execPath, [astroBinaryPath(), "build"], {
     cwd: fileURLToPath(REPO_ROOT),

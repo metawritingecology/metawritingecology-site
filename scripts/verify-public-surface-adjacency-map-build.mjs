@@ -90,12 +90,12 @@ const SRC_SNAPSHOT = p(
 );
 const SRC_MANIFEST = p("src/data/public-surface-adjacency-map/runtime-manifest.json");
 
-const DIST_PAGE = p(`dist${EXPANDED_ROUTE}index.html`);
-const DIST_MANIFEST = p(`dist${MANIFEST_ROUTE_PATH}`);
-const DIST_SNAPSHOT = p(`dist${snapshotPathForId(SELECTED_SNAPSHOT_ID)}`);
-const DIST_HEADERS = p("dist/_headers");
-const DIST_ASTRO = p("dist/_astro");
-const DIST_SITEMAP_DIR = p("dist");
+const DIST_PAGE = p(`dist/client${EXPANDED_ROUTE}index.html`);
+const DIST_MANIFEST = p(`dist/client${MANIFEST_ROUTE_PATH}`);
+const DIST_SNAPSHOT = p(`dist/client${snapshotPathForId(SELECTED_SNAPSHOT_ID)}`);
+const DIST_HEADERS = p("dist/client/_headers");
+const DIST_ASTRO = p("dist/client/_astro");
+const DIST_SITEMAP_DIR = p("dist/client");
 
 /**
  * The exact number of PSADJ checks this verifier must register and execute.
@@ -150,14 +150,14 @@ function clientJsFiles() {
   if (!existsSync(DIST_ASTRO)) return [];
   return readdirSync(DIST_ASTRO)
     .filter((f) => f.endsWith(".js"))
-    .map((f) => p(`dist/_astro/${f}`));
+    .map((f) => p(`dist/client/_astro/${f}`));
 }
 
 function clientCssFiles() {
   if (!existsSync(DIST_ASTRO)) return [];
   return readdirSync(DIST_ASTRO)
     .filter((f) => f.endsWith(".css"))
-    .map((f) => p(`dist/_astro/${f}`));
+    .map((f) => p(`dist/client/_astro/${f}`));
 }
 
 /**
@@ -178,7 +178,7 @@ function clientCssFiles() {
  * references no emitted asset, or a referenced artifact absent from the build
  * all throw rather than yielding a quietly empty graph.
  */
-function routeReachableArtifacts(distDir = p("dist")) {
+function routeReachableArtifacts(distDir = p("dist/client")) {
   const htmlPath = join(distDir, "public-surface-map", "expanded", "index.html");
   if (!existsSync(htmlPath)) throw new Error(`route document is missing: ${htmlPath}`);
   const astroDir = join(distDir, "_astro");
@@ -229,7 +229,7 @@ function astroBinaryPath() {
 function sitemapFiles() {
   return readdirSync(DIST_SITEMAP_DIR)
     .filter((f) => f.startsWith("sitemap") && f.endsWith(".xml"))
-    .map((f) => p(`dist/${f}`));
+    .map((f) => p(`dist/client/${f}`));
 }
 
 // ---------------------------------------------------------------------------
@@ -710,7 +710,10 @@ await check("PSADJ-14 the frozen 30-record product is unchanged", async () => {
     "src/pages/public-surface-map/data/snapshots/[snapshotId].json.ts":
       "99a83371f00d780469c9452398f1a7941fd46816",
     "src/components/PublicSurfaceAuthorityMap.astro": "e04ebc307d801acb878e2a6a0795ece1ac746762",
-    "scripts/verify-public-surface-map-build.mjs": "de691294e9ff70e69a39113f361058d4dd11f50f",
+    // Blob moved 2026-08-18 with the Astro 5 -> 7 migration: dist/ -> dist/client
+    // and quote-agnostic bundle needles. Same movement recorded in
+    // tests/public-surface-adjacency-map/preservation.test.ts.
+    "scripts/verify-public-surface-map-build.mjs": "28779cf44a904b4e24473f72506aaa14eed11e26",
   };
   for (const rel of frozen) {
     const blob = await gitBlobSha1Hex(readBytes(p(rel)));
@@ -858,11 +861,18 @@ await check("PSADJ-19 the route width and responsive grid are emitted", () => {
     [/min-width:\s*0/, "min-width: 0 on the canvas column"],
     [/max-width:\s*100%/, "max-width: 100% on the SVG"],
     [/overflow-wrap:\s*anywhere/, "wrap rule"],
-    [/@media\s*\(max-width:\s*640px\)/, "the 640px breakpoint"],
+    // Media-query syntax tolerance, added 2026-08-18 with the Astro 5 -> 7
+    // migration. Vite 8's CSS minifier rewrites `@media (max-width: 640px)`
+    // into the CSS Media Queries Level 4 RANGE form `@media (width<=640px)`
+    // (verified in dist/client/_astro/index.*.css). Both forms are the same
+    // breakpoint; a pattern accepting only the old one silently stops
+    // asserting anything. These read EMITTED css - the equivalents in
+    // tests/** read component SOURCE and are deliberately left alone.
+    [/@media\s*\((?:max-width:\s*640px|width\s*<=\s*640px)\)/, "the 640px breakpoint"],
     // D18 responsive role labels: both bands, and the outward shift that gives
     // an enlarged label room outside the orbit.
-    [/@media\s*\(max-width:\s*1199px\)/, "the 1199px label band"],
-    [/@media\s*\(max-width:\s*899px\)/, "the 899px label band"],
+    [/@media\s*\((?:max-width:\s*1199px|width\s*<=\s*1199px)\)/, "the 1199px label band"],
+    [/@media\s*\((?:max-width:\s*899px|width\s*<=\s*899px)\)/, "the 899px label band"],
     [/--psadj-label-shift-x/, "the per-label outward shift"],
   ];
   const missing = required.filter(([pattern]) => !pattern.test(all)).map(([, label]) => label);
