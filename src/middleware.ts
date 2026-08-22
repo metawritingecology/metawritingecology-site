@@ -5,6 +5,10 @@
 // to the rest of the pipeline, preserves the original body, status, statusText,
 // and existing headers, and then sets each policy header exactly once.
 //
+// It also declares the UTF-8 charset on HTML responses, which Astro emits
+// without one. See src/lib/htmlCharset.ts for why, and for the inputs that are
+// deliberately left alone.
+//
 // It does not:
 //   - convert a 404 into a 200 (status/statusText are preserved verbatim);
 //   - alter redirects or rewrite routes;
@@ -16,6 +20,7 @@
 // embedding decision.
 
 import { defineMiddleware } from "astro:middleware";
+import { resolveHtmlCharset } from "./lib/htmlCharset";
 
 // Enforced Package 2A response headers.
 const ENFORCED_HEADERS: Record<string, string> = {
@@ -39,6 +44,13 @@ export const onRequest = defineMiddleware(async (_context, next) => {
   }
 
   response.headers.set("Content-Security-Policy-Report-Only", REPORT_ONLY_CSP);
+
+  // Declare the encoding Astro already used. Only a charset-less text/html
+  // response is rewritten; anything else is returned exactly as received.
+  const contentType = resolveHtmlCharset(response.headers.get("Content-Type"));
+  if (contentType !== null) {
+    response.headers.set("Content-Type", contentType);
+  }
 
   return response;
 });
