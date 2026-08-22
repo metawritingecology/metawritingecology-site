@@ -1,0 +1,366 @@
+---
+import "../../../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Public Surface Case — 2026-08-22</title>
+  <meta name="description" content="A bounded artistic-research reading of three external agent-readiness evaluators reading one public website, across three observation windows spanning a verified change to the site. A second-order case specimen: an external score is not validation." />
+  <style>
+    :root { --deep:#15130f; --raised:#24211c; --max:920px; }
+    *{box-sizing:border-box}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
+    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    a:hover{color:var(--link-hover)}
+    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    p{margin:0}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
+    main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
+    .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
+    .kicker{color:var(--link);margin-bottom:14px}
+    .label{color:var(--muted)}
+
+    .case-head{max-width:760px;padding-bottom:42px;border-bottom:1px solid var(--line)}
+    .case-head h1{font-size:clamp(2rem,5vw,3.45rem);letter-spacing:-.04em;max-width:18ch;color:var(--accent)}
+    .subtitle{margin-top:16px;max-width:44rem;color:var(--muted);font-size:1.05rem}
+    .framing{margin-top:20px;max-width:42rem;font-size:1.04rem}
+    .date-row{display:flex;gap:30px;flex-wrap:wrap;margin-top:26px;color:var(--muted);font-size:.88rem}
+    .date-row span{display:block;margin-bottom:2px;color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .genre{margin-top:18px;padding:12px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);color:var(--muted);font-size:.86rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .genre b{color:var(--text);font-weight:500}
+
+    .flow{margin:26px 0 0;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.7;white-space:pre-wrap}
+
+    .movement{scroll-margin-top:20px;padding:52px 0 8px;border-top:1px solid var(--line)}
+    .movement:first-of-type{border-top:0}
+    .m-num{color:var(--link);font-size:.78rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+    .movement h2{margin-top:10px;max-width:34ch;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.02em}
+    .movement p.lead{margin-top:14px;max-width:46rem}
+    .movement p.note{margin-top:14px;max-width:46rem;color:var(--muted);font-size:.95rem}
+    .candidate{margin-top:8px;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
+    .candidate code{color:var(--accent)}
+
+    .reading{margin-top:22px}
+    .reading-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+    .reading-row:last-child{border-bottom:1px solid var(--line)}
+    .reading-row dt{color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .reading-row dd{margin:0;max-width:46rem}
+    .reading-row.reading-interpretation dd{color:var(--text)}
+    .reading-row.reading-interpretation dt{color:var(--link)}
+    .reading-row.reading-limit dd{color:var(--muted);font-size:.91rem}
+
+    .distinctions{margin:18px 0 0;padding:14px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);font-size:.82rem;line-height:1.85;white-space:pre-wrap}
+
+    .gloss{margin-top:16px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.9rem}
+    .gloss p+p{margin-top:8px}
+
+    .not-list{margin:14px 0 0;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.8;white-space:pre-wrap}
+
+    .windows{margin-top:22px;overflow-x:auto}
+    .windows table{border-collapse:collapse;min-width:520px;width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.84rem;font-variant-numeric:tabular-nums}
+    .windows th,.windows td{padding:10px 14px 10px 0;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .windows thead th{color:var(--muted);font-weight:500;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+    .windows tbody th{color:var(--text);font-weight:500}
+    .windows td{color:var(--accent)}
+    .windows td.sub{color:var(--muted)}
+    .windows caption{caption-side:bottom;margin-top:12px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif;font-size:.85rem;text-align:left;max-width:46rem}
+
+    .observers{margin-top:22px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+    .observers h3{font-size:.9rem;color:var(--link)}
+    .observers p{margin-top:8px;color:var(--muted);font-size:.9rem}
+    .observers .score{display:block;margin-top:10px;color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:1.5rem;font-variant-numeric:tabular-nums}
+
+    .relations{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .relations h3{font-size:.9rem;color:var(--link)}
+    .relations ul{margin:10px 0 0;padding-left:1.05rem;color:var(--muted);font-size:.92rem}
+    .relations li{margin:5px 0}
+    .rel-note{margin-top:16px;max-width:46rem;color:var(--muted);font-size:.82rem}
+
+    details{margin-top:22px}
+    summary{cursor:pointer;width:fit-content;color:var(--link);font-size:.85rem;font-weight:600}
+    .reconstruction{margin-top:12px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+    .reconstruction p+p{margin-top:8px}
+    .reconstruction code{color:var(--accent)}
+
+    .sources{margin-top:22px;border-top:1px solid var(--line)}
+    .source{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+    .source strong{color:var(--link);font-weight:650}
+    .source span{color:var(--muted)}
+    .access{margin-top:12px;color:var(--muted);font-size:.8rem}
+
+    .synthesis{margin-top:40px;padding-top:44px;border-top:1px solid var(--line)}
+    .synthesis h2{max-width:34ch;font-size:clamp(1.4rem,3vw,2rem)}
+    .one-sentence{margin-top:20px;max-width:44rem;font-size:1.06rem}
+    .one-sentence strong{color:var(--text);font-weight:600}
+    .boundary-note{margin-top:22px;max-width:48rem;color:var(--muted);font-size:.85rem}
+
+    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+
+    @media(max-width:760px){
+      main{padding:50px 18px 74px}.case-head h1{font-size:2.2rem}
+      .reading-row{grid-template-columns:1fr;gap:4px}
+      .relations,.observers{grid-template-columns:1fr;gap:18px}
+      .source{grid-template-columns:1fr;gap:3px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="case-head">
+    <p class="kicker">Artistic Research / Public Surface Case</p>
+    <h1>Three Machines Read the Surface</h1>
+    <p class="subtitle">Agent readiness as an observer-dependent public surface, held across three observation windows.</p>
+    <p class="framing">Three external agent-readiness evaluators read the same public website. They did not return the same site. Between the second and third readings the site was changed at the protocol level, verifiably — and not one of the three scores moved.</p>
+    <div class="date-row">
+      <div><span>Case date</span>22 August 2026</div>
+      <div><span>Evidence windows</span>Three, 22 August 2026, UTC+8</div>
+      <div><span>Indexing</span>noindex / bounded reading</div>
+    </div>
+    <p class="genre"><b>Field type</b> — second-order: external machine evaluators reading this site's own public surface, read back. Unlike the external-field specimens in this series, the object observed is this site, and the reading draws on repository evidence where it says so. <b>Status</b> — dated, verify-only case specimen (case specimen ≠ product review; external score ≠ validation).</p>
+  </header>
+
+  <pre class="flow">same public surface
+→ different evaluator
+→ different rubric
+→ different missingness
+→ different remediation pressure
+→ different ideal future</pre>
+
+  <section class="movement" id="observers" aria-labelledby="obs-title">
+    <div class="m-num">Movement 01</div>
+    <h2 id="obs-title">One surface, three observers</h2>
+    <p class="lead">Three publicly available agent-readiness scanners were pointed at the same site on the same day. Each returned a number. The numbers are far apart, and the site did not become three different objects in the interval.</p>
+    <div class="observers">
+      <div>
+        <h3>Observer A — Is Agentic / Ora</h3>
+        <span class="score">77</span>
+        <p>Essential 62.9/80 (5 of 7), Recommended 12.5/20 (5 of 10), bonus +1.6. Its questions are operational: can an agent find the site, move through it, understand enough to continue, and use what is public?</p>
+      </div>
+      <div>
+        <h3>Observer B — Cloudflare</h3>
+        <span class="score">20</span>
+        <p>“Basic Web Presence.” Passes robots.txt, sitemap and generic crawler access; scored down for absent agent-native capabilities — link discovery headers, DNS-AID, Markdown negotiation, API catalog, OAuth discovery, MCP server card, agent skills, commerce protocols.</p>
+      </div>
+      <div>
+        <h3>Observer C — AgentReady.dev</h3>
+        <span class="score">11</span>
+        <p>“Not Ready”: 10 pages audited, 0 good, 0 partial, 10 poor. One dominant question — does each page return a clean Markdown representation when an agent asks for one?</p>
+      </div>
+    </div>
+    <pre class="distinctions">score spread ≠ quality spread
+absent capability ≠ defect
+failed checks ≠ independent defects</pre>
+  </section>
+
+  <section class="movement" id="windows" aria-labelledby="win-title">
+    <div class="m-num">Movement 02</div>
+    <h2 id="win-title">Three windows, one changed site, no movement</h2>
+    <p class="lead">The readings were repeated twice more the same evening. Between the second and third windows two changes to the site were merged and deployed, and both were verified live before the third reading was taken.</p>
+    <div class="windows">
+      <table>
+        <caption>Windows 2 and 3 are identical figure for figure, including every sub-score, and both are held as retained records. Window 1's result pages were not kept: its headline figures are reported from the reading, and its sub-scores are marked unreproduced rather than printed. The site was unchanged between windows 1 and 2, and demonstrably changed between windows 2 and 3.</caption>
+        <thead>
+          <tr><th scope="col">Observer</th><th scope="col">Window 1<br />~11:04</th><th scope="col">Window 2<br />20:49–20:53</th><th scope="col">Window 3<br />21:09–21:10 · post-change</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Is Agentic / Ora</th><td>77</td><td>77</td><td>77</td></tr>
+          <tr><th scope="row"></th><td class="sub">unreproduced</td><td class="sub">62.9 / 12.5 / +1.6</td><td class="sub">62.9 / 12.5 / +1.6</td></tr>
+          <tr><th scope="row">Cloudflare</th><td>20</td><td>20</td><td>20</td></tr>
+          <tr><th scope="row">AgentReady.dev</th><td>11</td><td>11</td><td>11</td></tr>
+          <tr><th scope="row"></th><td class="sub">unreproduced</td><td class="sub">0 / 0 / 10</td><td class="sub">0 / 0 / 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <dl class="reading">
+      <div class="reading-row"><dt>What changed</dt><dd>Two merges landed between windows 2 and 3. The site's server-rendered HTML responses now declare their encoding — previously the header carried a bare <code>text/html</code>, so a client reading only the header had no encoding and would fall back to the historical default, under which the Chinese-language routes decode into mojibake. The bytes had always been correct; only the declaration was missing. Separately, the public <code>llms.txt</code> gained an orientation section and one further negative boundary.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>What the observers did</dt><dd>Nothing. All three returned their previous figure, to the sub-score. Whether any of them fetched the changed header is not observable from the outside; what is observable is that none of them scored it.</dd></div>
+      <div class="reading-row reading-limit"><dt>Confounds, and what is left standing</dt><dd>Window 3 was run in a private browsing session, so no browser cookie or cache carried over. Two of the three evaluators additionally evidence a fresh run on their own result pages: one prints its scan timestamp (21:09:34, against 20:51:43 in window 2), the other issues a new per-audit identifier. <b>The third — the only one whose score the prediction allowed to move — carries neither mark.</b> For that observer, a server-side result cached against the URL cannot be excluded from the outside, and this page does not exclude it.</dd></div>
+    </dl>
+    <p class="note">A prediction was written down before window 3 was taken: two observers were expected not to move, the third might rise, and a complete non-movement would be the strongest of the three outcomes. That record is author-attested and internal — it carries no third-party timestamp, and a reader should weigh it accordingly.</p>
+  </section>
+
+  <section class="movement" id="insensitivity" aria-labelledby="ins-title">
+    <div class="m-num">Movement 03</div>
+    <h2 id="ins-title">Divergence, and then insensitivity</h2>
+    <p class="lead">Window 2 establishes divergence: three evaluators, one surface, three numbers, all captured and retained. The third window adds a second property. A verified protocol repair, accompanied by an orientation-file extension, produced no change in any score.</p>
+    <p class="note">This is not a claim that the evaluators are wrong. Each measures what its own rubric enumerates, and none of the three rubrics enumerates the thing that was fixed. Two of them score negotiated Markdown, which this site does not implement and does not intend to; the third's failing checks lie elsewhere. The scanners behaved correctly. The point is what correct behaviour implies.</p>
+    <pre class="distinctions">a score measures what its instrument enumerates
+a score does not measure whether the surface improved
+here the two are demonstrably independent</pre>
+    <p class="note">The finding has to be stated narrowly, because two of the three nulls were expected. Observer B scores an inventory of agent-native capabilities and Observer C scores one question about Markdown negotiation; neither rubric contains an encoding declaration, so neither could have moved, and their stillness is a property of the design rather than a discovery. The case rests on the third. Observer A scores discovery, traversal and whether an agent can understand enough to continue — the operational band the fix sits in — and it was the one the prediction allowed to move. It did not move, to the decimal.</p>
+    <p class="note">What that supports is bounded. It is not that these instruments failed at their stated jobs, and it is not that the site was undecodable before the fix: the bytes were always correct, and a scanner that parses the HTML would never have met the failure. It is that a public surface can be corrected in the band an evaluator says it covers, and its score can record nothing.</p>
+    <p class="note">Stated as a case-local formulation, not a Registry model: <code>readiness score = surface state × observer model</code>. Window 3 is the demonstration that the first factor can move while the product does not.</p>
+  </section>
+
+  <section class="movement" id="missingness" aria-labelledby="miss-title">
+    <div class="m-num">Movement 04</div>
+    <h2 id="miss-title">Each evaluator operationalizes a different kind of missingness</h2>
+    <p class="lead">The three scans do not merely discover different absences. They operationalize absence differently, and the arithmetic of failure differs with the definition.</p>
+    <pre class="distinctions">Observer A — a missing item obstructs traversal, recovery, identity resolution, or applicable operation
+Observer B — a missing item is an absent capability the site never claimed to offer
+Observer C — one architectural absence cascades into a column of separate failures</pre>
+    <p class="note">Observer C's ten-page column of failures resolves to approximately one decision: the site does not expose a parallel negotiated Markdown representation. From that single absence follow no Markdown response, no valid Markdown, navigation not stripped, no Markdown link structure, no frontmatter, poor size reduction. The visible result is six failures per page. The structural cause is one. A reader who counts failed checks and reports a defect count has been misled by the instrument's shape rather than by any error in it.</p>
+  </section>
+
+  <section class="movement" id="existence" aria-labelledby="exist-title">
+    <div class="m-num">Movement 05</div>
+    <h2 id="exist-title">A disagreement about whether a representation exists</h2>
+    <p class="lead">One evaluator's remediation advice implied that content negotiation was present and should be declared. The other two reported its absence — one of them across ten of ten pages.</p>
+    <p class="note">This disagreement is now resolved locally, and against the first reading. Requesting the site with <code>Accept: text/html</code> and with <code>Accept: text/markdown</code> returns identical headers and identical markup; the two responses differ by a single newline adjacent to an edge-injection point, and by nothing else. There is no negotiation layer to declare. Declaring one would have announced a variance that does not occur.</p>
+    <p class="note">The finding worth keeping is not that one scanner erred. It is that machine legibility can be observer-dependent not only in degree but in kind: two machines can disagree about whether a representation exists at all, and a site can be advised to describe a capability it does not have.</p>
+    <pre class="distinctions">observer-dependent quality ≠ observer-dependent existence
+recommendation ≠ verified absence
+declared variance ≠ actual variance</pre>
+  </section>
+
+  <section class="movement" id="repair" aria-labelledby="rep-title">
+    <div class="m-num">Movement 06</div>
+    <h2 id="rep-title">A recommendation is not yet a repair</h2>
+    <p class="lead">A scan produces a list. A list is not a work order. Each item was inspected against the existing architecture and classified before anything was changed, and most items were closed without changing the site.</p>
+    <dl class="reading">
+      <div class="reading-row"><dt>Implemented</dt><dd>The encoding declaration, which no scanner reported. It was found while investigating the scan and is the only defect this round produced that was both real and unblocked.</dd></div>
+      <div class="reading-row"><dt>Closed as false positive</dt><dd>“Nonexistent paths do not return a genuine 404.” Fifteen distinct nonexistent paths, both request methods, both hostnames, all returned a real 404. Not reproducible.</dd></div>
+      <div class="reading-row"><dt>Closed as vacuous</dt><dd>Declaring a <code>Vary</code> on a negotiation the site does not perform. Verified above.</dd></div>
+      <div class="reading-row reading-limit"><dt>Rejected on governance grounds</dt><dd>Richer machine-readable identity fields. A pre-existing contract test forbids exactly the fields requested, in several independent places. Implementing the recommendation would have meant deleting assertions from a test written to prevent it.</dd></div>
+      <div class="reading-row reading-limit"><dt>Non-applicable</dt><dd>API catalog, OAuth discovery and protected-resource metadata, MCP and agent-card surfaces, agent skills, commerce protocols, DNS-based service discovery. These are absent because they are not offered.</dd></div>
+    </dl>
+    <pre class="distinctions">missing according to scanner ≠ missing according to system
+a reported absence may be a defect, an improvement, an open design question,
+a non-applicable capability, or a deliberate boundary</pre>
+  </section>
+
+  <section class="movement" id="order" aria-labelledby="ord-title">
+    <div class="m-num">Movement 07</div>
+    <h2 id="ord-title">The order is the argument</h2>
+    <p class="lead">A refusal made after a low score is a rationalization. A refusal that was already written down, in code, before the evaluator arrived is something else. The distinction is chronological, and in this case the chronology is checkable.</p>
+    <pre class="distinctions">an architecture was built
+→ a ceiling on machine-readable identity was decided
+→ the ceiling was encoded in types
+→ the prohibited expansion was encoded in tests that fail
+→ an external evaluator arrived
+→ the evaluator recommended the prohibited expansion
+→ the tests held</pre>
+    <p class="note">The identity fields the scan asked for are not absent because nobody added them. <code>tests/metadata-contract.test.ts</code> enumerates them and fails if they appear; it entered the public repository on <b>24 July 2026</b>, in commit <code>db24d72</code>, and was last touched on 28 July — twenty-five days before the scan that asked for those fields. Implementing the recommendation would have meant deleting assertions from a test whose purpose is to prevent exactly that. The refusal is therefore not a position taken under pressure; it is a decision that was already load-bearing when the pressure arrived, and the date is in the commit history rather than in this page's assertion.</p>
+    <p class="note">This is also why the two kinds of gap in a score should not be added together. A disclaimer asks a reader to cooperate. A test does not ask.</p>
+    <pre class="distinctions">missing because unfinished ≠ missing because refused
+a stated boundary ≠ an executable one
+the second is checkable without trusting the author</pre>
+  </section>
+
+  <section class="movement" id="navigation" aria-labelledby="nav-title">
+    <div class="m-num">Movement 08</div>
+    <h2 id="nav-title">Navigation as a boundary question</h2>
+    <p class="lead">One evaluator treats the removal of navigation, header and footer as an improvement to the machine representation. For many sites it is. Here it is a question rather than an answer.</p>
+    <p class="note">Links to a boundary statement, a related surface, a source orientation or a model are not necessarily interface decoration; they can carry the structural position required to read the page without misplacing it. If a lighter representation is ever built, the design problem is not how much markup can be removed. It is which relations must survive so that a lighter representation does not become a less bounded one.</p>
+    <pre class="distinctions">navigation ≠ always noise
+context reduction ≠ boundary preservation
+compression is safe only where it preserves position</pre>
+  </section>
+
+  <section class="movement" id="second-corpus" aria-labelledby="sec-title">
+    <div class="m-num">Movement 09</div>
+    <h2 id="sec-title">A machine representation must not become a second corpus</h2>
+    <p class="lead">A parallel machine-facing representation of the same canonical resource can be legitimate for a text-heavy research surface. The condition is that representation difference must not become semantic divergence.</p>
+    <pre class="distinctions">a second representation must not become
+a second editorial source
+a second authority layer
+a second boundary policy
+a corpus that can drift</pre>
+    <p class="note">A safe representation would preserve, deterministically, the title, the core text, the boundary statements, canonical relations, citation-relevant anchors, non-applicability signals and version-relevant context — removing only material that does not change structural position. The open question is not whether the format is good. It is whether the compression preserves position.</p>
+  </section>
+
+  <section class="movement" id="futures" aria-labelledby="fut-title">
+    <div class="m-num">Movement 10</div>
+    <h2 id="fut-title">Three observers, three ideal websites</h2>
+    <p class="lead">Each rubric implies a destination. Read together, the three remediation lists are three non-equivalent proposals for what this site should become — not mutually exclusive, since a site could implement all three, but differently weighted, and each optimising for something the others do not.</p>
+    <pre class="distinctions">Observer A — website → agent-traversable public system
+Observer B — website → agent-native capability surface: discovery, authentication, tools, protocols, optional commerce
+Observer C — website → dual representation system: HTML for browsers, clean Markdown for agents</pre>
+    <p class="note">Each destination is coherent inside its own rubric. None is canonical for this object. The research question therefore moves from <em>is this site agent-ready?</em> to <em>which version of agent-readiness is attempting to reshape it?</em> — and a governance layer that answers the second question is not obstruction; it is the thing that keeps a scoreboard from setting an architecture.</p>
+    <p class="note">It follows that a score has a legitimate stopping point below its maximum. Moving from the present figure by repairing representation correctness and improving orientation is ordinary work. Moving further would require removing the semantic ceiling, emitting identity claims a test was written to forbid, generating machine-facing material around routes that do not exist, and recasting a research surface as a familiar commercial entity — at which point the higher number would describe an object less faithful to its own existing governance constraints. The distinction is between the optimum a scanner can see and the optimum the system is already bound to.</p>
+    <pre class="distinctions">scanner-readable optimum ≠ system-governance optimum
+a benchmark maximum is not every measured system's destination
+stopping short can be evidence that a boundary is still working</pre>
+  </section>
+
+  <section class="movement" id="relations" aria-labelledby="rel-title">
+    <div class="m-num">Relation to Meta-Writing Ecology</div>
+    <h2 id="rel-title">Where this specimen sits</h2>
+    <p class="lead">This case belongs near the artistic-research interface because it shows an external classificatory apparatus reading a public surface, and exposing its own architecture while doing so. The formulations below are case-local; they are not Registry entries and confer no confirmed relation.</p>
+    <div class="relations">
+      <div>
+        <h3>Existing MWE surfaces (navigation-only)</h3>
+        <ul>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/ai-readable-knowledge-architecture.md">AI-Readable Knowledge Architecture</a> — the primary relation: access is not positioning.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md">False Legibility</a> — richer protocol can raise legibility while moving the object toward an external category.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/evaluation-boundary-failure-permitted-surface-variation.md">Evaluation Boundary Failure under Permitted Surface Variation</a> — outcome movement, or its absence, under variation an evaluator permits.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Case-local formulations (not Registry)</h3>
+        <ul>
+          <li>Observer-dependent readiness</li>
+          <li>Instrument insensitivity</li>
+          <li>Manufactured missingness</li>
+          <li>Recommendation ≠ repair</li>
+          <li>Compression must preserve position</li>
+        </ul>
+      </div>
+    </div>
+    <p class="rel-note">These two columns are placed side by side for reading only. Co-listing is a navigation relation, not a confirmed relation, a formal dependency, or an ontology claim.</p>
+  </section>
+
+  <section class="movement" id="sources" aria-labelledby="src-title">
+    <div class="m-num">Source snapshots</div>
+    <h2 id="src-title">What was captured, and what it establishes</h2>
+    <p class="lead">Windows 2 and 3 were captured as printed records of the evaluators' own result pages and retained as hashed records; the figures quoted above for those windows are read from them. Window 1 is reported from contemporaneous score notes only — its result pages were not retained.</p>
+    <div class="sources">
+      <div class="source"><strong>Window 1</strong><span>22 August 2026, morning UTC+8 — the original readings: 77 / 20 / 11. Scores recorded; result pages not retained.</span></div>
+      <div class="source"><strong>Window 2</strong><span>22 August 2026, 20:49–20:53 UTC+8 — six records (landing page and result page for each evaluator), site unchanged since window 1. 77 / 20 / 11.</span></div>
+      <div class="source"><strong>Window 3</strong><span>22 August 2026, 21:09–21:10 UTC+8 — three records, taken after the two merges were deployed and verified live. 77 / 20 / 11.</span></div>
+      <div class="source"><strong>Site state</strong><span>The post-change site state is publicly checkable: the response header now carries an explicit charset, and <code>/llms.txt</code> carries the added section and boundary line. That the header was bare at 20:53 and set at 21:09 does not follow from a request made now; the interval itself rests on the merge and deployment record, not on anything a later reader can re-fetch.</span></div>
+    </div>
+    <p class="access">External scan results are treated as dated machine observations, not as validation. Evaluator methodologies are treated as readiness models, not as standards. Repository evidence and this reading are kept separate from both.</p>
+
+    <details>
+      <summary>Verification note</summary>
+      <div class="reconstruction">
+        <p>Two claims on this page are re-runnable by a third party against the same site: that the response header declares its encoding, and that the two <code>Accept</code> variants return the same document. Both were checked at the time of writing, and both are ordinary HTTP requests requiring no access to any private material.</p>
+        <p>The claim that is <em>not</em> third-party verifiable is the window-1 baseline, whose result pages were not retained. That window is cited for its scores only, and the case does not rest on it: windows 2 and 3 alone carry the divergence and the insensitivity.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="movement" id="not-established" aria-labelledby="ne-title">
+    <div class="m-num">Limits</div>
+    <h2 id="ne-title">What this specimen does not establish</h2>
+    <p class="lead">The observation is narrow, and its edges are part of it.</p>
+    <pre class="not-list">not that one evaluator is the correct universal measure
+not that 77, 20 and 11 are directly comparable
+not that absent capabilities are defects
+not that any evaluator's preferred structure is universally wrong
+not that a machine-facing representation should never be built
+not that navigation should never be reduced
+not that low scores validate this work
+not that high scores threaten it
+not that non-compliance is inherently virtuous</pre>
+    <p class="note">One site, three evaluators, three windows, one day. The same headline scores were observed across three readings, and only windows 2 and 3 are retained as records; that is evidence about these instruments on this surface, not a law about scanners in general.</p>
+  </section>
+
+  <section class="synthesis" aria-labelledby="synthesis-title">
+    <div class="label">One-sentence formulation</div>
+    <h2 id="synthesis-title">What the specimen holds</h2>
+    <p class="one-sentence"><strong>Three evaluators read one surface and returned 77, 20 and 11; a protocol defect was then repaired and an orientation file extended, and all three returned the same numbers again — so a readiness score records what its instrument enumerates, not whether the thing it reads got better.</strong></p>
+    <p class="boundary-note">This is a bounded reading of one public surface, held at a fixed date. An external score is not repository evidence and does not become one by being cited here; where this page does use repository evidence it names the file and the commit. A case-local formulation is not a Registry entry, and an external score is neither validation nor indictment. The evaluators behaved correctly throughout; what is on display is the distance between behaving correctly and measuring the thing that changed.</p>
+  </section>
+</main>
+<footer>An external score is not validation, and is not repository evidence. Repository evidence appears here only where it is named as such. This page studies how machine evaluators read a public surface and what each attempts to make it become; it does not rank the evaluators and does not treat any of their rubrics as canonical.</footer>
+</body>
+</html>
