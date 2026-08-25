@@ -219,10 +219,26 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    5.10.1 -> 5.11.0. Lockfile regenerated via `pnpm install --lockfile-
  *    only` against the merged package.json rather than hand-merged, because
  *    #134 and #135 were each cut independently from main and conflicted on
- *    the raw lockfile text. */
+ *    the raw lockfile text.
+ *    183138 bytes  7e990329…ef5
+ *    owner-authorized integration 2026-08-25/26 (Dependabot #137, typescript
+ *    5.9.3 -> 6.0.3, single-package group; rebased onto the #134/#135/#136
+ *    baseline above after PR #138 merged as 3da015c). Byte length did NOT
+ *    move — the replaced version string is the same length — so the SHA-256
+ *    half is what caught the movement. Lockfile regenerated via `pnpm
+ *    install --lockfile-only` against the rebased package.json. Landed
+ *    alongside a 3-line source fix in
+ *    src/components/publicSurfaceAuthorityMap.client.ts (`Boolean(...)`
+ *    around three `.hidden` reads) required because TypeScript 6.0.3's
+ *    stricter lib.dom.d.ts types `HTMLElement.hidden` as
+ *    `boolean | "until-found"`, not `boolean`. This same-round fix required
+ *    an owner-authorized one-file freeze exception for the Phase-3A-P6 pin
+ *    below (owner one-file freeze exception 2026-08-25, pilot job 3 round 3,
+ *    recorded in C:\dev\shared\STATUS.md) since the fix necessarily touches
+ *    the frozen file. */
 const LOCKFILE_IDENTITY = {
   byteLength: 183138,
-  sha256: "65d162063ed1e4674fbe55df29f3c111e56f8c9af975d065d3de28ab7ebf5f04",
+  sha256: "7e99032995e06ca9c34f1e60dd02eb9ec8a5dd2b80d29b7a9cc4d8b1f10a0ef5",
 };
 
 /**
@@ -674,6 +690,8 @@ test("guard 8 — no motion or timer architecture", () => {
 // the new workerd. The parsed lockfile package-NAME set is unchanged at 352 --
 // 0 added, 0 removed, only version strings moved -- and 0 prohibited packages.
 // Runtime dependency list untouched.
+// 2026-08-25, typescript 5.9.3 -> 6.0.3 (Dependabot #137). Single-package
+// bump; 0 prohibited packages; no dependency added or removed.
 
 // 2026-08-25, owner-authorized baseline integration for Dependabot #134
 // (cloudflare-wrangler group), #135 (astro group), #136 (dev-tooling group):
@@ -687,7 +705,7 @@ const BASELINE_DEPENDENCIES = {
   "@astrojs/sitemap": "3.7.3",
   astro: "7.2.4",
   "d3-selection": "3.0.0",
-  typescript: "5.9.3",
+  typescript: "6.0.3",
 };
 
 const BASELINE_DEV_DEPENDENCIES = {
