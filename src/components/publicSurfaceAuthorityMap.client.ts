@@ -919,14 +919,14 @@ function init(root: HTMLElement): void {
         detailBodyEl && detailEmptyEl
           ? {
               children: Array.from(detailBodyEl.childNodes),
-              bodyHidden: detailBodyEl.hidden,
-              emptyHidden: detailEmptyEl.hidden,
+              bodyHidden: Boolean(detailBodyEl.hidden),
+              emptyHidden: Boolean(detailEmptyEl.hidden),
             }
           : null,
       routeSelected: routeSelectedEl ? routeSelectedEl.checked : false,
       routeGlobal: routeGlobalEl ? routeGlobalEl.checked : false,
-      densityHidden: densityWarningEl ? densityWarningEl.hidden : true,
-      emptyHidden: mapEmptyEl ? mapEmptyEl.hidden : true,
+      densityHidden: densityWarningEl ? Boolean(densityWarningEl.hidden) : true,
+      emptyHidden: mapEmptyEl ? Boolean(mapEmptyEl.hidden) : true,
       activeEl: document.activeElement as HTMLElement | null,
       viewportScale,
       viewportSurface: currentSurface,

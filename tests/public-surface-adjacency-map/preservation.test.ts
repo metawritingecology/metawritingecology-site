@@ -139,10 +139,25 @@ const FROZEN_IDENTITIES = [
     gitBlob: "e04ebc307d801acb878e2a6a0795ece1ac746762"
   },
   {
+    // Identity moved 2026-08-25/26 under an owner one-file freeze exception
+    // (pilot job 3, round 3, recorded in C:\dev\shared\STATUS.md). The
+    // exception authorizes updating THIS pin only, for THIS fix only; it does
+    // not weaken or remove the freeze mechanism, which still governs every
+    // other file in FROZEN_IDENTITIES. Change forced by TypeScript 6.0.3's
+    // stricter lib.dom.d.ts, which widens `HTMLElement.hidden` from
+    // `boolean` to `boolean | "until-found"`: the three `.hidden` reads at
+    // lines 918/928/929 are now wrapped in `Boolean(...)` to keep the field
+    // type strict `boolean`, matching the declared interface and the two
+    // write-back call sites elsewhere in this file. Runtime behavior is
+    // preserved — `"until-found"` (a truthy non-empty string) coerces to
+    // `true`, the same outcome the pre-6.0.3 implicit assignment produced.
+    // Landed alongside the guard-9 `LOCKFILE_IDENTITY`/`BASELINE_DEPENDENCIES`
+    // move in renderingBoundary.test.ts for the same typescript 5.9.3 ->
+    // 6.0.3 bump (Dependabot #137, PR #139).
     path: "src/components/publicSurfaceAuthorityMap.client.ts",
-    byteLength: 50946,
-    sha256: "9d39d30476dff7ea7374ea1b6c5a871f0a754554db5b7a60cdd573004b38a63c",
-    gitBlob: "6fbe3d5827f412dd07d228a83f066cc8301eb404"
+    byteLength: 50982,
+    sha256: "2c7142fe3e22285aadc26d1b0c8664d5317faf49ac949bb87a89989ca004de56",
+    gitBlob: "62b464fb1d3ff041883730b28980b633b3a3e583"
   },
   {
     // Identity moved 2026-08-18 with the Astro 5 -> 7 migration. Two changes,
