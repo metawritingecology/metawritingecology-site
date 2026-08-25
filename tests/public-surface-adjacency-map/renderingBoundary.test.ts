@@ -209,10 +209,20 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    byte-identical to main's. The byte length did NOT move — every changed
  *    line swapped one version string for another of equal length — so the
  *    byteLength half of this guard would have passed on its own, and the
- *    SHA-256 half is what caught the movement. */
+ *    SHA-256 half is what caught the movement.
+ *    183138 bytes  65d16206…5f04
+ *    owner-authorized integration 2026-08-25 (Dependabot #134 cloudflare-
+ *    wrangler group + #135 astro group + #136 dev-tooling group, combined
+ *    into one baseline-integration branch per owner authorization);
+ *    @astrojs/cloudflare 14.2.1 -> 14.2.3, @astrojs/mdx 7.0.5 -> 7.0.7,
+ *    astro 7.2.2 -> 7.2.4, wrangler 4.124.0 -> 4.125.0, fast-xml-parser
+ *    5.10.1 -> 5.11.0. Lockfile regenerated via `pnpm install --lockfile-
+ *    only` against the merged package.json rather than hand-merged, because
+ *    #134 and #135 were each cut independently from main and conflicted on
+ *    the raw lockfile text. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 164655,
-  sha256: "347bf0101cf0857f549d0a4489a06459fff9a350ef7104290be2d0a854ace493",
+  byteLength: 183138,
+  sha256: "65d162063ed1e4674fbe55df29f3c111e56f8c9af975d065d3de28ab7ebf5f04",
 };
 
 /**
@@ -665,11 +675,17 @@ test("guard 8 — no motion or timer architecture", () => {
 // 0 added, 0 removed, only version strings moved -- and 0 prohibited packages.
 // Runtime dependency list untouched.
 
+// 2026-08-25, owner-authorized baseline integration for Dependabot #134
+// (cloudflare-wrangler group), #135 (astro group), #136 (dev-tooling group):
+// @astrojs/cloudflare 14.2.1 -> 14.2.3, @astrojs/mdx 7.0.5 -> 7.0.7,
+// astro 7.2.2 -> 7.2.4, wrangler 4.124.0 -> 4.125.0,
+// fast-xml-parser 5.10.1 -> 5.11.0. Deploy tooling + Astro + one dev-tooling
+// package only; no dependency added or removed; 0 prohibited packages.
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "14.2.1",
-  "@astrojs/mdx": "7.0.5",
+  "@astrojs/cloudflare": "14.2.3",
+  "@astrojs/mdx": "7.0.7",
   "@astrojs/sitemap": "3.7.3",
-  astro: "7.2.2",
+  astro: "7.2.4",
   "d3-selection": "3.0.0",
   typescript: "5.9.3",
 };
@@ -677,8 +693,8 @@ const BASELINE_DEPENDENCIES = {
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
-  "fast-xml-parser": "5.10.1",
-  wrangler: "4.124.0",
+  "fast-xml-parser": "5.11.0",
+  wrangler: "4.125.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
