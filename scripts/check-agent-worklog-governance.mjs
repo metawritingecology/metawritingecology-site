@@ -7,6 +7,7 @@ const REVIEW_THRESHOLD_LINES = 4000;
 const HARD_REVIEW_THRESHOLD_LINES = 5000;
 const BOT_BRANCH_PREFIXES = ["dependabot/", "renovate/"];
 const REPOSITORY = "metawritingecology/metawritingecology-site";
+const INTEGRATION_BRANCH = "main";
 
 const args = process.argv.slice(2);
 if (args.length > 1 || (args.length === 1 && args[0] !== "--json")) {
@@ -39,6 +40,55 @@ function requireGit(gitArgs, message) {
   const result = runGit(gitArgs);
   if (!result.ok) throw new Error(`${message}: ${result.stderr}`);
   return result.stdout;
+}
+
+// Raw bytes of a path at a git revision (no encoding, no trim) for exact
+// byte-prefix comparison. Returns { ok: false } if the revision/path is not
+// available locally (e.g. the tracking ref is absent or predates the file).
+// Ported from metawritingecology/lineage-aware-agent-governance
+// scripts/check-agent-worklog-governance.mjs (origin/main, read 2026-08-26).
+function gitShowBytes(spec) {
+  try {
+    return {
+      ok: true,
+      buf: execFileSync("git", ["-c", "core.longpaths=true", "show", spec], {
+        stdio: ["ignore", "pipe", "pipe"],
+      }),
+    };
+  } catch {
+    return { ok: false, buf: null };
+  }
+}
+
+function gitObjectExists(spec) {
+  return (
+    spawnSync("git", ["-c", "core.longpaths=true", "cat-file", "-e", spec], {
+      stdio: ["ignore", "pipe", "pipe"],
+    }).status === 0
+  );
+}
+
+// Bytes of AGENT_WORKLOG.md at a specific commit. If the commit is not present
+// locally it is fetched by SHA with --no-tags: this brings in objects and
+// updates FETCH_HEAD (a normal side effect of any fetch) but changes no branch
+// ref, no tracking ref, and nothing in the working tree. Distinguishes:
+//   found         - blob obtained (compare it as the append-only base)
+//   path_absent   - commit present but the file did not exist there (bootstrap)
+//   indeterminate - commit could not be resolved even after a read-only fetch
+function worklogBaseAt(sha) {
+  let blob = gitShowBytes(`${sha}:AGENT_WORKLOG.md`);
+  if (blob.ok) return { state: "found", buf: blob.buf };
+  if (gitObjectExists(`${sha}^{commit}`)) return { state: "path_absent" };
+  const fetched =
+    spawnSync("git", ["-c", "core.longpaths=true", "fetch", "--quiet", "--no-tags", "origin", sha], {
+      stdio: ["ignore", "pipe", "pipe"],
+    }).status === 0;
+  if (fetched) {
+    blob = gitShowBytes(`${sha}:AGENT_WORKLOG.md`);
+    if (blob.ok) return { state: "found", buf: blob.buf };
+    if (gitObjectExists(`${sha}^{commit}`)) return { state: "path_absent" };
+  }
+  return { state: "indeterminate" };
 }
 
 function splitLines(text) {
@@ -161,8 +211,22 @@ function collectEvidence() {
   const repositoryRoot = requireGit(["rev-parse", "--show-toplevel"], "repository root cannot be determined");
   const currentBranch = requireGit(["rev-parse", "--abbrev-ref", "HEAD"], "current branch cannot be determined");
   const currentHead = requireGit(["rev-parse", "HEAD"], "current HEAD cannot be determined");
-  const originMainResult = runGit(["rev-parse", "origin/main"]);
-  const originMainSha = originMainResult.ok ? originMainResult.stdout : null;
+  // Branch inventory and integration target share ONE observation window:
+  // the integration-branch tip comes from the same ls-remote snapshot used for
+  // the branch list. The local origin/main tracking ref is only a fallback for
+  // offline runs, and is reported as such.
+  const remoteResult = runGit(["ls-remote", "--heads", "origin"]);
+  const remoteBranches = remoteResult.ok ? parseRemoteBranches(remoteResult.stdout) : [];
+  const integrationRemote = remoteBranches.find((b) => b.name === INTEGRATION_BRANCH) ?? null;
+  let originMainSha = integrationRemote ? integrationRemote.tipSha : null;
+  let originMainObservation = originMainSha ? "ls-remote (same window as branch inventory)" : "unavailable";
+  if (originMainSha === null) {
+    const originMainResult = runGit(["rev-parse", `origin/${INTEGRATION_BRANCH}`]);
+    if (originMainResult.ok) {
+      originMainSha = originMainResult.stdout;
+      originMainObservation = "local tracking ref (ls-remote unavailable; may be stale)";
+    }
+  }
 
   const worklogPath = `${repositoryRoot}/AGENT_WORKLOG.md`;
   if (!existsSync(worklogPath)) throw new Error("AGENT_WORKLOG.md cannot be read");
@@ -172,12 +236,76 @@ function collectEvidence() {
   const activeNoticeCount = (worklogText.match(/^## Active Log Notice$/gm) ?? []).length;
   const activeNoticePointsToAgents = /## Active Log Notice[\s\S]*?`AGENTS\.md`/.test(worklogText);
 
+  // Append-only invariant (HARD), fail-closed. The worklog at the observed
+  // integration commit must be an exact byte PREFIX of the working-tree file.
+  // If the commit cannot be resolved even after a read-only fetch, the
+  // invariant is INDETERMINATE and fails closed rather than passing green.
+  // Working-tree bytes are compared, so a checkout that smudges line endings
+  // (core.autocrlf without an eol=lf attribute) is reported as a violation;
+  // .gitattributes pins AGENT_WORKLOG.md to LF for that reason.
+  let worklogAppendOnly;
+  if (originMainSha === null) {
+    worklogAppendOnly = {
+      checked: false,
+      preserved: null,
+      indeterminate: false,
+      reason: "no remote integration branch observed (bootstrap / pre-first-push)",
+    };
+  } else {
+    const base = worklogBaseAt(originMainSha);
+    if (base.state === "found") {
+      const preserved =
+        worklogBuffer.byteLength >= base.buf.byteLength &&
+        worklogBuffer.subarray(0, base.buf.byteLength).equals(base.buf);
+      worklogAppendOnly = {
+        checked: true,
+        preserved,
+        indeterminate: false,
+        baseSha: originMainSha,
+        baseBytes: base.buf.byteLength,
+        currentBytes: worklogBuffer.byteLength,
+        reason: null,
+      };
+    } else if (base.state === "path_absent") {
+      worklogAppendOnly = {
+        checked: false,
+        preserved: null,
+        indeterminate: false,
+        baseSha: originMainSha,
+        reason: "AGENT_WORKLOG.md not present at the observed integration commit (bootstrap)",
+      };
+    } else {
+      worklogAppendOnly = {
+        checked: false,
+        preserved: null,
+        indeterminate: true,
+        baseSha: originMainSha,
+        reason: "observed integration commit unavailable locally and could not be fetched -- append-only unverifiable",
+      };
+    }
+  }
+
+  // Ancestry checks need the integration tip as a LOCAL object. worklogBaseAt
+  // above has already fetched the observed tip when it was absent; if that
+  // fetch failed, fall back to the local tracking ref for the ancestry
+  // inventory (and say so) instead of reporting every branch as "unknown".
+  let ancestrySha = originMainSha;
+  let ancestryObservation = originMainObservation;
+  if (ancestrySha !== null && !gitObjectExists(`${ancestrySha}^{commit}`)) {
+    const localRef = runGit(["rev-parse", `origin/${INTEGRATION_BRANCH}`]);
+    if (localRef.ok && gitObjectExists(`${localRef.stdout}^{commit}`)) {
+      ancestrySha = localRef.stdout;
+      ancestryObservation = "local tracking ref (observed remote tip not fetchable; may be stale)";
+    } else {
+      ancestrySha = null;
+      ancestryObservation = "unavailable (observed remote tip not fetchable, no local tracking ref)";
+    }
+  }
+
   const agentsPath = `${repositoryRoot}/AGENTS.md`;
   const agentsText = existsSync(agentsPath) ? readFileSync(agentsPath, "utf8") : "";
   const agentsCanonicalPointerPresent = agentsText.includes("node scripts/check-agent-worklog-governance.mjs");
 
-  const remoteResult = runGit(["ls-remote", "--heads", "origin"]);
-  const remoteBranches = remoteResult.ok ? parseRemoteBranches(remoteResult.stdout) : [];
   const prMetadata = fetchPrMetadata();
   const dependencyBranches = [];
   const nonBotRemoteBranches = [];
@@ -193,7 +321,7 @@ function collectEvidence() {
       continue;
     }
 
-    const evidence = buildBranchEvidence(branch, currentBranch, originMainSha, prMetadata);
+    const evidence = buildBranchEvidence(branch, currentBranch, ancestrySha, prMetadata);
     if (BOT_BRANCH_PREFIXES.some((prefix) => branch.name.startsWith(prefix))) {
       dependencyBranches.push(evidence);
     } else {
@@ -205,7 +333,11 @@ function collectEvidence() {
     repositoryRoot,
     currentBranch,
     currentHead,
+    integrationBranch: INTEGRATION_BRANCH,
     originMainSha,
+    originMainObservation,
+    ancestrySha,
+    ancestryObservation,
     agentWorklog: {
       byteSize: worklogBuffer.byteLength,
       lineCount: splitLines(worklogText).length,
@@ -214,6 +346,7 @@ function collectEvidence() {
       activeLogNoticeCount: activeNoticeCount,
       activeLogNoticeOccursExactlyOnce: activeNoticeCount === 1,
       activeLogNoticePointsToAgents: activeNoticePointsToAgents,
+      appendOnly: worklogAppendOnly,
     },
     agentsCanonicalPointerPresent,
     remoteBranchEvidenceAvailable: remoteResult.ok,
@@ -236,7 +369,8 @@ function printHuman(evidence) {
   console.log(`Repository root: ${evidence.repositoryRoot}`);
   console.log(`Current branch: ${evidence.currentBranch}`);
   console.log(`Current HEAD: ${evidence.currentHead}`);
-  console.log(`Available origin/main SHA: ${evidence.originMainSha ?? "unknown"}`);
+  console.log(`Available origin/main SHA: ${evidence.originMainSha ?? "unknown"} (${evidence.originMainObservation})`);
+  console.log(`Ancestry base SHA: ${evidence.ancestrySha ?? "unknown"} (${evidence.ancestryObservation})`);
   console.log("");
   console.log("AGENT_WORKLOG.md:");
   console.log(`  Exact byte size: ${evidence.agentWorklog.byteSize}`);
@@ -245,6 +379,16 @@ function printHuman(evidence) {
   console.log(`  Rollover line status: ${evidence.agentWorklog.rolloverLineStatus}`);
   console.log(`  Active Log Notice count: ${evidence.agentWorklog.activeLogNoticeCount}`);
   console.log(`  Active Log Notice points to AGENTS.md: ${evidence.agentWorklog.activeLogNoticePointsToAgents}`);
+  const ao = evidence.agentWorklog.appendOnly;
+  console.log(
+    `  Append-only (byte prefix at observed integration commit${ao.baseSha ? " " + ao.baseSha.slice(0, 8) : ""}): ${
+      ao.checked
+        ? ao.preserved
+        : ao.indeterminate
+          ? `INDETERMINATE -- fail-closed (${ao.reason})`
+          : `not-applicable (${ao.reason})`
+    }`,
+  );
   console.log(`  AGENTS.md script invocation pointer present: ${evidence.agentsCanonicalPointerPresent}`);
   console.log("");
   console.log(`Current branch exclusion: ${evidence.currentBranchExclusion}`);
@@ -289,6 +433,16 @@ try {
   }
   if (!evidence.agentsCanonicalPointerPresent) {
     errors.push("AGENTS.md script invocation pointer is absent");
+  }
+  if (evidence.agentWorklog.appendOnly.preserved === false) {
+    errors.push(
+      "AGENT_WORKLOG.md is not append-only: the observed integration-commit worklog is not a byte prefix of the current file",
+    );
+  }
+  if (evidence.agentWorklog.appendOnly.indeterminate) {
+    errors.push(
+      "AGENT_WORKLOG.md append-only invariant is unverifiable (observed integration commit unavailable) -- failing closed",
+    );
   }
 
   if (jsonMode) {
