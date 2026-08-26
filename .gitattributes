@@ -1,3 +1,15 @@
+# Normalize line endings so byte-for-byte invariants (the AGENT_WORKLOG.md
+# append-only byte-prefix check and the pnpm-lock.yaml identity guard) do
+# not depend on any machine's core.autocrlf or checkout configuration.
+# A path attribute set here overrides core.autocrlf for that path.
+# A repository-wide `* text=auto eol=lf` is deliberately NOT set: one tracked
+# file (src/pages/ai-readable-knowledge-architecture.md) is committed with
+# CRLF bytes and `git add --renormalize` would rewrite it; that is a separate
+# owner decision. Only paths whose committed bytes are already LF are pinned.
+AGENT_WORKLOG.md text eol=lf
+pnpm-lock.yaml text eol=lf
+
+# Byte-identity artifacts: never subject to any text conversion.
 src/data/public-surface-authority-map/runtime-manifest.json -text
 src/data/public-surface-authority-map/last-known-good.json -text
 src/data/public-surface-authority-map/runtime-snapshots/*.json -text

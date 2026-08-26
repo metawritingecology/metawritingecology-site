@@ -114,6 +114,26 @@ Replace `!=` with `≠` only when it appears as prose.
 
 If `!=` appears outside the edited files, report it but do not expand scope unless explicitly approved.
 
+## Frozen Check-Pipeline Prefix
+
+The `check` script in `package.json` is a single `&&` chain. Its first twenty steps (`astro build` through `pnpm run verify:metadata-build`, the `BASE_PIPELINE` list in `tests/public-surface-adjacency-map/preservation.test.ts` and `tests/check-pipeline-structure.test.ts`) are a frozen prefix.
+
+Rule for any change to `scripts.check`:
+- the `BASE_PIPELINE` steps must remain present, in their original relative order, and none may be removed or duplicated
+- a step that is not in `BASE_PIPELINE` may appear only after the last `BASE_PIPELINE` step: new steps are appended at the tail of the chain
+- extending `BASE_PIPELINE` itself is a freeze move and requires explicit owner authorization recorded in the worklog
+
+Both tests enforce this. `tests/check-pipeline-structure.test.ts` names the violated condition and carries the two historical violations as negative fixtures (the 2026-08-15 insertion of `test:human-governed`, corrected on PR #122; the 2026-08-22 insertion of `test:html-charset`, corrected by commit `e00d6cf` on PR #132). Both were caught by CI, not locally: `pnpm run check` on a Windows clone aborts at `test:orchestration` (see below) before reaching the preservation test, so a local partial run does not stand in for the pipeline rule.
+
+## Known-Environmental Failures
+
+The Linux `site-ci` workflow run on the pushed branch is the readiness authority for `pnpm run check`. The following local failures are known, environmental, and outside this repository; report them, do not fix them here, and do not treat them as evidence about the change under test:
+
+- Under Git Bash on Windows, `/usr/bin/tar` is GNU tar, which reads a `C:\...` path as `host:path` (`tar: Cannot connect to C: resolve failed`); `test:orchestration` then fails 22 of 29. From PowerShell, `tar` resolves to `C:\WINDOWS\system32\tar.exe` and the same tests pass.
+- PSADJ-21 in the adjacency-map suite fails on Windows for the same class of reason and passes on the Linux CI runner.
+
+A local failure that is not on this list is not environmental until shown to be; record it as a finding.
+
 ## Required Worklog
 
 After any change, update AGENT_WORKLOG.md with:
@@ -123,6 +143,13 @@ After any change, update AGENT_WORKLOG.md with:
 - tests or build checks run
 - unresolved questions
 - risks or assumptions
+
+For boundary-sensitive work and any change that received an independent review, also record the review provenance. Record a value as `unknown` rather than omitting the field:
+- reviewer interface (for example Codex CLI, Copilot pull-request reviewer, Cursor, direct API)
+- reviewer lineage (the model family behind the interface; `unknown` if the interface does not disclose it)
+- review mode (`parallel blind`, `sequential blind`, `sequential`, or `corroboration`)
+- reviewed commit (the exact commit SHA the reviewer saw)
+- review evidence reference (where the review text and its verdict are kept)
 
 ## Worklog Governance
 
