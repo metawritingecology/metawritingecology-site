@@ -68,9 +68,10 @@ function gitObjectExists(spec) {
   );
 }
 
-// Bytes of AGENT_WORKLOG.md at a specific commit, fetching that commit
-// read-only (objects only, no ref or working-tree change) if it is not present
-// locally. Distinguishes:
+// Bytes of AGENT_WORKLOG.md at a specific commit. If the commit is not present
+// locally it is fetched by SHA with --no-tags: this brings in objects and
+// updates FETCH_HEAD (a normal side effect of any fetch) but changes no branch
+// ref, no tracking ref, and nothing in the working tree. Distinguishes:
 //   found         - blob obtained (compare it as the append-only base)
 //   path_absent   - commit present but the file did not exist there (bootstrap)
 //   indeterminate - commit could not be resolved even after a read-only fetch
@@ -284,6 +285,23 @@ function collectEvidence() {
     }
   }
 
+  // Ancestry checks need the integration tip as a LOCAL object. worklogBaseAt
+  // above has already fetched the observed tip when it was absent; if that
+  // fetch failed, fall back to the local tracking ref for the ancestry
+  // inventory (and say so) instead of reporting every branch as "unknown".
+  let ancestrySha = originMainSha;
+  let ancestryObservation = originMainObservation;
+  if (ancestrySha !== null && !gitObjectExists(`${ancestrySha}^{commit}`)) {
+    const localRef = runGit(["rev-parse", `origin/${INTEGRATION_BRANCH}`]);
+    if (localRef.ok && gitObjectExists(`${localRef.stdout}^{commit}`)) {
+      ancestrySha = localRef.stdout;
+      ancestryObservation = "local tracking ref (observed remote tip not fetchable; may be stale)";
+    } else {
+      ancestrySha = null;
+      ancestryObservation = "unavailable (observed remote tip not fetchable, no local tracking ref)";
+    }
+  }
+
   const agentsPath = `${repositoryRoot}/AGENTS.md`;
   const agentsText = existsSync(agentsPath) ? readFileSync(agentsPath, "utf8") : "";
   const agentsCanonicalPointerPresent = agentsText.includes("node scripts/check-agent-worklog-governance.mjs");
@@ -303,7 +321,7 @@ function collectEvidence() {
       continue;
     }
 
-    const evidence = buildBranchEvidence(branch, currentBranch, originMainSha, prMetadata);
+    const evidence = buildBranchEvidence(branch, currentBranch, ancestrySha, prMetadata);
     if (BOT_BRANCH_PREFIXES.some((prefix) => branch.name.startsWith(prefix))) {
       dependencyBranches.push(evidence);
     } else {
@@ -318,6 +336,8 @@ function collectEvidence() {
     integrationBranch: INTEGRATION_BRANCH,
     originMainSha,
     originMainObservation,
+    ancestrySha,
+    ancestryObservation,
     agentWorklog: {
       byteSize: worklogBuffer.byteLength,
       lineCount: splitLines(worklogText).length,
@@ -350,6 +370,7 @@ function printHuman(evidence) {
   console.log(`Current branch: ${evidence.currentBranch}`);
   console.log(`Current HEAD: ${evidence.currentHead}`);
   console.log(`Available origin/main SHA: ${evidence.originMainSha ?? "unknown"} (${evidence.originMainObservation})`);
+  console.log(`Ancestry base SHA: ${evidence.ancestrySha ?? "unknown"} (${evidence.ancestryObservation})`);
   console.log("");
   console.log("AGENT_WORKLOG.md:");
   console.log(`  Exact byte size: ${evidence.agentWorklog.byteSize}`);
