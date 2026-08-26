@@ -6,13 +6,17 @@
 // GUARD LIFECYCLE (AGENTS.md "Guard lifecycle"; PLAN 5.A1: every new guard
 // carries review_after and sunset_condition).
 //   review_after: 2026-11-26
-//   sunset_condition: EITHER the seven source pins listed below (`contract.ts`,
-//   `d3AuthorityLayout.ts`, `d3AuthorityKeyboardNavigation.ts`,
-//   `d3AuthorityViewport.ts`, `fallback.ts`, `runtimeManifestContract.ts`,
-//   `byteIdentity.ts`) are retired by owner ruling and this test becomes the
-//   sole protection of their behaviour, OR this test is retired if those pins
-//   stay byte-frozen indefinitely. Retiring a pin is an owner freeze exception
-//   and is not taken by this file.
+//   sunset_condition: this test is retired only by an owner decision, taken at
+//   or after review_after, that the byte pins on the seven source files with
+//   direct coverage here (`contract.ts`, `d3AuthorityLayout.ts`,
+//   `d3AuthorityKeyboardNavigation.ts`, `d3AuthorityViewport.ts`,
+//   `fallback.ts`, `runtimeManifestContract.ts`, `byteIdentity.ts`) will be
+//   kept as the sole protection and this behaviour-level layer is not wanted.
+//   renewal_condition: if any of those seven pins is retired by owner ruling,
+//   this test becomes the sole behaviour-level protection for that file and
+//   MUST be renewed with a new review_after, never retired. Absent either
+//   decision at review_after, the default is renew. Retiring a pin is an owner
+//   freeze exception and is not taken by this file.
 //
 // Public Surface Authority Map — semantic / structural invariants.
 //
