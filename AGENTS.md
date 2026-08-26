@@ -175,4 +175,12 @@ Review `AGENT_WORKLOG.md` rollover eligibility at 4,000 lines, do not normally e
 
 When available, run `node scripts/check-agent-worklog-governance.mjs` as read-only validation evidence. Its output does not determine author status, merge readiness, integration priority, or authorization.
 
+### Guard lifecycle
+
+Every guard introduced by a governance change carries a review date (`review_after`) and a stated sunset condition (`sunset_condition`), so that it is retired deliberately rather than accumulating by default. When `review_after` passes, the guard is re-examined and either renewed with a new date, retired because its sunset condition is met, or escalated to the owner. Guards added by the 2026-08-26 governance PR (`agentgov/worklog-prefix-check-and-rule-elevation`):
+
+- Byte-prefix append-only check (`scripts/check-agent-worklog-governance.mjs`, `AGENT_WORKLOG.md` must keep the `origin/main` worklog as an exact byte prefix): review_after 2026-11-26; sunset_condition: retired when the repository migrates to per-run immutable records (`agent-runs/` plus a generated index) and `AGENT_WORKLOG.md` is archived with a pinned identity.
+- Structural pipeline test (`tests/check-pipeline-structure.test.ts`, the frozen `scripts.check` prefix rule above): review_after 2026-11-26; sunset_condition: merged into `tests/public-surface-adjacency-map/preservation.test.ts`, or retired when the frozen prefix is replaced by the semantic layer.
+- Known-environmental note (the "Known-Environmental Failures" section above): review_after 2026-11-26; sunset_condition: removed when CI runs on Windows or the GNU tar `host:path` defect is fixed upstream.
+
 The user remains final authority for public release, naming, classification, relation confirmation, top navigation, and merge / publication decisions.
