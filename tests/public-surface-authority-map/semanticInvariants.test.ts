@@ -3,6 +3,17 @@
 // types; type-checking of this test harness is disabled here. The production
 // modules it imports remain fully typed and are type-checked by `tsc`.
 //
+// GUARD LIFECYCLE (AGENTS.md "Guard lifecycle"; PLAN 5.A1: every new guard
+// carries review_after and sunset_condition).
+//   review_after: 2026-11-26
+//   sunset_condition: EITHER the seven source pins listed below (`contract.ts`,
+//   `d3AuthorityLayout.ts`, `d3AuthorityKeyboardNavigation.ts`,
+//   `d3AuthorityViewport.ts`, `fallback.ts`, `runtimeManifestContract.ts`,
+//   `byteIdentity.ts`) are retired by owner ruling and this test becomes the
+//   sole protection of their behaviour, OR this test is retired if those pins
+//   stay byte-frozen indefinitely. Retiring a pin is an owner freeze exception
+//   and is not taken by this file.
+//
 // Public Surface Authority Map — semantic / structural invariants.
 //
 // PURPOSE. `tests/public-surface-adjacency-map/preservation.test.ts` pins the
