@@ -57,6 +57,8 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   "/artistic-research/public-surface-case/2026-08-18/",
   // noindex,nofollow bounded public surface case, second-order machine reading (not in feed)
   "/artistic-research/public-surface-case/2026-08-22/",
+  // noindex,nofollow bounded public surface case, follow-up to the 2026-08-18 external-field reading (not in feed)
+  "/artistic-research/public-surface-case/2026-09-19/",
   // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
   "/public-surface-map/expanded/"
 ]);
