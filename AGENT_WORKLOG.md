@@ -5006,3 +5006,21 @@ Pre-append inventory gate: `origin/main` unchanged (`6fc0f4ed`) and no branch or
 Unresolved questions (for owner review, not blocking): (1) whether the three reconstruction keywords stay in Chinese as functional strings, or go; (2) the open items of the entries above.
 
 Risks or assumptions: the dated specimen's text has now been touched once, for language only; the 2026-09-19 page and this entry record the change so that "preserved as written" stays a checkable claim rather than a byte claim. Merge, PR and publication remain owner decisions and are not taken here.
+
+### 2026-09-19 - Claude Code (Fable 5.1, Claude Code on the web / remote container) - claude/tender-turing-tniexe - owner rulings: worklog rollover deferred; PR #146 opened for this branch; separate baseline-integration branch and PR authorized for Dependabot #142 / #144 / #145
+
+Agent: Claude Code, model `claude-fable-5-1`, same container and session as the eight entries above. Owner rulings, verbatim: "都可以，延後 rollover，分支跟 PR 都開" - (1) `AGENT_WORKLOG.md` rollover is DEFERRED by explicit author deferral; this file crossed the 5,000-line line at the entry above (5,009 lines) and this entry is appended under that deferral; rollover remains a separate authorized task after `main` is stable. (2) A pull request is to be opened for this branch. (3) A separate branch `sitegov/pr142-144-145-baseline-integration` may be pushed and its pull request opened; that work is recorded in the worklog entry on that branch, not here.
+
+Actions: PR #146 opened against `main` from `claude/tender-turing-tniexe` at head `e924627` (nine commits; not a draft; NOT merged; merge remains the owner's decision). The PR body lists the nine commits' content, the owner rulings of this session, the checks run, and the open items (no independent review yet; no PTS report; article bodies not retrievable from the container). No file other than this one changed in this round.
+
+Files changed (1): `AGENT_WORKLOG.md` (this entry, tail append only).
+
+Tests or build checks run: none needed for a worklog-only append; `node scripts/check-agent-worklog-governance.mjs` re-run after this append (result in the commit message). The `site-ci` run on PR #146's head is the readiness authority for the branch.
+
+Review provenance: unchanged - no independent review has been performed; Reviewer interface none; lineage not applicable; mode not applicable; reviewed commit none; evidence reference none. The repository carries `.github/copilot-instructions.md`; whether a Copilot pull-request review runs on #146 is recorded on the PR, not here.
+
+Pre-append inventory gate: `origin/main` unchanged (`6fc0f4ed`); the three Dependabot PRs are now the subject of the authorized integration branch; no other branch or PR state change. Gate does not stop.
+
+Unresolved questions (for owner review, not blocking): (1) merge of #146; (2) an independent review before merge; (3) the three reconstruction keywords on the 2026-08-18 page; (4) rollover, now deferred.
+
+Risks or assumptions: worklog-only append under an explicit deferral of the 5,000-line rule. Merge and publication remain owner decisions and are not taken here.
