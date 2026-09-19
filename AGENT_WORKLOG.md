@@ -18,10 +18,6 @@ Result:
 Unresolved questions:
 Risks or assumptions:
 
-## Archived volumes
-
-Historical dated entries from 2026-07-06 through 2026-08-26 are immutable evidence in `docs/worklogs/AGENT_WORKLOG_2026-Q3_part-1.md`, indexed by `docs/worklogs/README.md`. Do not edit archived logs. This file remains the single active append target.
-
 ### 2026-09-20 - Codex - public-worklog-redaction
 
 Agent: Codex
