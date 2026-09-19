@@ -166,6 +166,16 @@ Public forms can also be read through the permissions attached to them. This sli
 
 [Enter Public Slice — 7 August 2026](/artistic-research/public-slice/2026-08-07/)
 
+### Public Surface Case
+
+A Public Surface Case reads an external public-discourse field as a bounded, dated, verify-only specimen. Its material is external observation, not repository evidence. A dated specimen is preserved as written; a later reading is added as a separate page rather than as a revision.
+
+The 2026 pair below reads one field twice: first at the moment a cultural template was cast onto a public controversy, then a month later, when the field had become a five-night festival, to record how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire. Both pages are noindex and are listed here only.
+
+[Enter Public Surface Case — 18 August 2026](/artistic-research/public-surface-case/2026-08-18/)
+
+[Follow-up — 19 September 2026](/artistic-research/public-surface-case/2026-09-19/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.
