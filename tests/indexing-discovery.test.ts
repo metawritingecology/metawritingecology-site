@@ -1749,6 +1749,32 @@ test("public surface case 2026-08-18: standalone noindex page, exact-path exclud
   assert.equal(isSitemapEligible(adjacent), true);
 });
 
+test("public surface case 2026-09-19: standalone noindex follow-up, exact-path excluded, sibling untouched", () => {
+  const page = rd("src/pages/artistic-research/public-surface-case/2026-09-19.astro");
+  // Standalone page: hand-written head with a noindex,nofollow robots meta and
+  // no BaseLayout / self-canonical.
+  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(page));
+  assert.ok(!/BaseLayout/.test(page) && !/rel="canonical"/.test(page));
+
+  // The exact route is in the exclusion set and is not sitemap-eligible.
+  const route = "/artistic-research/public-surface-case/2026-09-19/";
+  assert.ok(SITEMAP_EXCLUDED_PATHS.has(route));
+  assert.equal(isSitemapEligible(route), false);
+
+  // Exact-path (not prefix) matching: an adjacent date is NOT auto-excluded.
+  const adjacent = "/artistic-research/public-surface-case/2026-09-20/";
+  assert.ok(!SITEMAP_EXCLUDED_PATHS.has(adjacent));
+  assert.equal(isSitemapEligible(adjacent), true);
+
+  // The follow-up links to the 2026-08-18 specimen it extends; that sibling
+  // still declares itself noindex and is still excluded (the follow-up does
+  // not change the sibling's indexing contract).
+  assert.ok(page.includes('href="/artistic-research/public-surface-case/2026-08-18/"'));
+  const sibling = rd("src/pages/artistic-research/public-surface-case/2026-08-18.astro");
+  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(sibling));
+  assert.ok(SITEMAP_EXCLUDED_PATHS.has("/artistic-research/public-surface-case/2026-08-18/"));
+});
+
 // ===========================================================================
 // Windows-safe generated dist path handling
 // ===========================================================================
