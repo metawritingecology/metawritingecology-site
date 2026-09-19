@@ -1,0 +1,310 @@
+---
+import "../../../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Public Surface Case — 2026-09-19</title>
+  <meta name="description" content="A dated follow-up to the 2026-08-18 public surface case. The platform-field layer that specimen declined to verify has since been performed and institutionally reported. This page adds the later layers, records how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire, and keeps every layer apart. The earlier specimen is preserved as written. External public-discourse observation, not repository evidence." />
+  <style>
+    :root { --deep:#15130f; --raised:#24211c; --max:920px; }
+    *{box-sizing:border-box}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
+    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    a:hover{color:var(--link-hover)}
+    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    p{margin:0}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
+    main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
+    .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
+    .kicker{color:var(--link);margin-bottom:14px}
+    .label{color:var(--muted)}
+
+    .case-head{max-width:760px;padding-bottom:42px;border-bottom:1px solid var(--line)}
+    .case-head h1{font-size:clamp(2rem,5vw,3.45rem);letter-spacing:-.04em;max-width:18ch;color:var(--accent)}
+    .subtitle{margin-top:16px;max-width:44rem;color:var(--muted);font-size:1.05rem}
+    .framing{margin-top:20px;max-width:42rem;font-size:1.04rem}
+    .date-row{display:flex;gap:30px;flex-wrap:wrap;margin-top:26px;color:var(--muted);font-size:.88rem}
+    .date-row span{display:block;margin-bottom:2px;color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .genre{margin-top:18px;padding:12px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);color:var(--muted);font-size:.86rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .genre b{color:var(--text);font-weight:500}
+
+    .flow{margin:26px 0 0;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.7;white-space:pre-wrap}
+
+    .movement{scroll-margin-top:20px;padding:52px 0 8px;border-top:1px solid var(--line)}
+    .movement:first-of-type{border-top:0}
+    .m-num{color:var(--link);font-size:.78rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+    .movement h2{margin-top:10px;max-width:34ch;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.02em}
+    .movement p.lead{margin-top:14px;max-width:46rem}
+    .movement p.note{margin-top:14px;max-width:46rem;color:var(--muted);font-size:.95rem}
+    .candidate{margin-top:8px;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
+    .candidate code{color:var(--accent)}
+
+    .reading{margin-top:22px}
+    .reading-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+    .reading-row:last-child{border-bottom:1px solid var(--line)}
+    .reading-row dt{color:var(--muted);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .reading-row dd{margin:0;max-width:46rem}
+    .reading-row.reading-interpretation dd{color:var(--text)}
+    .reading-row.reading-interpretation dt{color:var(--link)}
+    .reading-row.reading-limit dd{color:var(--muted);font-size:.91rem}
+
+    .distinctions{margin:18px 0 0;padding:14px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);font-size:.82rem;line-height:1.85;white-space:pre-wrap}
+
+    .gloss{margin-top:16px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.9rem}
+    .gloss p+p{margin-top:8px}
+
+    .not-list{margin:14px 0 0;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.8;white-space:pre-wrap}
+
+    .trajectory{margin-top:22px}
+    .step{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+    .step:last-child{border-bottom:1px solid var(--line)}
+    .step dt{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;font-variant-numeric:tabular-nums}
+    .step dt span{display:block;margin-top:4px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+    .step dd{margin:0;max-width:46rem;color:var(--muted);font-size:.93rem}
+    .step.step-institutional dd{color:var(--text)}
+
+    .relations{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .relations h3{font-size:.9rem;color:var(--link)}
+    .relations ul{margin:10px 0 0;padding-left:1.05rem;color:var(--muted);font-size:.92rem}
+    .relations li{margin:5px 0}
+    .rel-note{margin-top:16px;max-width:46rem;color:var(--muted);font-size:.82rem}
+
+    details{margin-top:22px}
+    summary{cursor:pointer;width:fit-content;color:var(--link);font-size:.85rem;font-weight:600}
+    .reconstruction{margin-top:12px;padding-left:16px;border-left:1px solid var(--line);color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+    .reconstruction p+p{margin-top:8px}
+    .reconstruction code{color:var(--accent)}
+
+    .sources{margin-top:22px;border-top:1px solid var(--line)}
+    .source{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+    .source strong{color:var(--link);font-weight:650}
+    .source span{color:var(--muted)}
+    .source a{overflow-wrap:anywhere}
+    .access{margin-top:12px;color:var(--muted);font-size:.8rem}
+
+    .synthesis{margin-top:40px;padding-top:44px;border-top:1px solid var(--line)}
+    .synthesis h2{max-width:34ch;font-size:clamp(1.4rem,3vw,2rem)}
+    .one-sentence{margin-top:20px;max-width:44rem;font-size:1.06rem}
+    .one-sentence strong{color:var(--text);font-weight:600}
+    .boundary-note{margin-top:22px;max-width:48rem;color:var(--muted);font-size:.85rem}
+
+    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+
+    @media(max-width:760px){
+      main{padding:50px 18px 74px}.case-head h1{font-size:2.2rem}
+      .reading-row,.step{grid-template-columns:1fr;gap:4px}
+      .relations{grid-template-columns:1fr;gap:18px}
+      .source{grid-template-columns:1fr;gap:3px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header class="case-head">
+    <p class="kicker">Artistic Research / Public Surface Case</p>
+    <h1>Semantic Casting, One Month On</h1>
+    <p class="subtitle">A dated follow-up to the 2026-08-18 specimen. The earlier page is preserved as written; this page adds the layers that came after it and keeps them apart.</p>
+    <p class="framing">On 18 August 2026 this series fixed a reading of a public-discourse field at the moment a cultural template had been cast and production elements were being proposed. That specimen declined to verify whether anything would be held. One month later the festival named in its reconstruction keywords opened, and institutional news reporting exists for it. This page records what came after the earlier reading: how fast the field moved, how large it became, and how it translated a dispute's template into forms that already existed. It revises nothing in the specimen it follows.</p>
+    <div class="date-row">
+      <div><span>Case date</span>19 September 2026</div>
+      <div><span>Platform-field window</span>18 August – 5 September 2026, UTC+8</div>
+      <div><span>Institutional window</span>18–19 September 2026, UTC+8</div>
+      <div><span>Indexing</span>noindex / bounded reading</div>
+    </div>
+    <p class="genre"><b>Field type</b> — external public-discourse observation, follow-up layer (≠ repository evidence). <b>Status</b> — dated, verify-only case specimen; the 2026-08-18 specimen is preserved as written (follow-up ≠ revision; later evidence ≠ earlier error).</p>
+  </header>
+
+  <pre class="flow">dated specimen, 18 August 2026
+→ platform-field layer, dated but unverified
+→ an official layer forms inside the platform field
+→ commitments gather in days; the template is translated into an existing repertoire
+→ a warm-up performance is held, 4 September
+→ institutional reporting, 18 September
+→ the earlier specimen is preserved, not revised</pre>
+
+  <section class="movement" id="held-open" aria-labelledby="ho-title">
+    <div class="m-num">Movement 01</div>
+    <h2 id="ho-title">What the earlier specimen held open</h2>
+    <p class="lead">The <a href="/artistic-research/public-surface-case/2026-08-18/">2026-08-18 page</a> read one public-discourse field as a specimen of a general mechanism: the move from public readability toward a performable civic surface. It proposed candidate formulations and a threshold, and it was explicit about what it did not do.</p>
+    <p class="note">It did not claim that any proposed performance, festival, or civic action was permitted, finalized, or held. It treated the festivalization layer as platform-field material and offered the cost threshold as a reading device, not as a property of the case. Those statements were true at their date. They remain on that page as written, because a dated specimen that is edited to match a later outcome stops being evidence of what could be read at its date.</p>
+    <pre class="distinctions">follow-up ≠ revision
+later evidence ≠ earlier error
+a preserved specimen ≠ an endorsed specimen</pre>
+  </section>
+
+  <section class="movement" id="source-boundary" aria-labelledby="sb-title">
+    <div class="m-num">Movement 02</div>
+    <h2 id="sb-title">Source boundary: three layers, now four</h2>
+    <p class="lead">The earlier page kept three kinds of material apart. This page adds a fourth and keeps all four apart.</p>
+    <pre class="distinctions">news snapshots, August — establish only that a controversy entered public news circulation
+platform-field material, 18 August – 5 September — dated screenshots held by the author; a public trace, not verification
+institutional reporting, 18–19 September — establishes that the festival entered public news circulation as an event
+MWE reading — an authored structural reading, not a repository or registry fact</pre>
+    <dl class="reading">
+      <div class="reading-row"><dt>Observed surface</dt><dd>The platform-field layer is documented by forty-five dated screenshots taken between 18 August and 5 September 2026 and held by the author. They are used here only as a reconstruction path for what was publicly posted, and when. None is reproduced on this page, and no account, name, or engagement figure is taken from them.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Institutional reporting changes the epistemic status of one claim only: that the event opened. It does not verify the platform-field layer retroactively. The two layers remain different kinds of evidence, and a headline that names the festival confirms nothing that was posted about it in August.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>The institutional layer is cited by outlet, date, headline, and URL. Article bodies are not the basis of any claim on this page. Attendance, budget, ticketing, and cash figures circulating on platforms and in other outlets vary between sources and are not adopted.</dd></div>
+    </dl>
+    <div class="gloss">
+      <p><b>Extension note (summary)</b></p>
+      <p>This page is an extension layer to the 2026-08-18 case specimen, not a revision. At its date, the earlier page did not confirm that any performance or festival had been held; those boundary statements are kept as written.</p>
+      <p>This page adds two layers: the platform-field layer of 18 August to 5 September (dated screenshots held by the author, used as a reconstruction path for the public trace and not reproduced on this page), and the institutional-reporting layer from 18 September (CNA, in Chinese and in English). Institutional reporting confirms only that the event entered news circulation; it does not retroactively verify any claim from the platform layer. This page does not verify attendance, budget, or ticketing figures, and it does not promote any candidate concept.</p>
+    </div>
+  </section>
+
+  <section class="movement" id="trajectory" aria-labelledby="tr-title">
+    <div class="m-num">Movement 03</div>
+    <h2 id="tr-title">A dated trajectory, read as platform-field material</h2>
+    <p class="lead">What the platform-field layer shows, read at arm's length and without names, is a sequence. Each step is dated by the screenshot that records it. None is verified by this page.</p>
+    <dl class="trajectory">
+      <div class="step"><dt>2026-08-18<span>platform field</span></dt><dd>A proposal circulates as a joke and as a plan at once. The same day a programme with four dated nights is posted. The poster states that contracts and payments to troupes begin the next day, that the venue is not yet fixed, and that a permit question is open. Others offer food, banquet coordination, and a map edit that renames a location. One troupe issues a statement that it will evaluate professionally and not treat the performance as topic hype; a news outlet reports the schedule the same evening.</dd></div>
+      <div class="step"><dt>2026-08-21<span>platform field</span></dt><dd>An official account for the festival appears. Its first statement says that an event company has been formally commissioned for planning, execution, and external information; that all information is to be taken from official pages only; and that no unauthorized person or unit represents the event. A warm-up performance is announced for 4 September at a temple in a different district. A word-mark is credited to a designer who authorized its use.</dd></div>
+      <div class="step"><dt>2026-08-25 – 29<span>platform field</span></dt><dd>The programme is extended: a fifth night, additional performers, a student and folk-troupe component for one night, and a volunteer design team for the main visual. One poster is labelled by the platform as AI-generated content.</dd></div>
+      <div class="step"><dt>2026-08-30<span>platform field</span></dt><dd>A second official statement draws a boundary inside the field. The festival is declared not to be a public trial of any person. On-stage content may be pointed; off-stage there is to be no personal attack, harassment, or rumour, and nothing unverified is to be treated as fact. Venue, dates, registration, and administrative information are valid only from official notices. Forwarded images, summaries, and derivative content do not represent the event.</dd></div>
+      <div class="step"><dt>2026-09-04<span>platform field</span></dt><dd>The warm-up performance is held. Posts from the official account and from attendees show a full-scale outdoor puppet stage, free noodles served from a street kitchen, coins and red envelopes distributed during the opening ritual, and a large seated crowd that includes families. Attendee posts circulate widely that evening.</dd></div>
+      <div class="step step-institutional"><dt>2026-09-18 – 19<span>institutional</span></dt><dd>The main festival opens in Anping, Tainan, and is reported to run five consecutive evenings. City police announce traffic control and security for it. A popular singer performs alongside the opening puppet play. CNA reports the opening in Chinese; its English-language service carries a report the next day; a television news service reports the singer and the puppet play together.</dd></div>
+    </dl>
+    <dl class="reading">
+      <div class="reading-row"><dt>Observed surface</dt><dd>Between the first post and the first institutional report, the field acquired an official information layer, a professional intermediary, a word-mark, a design team, a boundary statement of its own, and one held performance.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The 2026-08-18 page proposed that a symbol changes state when it begins to absorb commitments that leave infrastructure traces. The trajectory above contains items of that kind: announced contracts, a commissioned company, a built stage, served food, a police traffic plan. Whether they establish the candidate <code>Irreversible Cost Threshold</code> as a property of this case, rather than as a reading device, is not decided here. The candidate stays a candidate.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>The sequence is reconstructed from screenshots taken by one observer at irregular intervals. It is not a complete record of the field, and a gap between dates is a gap in observation, not evidence of inactivity.</dd></div>
+    </dl>
+  </section>
+
+  <section class="movement" id="cohesion" aria-labelledby="coh-title">
+    <div class="m-num">Movement 04</div>
+    <h2 id="coh-title">Speed, scale, and how fast cohesion formed</h2>
+    <p class="lead">Three properties of the field are worth holding separately: how fast it moved, how large it became, and what it said it was for.</p>
+    <dl class="reading">
+      <div class="reading-row"><dt>Speed</dt><dd>From the first dated programme post (18 August) to the first held performance (4 September) is seventeen days; to opening night (18 September), thirty-one days. Within the first four days the field had a programme, an announced payment schedule, an official account, and a commissioned event company.</dd></div>
+      <div class="reading-row"><dt>Scale</dt><dd>Five consecutive evenings, two traditional performance forms, several troupes, a warm-up performance in a second district, a paid banquet component reported by other outlets (figures not adopted), and police traffic control and security reported by CNA.</dd></div>
+      <div class="reading-row"><dt>Stated motive</dt><dd>The field's own posts and the headlines describe its purpose as solidarity with one party to a private dispute, and repeatedly frame participation as a matter of local belonging. This is the field's self-description, recorded here and not adopted.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The earlier specimen asked how a symbol becomes performable. This field adds a measure of how fast: a shared grievance on someone else's behalf, made sayable by a cultural template and made doable by a festival frame, gathered commitments from strangers in days, before any institution had spoken. The page records the speed and offers no account of what permits it. The speed is read as a property of this field, not of any people or place.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>The motive is self-described, not a measurement of any participant's reasons. Elapsed time runs between dated screenshots and dated headlines, so the start point is the first observation, not the first post. No baseline for civic events of this kind is offered, so "this fast" and "this large" are descriptions, not comparisons.</dd></div>
+    </dl>
+    <pre class="distinctions">rapid cohesion ≠ a property of a people or a place
+a stated motive ≠ a measured motive
+speed of materialization ≠ depth of commitment</pre>
+  </section>
+
+  <section class="movement" id="translation" aria-labelledby="tl-title">
+    <div class="m-num">Movement 05</div>
+    <h2 id="tl-title">Rapid cultural translation: the repertoire did the work</h2>
+    <p class="candidate">case-local formulation introduced on this page / not a Registry entry: <code>Rapid Cultural Translation</code></p>
+    <p class="lead">The field did not write a new play about the dispute. It translated the dispute's template into forms and pieces that already carried the theme.</p>
+    <dl class="reading">
+      <div class="reading-row"><dt>Forms</dt><dd>Glove puppetry, Taiwanese opera, a temple-style opening ritual with sweets, coins and red envelopes thrown to the crowd, banquet culture, and a Taiwanese-language popular singer on opening night.</dd></div>
+      <div class="reading-row"><dt>Repertoire</dt><dd>Every production on the five-night programme is an existing story of a faithless husband brought to judgment or a wronged woman returning. The theme was selected, not composed.</dd></div>
+      <div class="reading-row"><dt>The song layer</dt><dd>On opening night a popular singer performed between the puppet play and the crowd. Three of her songs, as noted by the author at the performance, were a theme song written in the 1990s for a televised puppet-theatre character, a song about a wandering heroine, and a lament in which a betrayed lover addresses a faithless partner. The third had been requested in advance by the public on the organizers' posts, before the set list was disclosed; that request is the author's observation of the platform field.</dd></div>
+      <div class="reading-row"><dt>The field's own account</dt><dd>The organizers described the pairing of puppetry and popular song as two forms carrying the same language, feeling and daily life.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>The speed recorded in the previous movement has a mechanism. The cultural material was already compressed: the plays, the ritual, the banquet and the songs each held the needed meaning before the dispute existed, so translating the dispute into them required choosing, scheduling and paying, not writing. The production system was already there too: troupes that can be booked for temple-festival theatre, stages that can be hired, a ritual opening with a fixed form, caterers who serve banquets. The song layer shows translation running in both directions: the singer's catalogue already contained a puppet-theatre song, so popular song and puppetry shared a stage without any new bridge, and the public chose in advance the one song in that catalogue whose subject is a faithless partner. The audience did part of the translating before the night. Officially, what was translated is the template: the organizers' statement of 30 August says the festival puts no living person on trial. Publicly, the translation was read literally: the posts, the headlines, and the advance request for a song about a faithless partner all treat the performances as being about the dispute and its parties. Both readings were present at once, and the public one was the louder.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>The set list, and the advance request for one song, rest on the author's observation of the performance and of the platform field; the institutional layer establishes only that the singer performed alongside the puppet play, not which songs were sung or asked for. Whether any production was newly written or retitled for the occasion is not verified. How the audience received the works, and whether it heard them as being about the dispute, is not measured. Lyrics are not reproduced on this page; the songs are described by subject only.</dd></div>
+    </dl>
+    <pre class="distinctions">a repertoire chosen ≠ a work composed
+the official translation ≠ the public translation
+thematic fit ≠ factual equivalence
+fast translation ≠ shallow translation</pre>
+  </section>
+
+  <section class="movement" id="own-boundary" aria-labelledby="ob-title">
+    <div class="m-num">Movement 06</div>
+    <h2 id="ob-title">The field draws its own boundary</h2>
+    <p class="lead">The most legible event in the platform-field layer, for this series, is not a performance. It is that the field produced boundary statements of its own.</p>
+    <p class="note">On 21 August the official layer separated itself from the crowd that had generated it: one commissioned company speaks for the event, and other voices do not. On 30 August it separated the template from its target: the festival keeps the name of a story about a punished husband while declaring that it puts no living person on trial, and it separated official notices from forwarded images, summaries, and derivative content. A field that began as distributed remix ended its first month by declaring which of its own surfaces are authoritative.</p>
+    <dl class="reading">
+      <div class="reading-row"><dt>Observed surface</dt><dd>A template name retained. Its literal application to a person disavowed. Official surfaces enumerated. Derivative surfaces disowned.</dd></div>
+      <div class="reading-row reading-interpretation"><dt>Research reading</dt><dd>Semantic casting, as the earlier page described it, made the field readable. The boundary statements show the field managing the cost of that readability: keeping the compressed name that carries the story while refusing the reading the name most directly invites. Read against the public layer, the statement functions as a line the official layer maintains for neutrality and for its own legal exposure, not as a description of how the event was read: the public reading stayed literal before the statement and after it. That account of the statement's function is the author's reading. This is offered as an observation about one field, not as a property of casting in general.</dd></div>
+      <div class="reading-row reading-limit"><dt>Limit</dt><dd>What is observable is that public posts and headlines went on reading the event as being about the dispute after the statement was issued. What is not observable is any participant's private belief, or the organizers' reasons for drawing the line where they drew it. A boundary statement is a claim about a surface, not a measurement of how the surface was read.</dd></div>
+    </dl>
+    <pre class="distinctions">a template name ≠ the reading it invites
+an official statement ≠ an accepted boundary
+an official boundary ≠ the public reading
+a field's own boundary ≠ this page's boundary</pre>
+  </section>
+
+  <section class="movement" id="not" aria-labelledby="not-title">
+    <div class="m-num">Limits</div>
+    <h2 id="not-title">What this page is not</h2>
+    <pre class="not-list">not a revision of the 2026-08-18 specimen
+not a verification of the platform-field layer, before or after the event
+not a verification of attendance, budget, ticketing, or cash figures
+not an event review, a listing, or a campaign page
+not a claim that the earlier reading predicted the outcome
+not a promotion of any candidate concept to a Registry entry
+not a review of any performance or song, and not a reproduction of any lyric
+not a moral judgment on any individual, organizer, troupe, performer, or outlet</pre>
+    <p class="note">One field, one observer's screenshots and set-list notes, and three institutional reports. That is evidence about this field in its first month, not a law about public symbols.</p>
+  </section>
+
+  <section class="movement" id="relations" aria-labelledby="rel-title">
+    <div class="m-num">Relation to Meta-Writing Ecology</div>
+    <h2 id="rel-title">Where this follow-up sits</h2>
+    <p class="lead">This follow-up sits where the earlier specimen sits, near the artistic-research interface. It introduces one case-local formulation of its own, <code>Rapid Cultural Translation</code>, authored for this series and pending review. It is listed beside the seven formulations of the 2026-08-18 page, which are carried over with their status unchanged. None is a Registry entry; none confers a confirmed relation.</p>
+    <div class="relations">
+      <div>
+        <h3>Existing surfaces (navigation-only)</h3>
+        <ul>
+          <li><a href="/artistic-research/public-surface-case/2026-08-18/">Semantic Casting: A Public Surface Case (2026-08-18)</a> — the specimen this page follows, preserved as written.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/false-legibility.md">False Legibility</a> — warns against treating template fit as truth.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/premature-circulation-model.md">Premature Circulation</a> — relevant where a form circulates before it is verified.</li>
+          <li><a href="https://github.com/metawritingecology/meta-writing-ecology/blob/main/reference-drift.md">Reference Drift</a> — relevant where frame and evidence drift apart.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Candidate concepts (not Registry)</h3>
+        <ul>
+          <li>Semantic Casting</li>
+          <li>Cultural Compression Interface</li>
+          <li>Civic Meme Materialization</li>
+          <li>Irreversible Cost Threshold</li>
+          <li>Distributed Vernacular Political Theatre</li>
+          <li>Festivalization as Friction Reduction</li>
+          <li>Ambiguity as Participation Shield</li>
+          <li>Rapid Cultural Translation — introduced on this page, 2026-09-19</li>
+        </ul>
+      </div>
+    </div>
+    <p class="rel-note">These two columns are placed side by side for reading only. Co-listing is a navigation relation, not a confirmed relation, a formal dependency, or an ontology claim. The internal link to the earlier specimen is a navigation relation between two dated pages in one series; neither page is linked from site navigation. The candidate concepts remain case-local formulations pending user review.</p>
+  </section>
+
+  <section class="movement" id="sources" aria-labelledby="src-title">
+    <div class="m-num">Source snapshots</div>
+    <h2 id="src-title">What is cited, and what it establishes</h2>
+    <p class="lead">The institutional snapshots establish only that the festival entered public news circulation as an event, and that a singer performed alongside the opening puppet play. The platform-field record and the set list are described, not reproduced.</p>
+    <div class="sources">
+      <div class="source"><strong>CNA</strong><span>2026-09-18 — “「鍘美藝術節」晚間起連5天 台南警啟動交管維安”. Police traffic control and security announced; five-evening run stated. <a href="https://www.cna.com.tw/news/aloc/202609180094.aspx">cna.com.tw/news/aloc/202609180094</a></span></div>
+      <div class="source"><strong>CNA</strong><span>2026-09-18 — “鍘美藝術節一連5晚台南安平登場 首場演出「包公斬駙馬」人潮爆滿”. Opening night reported; first performance named. <a href="https://www.cna.com.tw/news/aloc/202609180288.aspx">cna.com.tw/news/aloc/202609180288</a></span></div>
+      <div class="source"><strong>Focus Taiwan</strong><span>2026-09-19 — “Infidelity parable-inspired arts festival opens in Tainan”. CNA's English-language service. <a href="https://focustaiwan.tw/culture/202609190006">focustaiwan.tw/culture/202609190006</a></span></div>
+      <div class="source"><strong>CTS</strong><span>2026-09-19 — “「鍘美藝術節」開演！ 黃妃歌聲搭配布袋戲開場”. Television news; a popular singer and the opening puppet play on one stage. <a href="https://news.cts.com.tw/cts/society/202609/202609193080480.html">news.cts.com.tw/cts/society/202609/202609193080480</a></span></div>
+      <div class="source"><strong>Set list</strong><span>2026-09-18 — three songs as noted by the author at the performance. Author observation, not an institutional record; lyrics not reproduced.</span></div>
+      <div class="source"><strong>Platform field</strong><span>2026-08-18 to 2026-09-05 — forty-five dated screenshots of public posts on one platform and one news article read through a messaging app, held by the author. Used as a reconstruction path only. Not reproduced here; no platform image appears on this page.</span></div>
+      <div class="source"><strong>Earlier specimen</strong><span>2026-08-18 — <a href="/artistic-research/public-surface-case/2026-08-18/">Semantic Casting: A Public Surface Case</a>. Preserved as written.</span></div>
+    </div>
+    <p class="access">Headlines and dates are taken from the outlets' own public listings and retained in the original language; the English report is CNA's English-language service. Article bodies are not the basis of any claim on this page. Links are event-record snapshots, not endorsements.</p>
+
+    <details>
+      <summary>Preservation note</summary>
+      <div class="reconstruction">
+        <p>This page does not revise the 2026-08-18 page. That page's statements that no performance, festival, or civic action was verified were true at their date and are left as written. One language-only change was made to that page on 19 September 2026: its Chinese-language summary of the source boundary is now rendered in English, and a duplicate Chinese sentence in its reconstruction note was removed; no statement was altered. A reader who wants the earlier reading should read it there, in its own frame, and then read this page as a later layer.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="synthesis" aria-labelledby="synthesis-title">
+    <div class="label">One-sentence formulation</div>
+    <h2 id="synthesis-title">What the follow-up holds</h2>
+    <p class="one-sentence"><strong>The field that the earlier specimen declined to verify became a five-night festival in thirty-one days, because the forms it needed already existed and the public had already chosen them; the specimen is left as it was, and this page adds layers, it does not correct a reading.</strong></p>
+    <p class="boundary-note">This is a reading across one external public-discourse field, held at a second fixed date. Institutional reporting confirms that an event opened and that a singer shared its opening stage; it confirms nothing else on this page, and one observed field does not establish a system-wide law. The conditions and the translation named here are readings of one field, not properties of any people or place. Cultural casting remains a public-reading mechanism here, not a factual equivalence, and the candidate formulations remain candidates.</p>
+  </section>
+</main>
+<footer>External public-discourse observation ≠ repository evidence. Later evidence ≠ earlier error. This page adds a dated layer to a dated specimen; it does not report, verify, or endorse the field it reads, and it does not revise the page it follows.</footer>
+</body>
+</html>
