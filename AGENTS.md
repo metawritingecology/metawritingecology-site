@@ -125,6 +125,16 @@ Rule for any change to `scripts.check`:
 
 Both tests enforce this. `tests/check-pipeline-structure.test.ts` names the violated condition and carries the two historical violations as negative fixtures (the 2026-08-15 insertion of `test:human-governed`, corrected on PR #122; the 2026-08-22 insertion of `test:html-charset`, corrected by commit `e00d6cf` on PR #132). Both were caught by CI, not locally: `pnpm run check` on a Windows clone aborts at `test:orchestration` (see below) before reaching the preservation test, so a local partial run does not stand in for the pipeline rule.
 
+## Frozen Product Identities
+
+`tests/public-surface-adjacency-map/preservation.test.ts` pins each `FROZEN_IDENTITIES` path by byte length, SHA-256 and Git blob.
+
+Default: if a pin fails, restore the frozen file. Do not update the pin.
+
+The only sanctioned exception is an explicit owner-authorized identity move of named path(s). The authorization must name each path. The same change must update that entry's identities, record the previous identities in a dated comment on that entry, and cite the authorization in `AGENT_WORKLOG.md`. Every other entry remains frozen.
+
+This is the same shape as guard 9 in `tests/public-surface-adjacency-map/renderingBoundary.test.ts` (restore by default; owner-authorized baseline integration is the only sanctioned move). It generalises the 2026-08-25/26 one-file exception recorded on PR #139 (owner-queue Q-003, ruled 2026-08-26). It does not retire pins, which is a separate owner question (Q-007), and it does not authorize any identity move by existing.
+
 ## Known-Environmental Failures
 
 The Linux `site-ci` workflow run on the pushed branch is the readiness authority for `pnpm run check`. The following local failures are known, environmental, and outside this repository; report them, do not fix them here, and do not treat them as evidence about the change under test:
@@ -184,5 +194,6 @@ Every guard introduced by a governance change carries a review date (`review_aft
 - Byte-prefix append-only check (`scripts/check-agent-worklog-governance.mjs`, `AGENT_WORKLOG.md` must keep the `origin/main` worklog as an exact byte prefix): review_after 2026-11-26; sunset_condition: retired when the repository migrates to per-run immutable records (`agent-runs/` plus a generated index) and `AGENT_WORKLOG.md` is archived with a pinned identity.
 - Structural pipeline test (`tests/check-pipeline-structure.test.ts`, the frozen `scripts.check` prefix rule above): review_after 2026-11-26; sunset_condition: merged into `tests/public-surface-adjacency-map/preservation.test.ts`, or retired when the frozen prefix is replaced by the semantic layer.
 - Known-environmental note (the "Known-Environmental Failures" section above): review_after 2026-11-26; sunset_condition: removed only when both listed failures no longer reproduce - the GNU tar `host:path` defect is fixed upstream (or `test:orchestration` passes under Git Bash on Windows) AND PSADJ-21 passes on Windows - or when a Windows CI job running `pnpm run check` becomes a readiness authority, so that the note no longer describes a live local-vs-CI difference.
+- Frozen Product Identities flow (the section above, owner-queue Q-003): review_after 2026-11-26; sunset_condition: retired when `FROZEN_IDENTITIES` in `tests/public-surface-adjacency-map/preservation.test.ts` is retired or replaced by the semantic layer, or folded into that test's own header.
 
 The user remains final authority for public release, naming, classification, relation confirmation, top navigation, and merge / publication decisions.
