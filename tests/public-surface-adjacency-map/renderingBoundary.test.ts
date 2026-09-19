@@ -235,10 +235,27 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    an owner-authorized one-file freeze exception for the Phase-3A-P6 pin
  *    below (owner one-file freeze exception 2026-08-25, pilot job 3 round 3,
  *    recorded in C:\dev\shared\STATUS.md) since the fix necessarily touches
- *    the frozen file. */
+ *    the frozen file.
+ *    185136 bytes  6f2fb59a…3476
+ *    owner-authorized integration 2026-09-19 (Dependabot #142 cloudflare-
+ *    wrangler group + #144 dev-tooling group + #145 astro group, combined
+ *    into one baseline-integration branch per owner authorization):
+ *    @astrojs/cloudflare 14.2.3 -> 14.3.2, @astrojs/sitemap 3.7.3 -> 3.7.4,
+ *    astro 7.2.4 -> 7.3.1, wrangler 4.125.0 -> 4.127.0, fast-xml-parser
+ *    5.11.0 -> 5.11.1. The adapter moved PAST the 14.2.5 that #142 proposed:
+ *    every 14.2.x adapter imports `beginContentEntryCollection` from astro,
+ *    which astro 7.3.x no longer exports, so #145 could never build on its
+ *    own (its site-ci and Workers Builds both failed on exactly that missing
+ *    export); 14.2.5 and 14.2.6 were tested against 7.3.1 and fail the same
+ *    way, and 14.3.2 is the first adapter that builds. Lockfile regenerated
+ *    via `pnpm install --lockfile-only` against the merged package.json and
+ *    reproduced byte-for-byte by a full `pnpm install`; the parsed package-
+ *    NAME set moved 516 -> 511 (+2: @astrojs/compiler-binding-android-arm64,
+ *    find-proc; -7: chalk, color-convert, color-name, find-process, has-flag,
+ *    loglevel, stream-replace-string); 0 prohibited packages. */
 const LOCKFILE_IDENTITY = {
-  byteLength: 183138,
-  sha256: "7e99032995e06ca9c34f1e60dd02eb9ec8a5dd2b80d29b7a9cc4d8b1f10a0ef5",
+  byteLength: 185136,
+  sha256: "6f2fb59a021756c5cde390e73ebe2dc1130a7d6ba644afb8de72e6bd2d4c3476",
 };
 
 /**
@@ -699,11 +716,22 @@ test("guard 8 — no motion or timer architecture", () => {
 // astro 7.2.2 -> 7.2.4, wrangler 4.124.0 -> 4.125.0,
 // fast-xml-parser 5.10.1 -> 5.11.0. Deploy tooling + Astro + one dev-tooling
 // package only; no dependency added or removed; 0 prohibited packages.
+
+// 2026-09-19, owner-authorized baseline integration for Dependabot #142
+// (cloudflare-wrangler group), #144 (dev-tooling group), #145 (astro group):
+// @astrojs/cloudflare 14.2.3 -> 14.3.2 (past #142's 14.2.5: no 14.2.x adapter
+// builds against astro 7.3.x, see LOCKFILE_IDENTITY history above),
+// @astrojs/sitemap 3.7.3 -> 3.7.4, astro 7.2.4 -> 7.3.1,
+// wrangler 4.125.0 -> 4.127.0, fast-xml-parser 5.11.0 -> 5.11.1. Deploy
+// tooling + Astro + one dev-tooling package only; no declared dependency
+// added or removed; 0 prohibited packages. @astrojs/sitemap generates the
+// public sitemap, so the generated sitemap was compared against the main
+// build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "14.2.3",
+  "@astrojs/cloudflare": "14.3.2",
   "@astrojs/mdx": "7.0.7",
-  "@astrojs/sitemap": "3.7.3",
-  astro: "7.2.4",
+  "@astrojs/sitemap": "3.7.4",
+  astro: "7.3.1",
   "d3-selection": "3.0.0",
   typescript: "6.0.3",
 };
@@ -711,8 +739,8 @@ const BASELINE_DEPENDENCIES = {
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
   "@types/d3-selection": "3.0.11",
-  "fast-xml-parser": "5.11.0",
-  wrangler: "4.125.0",
+  "fast-xml-parser": "5.11.1",
+  wrangler: "4.127.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
