@@ -13,6 +13,25 @@
 //
 // If one of these fails, the correct response is to restore the frozen file —
 // never to update the pinned identity.
+//
+// The only exception is an explicit owner-authorized identity move of named
+// path(s): that entry's byteLength / sha256 / gitBlob move together, with a
+// dated comment on the entry recording the previous identities and a worklog
+// citation of the authorization. Every other entry stays frozen. Same shape
+// as guard 9 in renderingBoundary.test.ts (restore by default; owner-authorized
+// baseline integration is the only sanctioned move). Owner-queue Q-003 (ruled
+// 2026-08-26) generalised the PR #139 one-file exception into this standing
+// flow. The flow does not authorize a move by existing, and pin retirement is
+// a separate owner question (Q-007), not this flow.
+//
+// Owner-authorized identity-move history (the pins below are the live
+// contract; this list is the record, not a permission):
+//   2026-08-18     scripts/verify-public-surface-map-build.mjs
+//                  Astro 5 -> 7 migration (PR #130); previous identity recorded
+//                  on that entry.
+//   2026-08-25/26  src/components/publicSurfaceAuthorityMap.client.ts
+//                  One-file freeze exception for typescript 6.0.3 (Dependabot
+//                  #137, PR #139); previous identity recorded on that entry.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -154,6 +173,10 @@ const FROZEN_IDENTITIES = [
     // Landed alongside the guard-9 `LOCKFILE_IDENTITY`/`BASELINE_DEPENDENCIES`
     // move in renderingBoundary.test.ts for the same typescript 5.9.3 ->
     // 6.0.3 bump (Dependabot #137, PR #139).
+    // Previous identity, before the 2026-08-25/26 owner-authorized move
+    // (commit 0a39f59, PR #139): byteLength 50946, sha256
+    // 9d39d30476dff7ea7374ea1b6c5a871f0a754554db5b7a60cdd573004b38a63c,
+    // gitBlob 6fbe3d5827f412dd07d228a83f066cc8301eb404.
     path: "src/components/publicSurfaceAuthorityMap.client.ts",
     byteLength: 50982,
     sha256: "2c7142fe3e22285aadc26d1b0c8664d5317faf49ac949bb87a89989ca004de56",
@@ -167,6 +190,10 @@ const FROZEN_IDENTITIES = [
     // needles became quote-agnostic. That second change also RESTORED the
     // forbidden-marker assertions, which double-quoted needles had silently
     // turned vacuous against a backtick bundle.
+    // Previous identity, before the 2026-08-18 owner-authorized move
+    // (commit ac8291c, PR #130): byteLength 31519, sha256
+    // 0a248c87794c3ab9ea5994cc79dc258c4638eb9f14fcf4aeee3b58a8fafb02cb,
+    // gitBlob de691294e9ff70e69a39113f361058d4dd11f50f.
     path: "scripts/verify-public-surface-map-build.mjs",
     byteLength: 32560,
     sha256: "10f76b8dd0eaa911b2f90192803b504d8333606f3db590e9173b1f794e39c149",
