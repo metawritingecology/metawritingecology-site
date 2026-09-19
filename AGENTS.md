@@ -173,8 +173,6 @@ The pre-append inventory is advisory evidence only. It does not authorize merge,
 
 Review `AGENT_WORKLOG.md` rollover eligibility at 4,000 lines, do not normally exceed 5,000 lines without explicit author deferral, and also review after a major integration cycle or quarterly, whichever trigger occurs first. Execute rollover only as a separate authorized task after `main` is stable. Archived worklogs are immutable historical evidence. `AGENT_WORKLOG.md` remains the current append target after rollover.
 
-At an owner-authorized rollover the byte-prefix check in the Guard lifecycle schedule below reports the rolled `AGENT_WORKLOG.md` as not append-only for that single integration, because the observed integration-commit worklog has moved into the archive. The invariant that replaces it for that integration is that the archived volume is byte-identical to the `origin/main` worklog at the integration commit and that the rolled file keeps the header bytes and the Active Log Notice. Once the rolled file is on `main`, the check holds again for every later branch.
-
 When available, run `node scripts/check-agent-worklog-governance.mjs` as read-only validation evidence. Its output does not determine author status, merge readiness, integration priority, or authorization.
 
 ### Guard lifecycle
