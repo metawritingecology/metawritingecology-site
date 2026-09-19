@@ -4876,3 +4876,19 @@ Pre-append inventory gate: `origin/main` unchanged (`6fc0f4ed`) and no branch or
 Unresolved questions (for owner review, not blocking): (1) whether the Traditional Chinese paragraph inside the "Preservation note" `<details>` should also become English; (2) items (1)-(7) of the entry above are unchanged.
 
 Risks or assumptions: text-only change inside one noindex page; no indexing, navigation, relation, or candidate status affected. Merge, PR and publication remain owner decisions and are not taken here.
+
+### 2026-09-19 - Claude Code (Fable 5.1, Claude Code on the web / remote container) - claude/tender-turing-tniexe - follow-up: Preservation-note Chinese paragraph removed; owner rule recorded that only news headlines may remain in Chinese on the 2026-09-19 page
+
+Agent: Claude Code, model `claude-fable-5-1`, same container and session as the two entries above. Owner instruction (verbatim): "那個也改成英文，只有新聞報導可以留中文" - the Preservation-note paragraph is to be English as well; on this page only news-report text may remain in Chinese.
+
+The change: in `src/pages/artistic-research/public-surface-case/2026-09-19.astro`, the folded "Preservation note" `<details>` had two paragraphs, the second a Traditional Chinese rendering of the first. The Chinese paragraph is removed; the English paragraph, which already carried the same content, stands alone. A character-class scan of the whole file afterwards finds CJK text on exactly two lines: the two CNA headlines in the Source snapshots block (`2026-09-18`, routes `202609180094` and `202609180288`), retained in the original language as the series' source-snapshot convention requires and as the owner's rule permits. No other text on the page is in Chinese. Owner rule recorded for later work on this page: English throughout, except news-report titles.
+
+Files changed (2): `src/pages/artistic-research/public-surface-case/2026-09-19.astro` (one paragraph removed), `AGENT_WORKLOG.md` (this entry, tail append only). `2026-08-18.astro` re-verified byte-identical to `origin/main`; that page's own Chinese gloss and Chinese keyword trail are untouched, since the rule was stated for the new page.
+
+Tests or build checks run (Linux container): `astro build` Complete; `check:astro` 0 errors / 0 warnings; `test:indexing-discovery` 234 pass / 0 fail / 1 skipped; `verify:indexing-discovery-build` 161/161. Symbol hygiene: no literal ASCII not-equal marker in the touched page. Standalone preview rebuilt and delivered to the owner in the session (preview artifact outside the repository). `node scripts/check-agent-worklog-governance.mjs` re-run after this append (result in the commit message).
+
+Pre-append inventory gate: `origin/main` unchanged (`6fc0f4ed`) and no branch or PR state change since the entries above; the inventory of the first 2026-09-19 entry stands. Gate does not stop.
+
+Unresolved questions (for owner review, not blocking): items (1)-(7) of the first 2026-09-19 entry are unchanged; the language question raised in the entry above is now closed by the owner's rule.
+
+Risks or assumptions: text-only removal inside one noindex page; no indexing, navigation, relation, or candidate status affected. Merge, PR and publication remain owner decisions and are not taken here.
