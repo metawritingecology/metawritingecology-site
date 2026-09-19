@@ -7,7 +7,6 @@
 # CRLF bytes and `git add --renormalize` would rewrite it; that is a separate
 # owner decision. Only paths whose committed bytes are already LF are pinned.
 AGENT_WORKLOG.md text eol=lf
-docs/worklogs/*.md text eol=lf
 pnpm-lock.yaml text eol=lf
 
 # Byte-identity artifacts: never subject to any text conversion.

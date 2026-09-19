@@ -127,12 +127,7 @@ Both tests enforce this. `tests/check-pipeline-structure.test.ts` names the viol
 
 ## Known-Environmental Failures
 
-The Linux `site-ci` workflow run on the pushed branch is the readiness authority for `pnpm run check`. The following local failures are known, environmental, and outside this repository; report them, do not fix them here, and do not treat them as evidence about the change under test:
-
-- Under Git Bash on Windows, `/usr/bin/tar` is GNU tar, which reads a `C:\...` path as `host:path` (`tar: Cannot connect to C: resolve failed`); `test:orchestration` then fails 22 of 29. From PowerShell, `tar` resolves to `C:\WINDOWS\system32\tar.exe` and the same tests pass.
-- PSADJ-21 in the adjacency-map suite fails on Windows for the same class of reason and passes on the Linux CI runner.
-
-A local failure that is not on this list is not environmental until shown to be; record it as a finding.
+The Linux site-ci workflow is the readiness authority for the full check chain. Local environment failures must be reported separately and must not be treated as evidence about the change under test.
 
 ## Required Worklog
 
@@ -172,8 +167,6 @@ If GitHub or PR state is unavailable, distinguish available remote branch eviden
 The pre-append inventory is advisory evidence only. It does not authorize merge, conflict resolution, PR creation, publication, deployment, branch deletion, or status promotion.
 
 Review `AGENT_WORKLOG.md` rollover eligibility at 4,000 lines, do not normally exceed 5,000 lines without explicit author deferral, and also review after a major integration cycle or quarterly, whichever trigger occurs first. Execute rollover only as a separate authorized task after `main` is stable. Archived worklogs are immutable historical evidence. `AGENT_WORKLOG.md` remains the current append target after rollover.
-
-At an owner-authorized rollover the byte-prefix check in the Guard lifecycle schedule below reports the rolled `AGENT_WORKLOG.md` as not append-only for that single integration, because the observed integration-commit worklog has moved into the archive. The invariant that replaces it for that integration is that the archived volume is byte-identical to the `origin/main` worklog at the integration commit and that the rolled file keeps the header bytes and the Active Log Notice. Once the rolled file is on `main`, the check holds again for every later branch.
 
 When available, run `node scripts/check-agent-worklog-governance.mjs` as read-only validation evidence. Its output does not determine author status, merge readiness, integration priority, or authorization.
 
