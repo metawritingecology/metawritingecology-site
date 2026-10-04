@@ -17,6 +17,8 @@
 // repository.
 
 import { test } from "node:test";
+// The dated case contract runs in the existing indexing CI stage.
+import "./public-surface-case-2026-10-04.test.ts";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
