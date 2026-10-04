@@ -3,6 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { runInNewContext } from 'node:vm';
+import { splitSourceSection } from '../tools/public-surface-case-2026-10-04/source-section.mjs';
 import { SITEMAP_EXCLUDED_PATHS, isSitemapEligible, resolveRouteSource, isValidGithubSourceUrl } from '../scripts/lib/indexing-discovery-contract.mjs';
 const root=new URL('../',import.meta.url);
 const read=p=>readFileSync(new URL(p,root),'utf8');
@@ -67,4 +69,48 @@ test('GitHub compatibility keeps mutable, malformed and unsafe links rejected',(
  const file=`${root}/blob/${sha}/false-legibility.md`;
  for(const hash of ['#section','#L0','#L01','#L-1','#L1-L0','#L79-L21','#L1-L2-extra','#L1%2dL2','#L9007199254740992','#L1?x=1'])assert.equal(isValidGithubSourceUrl(file+hash),false,hash);
  for(const url of [`${root}/blob/main/false-legibility.md#L1`,`${root}/blob/feature/false-legibility.md#L1`,`${root}/tree/${sha}#L1`,`${root}/tree/${sha}?x=1`,`${root}/tree/main`,`${root}/blob/${sha}`,`${root}/blob/main`,`${root}/blob/${sha}/%2e%2e/file.md#L1`,`${root}/blob/${sha}/safe%2ffile.md#L1`,`${root}/blob/${sha}//file.md#L1`,file+'?x=1#L1',file.replace('https:','http:')+'#L1',file.replace('github.com','user@github.com')+'#L1',file.replace('github.com','github.com:8443')+'#L1',file.replace('meta-writing-ecology','unapproved-repository')+'#L1'])assert.equal(isValidGithubSourceUrl(url),false,url);
+});
+
+test('source-section parser retains leading, intervening and trailing prose in order',()=>{
+ const fixture='Intro with [1].\n\n[1] First record\n\n[2] Second record\n\nIntervening **scope**.\n\n[3] Third record\n\nTrailing limitation.';
+ assert.deepEqual(splitSourceSection(fixture),[
+  {type:'prose',markdown:'Intro with [1].'},
+  {type:'sources',sources:[{number:'1',text:'First record'},{number:'2',text:'Second record'}]},
+  {type:'prose',markdown:'Intervening **scope**.'},
+  {type:'sources',sources:[{number:'3',text:'Third record'}]},
+  {type:'prose',markdown:'Trailing limitation.'}
+ ]);
+});
+test('rendered SSR preserves the approved source context and working citations',()=>{
+ const manuscript=read(base+'article.en.md');
+ const section=manuscript.split('## Sources and verification\n')[1].split('\n## ')[0];
+ const prose=splitSourceSection(section).filter(part=>part.type==='prose');
+ assert.equal(prose.length,1);
+ const plain=html.replace(/<[^>]*>/g,'');
+ for(const part of prose)assert(plain.includes(part.markdown.replace(/\[(\d+)\]/g,'$1')),part.markdown);
+ assert(html.indexOf('Repository context in')<html.indexOf('<ol class="article-sources">'));
+ const intro=html.slice(html.indexOf('Repository context in'),html.indexOf('<ol class="article-sources">'));
+ for(const ref of [28,33,38])assert(intro.includes('href="#source-'+ref+'"'));
+});
+test('actual print handlers restore mixed disclosure state after cancellation and repeated cycles',()=>{
+ const classes=['reading-branch','branch-sources','reading-combination','reading-branch'];
+ const details=classes.map((className,i)=>({className,open:i%2===1,addEventListener(){}}));
+ const listeners=new Map();
+ const document={
+  getElementById(id){return id==='case-data'?{textContent:JSON.stringify({events:[],branches:[],ui:{}})}:null;},
+  querySelector(){return null;},
+  querySelectorAll(selector){const wanted=selector.split(',').map(s=>s.trim().slice(1));return details.filter(d=>wanted.includes(d.className));},
+  documentElement:{classList:{add(){}}}
+ };
+ const window={d3:{},addEventListener(type,handler){listeners.set(type,handler);}};
+ runInNewContext(read('public/assets/public-surface-case/2026-10-04/branch-app.js'),{window,document,location:{hash:''},setTimeout,clearTimeout,requestAnimationFrame(){}});
+ const states=()=>details.map(d=>d.open);
+ const original=states();
+ listeners.get('afterprint')();assert.deepEqual(states(),original,'unmatched afterprint is harmless');
+ listeners.get('beforeprint')();assert(details.every(d=>d.open));
+ listeners.get('beforeprint')();assert(details.every(d=>d.open));
+ listeners.get('afterprint')();assert.deepEqual(states(),original,'cancel/close restores the state before the first beforeprint');
+ listeners.get('afterprint')();assert.deepEqual(states(),original,'repeated afterprint is harmless');
+ details[0].open=true;details[1].open=false;
+ const next=states();listeners.get('beforeprint')();listeners.get('afterprint')();assert.deepEqual(states(),next,'a later print cycle captures its own original state');
 });

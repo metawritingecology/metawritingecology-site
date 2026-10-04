@@ -56,7 +56,18 @@ function renderBranch(branch){
 }
 $$('.reading-branch').forEach(branch=>branch.addEventListener('toggle',()=>renderBranch(branch)));
 let timer;window.addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>$$('.reading-branch[open]').forEach(renderBranch),120)});
-window.addEventListener('beforeprint',()=>{$$('.reading-branch').forEach(b=>b.open=true);$$('.branch-sources, .reading-combination').forEach(b=>b.open=true)});
+// Print expansion is temporary, including repeated beforeprint events and
+// cancelled dialogs. Capture once per print cycle and restore after it ends.
+let printDisclosureState=null;
+window.addEventListener('beforeprint',()=>{
+  if(!printDisclosureState)printDisclosureState=new Map($$('.reading-branch, .branch-sources, .reading-combination').map(detail=>[detail,detail.open]));
+  for(const detail of printDisclosureState.keys())detail.open=true;
+});
+window.addEventListener('afterprint',()=>{
+  if(!printDisclosureState)return;
+  for(const [detail,wasOpen] of printDisclosureState)detail.open=wasOpen;
+  printDisclosureState=null;
+});
 function revealHash(){
   const id=decodeURIComponent(location.hash.slice(1));if(!id)return;const target=document.getElementById(id);if(!target)return;
   let ancestor=target.closest('details');while(ancestor){ancestor.open=true;ancestor=ancestor.parentElement?.closest('details');}

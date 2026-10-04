@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {normalize} from './normalize.mjs';
 import {uiFor} from './i18n.mjs';
+import {splitSourceSection} from './source-section.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url)),require=createRequire(import.meta.url);
 const {marked}=await import(require.resolve('marked'));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -52,21 +53,28 @@ function addHeadingIds(html){return html.replace(/<h([23])>(.*?)<\/h\1>/gs,(_,le
 bodyHTML=addHeadingIds(bodyHTML);
 const citeCounts={};
 bodyHTML=bodyHTML.replace(/<a href="#source-(\d+)">/g,(_,n)=>{citeCounts[n]=(citeCounts[n]||0)+1;return `<a id="cite-${n}-${citeCounts[n]}" href="#source-${n}" aria-label="${ui.source} ${n}">`;});
+const renderMarkdown=s=>marked.parse(String(s||'').replace(/\[(\d+)\](?!\()/g,(_,n)=>`[${n}](#source-${n})`)).replace(/<a href="#source-(\d+)">/g,(_,n)=>{citeCounts[n]=(citeCounts[n]||0)+1;return `<a id="cite-${n}-${citeCounts[n]}" href="#source-${n}" aria-label="${ui.source} ${n}">`;});
 if(remaining){
   const endingAt=remaining.indexOf('\n## ',3);
-  const ending=endingAt>=0?remaining.slice(endingAt).split('\n').filter(line=>!/^\[\d+\]/.test(line)).join('\n'):'';
-  const sourceLines=remaining.split('\n').filter(l=>/^\[\d+\]/.test(l));
+  const sourceSectionMarkdown=(endingAt>=0?remaining.slice(0,endingAt):remaining).replace(/^## [^\n]*\n?/, '');
+  const ending=endingAt>=0?remaining.slice(endingAt):'';
   const linkify=line=>{
     const parts=line.split(/(https?:\/\/[^\s；，。]+)/g);
     return parts.map(p=>/^https?:\/\//.test(p)?`<a href="${esc(p)}" target="_blank" rel="noopener noreferrer">${esc(new URL(p).hostname)}</a>`:esc(p)).join('');
   };
-  bodyHTML+=`<h2 id="sources">${ui.sources}</h2><ol class="article-sources">${sourceLines.map(line=>{const m=line.match(/^\[(\d+)\]\s*(.*)$/);return `<li id="source-${m[1]}" value="${m[1]}"><p>${linkify(m[2])}${citeCounts[m[1]]?` <a class="source-back" href="#cite-${m[1]}-1">${ui.backToCitation}</a>`:''}</p></li>`}).join('')}</ol>`;
+  bodyHTML+=`<h2 id="sources">${ui.sources}</h2>`;
+  for(const part of splitSourceSection(sourceSectionMarkdown)){
+    if(part.type==='prose'){
+      bodyHTML+=renderMarkdown(part.markdown);
+    }else{
+      bodyHTML+=`<ol class="article-sources">${part.sources.map(source=>`<li id="source-${source.number}" value="${source.number}"><p>${linkify(source.text)}${citeCounts[source.number]?` <a class="source-back" href="#cite-${source.number}-1">${ui.backToCitation}</a>`:''}</p></li>`).join('')}</ol>`;
+    }
+  }
   toc.push({id:'sources',text:ui.sources});
-  bodyHTML+=addHeadingIds(marked.parse(ending));
+  bodyHTML+=addHeadingIds(renderMarkdown(ending));
 }
 bodyHTML=bodyHTML.replace(/<table>/g,'<div class="table-wrap"><table>').replace(/<\/table>/g,'</table></div>');
 const sourceList=e=>`<ul class="source-list">${e.sources.map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(['來源','Source'].includes(s.title)?`${ui.source} (${new URL(s.url).hostname})`:s.title)}</a></li>`).join('')}</ul>`;
-const renderMarkdown=s=>marked.parse(String(s||'').replace(/\[(\d+)\](?!\()/g,(_,n)=>`[${n}](#source-${n})`)).replace(/<a href="#source-(\d+)">/g,(_,n)=>{citeCounts[n]=(citeCounts[n]||0)+1;return `<a id="cite-${n}-${citeCounts[n]}" href="#source-${n}" aria-label="${ui.source} ${n}">`;});
 function combinationsHTML(branch){
  const cs=branch.readingCombinations||[];
  if(!cs.length)return '';
