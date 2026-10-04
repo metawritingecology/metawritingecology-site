@@ -59,6 +59,8 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   "/artistic-research/public-surface-case/2026-08-22/",
   // noindex,nofollow bounded public surface case, follow-up to the 2026-08-18 external-field reading (not in feed)
   "/artistic-research/public-surface-case/2026-09-19/",
+  // noindex,nofollow independent bounded public surface case (not in feed)
+  "/artistic-research/public-surface-case/2026-10-04/",
   // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
   "/public-surface-map/expanded/"
 ]);
@@ -670,9 +672,9 @@ export function isValidGithubSourceUrl(
   const kind = parts[2];
   if (kind !== "blob" && kind !== "tree") return false;
 
-  // A blob/tree SOURCE link forbids query/fragment and any encoded traversal,
+  // A blob/tree SOURCE link forbids queries and any encoded traversal,
   // encoded separator, literal backslash, or duplicate slash in the raw path.
-  if (url.search || url.hash) return false;
+  if (url.search) return false;
   if (/%2e|%2f|%5c/i.test(url.pathname)) return false;
   if (url.pathname.includes("\\")) return false;
   if (/\/\//.test(url.pathname)) return false;
@@ -682,12 +684,25 @@ export function isValidGithubSourceUrl(
   const isImmutableSha = /^[0-9a-f]{40}$/i.test(ref);
   if (!isImmutableSha && !stableRefs.has(ref)) return false; // mutable feature branch
 
-  // A blob/tree SOURCE link must carry at least one non-empty, safe source-path
-  // segment after the ref. A bare `blob/main` or `blob/main/` (no path) is NOT a
+  // Exact GitHub line anchors retain the cited passage of an immutable blob.
+  // Mutable refs, tree links, arbitrary fragments and malformed/reversed
+  // ranges remain rejected. This is URL syntax, not source authority.
+  if (url.hash) {
+    if (kind !== "blob" || !isImmutableSha) return false;
+    const lines = /^#L([1-9]\d*)(?:-L([1-9]\d*))?$/.exec(url.hash);
+    if (!lines) return false;
+    const first = Number(lines[1]);
+    const last = Number(lines[2] ?? lines[1]);
+    if (!Number.isSafeInteger(first) || !Number.isSafeInteger(last) || last < first) return false;
+  }
+
+  // A full-SHA tree root is a fixed repository overview, not a file definition.
+  // Every blob and every mutable-ref tree still requires a safe source path.
+  // A source path must carry at least one non-empty segment after the ref. A bare `blob/main` or `blob/main/` (no path) is NOT a
   // valid source link in any destination context — it is accepted only as the
   // exact bounded sourceRepoBase declaration (isApprovedSourceRepoBaseDeclaration).
   const sourceSegments = parts.slice(4);
-  if (sourceSegments.length === 0) return false;
+  if (sourceSegments.length === 0) return kind === "tree" && isImmutableSha && !url.hash;
   if (sourceSegments.some((s) => s === "" || s === "." || s === "..")) return false;
   return true;
 }

@@ -1,0 +1,55 @@
+---
+import "../../../styles/global.css";
+import "../../../styles/public-surface-case-2026-10-04.css";
+import bodyHTML from "../../../data/public-surface-case/2026-10-04/rendered-body.en.html?raw";
+import metadata from "../../../data/public-surface-case/2026-10-04/metadata.en.json";
+import data from "../../../data/public-surface-case/2026-10-04/payload.en.json";
+
+// The reviewed manuscript and branch markers are rendered explicitly by the
+// isolated generator in tools/public-surface-case-2026-10-04. Astro imports
+// generated prose as raw HTML; it does not interpret raw Markdown markers.
+if (metadata.title !== data.title || metadata.subtitle !== data.subtitle) {
+  throw new Error("Public Surface Case metadata and payload must agree");
+}
+const dataJSON = JSON.stringify(data)
+  .replace(/</g, "\\u003c")
+  .replace(/\u2028/g, "\\u2028")
+  .replace(/\u2029/g, "\\u2029");
+const { ui } = data;
+---
+
+<!doctype html>
+<html lang="en" class="case-2026-10-04">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content={metadata.subtitle} />
+    <title>{metadata.title} | {ui.pageKind}</title>
+  </head>
+  <body>
+    <a class="skip" href="#article">{ui.skip}</a>
+    <main>
+      <header class="case-head">
+        <p class="kicker">{ui.kicker}</p>
+        <h1>{metadata.title}</h1>
+        <p class="subtitle">{metadata.subtitle}</p>
+        <div class="meta"><span>{metadata.meta}</span></div>
+      </header>
+      <nav class="section-nav" aria-label={ui.navigation}>
+        <a href="#article">{ui.read}</a>
+        <a href="#sources">{ui.sources}</a>
+      </nav>
+      <p class="reading-intro">{ui.readingIntro}</p>
+      <div class="read-layout">
+        <article class="article" id="article" aria-label={ui.article} set:html={bodyHTML} />
+      </div>
+      <div id="event-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script is:inline id="case-data" type="application/json" set:html={dataJSON}></script>
+    <!-- Ordered classic scripts preserve the vendored window.d3 contract. -->
+    <script is:inline src="/assets/public-surface-case/2026-10-04/d3.v7.9.0.min.js"></script>
+    <script is:inline src="/assets/public-surface-case/2026-10-04/branch-app.js"></script>
+  </body>
+</html>

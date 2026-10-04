@@ -176,6 +176,10 @@ The 2026 pair below reads one field twice: first at the moment a cultural templa
 
 [Follow-up — 19 September 2026](/artistic-research/public-surface-case/2026-09-19/)
 
+A separate specimen follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation. The comparisons are authored; the sources retain their own evidentiary limits. Optional reading branches and timelines expose the selected material without establishing causal relations.
+
+[Enter Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.
