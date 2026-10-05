@@ -119,3 +119,75 @@ test('actual print handlers restore mixed disclosure state after cancellation an
  details[0].open=true;details[1].open=false;
  const next=states();listeners.get('beforeprint')();listeners.get('afterprint')();assert.deepEqual(states(),next,'a later print cycle captures its own original state');
 });
+
+// Execute both shipped scripts. This model checks event ownership/restoration,
+// not real browser print layout or assistive-technology behavior.
+for (const originalReady of [true, false]) {
+ test(`revisited print coordination: original app ${originalReady ? 'ready' : 'absent'}`, () => {
+  class Detail {
+   constructor(className, open) { this.className=className; this.open=open; this.parentElement=null; }
+   matches(selector) { return selector.split(',').map(s=>s.trim().slice(1)).includes(this.className); }
+   addEventListener() {}
+  }
+  const details=[
+   new Detail('reading-branch',false),new Detail('branch-sources',true),new Detail('reading-combination',false),
+   ...Array.from({length:7},(_,i)=>new Detail('review-evidence',i%2===0)),
+   ...Array.from({length:3},(_,i)=>new Detail('latest-evidence',i%2===1)),new Detail('unrelated',false)
+  ];
+  const listeners=new Map(), classes=new Set();
+  const document={
+   getElementById(id) { return id==='case-data'?{textContent:JSON.stringify({events:[],branches:[],ui:{}})}:null; },
+   querySelector() { return null; },
+   querySelectorAll(selector) { return selector==='details'?details:details.filter(d=>d.matches(selector)); },
+   documentElement:{classList:{add(c){classes.add(c);},contains(c){return classes.has(c);}}}
+  };
+  const window={d3:originalReady?{}:undefined,addEventListener(type,handler){
+   if(!listeners.has(type)) listeners.set(type,[]);
+   listeners.get(type).push(handler);
+  }};
+  const context={window,document,location:{hash:''},HTMLDetailsElement:Detail,setTimeout,clearTimeout,requestAnimationFrame(){}};
+  runInNewContext(read('public/assets/public-surface-case/2026-10-04/branch-app.js'),context);
+  runInNewContext(read('public/assets/public-surface-case/2026-10-04-revisited/review-layer.js'),context);
+  assert.equal(classes.has('js-ready'),originalReady);
+  assert.equal(listeners.get('beforeprint').length,originalReady?2:1,'retain both handlers');
+  assert.equal(listeners.get('afterprint').length,originalReady?2:1,'retain both handlers');
+  const emit=event=>listeners.get(event)?.forEach(handler=>handler());
+  const states=()=>details.map(d=>d.open);
+  const original=states();
+  emit('afterprint'); assert.deepEqual(states(),original);
+  emit('beforeprint'); assert(details.every(d=>d.open));
+  emit('beforeprint'); emit('afterprint'); assert.deepEqual(states(),original,'cancel/close restores mixed states');
+  emit('afterprint'); assert.deepEqual(states(),original,'repeated close is harmless');
+  details[0].open=true; details[3].open=false; details[10].open=true;
+  const next=states(); emit('beforeprint'); emit('beforeprint'); assert(details.every(d=>d.open));
+  emit('afterprint'); assert.deepEqual(states(),next,'later cycle captures new states');
+ });
+}
+
+test('revisited print fallback and October 5 stylesheet precedence stay scoped', () => {
+ const page=read('src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro');
+ const assertOrder=source=>{
+  const imports=[...source.matchAll(/import "([^"\n]+\.css)";/g)].map(m=>m[1]);
+  const ordered=['global.css','public-surface-case-2026-10-04.css','public-surface-case-2026-10-04-revisited.css','public-surface-case-2026-10-05-additions.css'];
+  const indexes=ordered.map(name=>imports.findIndex(p=>p.endsWith('/'+name)));
+  assert(indexes.every(i=>i>=0));
+  assert(indexes.every((i,n)=>n===0||i>indexes[n-1]));
+ };
+ assertOrder(page);
+ const latestImport='import "../../../styles/public-surface-case-2026-10-05-additions.css";';
+ assert.throws(()=>assertOrder(latestImport+'\n'+page.replace(latestImport,'')));
+ const css=read('src/styles/public-surface-case-2026-10-04-revisited.css');
+ const rule='.review-2026-10-04 .review-insertion details > :not(summary){display:block!important}';
+ const assertFallback=source=>{
+  const i=source.indexOf('@media print{'); assert(i>=0);
+  assert(!source.slice(0,i).includes(rule));
+  assert.equal(source.slice(i).split(rule).length-1,1);
+  assert(source.slice(i).includes('.review-2026-10-04 .review-insertion details::details-content{content-visibility:visible!important;display:block!important}'));
+ };
+ assertFallback(css);
+ assert.throws(()=>assertFallback(css.replace(rule,'')));
+ assert.throws(()=>assertFallback(css.replace(rule,rule.replace(':not(summary)','*'))));
+ assert.throws(()=>assertFallback(rule+css.replace(rule,'')));
+ const latest=read('src/styles/public-surface-case-2026-10-05-additions.css');
+ assert(latest.slice(latest.indexOf('@media print{')).includes('.review-2026-10-04 .latest-insertion{background:#f4eff7;color:#2d2338;border-left-color:#77638d}'));
+});

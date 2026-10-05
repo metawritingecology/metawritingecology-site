@@ -51,3 +51,10 @@ Unresolved questions: Exact-head CI; rendered metadata, response headers, keyboa
 Risks or assumptions: Other indexing exclusions remain unchanged. Automatic branch deployment may update the live site; this risk was acknowledged before this push. No merge is requested.
 Review provenance: reviewer interface: independent document review; reviewer lineage: unknown in this public record; review mode: sequential; reviewed commit: unknown (pre-commit source artifact); review evidence reference: PR review-status summary. Private operational details are omitted from this public log.
 Inventory: Current main and remote branches/PRs were checked before this append. Previously declared separate/held work remains separate under the recorded dispositions in PR #127; reviewed portions of #146/#147 were integrated by #151. Other applicable feature branches are merged. The open dependency queue (#153, #155, #156, #158) is excluded. No other work is integrated here.
+
+### 2026-10-05 - Revisited stylesheet order and print regression coverage
+
+Addressed the first PR review's remaining technical findings: load the October 5 palette after shared/revisited styles, and commit event-model tests that execute both shipped handlers with multiple listeners retained. The tests cover mixed original/earlier/latest disclosure states, absent original-app initialization, repeated print events, cancellation/closure and later cycles. Added scoped CSS fallback and import-order mutation checks. The original essay and all ten additions remain unchanged.
+
+Validation: three focused regression tests passed. The preceding head passed full Linux site-ci and Cloudflare build; the new head requires its own CI and review. Real-browser print layout remains unverified.
+Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 2e1fa81b537274c3065cc5fd54f68bf235239903; evidence PR #159 inline review. This repair is pending re-review. No merge performed.
