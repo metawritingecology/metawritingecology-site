@@ -49,8 +49,15 @@ const INTERACTIVE = "/public-surface-map/interactive/";
 const EXPANDED = "/public-surface-map/expanded/";
 
 // The two noindex interactive previews. Every other registered route is one of
-// the 42 indexable routes.
+// the 46 indexable routes.
 const NOINDEX_PREVIEWS = [INTERACTIVE, EXPANDED];
+// An explicit technical metadata scope; no genre is inferred for these pages.
+const CASE_ROUTES = [
+  "/artistic-research/public-surface-case/2026-08-18/",
+  "/artistic-research/public-surface-case/2026-09-19/",
+  "/artistic-research/public-surface-case/2026-10-04/",
+  "/artistic-research/public-surface-case/2026-10-04-revisited/"
+];
 const registeredRoutes = getRegisteredRoutes();
 const indexableRegistered = registeredRoutes.filter((r) => !NOINDEX_PREVIEWS.includes(r));
 
@@ -73,8 +80,8 @@ test("approved production origin equals Package C PRODUCTION_ORIGIN", () => {
 
 // --- 1 / 3: registration count and cardinality -----------------------------
 
-test("registry has exactly 42 indexable routes and 2 interactive noindex routes", () => {
-  assert.equal(indexableRegistered.length, 42);
+test("registry has exactly 46 indexable routes and 2 interactive noindex routes", () => {
+  assert.equal(indexableRegistered.length, 46);
   for (const route of NOINDEX_PREVIEWS) {
     const policy = getRoutePolicy(route);
     assert.ok(policy, route);
@@ -85,8 +92,8 @@ test("registry has exactly 42 indexable routes and 2 interactive noindex routes"
     assert.equal(policy.structuredData.type, "WebPage", route);
     assert.equal(policy.language, "en", route);
   }
-  // total registered = 44
-  assert.equal(registeredRoutes.length, 44);
+  // total registered = 48
+  assert.equal(registeredRoutes.length, 48);
   // Each noindex preview is registered exactly once.
   for (const route of NOINDEX_PREVIEWS) {
     assert.equal(registeredRoutes.filter((r) => r === route).length, 1, route);
@@ -118,7 +125,7 @@ test("registry indexable routes exactly equal Package C's independent expected s
   }
 });
 
-test("no unregistered BaseLayout indexable route exists (no fallback needed)", () => {
+test("no unregistered indexable route exists (no fallback needed)", () => {
   const { expected } = buildExpectedRouteSet({ pagesDir: PAGES_DIR });
   for (const route of expected) {
     assert.ok(
@@ -463,6 +470,13 @@ test("structured genres are exactly the existing emitted set; none added", () =>
     const policy = ROUTE_METADATA_REGISTRY[route];
     assert.ok(policy.structuredData.enabled, route);
     const genre = policy.structuredData.genre;
+    if (CASE_ROUTES.includes(route)) {
+      assert.equal(genre, undefined, `${route} must not infer a genre`);
+      const graph = buildJsonLd(resolvePublicMetadata(input(route)), ORIGIN);
+      const webpage = graph["@graph"].find((n) => n["@type"] === "WebPage");
+      assert.ok(!Object.hasOwn(webpage, "genre"), route);
+      continue;
+    }
     assert.ok(APPROVED_GENRES.has(genre), `${route} genre not approved: ${genre}`);
     const expected = EXPECTED_GENRE[route] ?? "Public orientation surface";
     assert.equal(genre, expected, `${route} genre drift`);
@@ -526,5 +540,21 @@ test("robots values derive only from the typed indexing policy", () => {
   }
   for (const route of NOINDEX_PREVIEWS) {
     assert.equal(resolvePublicMetadata(input(route)).robots, "noindex, nofollow", route);
+  }
+});
+
+test("selected case routes have the exact minimal indexable policy", () => {
+  for (const route of CASE_ROUTES) {
+    assert.deepEqual(getRoutePolicy(route), {
+      language: "en",
+      canonical: { kind: "self" },
+      indexing: { kind: "indexable" },
+      structuredData: { enabled: true, type: "WebPage" }
+    });
+    const resolved = resolvePublicMetadata(input(route));
+    assert.equal(resolved.canonicalUrl, `${ORIGIN}${route}`);
+    assert.equal(resolved.robots, undefined);
+    const graph = buildJsonLd(resolved, ORIGIN);
+    assert.deepEqual(graph["@graph"].map((node) => node["@type"]), ["WebSite", "WebPage"]);
   }
 });

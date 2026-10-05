@@ -157,11 +157,11 @@ export function normalizeRoute(input: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// The typed shared-layout route registry
+// The typed public-route metadata registry
 // ---------------------------------------------------------------------------
 //
-// Every route rendered through BaseLayout MUST appear here exactly once. There
-// is NO generic fallback: an unregistered BaseLayout route fails closed in the
+// Every route using this metadata resolver MUST appear here exactly once. There
+// is NO generic fallback: an unregistered public route fails closed in the
 // resolver rather than silently receiving generic metadata. The registry holds
 // only mechanical route policy — language, canonical policy, indexing policy,
 // structured-data enablement, and the existing structured genre already emitted
@@ -193,8 +193,19 @@ function zh(genre: string = DEFAULT_GENRE): RouteMetadataPolicy {
   };
 }
 
+// Standalone case pages use the same indexing/canonical/JSON-LD contract.
+// No genre is inferred for a case or its later reading.
+function casePage(): RouteMetadataPolicy {
+  return {
+    language: "en",
+    canonical: { kind: "self" },
+    indexing: { kind: "indexable" },
+    structuredData: { enabled: true, type: "WebPage" }
+  };
+}
+
 export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolicy>> = {
-  // --- 42 indexable routes -------------------------------------------------
+  // --- 46 indexable routes -------------------------------------------------
   "/": en(),
   "/about/": en(),
   "/ai-readable-knowledge-architecture/": en("AI-readable boundary page"),
@@ -202,6 +213,10 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/ai-training-boundary/": en(),
   "/application-boundary/": en("Public boundary page"),
   "/artistic-research/": en(),
+  "/artistic-research/public-surface-case/2026-08-18/": casePage(),
+  "/artistic-research/public-surface-case/2026-09-19/": casePage(),
+  "/artistic-research/public-surface-case/2026-10-04/": casePage(),
+  "/artistic-research/public-surface-case/2026-10-04-revisited/": casePage(),
   "/atlas/": en(),
   "/boundary-preserving-use-conditions/": en(),
   "/boundary/": en(),
@@ -378,7 +393,7 @@ export function resolveMetadataForPolicy(
   return resolved;
 }
 
-// Resolve metadata for a REGISTERED BaseLayout route. Fails closed on an
+// Resolve metadata for a REGISTERED public route. Fails closed on an
 // unknown route rather than emitting generic metadata.
 export function resolvePublicMetadata(input: ResolveInput): ResolvedPublicMetadata {
   const route = normalizeRoute(input.route);
@@ -386,7 +401,7 @@ export function resolvePublicMetadata(input: ResolveInput): ResolvedPublicMetada
   if (!policy) {
     throw new PublicMetadataError(
       "UNKNOWN_ROUTE",
-      `route is not registered in the BaseLayout metadata registry: ${route}`
+      `route is not registered in the public metadata registry: ${route}`
     );
   }
   return resolveMetadataForPolicy(policy, { ...input, route });

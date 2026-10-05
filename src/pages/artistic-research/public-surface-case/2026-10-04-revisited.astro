@@ -1,0 +1,81 @@
+---
+import "../../../styles/public-surface-case-2026-10-05-additions.css";
+import latest from "../../../data/public-surface-case/2026-10-04-revisited/latest-updates.en.json";
+import "../../../styles/global.css";
+import "../../../styles/public-surface-case-2026-10-04.css";
+import "../../../styles/public-surface-case-2026-10-04-revisited.css";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
+import bodyHTML from "../../../data/public-surface-case/2026-10-04-revisited/rendered-body.en.html?raw";
+import reviewMetadata from "../../../data/public-surface-case/2026-10-04-revisited/metadata.en.json";
+import review from "../../../data/public-surface-case/2026-10-04-revisited/annotations.en.json";
+import originalMetadata from "../../../data/public-surface-case/2026-10-04/metadata.en.json";
+import data from "../../../data/public-surface-case/2026-10-04/payload.en.json";
+
+// This proposed page consumes a separately generated composition. The original
+// October 4 generator must not be used to write this page's files.
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: reviewMetadata.title,
+  description: reviewMetadata.description,
+  siteOrigin,
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
+const dataJSON = JSON.stringify(data)
+  .replace(/</g, "\\u003c")
+  .replace(/\u2028/g, "\\u2028")
+  .replace(/\u2029/g, "\\u2029");
+const { ui } = data;
+---
+
+<!doctype html>
+<html lang={publicMetadata.language} class="case-2026-10-04 review-2026-10-04">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content={publicMetadata.description} />
+    <title>{publicMetadata.title}</title>
+    <link rel="canonical" href={publicMetadata.canonicalUrl} />
+    {jsonLd && <SchemaJsonLd data={jsonLd} />}
+  </head>
+  <body>
+    <a class="skip" href="#article">Skip to the interleaved reading</a>
+    <main>
+      <header class="case-head">
+        <p class="kicker">{ui.kicker}</p>
+        <h1>{reviewMetadata.title}</h1>
+        <p class="subtitle">{reviewMetadata.subtitle}</p>
+        <p class="meta">Later news selection through 4 October 2026, 22:29 UTC+8</p>
+        <p class="meta latest-cutoff">{latest.cutoffLabel}</p>
+      </header>
+      <nav class="section-nav" aria-label="Reading navigation">
+        <a href="#article">{review.navigation.expandedReadingLabel}</a>
+        <a href={review.original.route}>Read the original October 4 page</a>
+        <a href="#sources">Original sources</a>
+        <a class="latest-nav" href={"#"+latest.blocks[0].id}>5 October additions</a>
+      </nav>
+      <div class="review-framing">
+        {review.framing.map(paragraph => <p>{paragraph}</p>)}
+        <p class="review-legend">Warm text retains the original reading. Blue-green passages marked “Added reading” are later additions; their sources and verification details can be opened separately.</p>
+        <p class="latest-legend">{latest.legend}</p>
+      </div>
+      <header class="original-head">
+        <p class="kicker">Preserved October 4 essay</p>
+        <h2>{originalMetadata.title}</h2>
+        <p class="subtitle">{originalMetadata.subtitle}</p>
+        <div class="meta"><span>{originalMetadata.meta}</span></div>
+      </header>
+      <p class="reading-intro">{ui.readingIntro}</p>
+      <div class="read-layout">
+        <article class="article" id="article" aria-label="Preserved essay with visible later additions" set:html={bodyHTML} />
+      </div>
+      <div id="event-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script is:inline id="case-data" type="application/json" set:html={dataJSON}></script>
+    <script is:inline src="/assets/public-surface-case/2026-10-04/d3.v7.9.0.min.js"></script>
+    <script is:inline src="/assets/public-surface-case/2026-10-04/branch-app.js"></script>
+    <script is:inline src="/assets/public-surface-case/2026-10-04-revisited/review-layer.js"></script>
+  </body>
+</html>

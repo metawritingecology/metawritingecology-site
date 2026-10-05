@@ -14,13 +14,18 @@ const meta=JSON.parse(read(base+'metadata.en.json'));
 const html=read(base+'rendered-body.en.html');
 const astro=read('src/pages/artistic-research/public-surface-case/2026-10-04.astro');
 const route='/artistic-research/public-surface-case/2026-10-04/';
-test('dated case exclusion is exact and route resolves',()=>{
- assert(SITEMAP_EXCLUDED_PATHS.has(route));assert.equal(isSitemapEligible(route),false);
+test('dated case is sitemap-eligible and route resolves',()=>{
+ assert(!SITEMAP_EXCLUDED_PATHS.has(route));assert.equal(isSitemapEligible(route),true);
+ assert(!SITEMAP_EXCLUDED_PATHS.has('/artistic-research/public-surface-case/2026-10-05/'));
  assert.equal(isSitemapEligible('/artistic-research/public-surface-case/2026-10-05/'),true);
  assert(resolveRouteSource(route)?.endsWith('2026-10-04.astro'));
 });
-test('standalone route retains robots, raw SSR and ordered classic scripts',()=>{
- assert.match(astro,/name="robots" content="noindex, nofollow"/);
+test('standalone route has indexable metadata, raw SSR and ordered classic scripts',()=>{
+ assert.doesNotMatch(astro,/name="robots"/i);
+ assert.equal((astro.match(/rel="canonical"/g)||[]).length,1);
+ assert.match(astro,/rel="canonical"\s+href=\{publicMetadata\.canonicalUrl\}/);
+ assert.match(astro,/route:\s*Astro\.url\.pathname/);assert.match(astro,/resolvePublicMetadata/);
+ assert.match(astro,/<SchemaJsonLd data=\{jsonLd\}/);
  assert.match(astro,/rendered-body\.en\.html\?raw/);assert.match(astro,/set:html=\{bodyHTML\}/);
  assert(!astro.includes('BaseLayout'));assert(!astro.includes('ui.unpublished'));assert(!astro.includes('ui.footer'));assert.match(astro,/styles\/global\.css/);
  assert(astro.indexOf('src="/assets/public-surface-case/2026-10-04/d3.')<astro.indexOf('src="/assets/public-surface-case/2026-10-04/branch-app.js"'));

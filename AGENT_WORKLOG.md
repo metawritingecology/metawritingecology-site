@@ -39,3 +39,15 @@ Validation: the original PR head passed the full repository CI check suite.
 Preserved source-section prose in its authored order and restored each disclosure's original state after printing. Regression tests cover source prose around numbered entries, repeated print events, cancelled or closed dialogs, and subsequent print cycles.
 
 Validation: the full repository check suite passed with 1,185 tests and zero failures; the indexing stage passed 247 tests. CI for the follow-up commit is pending.
+
+### 2026-10-05 - October 4 revisited page and bounded indexing update
+
+Agent: AI-assisted implementation.
+Task: Add the approved revisited essay with seven earlier additions and three separately colored October 5 updates; preserve the original text and URL.
+Files changed: New revisited page, its data, styles and interaction asset; Artistic Research entry; indexing metadata and contracts for August 18, September 19, October 4 and the revisited route; corresponding tests; this worklog.
+Build / tests run: 19 artifact integrity, event-model and static print checks passed. The 19-file proposal patch reproduced the reviewed source snapshots. Full repository build, browser and actual print checks remain pending; Linux site-ci is authoritative.
+Result: Independent source review found no Draft PR content blocker after attribution and print-fallback corrections.
+Unresolved questions: Exact-head CI; rendered metadata, response headers, keyboard/mobile behavior and JavaScript-on/off printing.
+Risks or assumptions: Other indexing exclusions remain unchanged. Automatic branch deployment may update the live site; this risk was acknowledged before this push. No merge is requested.
+Review provenance: reviewer interface: independent document review; reviewer lineage: unknown in this public record; review mode: sequential; reviewed commit: unknown (pre-commit source artifact); review evidence reference: PR review-status summary. Private operational details are omitted from this public log.
+Inventory: Current main and remote branches/PRs were checked before this append. Previously declared separate/held work remains separate under the recorded dispositions in PR #127; reviewed portions of #146/#147 were integrated by #151. Other applicable feature branches are merged. The open dependency queue (#153, #155, #156, #158) is excluded. No other work is integrated here.

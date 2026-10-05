@@ -1,5 +1,11 @@
 ---
 import "../../../styles/global.css";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import {
+  resolvePublicMetadata,
+  buildJsonLd,
+  APPROVED_PRODUCTION_ORIGIN
+} from "../../../lib/publicMetadata";
 import "../../../styles/public-surface-case-2026-10-04.css";
 import bodyHTML from "../../../data/public-surface-case/2026-10-04/rendered-body.en.html?raw";
 import metadata from "../../../data/public-surface-case/2026-10-04/metadata.en.json";
@@ -16,17 +22,27 @@ const dataJSON = JSON.stringify(data)
   .replace(/\u2028/g, "\\u2028")
   .replace(/\u2029/g, "\\u2029");
 const { ui } = data;
+
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: `${metadata.title} | ${ui.pageKind}`,
+  description: metadata.subtitle,
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
 ---
 
 <!doctype html>
-<html lang="en" class="case-2026-10-04">
+<html lang={publicMetadata.language} class="case-2026-10-04">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="description" content={metadata.subtitle} />
-    <title>{metadata.title} | {ui.pageKind}</title>
+    <meta name="description" content={publicMetadata.description} />
+    <title>{publicMetadata.title}</title>
+    <link rel="canonical" href={publicMetadata.canonicalUrl} />
+    {jsonLd && <SchemaJsonLd data={jsonLd} />}
   </head>
   <body>
     <a class="skip" href="#article">{ui.skip}</a>
