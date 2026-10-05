@@ -65,3 +65,12 @@ Restored the Artistic Research introduction's existing authored-comparison, sour
 
 Validation: two focused tests and their negative mutations passed; preceding head 13bc27ee76d6b52f7f162aef095a0eeffbafd72f passed full Linux site-ci. This head requires fresh CI and review. The second Copilot review confirmed stylesheet order, retained earlier open threads, and suggested these additional regressions and restored boundaries. Real-browser print and accessibility coverage remain incomplete; no merge performed.
 Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 13bc27ee76d6b52f7f162aef095a0eeffbafd72f; evidence PR #159 second review.
+
+### 2026-10-05 - Publication-state cleanup and distinct reading groups
+
+Removed only the two approved obsolete publication-state statements from the original manuscript and synchronized original/revisited renderings and metadata. Retained the remaining source-distinction, case-date and cutoff sentence. Updated source hashes and added a reversal test: restoring exactly those removed strings must recover each frozen original hash. Other essay and addition text remains unchanged.
+
+Added separate entry headings for the three earlier Public Slices and for the August/September pair versus the independent October original/revisited pair. Preserved the accepted introduction, with its preservation sentence clarified to disclose only the publication-state cleanup. No homepage changes.
+
+Added a scoped print hover-color override for the earlier seven additions and a regression that rejects its removal. Validation: five focused preservation/grouping/print tests passed; source hashes synchronized through exact text transformations. The isolated original renderer was not run and no dependency installation was performed. The preceding head passed full Linux CI; this head needs fresh CI and Copilot review. Real print-engine and complete accessibility evidence remain outstanding. No merge performed.
+Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 05d160e636ec9c13ca54a49f88c134cef2086394; evidence PR #159 third review. Its additional hover finding is addressed here; earlier open threads are not manually marked resolved.

@@ -1,7 +1,7 @@
 # The Syringe Changes Its Place in the Sentence
 ## A dated reading of how policy language moves between service, danger, and public explanation
 
-Observational essay | October 4, 2026 | Not publicly published
+Observational essay | October 4, 2026
 
 This independent Public Surface Case reads selected statements and reports surrounding a Taipei drug-policy dispute on October 3–4, 2026. Its object is how familiar signs can make a relationship appear settled before its conditions have been examined. The connections to policing, historical memory, and civic imagery are the author's comparative reading; they do not establish a single operation or shared cause.
 
@@ -191,4 +191,4 @@ Repository context in [28] is supplemented by the individually pinned model and 
 - Sources differ on whether 92 or 93 people were involved in the Nong'an Street incident. Claims involving suicide conflict with the authorities' denial at the time; this essay does not treat them as established facts.
 - “Political mimicry,” possible relation-completion, potential erosion of prior anti-stigma work, and the links across the case are the author's readings. They are not measurements of reader psychology, findings of common command or intent, or diagnoses conferred by MWE.
 - MWE sources are selected public-facing model or diagnostic documents. Visibility here does not establish internal Registry status or a confirmed formal relation between this case and a model. Co-listing and diagram edges remain reading devices.
-- The article and branch materials have not been publicly published. The interactive version should retain these source distinctions and the case's date and cutoff.
+- The interactive version should retain these source distinctions and the case's date and cutoff.

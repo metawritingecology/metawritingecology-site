@@ -235,3 +235,52 @@ test('Artistic Research retains the original comparison and causality boundaries
  assert(intro.includes('The comparisons are authored; the sources retain their own evidentiary limits.'));
  assert(intro.includes('Optional reading branches and timelines expose the selected material without establishing causal relations.'));
 });
+
+test('publication-status cleanup is limited to the two explicitly removed states', () => {
+ const label=' | Not publicly published';
+ const sentence='The article and branch materials have not been publicly published. ';
+ const originals={
+  'article.en.md':'3d28c4ebc0836624839665be1e0985d499f3c06bc5aed024750ccfeb824c94b9',
+  'metadata.en.json':'62d24dd5a77b98545bd23df537eb0a0486794f3f63b1bdcbac8c56ca0466149a',
+  'rendered-body.en.html':'0a441ccfa93e718501f1a76f684e2e65d7478388687356c95fd503ea855d0881'
+ };
+ for(const [name,expected] of Object.entries(originals)) {
+  const current=read(base+name); assert(!current.includes(label)); assert(!current.includes(sentence));
+  let restored=current;
+  if(name!=='rendered-body.en.html') {
+   const caption='Observational essay | October 4, 2026';
+   assert.equal(restored.split(caption).length-1,1);
+   restored=restored.replace(caption,caption+label);
+  }
+  if(name!=='metadata.en.json') {
+   const anchor=name==='article.en.md'?'- The interactive version':'<li>The interactive version';
+   assert.equal(restored.split(anchor).length-1,1);
+   restored=restored.replace(anchor,anchor.replace('The interactive version',sentence+'The interactive version'));
+  }
+  assert.equal(createHash('sha256').update(restored).digest('hex'),expected,name+' has no other original-text changes');
+ }
+ const composed=read('src/data/public-surface-case/2026-10-04-revisited/rendered-body.en.html');
+ assert(!composed.includes(sentence));
+ assert(composed.includes('The interactive version should retain these source distinctions and the case&#39;s date and cutoff.'));
+});
+
+test('Artistic Research separates three slices and the two distinct case groups', () => {
+ const page=read('src/pages/artistic-research.md');
+ for(const date of ['25 July 2026','31 July 2026','7 August 2026']) assert.equal(page.split('### Public Slice — '+date+'\n').length-1,1);
+ const first=page.split('#### 18 August and 19 September 2026\n')[1]?.split('#### 4 October 2026 — original and revisited\n')[0];
+ const second=page.split('#### 4 October 2026 — original and revisited\n')[1]?.split('\n## ')[0];
+ assert(first&&second);
+ for(const route of ['2026-08-18','2026-09-19']) {assert(first.includes('/public-surface-case/'+route+'/')); assert(!second.includes('/public-surface-case/'+route+'/'));}
+ for(const route of ['2026-10-04','2026-10-04-revisited']) {assert(second.includes('/public-surface-case/'+route+'/')); assert(!first.includes('/public-surface-case/'+route+'/'));}
+});
+
+test('earlier additions retain dark text and source URLs when hovered in print', () => {
+ const css=read('src/styles/public-surface-case-2026-10-04-revisited.css');
+ const verify=source=>{
+  const print=source.slice(source.indexOf('@media print{'));
+  assert.match(print,/\.review-2026-10-04 \.review-insertion a:hover,[^{]+\{color:#122d30\}/);
+ };
+ verify(css);
+ const i=css.indexOf('@media print{');
+ assert.throws(()=>verify(css.slice(0,i)+css.slice(i).replace('.review-2026-10-04 .review-insertion a:hover,','')));
+});
