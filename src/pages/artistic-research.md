@@ -156,11 +156,17 @@ The work is therefore not contained in one page or one object. It appears throug
 
 A Public Slice assembles a small number of repository states into a bounded reading. It does not represent the full repository, archive, or system.
 
+### Public Slice — 25 July 2026
+
 [Enter Public Slice — 25 July 2026](/artistic-research/public-slice/2026-07-25/)
+
+### Public Slice — 31 July 2026
 
 A slice may hold a measurement rather than a sequence of states. The slice below counts what the working corpus held at a fixed cut-off: words written, posts published, and AI tokens logged, each month set against its own base month. It is a snapshot of activity, not an account of the work. It measures no quality, no difficulty and no effect, and the three series are never summed.
 
 [Enter Public Slice — 31 July 2026](/artistic-research/public-slice/2026-07-31/)
+
+### Public Slice — 7 August 2026
 
 Public forms can also be read through the permissions attached to them. This slice brings together four fixed repository states: a Public Anchor scaffold that declares its own boundary; a generated visualization made verify-only as historical material; a later visualization product documented beside rather than over that frozen artifact; and a radial interface whose rendering constraints limit what the new form is permitted to formally encode. The repository evidence establishes each state at a fixed commit. Their relation is an authored reading rather than a repository fact.
 
@@ -170,15 +176,23 @@ Public forms can also be read through the permissions attached to them. This sli
 
 A Public Surface Case reads an external public-discourse field as a bounded, dated, verify-only specimen. Its material is external observation, not repository evidence. A dated specimen is preserved as written; a later reading is added as a separate page rather than as a revision.
 
-The 2026 pair below reads one field twice: first at the moment a cultural template was cast onto a public controversy, then a month later, when the field had become a five-night festival, to record how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire. Both pages are noindex and are listed here only.
+#### 18 August and 19 September 2026
+
+The 2026 pair below reads one field twice: first at the moment a cultural template was cast onto a public controversy, then a month later, when the field had become a five-night festival, to record how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire.
 
 [Enter Public Surface Case — 18 August 2026](/artistic-research/public-surface-case/2026-08-18/)
 
 [Follow-up — 19 September 2026](/artistic-research/public-surface-case/2026-09-19/)
 
-A separate specimen follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation. The comparisons are authored; the sources retain their own evidentiary limits. Optional reading branches and timelines expose the selected material without establishing causal relations.
+#### 4 October 2026 — original and revisited
 
-[Enter Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
+The October 4 essay follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation. The comparisons are authored; the sources retain their own evidentiary limits. Optional reading branches and timelines expose the selected material without establishing causal relations.
+
+The October 4 essay is read again with later observations inserted beside the passages they return to. The earlier essay is retained, with only outdated publication-status wording removed. The added paragraphs follow changes in the public record and keep unresolved questions visible. The original page remains available separately.
+
+[Revisit the October 4 Slice — with later evidence](/artistic-research/public-surface-case/2026-10-04-revisited/)
+
+[Original Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
 
 ## Exhibition or Presentation Version
 

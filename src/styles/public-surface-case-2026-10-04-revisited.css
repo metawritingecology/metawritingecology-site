@@ -1,0 +1,21 @@
+/* New reading layer only; original case palette remains untouched. */
+.case-2026-10-04.review-2026-10-04{--review-bg:#182427;--review-text:#d5e8e6;--review-label:#9bbfc1;--review-line:#52777b;--review-link:#b7d9d7}
+.review-2026-10-04 .review-framing{max-width:760px;margin-bottom:36px}
+.review-2026-10-04 .review-framing p{margin:0 0 16px}
+.review-2026-10-04 .review-legend{font-size:.875rem;color:var(--muted);border-left:2px solid var(--review-line);padding-left:14px}
+.review-2026-10-04 .original-head{max-width:760px;margin:40px 0 24px;padding-top:26px;border-top:1px solid var(--line)}
+.review-2026-10-04 .original-head h2{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.25;color:var(--accent);margin:0 0 15px;letter-spacing:-.025em}
+.review-2026-10-04 .review-insertion{margin:30px 0 32px;padding:18px 22px 16px;border-left:2px solid var(--review-line);background:var(--review-bg);color:var(--review-text);scroll-margin-top:24px}
+.review-2026-10-04 .review-insertion .review-label{margin:0 0 13px;font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--review-label)}
+.review-2026-10-04 .review-insertion p{color:var(--review-text);margin:0 0 17px}
+.review-2026-10-04 .review-insertion a{color:var(--review-link)}
+.review-2026-10-04 .review-insertion a:hover{color:#e2f3f1}
+.review-2026-10-04 .review-insertion details{border-top:1px solid var(--review-line);padding-top:10px;margin-top:16px;font-size:.875rem}
+.review-2026-10-04 .review-insertion summary{cursor:pointer;color:var(--review-label);width:fit-content}
+.review-2026-10-04 .review-insertion details p{margin:14px 0 0}
+.review-2026-10-04 .review-insertion .review-source-list{padding-left:1.1em;margin-bottom:0}
+.review-2026-10-04 .review-insertion .review-source-list li{line-height:1.5;margin:10px 0}
+.review-2026-10-04 .review-insertion :focus-visible{outline-color:var(--review-link)}
+@media(max-width:760px){.review-2026-10-04 .review-insertion{margin:24px 0;padding:16px 14px}.review-2026-10-04 .original-head{margin-top:32px}}
+@media(prefers-reduced-motion:reduce){html.review-2026-10-04{scroll-behavior:auto}}
+@media print{.review-2026-10-04 .review-insertion{background:#f0f5f5;color:#122d30;border-left-color:#52777b;break-inside:auto}.review-2026-10-04 .review-insertion p,.review-2026-10-04 .review-insertion a,.review-2026-10-04 .review-insertion a:hover,.review-2026-10-04 .review-insertion summary,.review-2026-10-04 .review-insertion .review-label{color:#122d30}.review-2026-10-04 .review-insertion details > :not(summary){display:block!important}.review-2026-10-04 .review-insertion details::details-content{content-visibility:visible!important;display:block!important}}

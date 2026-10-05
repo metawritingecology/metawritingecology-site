@@ -1,15 +1,31 @@
 ---
 import "../../../styles/global.css";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import {
+  resolvePublicMetadata,
+  buildJsonLd,
+  APPROVED_PRODUCTION_ORIGIN
+} from "../../../lib/publicMetadata";
+
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: "Public Surface Case — 2026-09-19",
+  description: "A dated follow-up to the 2026-08-18 public surface case. The platform-field layer that specimen declined to verify has since been performed and institutionally reported. This page adds the later layers, records how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire, and keeps every layer apart. The earlier specimen is preserved as written. External public-discourse observation, not repository evidence.",
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={publicMetadata.language}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Public Surface Case — 2026-09-19</title>
-  <meta name="description" content="A dated follow-up to the 2026-08-18 public surface case. The platform-field layer that specimen declined to verify has since been performed and institutionally reported. This page adds the later layers, records how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire, and keeps every layer apart. The earlier specimen is preserved as written. External public-discourse observation, not repository evidence." />
+  <title>{publicMetadata.title}</title>
+  <meta name="description" content={publicMetadata.description} />
+  <link rel="canonical" href={publicMetadata.canonicalUrl} />
+  {jsonLd && <SchemaJsonLd data={jsonLd} />}
   <style>
     :root { --deep:#15130f; --raised:#24211c; --max:920px; }
     *{box-sizing:border-box}
@@ -117,7 +133,7 @@ import "../../../styles/global.css";
       <div><span>Case date</span>19 September 2026</div>
       <div><span>Platform-field window</span>18 August – 5 September 2026, UTC+8</div>
       <div><span>Institutional window</span>18–19 September 2026, UTC+8</div>
-      <div><span>Indexing</span>noindex / bounded reading</div>
+      <div><span>Indexing</span>indexable / bounded reading</div>
     </div>
     <p class="genre"><b>Field type</b> — external public-discourse observation, follow-up layer (≠ repository evidence). <b>Status</b> — dated, verify-only case specimen; the 2026-08-18 specimen is preserved as written (follow-up ≠ revision; later evidence ≠ earlier error).</p>
   </header>

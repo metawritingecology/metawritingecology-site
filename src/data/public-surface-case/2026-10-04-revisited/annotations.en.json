@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 3,
+  "status": "editorial-draft-not-published",
+  "proposedRoute": "/artistic-research/public-surface-case/2026-10-04-revisited/",
+  "title": "Revisiting the October 4 Slice",
+  "subtitle": "A further reading within the preserved essay",
+  "caseDate": "2026-10-04",
+  "originalSelectionCutoff": "2026-10-04T12:30:00+08:00",
+  "laterNewsSelectionEnd": "2026-10-04T22:29:00+08:00",
+  "annotationPreparationDate": "2026-10-05",
+  "timezone": "Asia/Taipei",
+  "original": {
+    "route": "/artistic-research/public-surface-case/2026-10-04/",
+    "repository": "metawritingecology/metawritingecology-site",
+    "commit": "3e0c0c527bcbc003a9b49e23656c78eb08645ddb",
+    "manuscriptPath": "src/data/public-surface-case/2026-10-04/article.en.md",
+    "manuscriptBlob": "15273ad63062feb0c6a5b1b6376f73f26621dde8",
+    "renderedBodyPath": "src/data/public-surface-case/2026-10-04/rendered-body.en.html",
+    "renderedBodyBlob": "e31e68cc002b59c14f985c20232367adaa18afcf",
+    "modelCommit": "ab5304b71fee9fb2f78f6f32997f2fa2109fb83f",
+    "manuscriptSha256": "3d28c4ebc0836624839665be1e0985d499f3c06bc5aed024750ccfeb824c94b9",
+    "renderedBodySha256": "0a441ccfa93e718501f1a76f684e2e65d7478388687356c95fd503ea855d0881"
+  },
+  "framing": [
+    "The October 4 essay is reproduced below without rewriting its text. Later observations enter between the passages they return to, marked by a fine side rule and a date. The two readings remain distinguishable while they are read together.",
+    "The original selection ended at 12:30 UTC+8. This further reading follows selected reporting through the evening of October 4. All news times on this page are Taiwan time (UTC+8). Source and verification details can be opened beside each addition. The original essay, its reading branches, source list, and manuscript metadata remain available on their own page."
+  ],
+  "navigation": {
+    "indexLabel": "Revisit the October 4 Slice — with later evidence",
+    "originalLinkLabel": "Read the original October 4 page",
+    "originalPageNewLinkLabel": "Read the expanded October 4 reading",
+    "evidenceDetailsLabel": "Sources and verification",
+    "expandedReadingLabel": "Read the expanded October 4 reading"
+  },
+  "annotations": [
+    {
+      "id": "reading-boundary",
+      "originalFragment": null,
+      "label": "Reading boundary",
+      "title": "Two observation windows",
+      "kind": "source-boundary",
+      "body": [
+        "The later reading begins at this boundary. Keeping the earlier selection visible allows a change in the record to be observed without making the first reading appear to have known it already. The additions follow selected news reports published after the original cutoff through 22:29 on October 4. Guinness and the pinned MWE definitions supply separate points of comparison and interpretation."
+      ],
+      "sourceIds": [
+        "original",
+        "udn-alliance"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 2,
+        "textExact": "Case date: October 4, 2026. Current-discourse window: October 3–4, 2026, UTC+8. The author's publication cutoff for the selected current news reports is October 4 at 12:30 UTC+8; this is a boundary for this selection, not a claim to have captured every report or subsequent development.",
+        "textSha256": "9976115fe9d516b53aba3701973d95b6973fe571af3df1b01cd2027b745f41ea",
+        "viewAnchor": "original-p-2"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R1: Two observation windows",
+        "defaultOpen": false,
+        "body": [
+          "The later news selection runs after the original 12:30 Taiwan time cutoff through the United Daily News report published at 22:29 Taiwan time on 4 October 2026. Publication and update times locate reports, not necessarily the conduct, interview, or statement described.",
+          "The original essay link identifies the preserved first selection. The final news report in the later selection is linked here; the other news sources are linked with the additions below. Guinness is an external comparator and the pinned model files are conceptual references, not new October 4 events."
+        ],
+        "sourceIds": [
+          "original",
+          "udn-alliance"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T22:29:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "comment-count",
+      "originalFragment": "#cite-4-1",
+      "label": "Later report",
+      "title": "A larger count and the same limit",
+      "kind": "later-evidence",
+      "body": [
+        "By the evening of October 4, TVBS reported more than 500,000 comments beneath Chiang Wan-an's October 3 drug-policy Facebook post. Placing that reported total beside the 377,004 listed by Guinness World Records for comments on one Facebook item in 24 hours can invite another reading: the comment field as a quantity set against a record.",
+        "This is a comparison proposed here. The selected reports do not establish a matched 24-hour counting window or formal recognition of a new record. Nor does a larger reported total turn comments into unique people. The work of explaining the policy remains inside the same field as repetition, disagreement, and competing accounts of what the number means; the total cannot separate those activities for us."
+      ],
+      "sourceIds": [
+        "tvbs-count",
+        "guinness-24h"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 10,
+        "textExact": "Public responses introduced another way of reading. Media coverage of the same dispute recorded responses from physician Tu Cheng-che and health official Lin Ching-yi, who also has a medical background, as well as people in the arts and cultural sectors. Some supplied details of the systems; others explained harm reduction from the perspective of medical work.30 The more than 300,000 comments reported in the news cannot be converted directly into the same number of people, much less used to establish commenters' occupations or sexual orientations.4 The count itself can support competing stories: public anger, partisan mobilization, or coordinated online activity. It establishes none of those explanations by itself. What can be identified in the cited responses is narrower: named people reconnecting the equipment with its preventive purpose. A connection that had initially required only a few words now had to encounter a longer explanation.",
+        "textSha256": "429bd3a1717f5233ec030f5bb7d93e4ee3cf8d6598db7159565d64cdc8f2cf82",
+        "viewAnchor": "original-p-10"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R2: A larger count and the same limit",
+        "defaultOpen": false,
+        "body": [
+          "TVBS lists publication at 20:45 Taiwan time and an update at 20:45 Taiwan time on October 4. Its report concerns the October 3 drug-policy post, not a separate post about the Commander D search. The original essay retains its separately sourced more-than-300,000 figure; this addition does not construct a verified counter history or a growth rate between the two reports.",
+          "Guinness' public 24-hour category lists 377,004, achieved by Indian Trinity on April 8, 2012. The site warns that records may not be published online immediately. No native Facebook counter, exact posting timestamp, complete 24-hour sequence, or formal Guinness recognition of this post has been independently verified here."
+        ],
+        "sourceIds": [
+          "tvbs-count",
+          "guinness-24h"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T20:45:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "recording-and-admission",
+      "originalFragment": "#cite-3-2",
+      "label": "Later evidence",
+      "title": "The police account changes",
+      "kind": "later-evidence",
+      "body": [
+        "Later reporting adds an institutional response to the questions about language at the scene. FTV describes human-rights groups releasing surveillance footage and an audio recording during the protest. CNA records an earlier police denial of humiliating language toward a disabled person, followed by an acknowledgment, after reviewing footage, that an officer's words and conduct had been improper. The police said administrative discipline had been imposed.",
+        "The earlier denial must now be read alongside that subsequent acknowledgment. This changes the institution's public account; it does not answer why customers were taken to the police station as a group, what procedural status each person held, or how those present experienced the language used at the scene. Those questions remain open. The acknowledgment is also not a judicial determination about the operation as a whole."
+      ],
+      "sourceIds": [
+        "ftv-footage",
+        "cna-police"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 15,
+        "textExact": "Why customers were taken to the police station as a group, what procedural status each person held, and how those present experienced the language used at the scene remain separate questions.327 The warrant, the procedures for taking people to the station, and customers' accounts each have different evidentiary limits. Whether other venues were targeted at the same time, or whether there was a coordinated operation, cannot be filled in with material from this one establishment.",
+        "textSha256": "490df45c63272ee89bb00d04ddebfebe93b5ef619e4c5150c88f17254a360f35",
+        "viewAnchor": "original-p-15"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R3: The police account changes",
+        "defaultOpen": false,
+        "body": [
+          "FTV lists publication at 17:39 Taiwan time and an update at 17:39 Taiwan time on October 4. The paragraph uses its report of audiovisual material being released; no independent playback, authentication, or complete archive of the recordings is claimed.",
+          "CNA lists publication on October 4 at 15:48 Taiwan time and an update at 17:12 Taiwan time. Its body records the earlier denial and later acknowledgment and administrative discipline. The publication history does not independently timestamp either police statement."
+        ],
+        "sourceIds": [
+          "ftv-footage",
+          "cna-police"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T17:39:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "search-and-inspections",
+      "originalFragment": "#cite-27-1",
+      "label": "Scope clarification",
+      "title": "The warrant and the other venues",
+      "kind": "scope-clarification",
+      "body": [
+        "According to the police account reported by CNA, the warrant-based search of Commander D was distinct from inspections at other establishments during an expanded inspection operation that police said had been planned beforehand. Information about other venues has therefore entered the record, but it arrives as an attributed account with distinctions that the image of several venues under police attention can readily lose.",
+        "Reading these actions together requires keeping their grounds and procedures apart. The warrant for one establishment cannot become an explanation of every action elsewhere; neither can the acknowledgment of improper language decide every remaining procedural objection. The expanded account makes a more detailed inquiry possible. It does not yet supply the complete record of the operation."
+      ],
+      "sourceIds": [
+        "cna-police"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 15,
+        "textExact": "Why customers were taken to the police station as a group, what procedural status each person held, and how those present experienced the language used at the scene remain separate questions.327 The warrant, the procedures for taking people to the station, and customers' accounts each have different evidentiary limits. Whether other venues were targeted at the same time, or whether there was a coordinated operation, cannot be filled in with material from this one establishment.",
+        "textSha256": "490df45c63272ee89bb00d04ddebfebe93b5ef619e4c5150c88f17254a360f35",
+        "viewAnchor": "original-p-15"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R4: The warrant and the other venues",
+        "defaultOpen": false,
+        "body": [
+          "CNA lists publication on October 4 at 15:48 Taiwan time and an update at 17:12 Taiwan time. The source was read in that updated form. The 17:12 source timestamp does not establish when the search-versus-inspection wording was first added or when the operations were planned.",
+          "The distinction and the claim of prior planning are attributed to the police account reported by CNA, rather than treated as an independently reconstructed operational history. The selected material does not include the complete warrant, each person's procedural record, a complete independent investigation, or a judicial determination of all disputed measures. Conflicting headcounts are not combined."
+        ],
+        "sourceIds": [
+          "cna-police"
+        ]
+      },
+      "afterInsertionId": "recording-and-admission",
+      "sourceTimestamp": "2026-10-04T17:12:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "mayoral-apology",
+      "originalFragment": null,
+      "label": "Later response",
+      "title": "An apology enters the record",
+      "kind": "later-evidence",
+      "body": [
+        "By the evening, an apology had entered this arrangement. United Daily News reported Chiang Wan-an apologizing to those who had been offended, describing the discriminatory incident as contrary to the city's principles, and calling for review and stronger police discipline. That response now belongs beside the earlier call for enforcement.",
+        "The mayor's position in the public account consequently changes again: the office that called for enforcement is also called upon to answer for how people were treated. The apology makes that response visible. It does not reconstruct the operational decisions between an administrative directive and the actions at the scene. Following responsibility still requires those intermediate relations, even after a public figure has acknowledged that something went wrong."
+      ],
+      "sourceIds": [
+        "udn-apology"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 16,
+        "textExact": "Public images, however, do not wait for every question to be answered before they are read. Simply appearing in footage of a search may place a venue in the position of the “suspect”; viewers may then extend that position to everyone inside. The same arrangement can also be read from the other direction. Put the mayor beside the police, the search, and the campaign dispute, and a story of directly ordered political repression may seem to complete itself. The September directive is documented; an instruction determining the search's specific methods or coordinating it with the drug-policy attack is not established here. Both readings require the missing relations to be demonstrated. Place, identity, office, and temporal proximity cannot supply them on their own.",
+        "textSha256": "ef068c9b71a7195ac1d2ad4b51eb9e59af10050d9a0f19888c9c529c849adb1f",
+        "viewAnchor": "original-p-16"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R5: An apology enters the record",
+        "defaultOpen": false,
+        "body": [
+          "United Daily News published the cited report on October 4 at 21:35. That is a publication time, not an independently verified interview time. The reporting describes an apology to those offended and a call for review; it does not establish who directed a specific tactic."
+        ],
+        "sourceIds": [
+          "udn-apology"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T21:35:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "cost-and-recurrence",
+      "originalFragment": "#cite-36-1",
+      "label": "Further reading",
+      "title": "Repair work acquires a longer account",
+      "kind": "authored-reading",
+      "body": [
+        "The evening reporting adds an account of the recurrence of this explanatory work. United Daily News records the Taiwan Alliance to Promote Civil Partnership Rights describing repeated efforts by LGBTQ and human-rights groups to petition, propose changes, and monitor disputed policing. The alliance criticized a recurring sequence of individual discipline, gender-equity education, monitoring, and closure.",
+        "That account extends the question of cost beyond the work produced by a single controversy. If similar disputes return after those responses and closure, some of the work of assembling records and explaining the problem may have to be performed again, rather than accumulating as a settled gain. The statement gives this concern a public form; whether those burdens enter the authorities' decisions or change procedures remains a question for the subsequent record."
+      ],
+      "sourceIds": [
+        "udn-alliance",
+        "mwe-cost"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 34,
+        "textExact": "The Cost Visibility and Redistribution Model turns attention to what these movements may consume, and where that cost can enter a decision.36 Some of the work is new: checking an older text, distinguishing clinical programs, answering a claim, comparing photographs, or reconstructing the procedure applied to a customer. The cited material records instances of such explanation. It does not measure their total duration or establish who has carried the greatest share.",
+        "textSha256": "b0a28191724cc7ec869751204dc81d5f8b44cc85eb2c5fa3030afee207d8e894",
+        "viewAnchor": "original-p-34"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R6: Repair work acquires a longer account",
+        "defaultOpen": false,
+        "body": [
+          "United Daily News published its report on the alliance's statement at 22:29 on October 4. The report also records the mayor's apology; it does not establish the order in which the two statements were made.",
+          "The statement is the organization's account of repeated experience. This reading does not measure the frequency, duration, total cost, or distribution of the work it describes. The conditional interpretation uses the pinned Cost Visibility and Redistribution Model definition."
+        ],
+        "sourceIds": [
+          "udn-alliance",
+          "mwe-cost"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T22:29:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    },
+    {
+      "id": "responsibility-after-recognition",
+      "originalFragment": "#cite-33-2",
+      "label": "Further reading",
+      "title": "Recognition and responsibility",
+      "kind": "authored-reading",
+      "body": [
+        "The later reports also describe different positions in this work. FTV reports human-rights groups releasing recordings at a protest; CNA records the police acknowledgment of improper conduct; United Daily News records the alliance's objections and the mayor's response. These are specific reported actions, not a complete record of preservation or circulation. The ability to make an event visible does not give a customer or advocacy group authority to change police procedures.",
+        "Responsibility Alignment keeps attention on the distance between the work performed and the authority available to alter its conditions. The alliance's account gives a reason to investigate recurrence; the selected reports still do not establish Residual Stabilizer Dependency or identify one final bearer. The next thing to observe is whether recognition produces an inspectable account of decisions and procedures, with responsibility remaining with the bodies able to change them."
+      ],
+      "sourceIds": [
+        "ftv-footage",
+        "cna-police",
+        "udn-apology",
+        "udn-alliance",
+        "mwe-responsibility"
+      ],
+      "target": {
+        "kind": "top-level-paragraph",
+        "index": 39,
+        "textExact": "The model names a stronger, repeated condition Residual Stabilizer Dependency: formal responsibility stays unclear while a capable node keeps absorbing unassigned work.33 These responses do not establish that dependency or identify a sole final bearer. They leave a question to follow across episodes: who keeps being called back to explain, and what authority travels with that work?",
+        "textSha256": "c8648a85b526255dc3e679d27708217ba29dfcb1a28e6f96866de7f9d775d755",
+        "viewAnchor": "original-p-39"
+      },
+      "visible": true,
+      "display": "interleaved-prose",
+      "placement": "after-target-paragraph",
+      "uiLabel": "Added reading · 4 October, evening",
+      "details": {
+        "summary": "Sources and verification · R7: Recognition and responsibility",
+        "defaultOpen": false,
+        "body": [
+          "The interpretation uses the same pinned Responsibility Alignment Model version as the first essay. Its distinctions among ownership, scope, authority, visibility, capacity, burden, and accountability do not determine legal liability.",
+          "The selected reports identify particular actions and a claim of recurrence, but do not independently establish the stronger repeated condition described by Residual Stabilizer Dependency.",
+          "The source timestamp of 22:29 Taiwan time refers to the alliance report on October 4, the latest selected news item used here. It is not the timestamp of a separate event or of this interpretation. The release of recordings is attributed specifically to FTV's report."
+        ],
+        "sourceIds": [
+          "ftv-footage",
+          "cna-police",
+          "udn-apology",
+          "udn-alliance",
+          "mwe-responsibility"
+        ]
+      },
+      "sourceTimestamp": "2026-10-04T22:29:00+08:00",
+      "timestampRole": "source publication/update boundary; not independently verified event time"
+    }
+  ],
+  "sources": [
+    {
+      "id": "original",
+      "title": "The Syringe Changes Its Place in the Sentence",
+      "url": "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md",
+      "kind": "fixed-original"
+    },
+    {
+      "id": "ftv-footage",
+      "title": "FTV report on surveillance footage, audio, protest, and police response",
+      "url": "https://www.ftvnews.com.tw/news/detail/2026A04S05M1",
+      "publishedAt": "2026-10-04T17:39:00+08:00",
+      "kind": "news-report",
+      "verification": "FTV article text retrieved again by web search on 2026-10-04; report describes human-rights groups releasing footage and audio. No independent audiovisual playback or authentication."
+    },
+    {
+      "id": "cna-police",
+      "title": "CNA report on the search and the police acknowledgment",
+      "url": "https://www.cna.com.tw/news/asoc/202610040116.aspx",
+      "publishedAt": "2026-10-04T15:48:00+08:00",
+      "updatedAt": "2026-10-04T17:12:00+08:00",
+      "kind": "news-report",
+      "verification": "Article body directly read in cloud browser"
+    },
+    {
+      "id": "udn-apology",
+      "title": "United Daily News report on Chiang Wan-an's apology",
+      "url": "https://udn.com/news/amp/story/7320/9794369",
+      "publishedAt": "2026-10-04T21:35:00+08:00",
+      "kind": "news-report",
+      "verification": "Retrieved through web search; publication time is not interview time"
+    },
+    {
+      "id": "udn-alliance",
+      "title": "United Daily News report on the Taiwan Alliance to Promote Civil Partnership Rights statement",
+      "url": "https://udn.com/news/amp/story/7266/9794427",
+      "publishedAt": "2026-10-04T22:29:00+08:00",
+      "kind": "news-report",
+      "verification": "Retrieved through web search; original statement not independently obtained"
+    },
+    {
+      "id": "tvbs-count",
+      "title": "TVBS report of more than 500,000 comments",
+      "url": "https://news.tvbs.com.tw/politics/4031544",
+      "publishedAt": "2026-10-04T20:45:00+08:00",
+      "kind": "news-report",
+      "verification": "Verified by parallel research; native Facebook counter not independently obtained"
+    },
+    {
+      "id": "guinness-24h",
+      "title": "Guinness World Records: Most comments on a Facebook item in 24 hours",
+      "url": "https://www.guinnessworldrecords.com/world-records/most-comments-on-a-facebook-item-in-24-hours",
+      "kind": "official-record-page",
+      "verification": "Verified by parallel research; listed benchmark, not confirmation of a new record"
+    },
+    {
+      "id": "mwe-cost",
+      "title": "Cost Visibility and Redistribution Model",
+      "url": "https://github.com/metawritingecology/meta-writing-ecology/blob/ab5304b71fee9fb2f78f6f32997f2fa2109fb83f/cost-visibility-redistribution.md#L81-L150",
+      "kind": "fixed-concept-definition"
+    },
+    {
+      "id": "mwe-responsibility",
+      "title": "Responsibility Alignment Model",
+      "url": "https://github.com/metawritingecology/meta-writing-ecology/blob/ab5304b71fee9fb2f78f6f32997f2fa2109fb83f/responsibility-alignment-model.md#L81-L150",
+      "kind": "fixed-concept-definition"
+    }
+  ],
+  "renderMode": "interleaved-visible-prose",
+  "renderingContract": {
+    "originalContent": "Preserve source HTML and all original text, source IDs, branches and combinations",
+    "insertions": "Visible sibling blocks between original paragraphs, identified by data-review-insertion",
+    "collapsibleContent": "Only source and verification details, never the principal new prose",
+    "removalInvariant": "Removing all insertion blocks and unwrapping any view-only anchors yields byte-identical original body HTML",
+    "indexEntry": "Artistic Research primary October 4 entry points to the new expanded reading",
+    "originalAccess": "Original URL remains separately accessible with visible two-way navigation"
+  },
+  "wordCounts": {
+    "framing": 95,
+    "visibleAdditions": 818,
+    "collapsibleDetails": 593,
+    "allNewProse": 1506
+  },
+  "visualLayer": {
+    "palette": "one blue-green addition palette; original warm colors unchanged",
+    "background": "#182427",
+    "text": "#d5e8e6",
+    "label": "#9bbfc1",
+    "rule": "#52777b",
+    "link": "#b7d9d7",
+    "notColorOnly": "Each addition has an Added reading label and fine side rule",
+    "notEvidenceStatus": "Color identifies the later layer, not proof or severity"
+  },
+  "revision": "mwe-1004-revisited-review-v2",
+  "previousRevision": "mwe-1004-revisited-review-v1"
+}

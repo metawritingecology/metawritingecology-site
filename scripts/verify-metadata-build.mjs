@@ -61,6 +61,14 @@ const PAGES_DIR = new URL("../src/pages/", import.meta.url);
 const INTERACTIVE_ROUTE = "/public-surface-map/interactive/";
 const PROTOTYPE_ROUTE = "/language-pressure-test-lab-prototype/";
 const NOT_FOUND_PROBE = "/package-d-metadata-verifier-404-probe/";
+// Exact authorized promotions, independent of the registry and total count.
+const INDEXABLE_CASE_ROUTES = [
+  "/artistic-research/public-surface-case/2026-08-18/",
+  "/artistic-research/public-surface-case/2026-09-19/",
+  "/artistic-research/public-surface-case/2026-10-04/",
+  "/artistic-research/public-surface-case/2026-10-04-revisited/"
+];
+const UNCHANGED_NOINDEX_CASE_ROUTE = "/artistic-research/public-surface-case/2026-08-22/";
 const JSON_ENDPOINTS = [
   "/public-surface-map/data/manifest.json",
   "/public-surface-map/data/snapshots/3219fa03149b4bf1a229f059b4912b632028422b-3b1e5993a52cbce340b85472fea1ae5ea6f921cf8f7751d2d635edc7b17216ea.json"
@@ -457,7 +465,11 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   const { expected, findings: robotsFindings } = buildExpectedRouteSet({ pagesDir: PAGES_DIR });
   for (const f of robotsFindings) check(false, "ROBOTS_CONTRACT", "page robots contract unambiguous", f.message);
   const indexableRoutes = [...expected].sort();
-  check(indexableRoutes.length === 42, "INDEXABLE_COUNT", "exactly 42 indexable routes", `${indexableRoutes.length}`);
+  check(indexableRoutes.length === 46, "INDEXABLE_COUNT", "exactly 46 indexable routes", `${indexableRoutes.length}`);
+  for (const route of INDEXABLE_CASE_ROUTES) {
+    check(expected.has(route), "CASE_INDEXABLE_MEMBER", "authorized case is in the independently derived indexable set", route);
+  }
+  check(!expected.has(UNCHANGED_NOINDEX_CASE_ROUTE), "UNCHANGED_CASE_NOT_INDEXABLE", "August 22 remains outside the indexable set", UNCHANGED_NOINDEX_CASE_ROUTE);
 
   // Every indexable route is registered in the Package D registry.
   for (const route of indexableRoutes) {
@@ -470,7 +482,7 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   }
 
   await withLocalServer(async (origin, renderRoute) => {
-    // --- 42 indexable routes ---------------------------------------------
+    // --- 46 indexable routes ---------------------------------------------
     for (const route of indexableRoutes) {
       const policy = ROUTE_METADATA_REGISTRY[route];
       const expectedLang = policy ? policy.language : "en";
@@ -514,12 +526,33 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
       );
       const wp = webpages[0] ?? {};
       const ws = websites[0] ?? {};
+      // Named, actually rendered head contract for the four case routes,
+      // including August 18. This is additional to every general gate below.
+      if (INDEXABLE_CASE_ROUTES.includes(route)) {
+        check(
+          m.robotsCount === 0 &&
+            m.canonicalCount === 1 &&
+            m.canonical === `${PRODUCTION_ORIGIN}${route}` &&
+            m.htmlLang === "en" &&
+            m.jsonLdCount === 1 &&
+            m.jsonLdParseOk === true &&
+            webpages.length === 1 &&
+            wp.url === `${PRODUCTION_ORIGIN}${route}` &&
+            wp.inLanguage === "en" &&
+            !Object.hasOwn(wp, "genre"),
+          "CASE_RENDERED_HEAD",
+          "case renders one production self-canonical and genre-free WebPage, with en and no robots meta",
+          route
+        );
+      }
       check(wp.name === m.title, "WEBPAGE_NAME", "WebPage name equals title", route);
       check(wp.description === m.description, "WEBPAGE_DESC_PARITY", "WebPage description equals meta description", route);
       check(wp.url === m.canonical, "WEBPAGE_URL", "WebPage url equals canonical", `${route} -> ${wp.url}`);
       check(wp.inLanguage === m.htmlLang, "WEBPAGE_INLANGUAGE", "WebPage inLanguage equals html lang", `${route} -> ${wp.inLanguage}`);
       if (expectedGenre !== undefined) {
         check(wp.genre === expectedGenre, "WEBPAGE_GENRE", "WebPage genre preserved exactly", `${route} -> ${wp.genre}`);
+      } else {
+        check(!Object.hasOwn(wp, "genre"), "WEBPAGE_NO_GENRE", "no unapproved genre is inferred", route);
       }
       // WebSite semantics preserved exactly.
       check(ws.name === WEBSITE_NODE.name, "WEBSITE_NAME", "WebSite name preserved", route);

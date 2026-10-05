@@ -1,15 +1,31 @@
 ---
 import "../../../styles/global.css";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import {
+  resolvePublicMetadata,
+  buildJsonLd,
+  APPROVED_PRODUCTION_ORIGIN
+} from "../../../lib/publicMetadata";
+
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: "Public Surface Case — 2026-08-18",
+  description: "A bounded artistic-research reading of how a public controversy can move from public readability toward a performable civic surface. External public-discourse observation, not repository evidence and not event verification.",
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={publicMetadata.language}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Public Surface Case — 2026-08-18</title>
-  <meta name="description" content="A bounded artistic-research reading of how a public controversy can move from public readability toward a performable civic surface. External public-discourse observation, not repository evidence and not event verification." />
+  <title>{publicMetadata.title}</title>
+  <meta name="description" content={publicMetadata.description} />
+  <link rel="canonical" href={publicMetadata.canonicalUrl} />
+  {jsonLd && <SchemaJsonLd data={jsonLd} />}
   <style>
     :root { --deep:#15130f; --raised:#24211c; --max:920px; }
     *{box-sizing:border-box}
@@ -108,7 +124,7 @@ import "../../../styles/global.css";
     <div class="date-row">
       <div><span>Case date</span>18 August 2026</div>
       <div><span>Evidence window</span>13–18 August 2026, UTC+8</div>
-      <div><span>Indexing</span>noindex / bounded reading</div>
+      <div><span>Indexing</span>indexable / bounded reading</div>
     </div>
     <p class="genre"><b>Field type</b> — external public-discourse observation (≠ repository evidence). <b>Status</b> — dated, verify-only case specimen (case specimen ≠ event commentary).</p>
   </header>

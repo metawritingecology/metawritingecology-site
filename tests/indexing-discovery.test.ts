@@ -1670,7 +1670,13 @@ test("forbidden origins: functional URLs flagged, prose platform names are not",
 // Canonical parity contract at the source level (SSR routes are not in dist)
 // ===========================================================================
 
-test("canonical parity: every sitemap-eligible page renders through BaseLayout", () => {
+test("canonical parity: eligible pages use BaseLayout or the four exact standalone metadata contracts", () => {
+  const standalone = new Set([
+    "/artistic-research/public-surface-case/2026-08-18/",
+    "/artistic-research/public-surface-case/2026-09-19/",
+    "/artistic-research/public-surface-case/2026-10-04/",
+    "/artistic-research/public-surface-case/2026-10-04-revisited/"
+  ]);
   const known = knownRouteSet();
   for (const route of known) {
     if (!isSitemapEligible(route)) continue;
@@ -1678,7 +1684,16 @@ test("canonical parity: every sitemap-eligible page renders through BaseLayout",
     assert.ok(source, `no source for ${route}`);
     const text = readFileSync(source, "utf8");
     const usesBaseLayout = /layout:\s*[^\n]*BaseLayout\.astro/.test(text) || /import\s+BaseLayout\s+from/.test(text);
-    assert.ok(usesBaseLayout, `sitemap route ${route} must render through BaseLayout for its self-canonical`);
+    if (standalone.has(route)) {
+      assert.match(text, /resolvePublicMetadata\(\{/);
+      assert.match(text, /route:\s*Astro\.url\.pathname/);
+      assert.equal((text.match(/rel="canonical"/g) ?? []).length, 1, route);
+      assert.match(text, /rel="canonical"\s+href=\{publicMetadata\.canonicalUrl\}/);
+      assert.match(text, /buildJsonLd\(publicMetadata, siteOrigin\)/);
+      assert.match(text, /<SchemaJsonLd data=\{jsonLd\}/);
+    } else {
+      assert.ok(usesBaseLayout, `sitemap route ${route} must render through BaseLayout for its self-canonical`);
+    }
   }
 });
 
@@ -1733,48 +1748,57 @@ test("expanded adjacency view: noindex, excluded, with extension-bearing JSON en
   );
 });
 
-test("public surface case 2026-08-18: standalone noindex page, exact-path excluded", () => {
-  const page = rd("src/pages/artistic-research/public-surface-case/2026-08-18.astro");
-  // Standalone page: hand-written head with a noindex,nofollow robots meta and
-  // no BaseLayout / self-canonical.
-  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(page));
-  assert.ok(!/BaseLayout/.test(page) && !/rel="canonical"/.test(page));
-
-  // The exact route is in the exclusion set and is not sitemap-eligible.
-  const route = "/artistic-research/public-surface-case/2026-08-18/";
-  assert.ok(SITEMAP_EXCLUDED_PATHS.has(route));
-  assert.equal(isSitemapEligible(route), false);
-
-  // Exact-path (not prefix) matching: an adjacent date is NOT auto-excluded.
-  const adjacent = "/artistic-research/public-surface-case/2026-08-19/";
-  assert.ok(!SITEMAP_EXCLUDED_PATHS.has(adjacent));
-  assert.equal(isSitemapEligible(adjacent), true);
+test("the selected public surface cases are standalone, indexable and sitemap-eligible", () => {
+  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited"]) {
+    const page = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+    const route = `/artistic-research/public-surface-case/${date}/`;
+    assert.equal(classifyRobots(page, route).status, "indexable");
+    assert.ok(!/name="robots"/i.test(page));
+    assert.ok(!/BaseLayout/.test(page));
+    assert.equal((page.match(/rel="canonical"/g) ?? []).length, 1);
+    assert.match(page, /rel="canonical"\s+href=\{publicMetadata\.canonicalUrl\}/);
+    assert.match(page, /route:\s*Astro\.url\.pathname/);
+    assert.ok(/resolvePublicMetadata/.test(page));
+    assert.ok(/<SchemaJsonLd data=\{jsonLd\}/.test(page));
+    assert.ok(!SITEMAP_EXCLUDED_PATHS.has(route));
+    assert.equal(isSitemapEligible(route), true);
+  }
+  // The later reading still links to the independently accessible August page.
+  const followup = rd("src/pages/artistic-research/public-surface-case/2026-09-19.astro");
+  assert.ok(followup.includes('href="/artistic-research/public-surface-case/2026-08-18/"'));
+  // The unrelated second-order machine-reading specimen remains excluded.
+  const untouched = rd("src/pages/artistic-research/public-surface-case/2026-08-22.astro");
+  const untouchedRoute = "/artistic-research/public-surface-case/2026-08-22/";
+  assert.equal(classifyRobots(untouched, untouchedRoute).status, "noindex");
+  assert.match(untouched, /name="robots"\s+content="noindex, ?nofollow"/i);
+  assert.ok(!/rel=["']canonical["']/i.test(untouched));
+  assert.ok(!/BaseLayout/.test(untouched));
+  assert.ok(SITEMAP_EXCLUDED_PATHS.has(untouchedRoute));
+  assert.equal(isSitemapEligible(untouchedRoute), false);
+  for (const adjacent of ["2026-08-19", "2026-09-20", "2026-10-05"]) {
+    const adjacentRoute = `/artistic-research/public-surface-case/${adjacent}/`;
+    assert.ok(!SITEMAP_EXCLUDED_PATHS.has(adjacentRoute));
+    assert.equal(isSitemapEligible(adjacentRoute), true);
+  }
+  for (const date of ["2026-08-18", "2026-09-19"]) {
+    const page = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+    assert.ok(page.includes('<div><span>Indexing</span>indexable / bounded reading</div>'));
+    assert.ok(!page.includes('<div><span>Indexing</span>noindex / bounded reading</div>'));
+  }
 });
 
-test("public surface case 2026-09-19: standalone noindex follow-up, exact-path excluded, sibling untouched", () => {
-  const page = rd("src/pages/artistic-research/public-surface-case/2026-09-19.astro");
-  // Standalone page: hand-written head with a noindex,nofollow robots meta and
-  // no BaseLayout / self-canonical.
-  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(page));
-  assert.ok(!/BaseLayout/.test(page) && !/rel="canonical"/.test(page));
-
-  // The exact route is in the exclusion set and is not sitemap-eligible.
-  const route = "/artistic-research/public-surface-case/2026-09-19/";
-  assert.ok(SITEMAP_EXCLUDED_PATHS.has(route));
-  assert.equal(isSitemapEligible(route), false);
-
-  // Exact-path (not prefix) matching: an adjacent date is NOT auto-excluded.
-  const adjacent = "/artistic-research/public-surface-case/2026-09-20/";
-  assert.ok(!SITEMAP_EXCLUDED_PATHS.has(adjacent));
-  assert.equal(isSitemapEligible(adjacent), true);
-
-  // The follow-up links to the 2026-08-18 specimen it extends; that sibling
-  // still declares itself noindex and is still excluded (the follow-up does
-  // not change the sibling's indexing contract).
-  assert.ok(page.includes('href="/artistic-research/public-surface-case/2026-08-18/"'));
-  const sibling = rd("src/pages/artistic-research/public-surface-case/2026-08-18.astro");
-  assert.ok(/name="robots"\s+content="noindex, ?nofollow"/i.test(sibling));
-  assert.ok(SITEMAP_EXCLUDED_PATHS.has("/artistic-research/public-surface-case/2026-08-18/"));
+test("the revisited route consumes separate composed data and the shared metadata head", () => {
+  const page = rd("src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro");
+  assert.match(page, /2026-10-04-revisited\/rendered-body\.en\.html\?raw/);
+  assert.match(page, /2026-10-04-revisited\/metadata\.en\.json/);
+  assert.match(page, /2026-10-04-revisited\/annotations\.en\.json/);
+  assert.match(page, /set:html=\{bodyHTML\}/);
+  assert.match(page, /title:\s*reviewMetadata\.title/);
+  assert.match(page, /description:\s*reviewMetadata\.description/);
+  assert.match(page, /buildJsonLd\(publicMetadata, siteOrigin\)/);
+  assert.match(page, /<html\s+lang=\{publicMetadata\.language\}/);
+  assert.match(page, /href=\{review\.original\.route\}/);
+  assert.doesNotMatch(page, /name="robots"/i);
 });
 
 // ===========================================================================
@@ -1874,10 +1898,14 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 42 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 46 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 42);
+  assert.equal(expected.size, 46);
+  assert.ok(expected.has("/artistic-research/public-surface-case/2026-08-18/"));
+  assert.ok(expected.has("/artistic-research/public-surface-case/2026-09-19/"));
+  assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04/"));
+  assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04-revisited/"));
   assert.ok(expected.has("/about/"));
   assert.ok(expected.has("/"));
   assert.ok(!expected.has("/language-pressure-test-lab-prototype/"));
@@ -3263,4 +3291,26 @@ test("verifier root-fatal: invalid child root extracts ZERO URL entries and no r
 test("constants: production origin and 404 path are the approved values", () => {
   assert.equal(PRODUCTION_ORIGIN, "https://metawritingecology.org");
   assert.equal(NOT_FOUND_PATH, "/404/");
+});
+
+
+test("GitHub syntax: only the exact pinned original website manuscript is admitted", () => {
+  const original = "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md";
+  assert.equal(isValidGithubSourceUrl(original), true);
+  for (const allowedRepos of [new Set(), new Set(["metawritingecology/meta-writing-ecology"])]) {
+    assert.equal(isValidGithubSourceUrl(original, { allowedRepos }), false);
+    assert.equal(classifyGithubOccurrence({kind: "autolink", value: original}, { allowedRepos }), "invalid");
+  }
+  const explicitWebsite = new Set(["metawritingecology/metawritingecology-site"]);
+  assert.equal(isValidGithubSourceUrl(original, { allowedRepos: explicitWebsite }), true);
+  assert.equal(classifyGithubOccurrence({kind: "autolink", value: original}, { allowedRepos: explicitWebsite }), "source");
+  for (const invalid of [
+    original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "main"),
+    original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "f3fc935f03a5a32c43f973180a93feb4381eb6f7"),
+    original.replace("article.en.md", "metadata.en.json"),
+    original.replace("/blob/", "/tree/"),
+    original.replace("/src/data/", "/src//data/"),
+    original + "?raw=1", original + "#L1", original + "/",
+    "https://github.com/metawritingecology/metawritingecology-site"
+  ]) assert.equal(isValidGithubSourceUrl(invalid), false, invalid);
 });

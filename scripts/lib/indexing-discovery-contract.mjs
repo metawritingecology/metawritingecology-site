@@ -53,14 +53,8 @@ export const SITEMAP_EXCLUDED_PATHS = new Set([
   "/artistic-research/public-slice/2026-07-31/",
   // noindex,nofollow bounded public slice, permission reading (not in feed)
   "/artistic-research/public-slice/2026-08-07/",
-  // noindex,nofollow bounded public surface case, external-field reading (not in feed)
-  "/artistic-research/public-surface-case/2026-08-18/",
   // noindex,nofollow bounded public surface case, second-order machine reading (not in feed)
   "/artistic-research/public-surface-case/2026-08-22/",
-  // noindex,nofollow bounded public surface case, follow-up to the 2026-08-18 external-field reading (not in feed)
-  "/artistic-research/public-surface-case/2026-09-19/",
-  // noindex,nofollow independent bounded public surface case (not in feed)
-  "/artistic-research/public-surface-case/2026-10-04/",
   // noindex,nofollow expanded adjacency view (self-canonical, not in feed)
   "/public-surface-map/expanded/"
 ]);
@@ -666,6 +660,10 @@ export function isValidGithubSourceUrl(
   }
 
   const repo = `${parts[0]}/${parts[1]}`;
+  // One immutable original-manuscript source used by the revisited case.
+  // Do not admit the website repository generally or normalize lookalike URLs.
+  const pinnedOriginal = "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md";
+  if (value === pinnedOriginal && allowedRepos === ALLOWED_GITHUB_REPOS) return true;
   if (!allowedRepos.has(repo)) return false;
   if (parts.length === 2) return true; // repository root
 
