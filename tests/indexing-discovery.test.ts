@@ -3297,6 +3297,13 @@ test("constants: production origin and 404 path are the approved values", () => 
 test("GitHub syntax: only the exact pinned original website manuscript is admitted", () => {
   const original = "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md";
   assert.equal(isValidGithubSourceUrl(original), true);
+  for (const allowedRepos of [new Set(), new Set(["metawritingecology/meta-writing-ecology"])]) {
+    assert.equal(isValidGithubSourceUrl(original, { allowedRepos }), false);
+    assert.equal(classifyGithubOccurrence({kind: "autolink", value: original}, { allowedRepos }), "invalid");
+  }
+  const explicitWebsite = new Set(["metawritingecology/metawritingecology-site"]);
+  assert.equal(isValidGithubSourceUrl(original, { allowedRepos: explicitWebsite }), true);
+  assert.equal(classifyGithubOccurrence({kind: "autolink", value: original}, { allowedRepos: explicitWebsite }), "source");
   for (const invalid of [
     original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "main"),
     original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "f3fc935f03a5a32c43f973180a93feb4381eb6f7"),

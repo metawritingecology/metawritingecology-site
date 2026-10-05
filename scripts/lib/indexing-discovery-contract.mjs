@@ -663,7 +663,7 @@ export function isValidGithubSourceUrl(
   // One immutable original-manuscript source used by the revisited case.
   // Do not admit the website repository generally or normalize lookalike URLs.
   const pinnedOriginal = "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md";
-  if (value === pinnedOriginal) return true;
+  if (value === pinnedOriginal && allowedRepos === ALLOWED_GITHUB_REPOS) return true;
   if (!allowedRepos.has(repo)) return false;
   if (parts.length === 2) return true; // repository root
 

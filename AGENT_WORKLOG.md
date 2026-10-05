@@ -83,3 +83,10 @@ Removed the redundant newly drafted three-sentence explanation. Counts remain se
 
 Validation: twelve artifact checks and five bounded candidate contracts passed. The composition test now strips the two separate historical/film blocks as well as the earlier additions and compares the remainder exactly to the current original. No full build or independent review of this new candidate had run before commit; exact-head Linux CI and Copilot review are required next. No merge performed.
 Review provenance: reviewer interface unknown for these latest additions; lineage unknown; mode unknown; reviewed commit unknown; evidence reference pending PR review. Earlier review approval does not cover this new material.
+
+### 2026-10-05 - Preserve explicit GitHub source-policy restrictions
+
+Restricted the exact pinned-manuscript exception to the default repository policy. Explicit empty or narrower allowlists now reject the URL; an explicit website-repository allowlist follows ordinary validation. Added direct-validator and occurrence-classifier regressions for all three cases. Article, metadata, CSS and interaction behavior are unchanged.
+
+Validation: seven focused assertions passed. The preceding head passed full Linux site-ci and Cloudflare build. This repair requires new exact-head CI and review. No merge performed.
+Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 7ac2c5bb9fe32a6d6c1fc4cb2a3b481de5a7961e; evidence PR #159 review submitted 2026-10-05T18:58:26Z. Real print/accessibility and production-response verification remain incomplete.
