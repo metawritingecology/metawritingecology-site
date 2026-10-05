@@ -4,6 +4,7 @@ import "../../../styles/global.css";
 import "../../../styles/public-surface-case-2026-10-04.css";
 import "../../../styles/public-surface-case-2026-10-04-revisited.css";
 import "../../../styles/public-surface-case-2026-10-05-additions.css";
+import "../../../styles/public-surface-case-2010-historical-reference.css";
 import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
 import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
 import bodyHTML from "../../../data/public-surface-case/2026-10-04-revisited/rendered-body.en.html?raw";
@@ -60,6 +61,7 @@ const { ui } = data;
         {review.framing.map(paragraph => <p>{paragraph}</p>)}
         <p class="review-legend">Warm text retains the original reading. Blue-green passages marked “Added reading” are later additions; their sources and verification details can be opened separately.</p>
         <p class="latest-legend">{latest.legend}</p>
+        <p class="historical-legend">Blue-gray passages marked “Historical reference” introduce a dated historical source. This 2010 material is separate from the October 4–5, 2026 news selections.</p>
       </div>
       <header class="original-head">
         <p class="kicker">Preserved October 4 essay</p>

@@ -74,3 +74,12 @@ Added separate entry headings for the three earlier Public Slices and for the Au
 
 Added a scoped print hover-color override for the earlier seven additions and a regression that rejects its removal. Validation: five focused preservation/grouping/print tests passed; source hashes synchronized through exact text transformations. The isolated original renderer was not run and no dependency installation was performed. The preceding head passed full Linux CI; this head needs fresh CI and Copilot review. Real print-engine and complete accessibility evidence remain outstanding. No merge performed.
 Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 05d160e636ec9c13ca54a49f88c134cef2086394; evidence PR #159 third review. Its additional hover finding is addressed here; earlier open threads are not manually marked resolved.
+
+### 2026-10-05 - Historical quotation and short film transition
+
+Added the approved two-sentence reference to the 2009 television film Prayers for Bobby, followed by a separately dated 18 September 2010 excerpt from Chen Chun-ju, mother of Yeh Yung-chih. Chinese quotation and labelled English translation are visible; source/date limitations are in a separate disclosure. CivilMedia's 27 September 2010 publication date remains distinct from the event. The film is not presented as influencing Chen or dating a real council speech; neither mother is presented as responding to the 2026 case.
+
+Removed the redundant newly drafted three-sentence explanation. Counts remain seven earlier additions, three October 5 news additions, one historical source and one short film transition. No original essay argument or existing addition changed, apart from the separately recorded approved publication-state cleanup. No homepage change is included.
+
+Validation: twelve artifact checks and five bounded candidate contracts passed. The composition test now strips the two separate historical/film blocks as well as the earlier additions and compares the remainder exactly to the current original. No full build or independent review of this new candidate had run before commit; exact-head Linux CI and Copilot review are required next. No merge performed.
+Review provenance: reviewer interface unknown for these latest additions; lineage unknown; mode unknown; reviewed commit unknown; evidence reference pending PR review. Earlier review approval does not cover this new material.

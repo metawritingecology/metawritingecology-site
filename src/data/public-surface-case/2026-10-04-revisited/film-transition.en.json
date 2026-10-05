@@ -1,0 +1,11 @@
+{
+  "id": "film-prayers-for-bobby-2009",
+  "label": "Film reference · 2009",
+  "approvedText": "In the 2009 television film Prayers for Bobby, based on Mary Griffith’s life, a mother’s address to a city council asks adults to consider how their words reach the children listening. A related appeal emerges from Chen Chun-ju’s own experience of loss: her public words turn toward protecting other children and affirming their right to be themselves.",
+  "sources": [
+    {"title": "Prayers for Bobby — official production website", "url": "https://prayersforbobby.com/", "supports": "Television production and adaptation of Mary Griffith’s life; scene described as part of the film"},
+    {"title": "Mary Griffith — A Prayer for Bobby on Coming Out Day", "url": "https://www.advocate.com/commentary/2019/10/11/prayer-bobby-coming-out-day", "publishedAt": "2019-10-11", "supports": "First-person account identifying the film as 2009; not a date for a real council speech"}
+  ],
+  "limits": ["No film dialogue quoted", "No claim that the film influenced Chen", "No transfer of Mary's self-blame onto Chen", "No assertion of the real-life council speech date", "No claim of either mother responding to the 2026 case"],
+  "status": "user-approved two-sentence transition; candidate not independently reviewed or pushed"
+}
