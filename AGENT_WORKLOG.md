@@ -58,3 +58,10 @@ Addressed the first PR review's remaining technical findings: load the October 5
 
 Validation: three focused regression tests passed. The preceding head passed full Linux site-ci and Cloudflare build; the new head requires its own CI and review. Real-browser print layout remains unverified.
 Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 2e1fa81b537274c3065cc5fd54f68bf235239903; evidence PR #159 inline review. This repair is pending re-review. No merge performed.
+
+### 2026-10-05 - Composed-reading preservation regressions and entry boundaries
+
+Restored the Artistic Research introduction's existing authored-comparison, source-evidence and non-causality qualifications beside the new links. Added committed composition checks for byte-identical recovery of the original after removing seven earlier and three latest insertions, unique IDs, resolved fragments, closed source disclosures and visible main paragraphs. Negative mutations cover altered original text, duplicate IDs, broken fragments and prose moved inside a disclosure. Essay bodies remain unchanged.
+
+Validation: two focused tests and their negative mutations passed; preceding head 13bc27ee76d6b52f7f162aef095a0eeffbafd72f passed full Linux site-ci. This head requires fresh CI and review. The second Copilot review confirmed stylesheet order, retained earlier open threads, and suggested these additional regressions and restored boundaries. Real-browser print and accessibility coverage remain incomplete; no merge performed.
+Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 13bc27ee76d6b52f7f162aef095a0eeffbafd72f; evidence PR #159 second review.

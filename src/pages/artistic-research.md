@@ -176,7 +176,7 @@ The 2026 pair below reads one field twice: first at the moment a cultural templa
 
 [Follow-up — 19 September 2026](/artistic-research/public-surface-case/2026-09-19/)
 
-The October 4 essay follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation.
+The October 4 essay follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation. The comparisons are authored; the sources retain their own evidentiary limits. Optional reading branches and timelines expose the selected material without establishing causal relations.
 
 The October 4 essay is read again with later observations inserted beside the passages they return to. The earlier text is preserved in full, while the added paragraphs follow changes in the public record and keep unresolved questions visible. The original page remains available separately.
 

@@ -191,3 +191,47 @@ test('revisited print fallback and October 5 stylesheet precedence stay scoped',
  const latest=read('src/styles/public-surface-case-2026-10-05-additions.css');
  assert(latest.slice(latest.indexOf('@media print{')).includes('.review-2026-10-04 .latest-insertion{background:#f4eff7;color:#2d2338;border-left-color:#77638d}'));
 });
+
+test('revisited composition preserves the original and all ten visible additions', () => {
+ const dir='src/data/public-surface-case/2026-10-04-revisited/';
+ const composed=read(dir+'rendered-body.en.html');
+ const earlier=JSON.parse(read(dir+'annotations.en.json')).annotations;
+ const latest=JSON.parse(read(dir+'latest-updates.en.json')).blocks;
+ const decode=s=>s.replace(/<[^>]+>/g,'').replace(/&#(?:39|x27);/g,"'").replace(/&quot;/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&');
+ const verify=body=>{
+  const blocks=[...body.matchAll(/\n<!-- BEGIN (REVIEW|LATEST) INSERTION ([a-z-]+) -->\n([\s\S]*?)\n<!-- END \1 INSERTION \2 -->/g)];
+  assert.equal(blocks.filter(m=>m[1]==='REVIEW').length,7);
+  assert.equal(blocks.filter(m=>m[1]==='LATEST').length,3);
+  assert.equal(new Set(blocks.map(m=>m[2])).size,10);
+  let stripped=body; for(const m of blocks) stripped=stripped.replace(m[0],'');
+  assert.equal(stripped,html,'removing only the ten insertions recovers the original bytes');
+  const ids=[...body.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+  assert.equal(ids.length,new Set(ids).size,'unique composed IDs');
+  const idSet=new Set(ids); for(const m of body.matchAll(/href="#([^"]+)"/g)) assert(idSet.has(m[1]),m[1]);
+  for(const note of [...earlier,...latest]) {
+   const block=blocks.find(m=>m[2]===note.id); assert(block,note.id);
+   assert.equal((block[3].match(/<details\b/g)||[]).length,1,note.id);
+   assert(!/<details\b[^>]*\bopen\b/.test(block[3]),'sources initially closed');
+   const main=block[3].slice(0,block[3].indexOf('<details'));
+   assert(!/\bhidden\b|display\s*:\s*none|visibility\s*:\s*hidden/.test(main));
+   for(const paragraph of Array.isArray(note.body)?note.body:[note.body]) assert(decode(main).includes(paragraph),note.id+' main prose stays outside details');
+  }
+ };
+ verify(composed);
+ assert.throws(()=>verify(composed.replace('This independent Public Surface Case','Changed original text')));
+ assert.throws(()=>verify(composed.replace('id="review-note-reading-boundary"','id="source-1"')));
+ assert.throws(()=>verify(composed.replace('href="#review-evidence-reading-boundary"','href="#missing-review-target"')));
+ const first=composed.indexOf('data-review-insertion="reading-boundary"');
+ const start=composed.indexOf('</p><p>',first)+4, end=composed.indexOf('</p><details',start)+4;
+ const paragraph=composed.slice(start,end);
+ assert(paragraph.startsWith('<p>')&&paragraph.endsWith('</p>'));
+ const moved=composed.slice(0,start)+composed.slice(end);
+ const at=moved.indexOf('</summary>',start)+10;
+ assert.throws(()=>verify(moved.slice(0,at)+paragraph+moved.slice(at)));
+});
+
+test('Artistic Research retains the original comparison and causality boundaries', () => {
+ const intro=read('src/pages/artistic-research.md');
+ assert(intro.includes('The comparisons are authored; the sources retain their own evidentiary limits.'));
+ assert(intro.includes('Optional reading branches and timelines expose the selected material without establishing causal relations.'));
+});
