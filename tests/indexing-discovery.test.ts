@@ -1670,7 +1670,13 @@ test("forbidden origins: functional URLs flagged, prose platform names are not",
 // Canonical parity contract at the source level (SSR routes are not in dist)
 // ===========================================================================
 
-test("canonical parity: every sitemap-eligible page renders through BaseLayout", () => {
+test("canonical parity: eligible pages use BaseLayout or the four exact standalone metadata contracts", () => {
+  const standalone = new Set([
+    "/artistic-research/public-surface-case/2026-08-18/",
+    "/artistic-research/public-surface-case/2026-09-19/",
+    "/artistic-research/public-surface-case/2026-10-04/",
+    "/artistic-research/public-surface-case/2026-10-04-revisited/"
+  ]);
   const known = knownRouteSet();
   for (const route of known) {
     if (!isSitemapEligible(route)) continue;
@@ -1678,7 +1684,16 @@ test("canonical parity: every sitemap-eligible page renders through BaseLayout",
     assert.ok(source, `no source for ${route}`);
     const text = readFileSync(source, "utf8");
     const usesBaseLayout = /layout:\s*[^\n]*BaseLayout\.astro/.test(text) || /import\s+BaseLayout\s+from/.test(text);
-    assert.ok(usesBaseLayout, `sitemap route ${route} must render through BaseLayout for its self-canonical`);
+    if (standalone.has(route)) {
+      assert.match(text, /resolvePublicMetadata\(\{/);
+      assert.match(text, /route:\s*Astro\.url\.pathname/);
+      assert.equal((text.match(/rel="canonical"/g) ?? []).length, 1, route);
+      assert.match(text, /rel="canonical"\s+href=\{publicMetadata\.canonicalUrl\}/);
+      assert.match(text, /buildJsonLd\(publicMetadata, siteOrigin\)/);
+      assert.match(text, /<SchemaJsonLd data=\{jsonLd\}/);
+    } else {
+      assert.ok(usesBaseLayout, `sitemap route ${route} must render through BaseLayout for its self-canonical`);
+    }
   }
 });
 
@@ -3276,4 +3291,19 @@ test("verifier root-fatal: invalid child root extracts ZERO URL entries and no r
 test("constants: production origin and 404 path are the approved values", () => {
   assert.equal(PRODUCTION_ORIGIN, "https://metawritingecology.org");
   assert.equal(NOT_FOUND_PATH, "/404/");
+});
+
+
+test("GitHub syntax: only the exact pinned original website manuscript is admitted", () => {
+  const original = "https://github.com/metawritingecology/metawritingecology-site/blob/3e0c0c527bcbc003a9b49e23656c78eb08645ddb/src/data/public-surface-case/2026-10-04/article.en.md";
+  assert.equal(isValidGithubSourceUrl(original), true);
+  for (const invalid of [
+    original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "main"),
+    original.replace("3e0c0c527bcbc003a9b49e23656c78eb08645ddb", "f3fc935f03a5a32c43f973180a93feb4381eb6f7"),
+    original.replace("article.en.md", "metadata.en.json"),
+    original.replace("/blob/", "/tree/"),
+    original.replace("/src/data/", "/src//data/"),
+    original + "?raw=1", original + "#L1", original + "/",
+    "https://github.com/metawritingecology/metawritingecology-site"
+  ]) assert.equal(isValidGithubSourceUrl(invalid), false, invalid);
 });
