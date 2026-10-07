@@ -90,3 +90,15 @@ Restricted the exact pinned-manuscript exception to the default repository polic
 
 Validation: seven focused assertions passed. The preceding head passed full Linux site-ci and Cloudflare build. This repair requires new exact-head CI and review. No merge performed.
 Review provenance: interface GitHub Copilot PR reviewer; lineage unknown; mode sequential; reviewed commit 7ac2c5bb9fe32a6d6c1fc4cb2a3b481de5a7961e; evidence PR #159 review submitted 2026-10-05T18:58:26Z. Real print/accessibility and production-response verification remain incomplete.
+
+### 2026-10-07 - Desktop homepage article entries
+
+Agent: AI-assisted implementation.
+Task: Integrate the approved editorial desktop artwork and article copy as two reading groups after the homepage introduction.
+Files changed: src/components/DesktopArticleEntries.astro, src/pages/index.astro, AGENT_WORKLOG.md.
+Build / tests run: Source-preservation checks passed: removing the new import and component call recovers the original homepage exactly; both desktop SVGs and three approved links match the accepted preview; SVG XML is valid; mobile SVGs and mobile-specific styles are excluded. Original desktop preview rendering and article-link keyboard focus were checked. The integrated Astro build, full Linux site-ci and exact-head review remain pending.
+Result: The new entries are displayed only at viewport widths of 1024 CSS pixels and above. Narrower layouts retain the existing homepage. The August/September pair remains one reading group, and the October revisited essay remains a separate group. Existing prose, navigation, search, metadata, global styles and diagnostic components are preserved.
+Unresolved questions: Integrated browser verification and exact-head CI/review. Phone, touch and other responsive variants remain a separate task and are not included.
+Risks or assumptions: The accepted standalone preview is source material, not a replacement for BaseLayout. Automatic branch builds may update the live site; the owner accepted that possibility for this desktop-only PR before push. No merge is requested.
+Review provenance: reviewer interface unknown for this integration; reviewer lineage unknown; review mode unknown; reviewed commit unknown; review evidence reference pending PR review. Earlier source/preview checks do not constitute independent review of this integration.
+Inventory: Main and all current remote branches and PRs were checked before this append. Previously owner-declared separate/held work remains separate under the dispositions recorded in PR #127; reviewed portions of #146/#147 were integrated by #151, and #148/#149 were followed by the public-worklog cleanup. Other applicable feature branches are merged. Open dependency PRs #153, #155, #156 and #158 are listed separately and excluded. No other branch is integrated.
