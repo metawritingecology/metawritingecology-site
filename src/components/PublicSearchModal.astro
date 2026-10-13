@@ -421,7 +421,8 @@ const endpoint = "https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudfl
 
     const open = () => {
       if (isOpen) return;
-      returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      returnFocus = document.activeElement instanceof HTMLElement || document.activeElement instanceof SVGElement
+        ? document.activeElement : null;
       isOpen = true;
       dialog.hidden = false;
       backdrop.hidden = false;

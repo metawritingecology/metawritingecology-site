@@ -1,0 +1,20 @@
+{
+  "base_commit": "f424b80d7ad5fe526c1415565ee97abe3daee33b",
+  "pages": {
+    "src/pages/artistic-research/public-slice/2026-07-25.astro": "19675532a8fd5e4a0772811d7acfdb6b7a1257f83c7285773f1bb3f6698e0481",
+    "src/pages/artistic-research/public-slice/2026-07-31.astro": "67b987d1955e24388f128948189cdd5efc73e99c1d5f6367d50e7975aa2fefe7",
+    "src/pages/artistic-research/public-slice/2026-08-07.astro": "f055edfc7c0430c6c957200318f7bf479237297e6971888ea365cb87ef96034d",
+    "src/pages/artistic-research/public-surface-case/2026-08-18.astro": "262dc76f94e2c8873fffea97e80708aacd6b420fb74240c2f0b814fcdc7e74f0",
+    "src/pages/artistic-research/public-surface-case/2026-08-22.astro": "e5b82d5cdae2072923ab848b9a4cc9d3b7011fa87c997a95ff793673cd7d8274",
+    "src/pages/artistic-research/public-surface-case/2026-09-19.astro": "0446046003a99691dca522c610a8ad37159ea4534c8b0d8f3c2a1be532159a2a",
+    "src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro": "68f8e775f9a03b86cf10766d38fdbd0995818a5d0296f7a79ded755b2e07257a",
+    "src/pages/artistic-research/public-surface-case/2026-10-04.astro": "a0b4d6f9c476edb6602ca9b50961e7882c2af18f2e290febae226a3e3037e183"
+  },
+  "exceptions": {
+    "src/pages/404.astro": "0eaec7ae4902f1c331136711ed966c3b76e177af62b70a4579782d30682264b7",
+    "src/pages/language-pressure-test-lab-prototype.astro": "278681c1603b8231723881af213e90c30ec2728bee2366ff861fc7c093b8a96d"
+  },
+  "shared_header_whitespace_normalized": "7e7718a0039b112316ac9b34e0e504cf0ce6a8ebaa12c4edf2738f7996838945",
+  "shared_footer_whitespace_normalized": "62a677ff7a330b2dac463eecd9f9bab290607d265a90dc13cdb06f7610ec3941",
+  "case_stylesheet": "6fddc36cd9f4a5fdd848e2bfee380151efcdfa8dc852819790ecd0e1536f87dd"
+}

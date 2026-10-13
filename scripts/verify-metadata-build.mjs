@@ -344,7 +344,7 @@ export async function awaitReady(
   return false;
 }
 
-async function withLocalServer(fn, options) {
+export async function withLocalServer(fn, options) {
   const {
     port,
     fetchImpl = globalThis.fetch,
