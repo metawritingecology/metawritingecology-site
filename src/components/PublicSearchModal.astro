@@ -134,6 +134,7 @@ const endpoint = "https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudfl
     let controller = null;
     let debounceTimer = null;
     let isOpen = false;
+    let returnFocus = null;
 
     const normalizeQuery = (value) => value.trim().toLowerCase().replace(/\s+/g, " ");
 
@@ -420,6 +421,7 @@ const endpoint = "https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudfl
 
     const open = () => {
       if (isOpen) return;
+      returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       isOpen = true;
       dialog.hidden = false;
       backdrop.hidden = false;
@@ -433,6 +435,8 @@ const endpoint = "https://66a032cb-79af-46cb-82f1-2576f76bae9d.search.ai.cloudfl
       dialog.hidden = true;
       backdrop.hidden = true;
       document.documentElement.classList.remove("public-search-open");
+      if (returnFocus?.isConnected) returnFocus.focus();
+      returnFocus = null;
     };
 
     document.addEventListener("click", (event) => {
