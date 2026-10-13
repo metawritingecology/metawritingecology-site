@@ -132,6 +132,13 @@
   .plate { min-height: 340px; display: flex; align-items: center; }
   .plate-copy { width: 60%; margin: 35px 0 35px 12px; background: transparent; padding: 17px 24px; }
 
+  /* Retain artwork proportions inside the wider desktop homepage container.
+     Touch devices keep the accepted composition. */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .plate { aspect-ratio: 712 / 340; }
+    .plate-copy { max-width: 460px; }
+  }
+
   @media (max-width: 700px) {
     .plate { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
     .plate-art { display: none; }
