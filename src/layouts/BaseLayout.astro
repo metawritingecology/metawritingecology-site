@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
-import PublicSearchModal from "../components/PublicSearchModal.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 import SchemaJsonLd from "../components/SchemaJsonLd.astro";
 import {
@@ -72,52 +73,12 @@ const jsonLd = buildJsonLd(metadata, siteOrigin);
   </head>
 
   <body>
-    <header class="site-header">
-      <nav class="site-nav">
-        <a href="/">Home</a>
-        <button
-          class="site-search-trigger"
-          type="button"
-          data-search-modal-trigger
-          aria-label="Search public MWE surfaces"
-        >
-          Search public MWE surfaces
-        </button>
-
-        <a href="/about/">About</a>
-
-        <a href="/surfaces/">Entry</a>
-
-        <a href="/atlas/">Atlas</a>
-
-        <a href="/models/">Models</a>
-
-        <a href="/fiction/">Fiction</a>
-
-        <a href="/artistic-research/">Artistic Research</a>
-
-        <a href="/publications/">Publications</a>
-
-        <a href="/ai-readable-knowledge-architecture/">AI Architecture</a>
-
-        <a href="/zh/">中文</a>
-      </nav>
-
-      <PublicSearchModal />
-    </header>
+    <SiteHeader />
 
     <main class={mainClass}>
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <p>
-        Meta-Writing Ecology is a selective public-facing orientation surface. It
-        supports bounded conceptual, structural, and case-based interpretation
-        while withholding the full working corpus, complete applied methodology,
-        and internal operating layers required to reconstruct the full working
-        system. See <a href="/boundary/">Boundary</a>.
-      </p>
-    </footer>
+    <SiteFooter />
   </body>
 </html>

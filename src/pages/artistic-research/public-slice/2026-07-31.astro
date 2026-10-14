@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import "../../../styles/global.css";
 
 // Local typed constant for this one page, matching the shape used by
@@ -162,6 +164,7 @@ const MEASUREMENTS: readonly Measurement[] = [
     />
   </head>
   <body>
+    <SiteHeader articleShell />
     <main class="slice">
       <header class="slice-head">
         <h1>Public Slice &mdash; 2026-07-31</h1>
@@ -546,7 +549,8 @@ measure quality, difficulty, or how much of the work was thinking rather than ty
         <a href="/artistic-research/">Return to Artistic Research</a>
       </nav>
     </main>
-  </body>
+      <SiteFooter articleShell />
+</body>
 </html>
 
 <style>

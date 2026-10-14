@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import "../../../styles/global.css";
 ---
 
@@ -15,11 +17,11 @@ import "../../../styles/global.css";
     *{box-sizing:border-box}
     html{background:var(--bg);scroll-behavior:smooth}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
-    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
-    a:hover{color:var(--link-hover)}
-    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
-    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
-    p{margin:0}
+    :global(:where(main)) a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    :global(:where(main)) a:hover{color:var(--link-hover)}
+    :global(:where(main)) a:focus-visible,:global(:where(main)) summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    :global(:where(main)) h1,:global(:where(main)) h2,:global(:where(main)) h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    :global(:where(main)) p{margin:0}
     code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
     main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
     .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
@@ -100,7 +102,7 @@ import "../../../styles/global.css";
     .one-sentence strong{color:var(--text);font-weight:600}
     .boundary-note{margin-top:22px;max-width:48rem;color:var(--muted);font-size:.85rem}
 
-    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+    footer:not(.site-footer){max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
 
     @media(max-width:760px){
       main{padding:50px 18px 74px}.case-head h1{font-size:2.2rem}
@@ -112,6 +114,7 @@ import "../../../styles/global.css";
   </style>
 </head>
 <body>
+    <SiteHeader articleShell />
 <main>
   <header class="case-head">
     <p class="kicker">Artistic Research / Public Surface Case</p>
@@ -361,6 +364,7 @@ not that non-compliance is inherently virtuous</pre>
     <p class="boundary-note">This is a bounded reading of one public surface, held at a fixed date. An external score is not repository evidence and does not become one by being cited here; where this page does use repository evidence it names the file and the commit. A case-local formulation is not a Registry entry, and an external score is neither validation nor indictment. The evaluators behaved correctly throughout; what is on display is the distance between behaving correctly and measuring the thing that changed.</p>
   </section>
 </main>
-<footer>An external score is not validation, and is not repository evidence. Repository evidence appears here only where it is named as such. This page studies how machine evaluators read a public surface and what each attempts to make it become; it does not rank the evaluators and does not treat any of their rubrics as canonical.</footer>
+<footer role="note">An external score is not validation, and is not repository evidence. Repository evidence appears here only where it is named as such. This page studies how machine evaluators read a public surface and what each attempts to make it become; it does not rank the evaluators and does not treat any of their rubrics as canonical.</footer>
+    <SiteFooter articleShell />
 </body>
 </html>

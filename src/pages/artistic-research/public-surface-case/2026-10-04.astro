@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import "../../../styles/global.css";
 import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
 import {
@@ -45,6 +47,7 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
     {jsonLd && <SchemaJsonLd data={jsonLd} />}
   </head>
   <body>
+    <SiteHeader articleShell />
     <a class="skip" href="#article">{ui.skip}</a>
     <main>
       <header class="case-head">
@@ -67,5 +70,6 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
     <!-- Ordered classic scripts preserve the vendored window.d3 contract. -->
     <script is:inline src="/assets/public-surface-case/2026-10-04/d3.v7.9.0.min.js"></script>
     <script is:inline src="/assets/public-surface-case/2026-10-04/branch-app.js"></script>
-  </body>
+      <SiteFooter articleShell />
+</body>
 </html>

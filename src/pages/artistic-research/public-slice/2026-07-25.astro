@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import "../../../styles/global.css";
 
 // Local typed constant for this one page. Deliberately not a content
@@ -199,6 +201,7 @@ const MOMENTS: readonly Moment[] = [
     />
   </head>
   <body>
+    <SiteHeader articleShell />
     <main class="slice">
       <header class="slice-head">
         <h1>Public Slice — 2026-07-25</h1>
@@ -317,7 +320,8 @@ const MOMENTS: readonly Moment[] = [
         <a href="/artistic-research/">Return to Artistic Research</a>
       </nav>
     </main>
-  </body>
+      <SiteFooter articleShell />
+</body>
 </html>
 
 <style>
