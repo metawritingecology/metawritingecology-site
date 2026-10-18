@@ -1,0 +1,36 @@
+---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
+import "../../../styles/global.css";
+import "../../../styles/public-surface-case-2026-10-18.css";
+import bodyHTML from "../../../data/public-surface-case/2026-10-18/rendered-body.en.html?raw";
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: "France Protests 2026: When History Returns to the Street",
+  description: "A dated reading of France’s 2026 protests alongside Taiwan and Hong Kong, tracing music, historical memory, public claims, and cross-border learning.",
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
+---
+<!doctype html>
+<html lang={publicMetadata.language}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>{publicMetadata.title}</title>
+  <meta name="description" content={publicMetadata.description} />
+  <link rel="canonical" href={publicMetadata.canonicalUrl} />
+  {jsonLd && <SchemaJsonLd data={jsonLd} />}
+</head>
+<body>
+  <SiteHeader articleShell />
+  <a class="skip" href="#article">Skip to article</a>
+  <main id="article" set:html={bodyHTML} />
+  <footer role="note">External public-discourse observation ≠ repository evidence. This dated page does not revise the earlier specimens.</footer>
+  <SiteFooter articleShell />
+</body>
+</html>

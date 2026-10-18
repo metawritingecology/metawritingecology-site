@@ -194,6 +194,12 @@ The October 4 essay is read again with later observations inserted beside the pa
 
 [Original Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
 
+#### 18 October 2026 — When History Returns to the Street
+
+The 18 October reading follows songs, public symbols, and gestures of care through the French protests, alongside selected movements in Taiwan and Hong Kong. It asks how earlier struggles become available to new gatherings, how public promises turn into claims, and what it costs to remain in the street.
+
+[Enter Public Surface Case — 18 October 2026](/artistic-research/public-surface-case/2026-10-18/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

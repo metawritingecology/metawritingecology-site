@@ -49,14 +49,15 @@ const INTERACTIVE = "/public-surface-map/interactive/";
 const EXPANDED = "/public-surface-map/expanded/";
 
 // The two noindex interactive previews. Every other registered route is one of
-// the 46 indexable routes.
+// the 47 indexable routes.
 const NOINDEX_PREVIEWS = [INTERACTIVE, EXPANDED];
 // An explicit technical metadata scope; no genre is inferred for these pages.
 const CASE_ROUTES = [
   "/artistic-research/public-surface-case/2026-08-18/",
   "/artistic-research/public-surface-case/2026-09-19/",
   "/artistic-research/public-surface-case/2026-10-04/",
-  "/artistic-research/public-surface-case/2026-10-04-revisited/"
+  "/artistic-research/public-surface-case/2026-10-04-revisited/",
+  "/artistic-research/public-surface-case/2026-10-18/"
 ];
 const registeredRoutes = getRegisteredRoutes();
 const indexableRegistered = registeredRoutes.filter((r) => !NOINDEX_PREVIEWS.includes(r));
@@ -80,8 +81,8 @@ test("approved production origin equals Package C PRODUCTION_ORIGIN", () => {
 
 // --- 1 / 3: registration count and cardinality -----------------------------
 
-test("registry has exactly 46 indexable routes and 2 interactive noindex routes", () => {
-  assert.equal(indexableRegistered.length, 46);
+test("registry has exactly 47 indexable routes and 2 interactive noindex routes", () => {
+  assert.equal(indexableRegistered.length, 47);
   for (const route of NOINDEX_PREVIEWS) {
     const policy = getRoutePolicy(route);
     assert.ok(policy, route);
@@ -92,8 +93,8 @@ test("registry has exactly 46 indexable routes and 2 interactive noindex routes"
     assert.equal(policy.structuredData.type, "WebPage", route);
     assert.equal(policy.language, "en", route);
   }
-  // total registered = 48
-  assert.equal(registeredRoutes.length, 48);
+  // total registered = 49
+  assert.equal(registeredRoutes.length, 49);
   // Each noindex preview is registered exactly once.
   for (const route of NOINDEX_PREVIEWS) {
     assert.equal(registeredRoutes.filter((r) => r === route).length, 1, route);

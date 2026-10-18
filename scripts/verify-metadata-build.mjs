@@ -66,7 +66,8 @@ const INDEXABLE_CASE_ROUTES = [
   "/artistic-research/public-surface-case/2026-08-18/",
   "/artistic-research/public-surface-case/2026-09-19/",
   "/artistic-research/public-surface-case/2026-10-04/",
-  "/artistic-research/public-surface-case/2026-10-04-revisited/"
+  "/artistic-research/public-surface-case/2026-10-04-revisited/",
+  "/artistic-research/public-surface-case/2026-10-18/"
 ];
 const UNCHANGED_NOINDEX_CASE_ROUTE = "/artistic-research/public-surface-case/2026-08-22/";
 const JSON_ENDPOINTS = [
@@ -465,7 +466,7 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   const { expected, findings: robotsFindings } = buildExpectedRouteSet({ pagesDir: PAGES_DIR });
   for (const f of robotsFindings) check(false, "ROBOTS_CONTRACT", "page robots contract unambiguous", f.message);
   const indexableRoutes = [...expected].sort();
-  check(indexableRoutes.length === 46, "INDEXABLE_COUNT", "exactly 46 indexable routes", `${indexableRoutes.length}`);
+  check(indexableRoutes.length === 47, "INDEXABLE_COUNT", "exactly 47 indexable routes", `${indexableRoutes.length}`);
   for (const route of INDEXABLE_CASE_ROUTES) {
     check(expected.has(route), "CASE_INDEXABLE_MEMBER", "authorized case is in the independently derived indexable set", route);
   }
@@ -482,7 +483,7 @@ export async function verifyMetadataBuild({ port, testHooks } = {}) {
   }
 
   await withLocalServer(async (origin, renderRoute) => {
-    // --- 46 indexable routes ---------------------------------------------
+    // --- 47 indexable routes ---------------------------------------------
     for (const route of indexableRoutes) {
       const policy = ROUTE_METADATA_REGISTRY[route];
       const expectedLang = policy ? policy.language : "en";
