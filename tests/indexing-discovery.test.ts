@@ -1670,12 +1670,13 @@ test("forbidden origins: functional URLs flagged, prose platform names are not",
 // Canonical parity contract at the source level (SSR routes are not in dist)
 // ===========================================================================
 
-test("canonical parity: eligible pages use BaseLayout or the four exact standalone metadata contracts", () => {
+test("canonical parity: eligible pages use BaseLayout or the five exact standalone metadata contracts", () => {
   const standalone = new Set([
     "/artistic-research/public-surface-case/2026-08-18/",
     "/artistic-research/public-surface-case/2026-09-19/",
     "/artistic-research/public-surface-case/2026-10-04/",
-    "/artistic-research/public-surface-case/2026-10-04-revisited/"
+    "/artistic-research/public-surface-case/2026-10-04-revisited/",
+    "/artistic-research/public-surface-case/2026-10-18/"
   ]);
   const known = knownRouteSet();
   for (const route of known) {
@@ -1749,7 +1750,7 @@ test("expanded adjacency view: noindex, excluded, with extension-bearing JSON en
 });
 
 test("the selected public surface cases are standalone, indexable and sitemap-eligible", () => {
-  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited"]) {
+  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited", "2026-10-18"]) {
     const page = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
     const route = `/artistic-research/public-surface-case/${date}/`;
     assert.equal(classifyRobots(page, route).status, "indexable");
@@ -1898,14 +1899,15 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 46 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 47 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 46);
+  assert.equal(expected.size, 47);
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-08-18/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-09-19/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04-revisited/"));
+  assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-18/"));
   assert.ok(expected.has("/about/"));
   assert.ok(expected.has("/"));
   assert.ok(!expected.has("/language-pressure-test-lab-prototype/"));
@@ -2221,12 +2223,50 @@ function diagnosticEntryAnchorIds() {
   return ids;
 }
 
+// These case pages declare their section anchors as literal HTML attributes.
+// Consume complete quoted attribute values so data-id or an id-looking value
+// cannot masquerade as the browser's actual id attribute.
+function caseSectionAnchorIds(source) {
+  const ids = new Set();
+  const html = source.replace(/<!--[\s\S]*?-->/g, "");
+  for (const tag of html.matchAll(/<section\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/g)) {
+    for (const attr of tag[0].slice(8, -1).matchAll(/([^\s=]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
+      if (attr[1].toLowerCase() === "id") ids.add(attr[2] ?? attr[3]);
+    }
+  }
+  return ids;
+}
+
 // Map every target route that a real fragment points at to its source-derived
 // stable anchor set. A fragment whose route is absent here would pass
 // validateInternalLinks unchecked, so the test below asserts coverage.
 function knownFragmentsFromSource() {
-  return new Map([["/diagnostic-entry-layer/", diagnosticEntryAnchorIds()]]);
+  const anchors = new Map([["/diagnostic-entry-layer/", diagnosticEntryAnchorIds()]]);
+  // The 18 October reading cites these two existing sections. Derive their
+  // literal section IDs from the target pages rather than exempting the links.
+  for (const date of ["2026-08-18", "2026-09-19"]) {
+    const source = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+    const ids = caseSectionAnchorIds(source);
+    anchors.set(`/artistic-research/public-surface-case/${date}/`, ids);
+  }
+  return anchors;
 }
+
+test("case anchor extraction rejects data-id replacements of the actual cited sections", () => {
+  for (const [date, id] of [["2026-08-18", "semantic-casting"], ["2026-09-19", "translation"]]) {
+    const source = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+    const route = `/artistic-research/public-surface-case/${date}/`;
+    assert.ok(caseSectionAnchorIds(source).has(id));
+    const mutation = source.replace(` id="${id}"`, ` data-id="${id}"`);
+    assert.notEqual(mutation, source);
+    const ids = caseSectionAnchorIds(mutation);
+    assert.ok(!ids.has(id));
+    assert.equal(validateInternalLinks([`${route}#${id}`], knownRouteSet(), {
+      knownFragments: new Map([[route, ids]])
+    })[0]?.code, "INTERNAL_FRAGMENT_MISSING");
+  }
+  assert.deepEqual([...caseSectionAnchorIds('<section data-note=\' id="fake"\' data-id="alias"></section>')], []);
+});
 
 test("fragment inventory: every real functional fragment resolves to a source-derived stable anchor", () => {
   // Scan the real inventory for internal functional fragment references.
@@ -2278,6 +2318,14 @@ test("fragment inventory: every real functional fragment resolves to a source-de
     })[0]?.code,
     "INTERNAL_FRAGMENT_MISSING"
   );
+
+  for (const date of ["2026-08-18", "2026-09-19"]) {
+    const route = `/artistic-research/public-surface-case/${date}/`;
+    assert.ok(knownFragments.get(route).size > 0);
+    assert.equal(validateInternalLinks([`${route}#no-such-case-section`], knownRoutes, {
+      knownFragments
+    })[0]?.code, "INTERNAL_FRAGMENT_MISSING");
+  }
 
   // Synthetic-fixture checks (retained): the validator resolves a valid heading
   // anchor and rejects a missing one against a purely synthetic route/anchor set.

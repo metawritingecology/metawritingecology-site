@@ -7,7 +7,8 @@ export const DATED_SHELL_ROUTES = [
   '/artistic-research/public-surface-case/2026-08-22/',
   '/artistic-research/public-surface-case/2026-09-19/',
   '/artistic-research/public-surface-case/2026-10-04/',
-  '/artistic-research/public-surface-case/2026-10-04-revisited/'
+  '/artistic-research/public-surface-case/2026-10-04-revisited/',
+  '/artistic-research/public-surface-case/2026-10-18/'
 ];
 export const SHELL_EXCEPTIONS = ['/language-pressure-test-lab-prototype/', '/404/'];
 

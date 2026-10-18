@@ -8,11 +8,12 @@ const read = path => readFileSync(new URL('../'+path,import.meta.url),'utf8').re
 const sha = s => createHash('sha256').update(s).digest('hex');
 const baseline=JSON.parse(read('tests/fixtures/dated-shell-baseline.json'));
 
-test('shell route coverage is exactly the eight approved dates and two preserved exceptions',()=>{
+test('shell route coverage is exactly the nine approved dates and two preserved exceptions',()=>{
  assert.deepEqual(DATED_SHELL_ROUTES,[
   '/artistic-research/public-slice/2026-07-25/','/artistic-research/public-slice/2026-07-31/','/artistic-research/public-slice/2026-08-07/',
   '/artistic-research/public-surface-case/2026-08-18/','/artistic-research/public-surface-case/2026-08-22/','/artistic-research/public-surface-case/2026-09-19/',
-  '/artistic-research/public-surface-case/2026-10-04/','/artistic-research/public-surface-case/2026-10-04-revisited/'
+  '/artistic-research/public-surface-case/2026-10-04/','/artistic-research/public-surface-case/2026-10-04-revisited/',
+  '/artistic-research/public-surface-case/2026-10-18/'
  ]);
  assert.deepEqual(SHELL_EXCEPTIONS,['/language-pressure-test-lab-prototype/','/404/']);
 });
@@ -64,4 +65,25 @@ test('rendered shell counter rejects missing/duplicate shells and ignores script
  for(const s of [valid+valid,valid.replace('class="site-footer"','data-class="site-footer"'),valid.replace('class="site-nav"','class="site-nav-copy"')]) assert.throws(()=>assertShellCounts(shellCounts(s),{present:true,dated:false},'/'));
  assertShellCounts(shellCounts(valid+'<!--'+valid+'--><script>const template='+JSON.stringify(valid)+'</script><style>.x{content:'+JSON.stringify(valid)+'}</style>'),{present:true,dated:false},'/');
  assertShellCounts(shellCounts('<main><header>Article</header><footer>Article boundary</footer></main>'),{present:false,dated:false},'/exception');
+});
+
+test('18 October article is text-only, citation-preserving and free of editing labels', () => {
+ const body=read('src/data/public-surface-case/2026-10-18/rendered-body.en.html');
+ const manuscript=read('src/data/public-surface-case/2026-10-18/article.en.md');
+ const page=read('src/pages/artistic-research/public-surface-case/2026-10-18.astro');
+ assert.equal((body.match(/<h1\b/g)||[]).length,1);
+ assert.equal((body.match(/class="m-num">Movement \d{2}</g)||[]).length,9);
+ assert.doesNotMatch(body,/<(?:img|svg|figure|figcaption)\b/i);
+ assert.doesNotMatch(body+'\n'+manuscript,/\b(?:draft|editorial version|version history|final-edit)\b/i);
+ assert.match(body,/17 octobre 2026 \(#17octobre\)/);
+ assert.equal((body.match(/#17octobre/g)||[]).length,1);
+ assert.match(body,/Event record through 18 October 2026, 04:23 UTC/);
+ const sourceLinks=[...manuscript.matchAll(/\[[^\]]+\]\((https?:\/\/[^\s)]+)\)/g)].map(m=>m[1]);
+ const renderedLinks=[...body.matchAll(/<a href="(https?:\/\/[^"]+)"/g)].map(m=>m[1].replace(/&amp;/g,'&'));
+ assert.equal(sourceLinks.length,54);
+ assert.deepEqual(renderedLinks.map(url=>new URL(url).href),sourceLinks.map(url=>new URL(url).href));
+ assert.match(page,/<SiteHeader articleShell \/>/);
+ assert.match(page,/<SiteFooter articleShell \/>/);
+ assert.match(page,/France Protests 2026: When History Returns to the Street/);
+ assert.doesNotMatch(page,/noindex|og:|twitter:/i);
 });

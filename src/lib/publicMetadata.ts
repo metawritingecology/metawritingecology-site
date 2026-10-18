@@ -205,7 +205,7 @@ function casePage(): RouteMetadataPolicy {
 }
 
 export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolicy>> = {
-  // --- 46 indexable routes -------------------------------------------------
+  // --- 47 indexable routes -------------------------------------------------
   "/": en(),
   "/about/": en(),
   "/ai-readable-knowledge-architecture/": en("AI-readable boundary page"),
@@ -217,6 +217,7 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/artistic-research/public-surface-case/2026-09-19/": casePage(),
   "/artistic-research/public-surface-case/2026-10-04/": casePage(),
   "/artistic-research/public-surface-case/2026-10-04-revisited/": casePage(),
+  "/artistic-research/public-surface-case/2026-10-18/": casePage(),
   "/atlas/": en(),
   "/boundary-preserving-use-conditions/": en(),
   "/boundary/": en(),
