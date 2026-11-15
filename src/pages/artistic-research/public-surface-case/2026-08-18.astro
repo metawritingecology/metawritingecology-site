@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import "../../../styles/global.css";
 import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
 import {
@@ -31,11 +33,11 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
     *{box-sizing:border-box}
     html{background:var(--bg);scroll-behavior:smooth}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:17px;line-height:1.7}
-    a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
-    a:hover{color:var(--link-hover)}
-    a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
-    h1,h2,h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
-    p{margin:0}
+    :global(:where(main)) a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+    :global(:where(main)) a:hover{color:var(--link-hover)}
+    :global(:where(main)) a:focus-visible,:global(:where(main)) summary:focus-visible{outline:2px solid var(--link);outline-offset:4px;border-radius:2px}
+    :global(:where(main)) h1,:global(:where(main)) h2,:global(:where(main)) h3{margin:0;color:var(--text);font-weight:600;line-height:1.22}
+    :global(:where(main)) p{margin:0}
     code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:transparent;padding:0}
     main{max-width:var(--max);margin:0 auto;padding:72px 24px 96px}
     .kicker,.label{font-size:.75rem;letter-spacing:.085em;text-transform:uppercase}
@@ -103,7 +105,7 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
     .one-sentence strong{color:var(--text);font-weight:600}
     .boundary-note{margin-top:22px;max-width:48rem;color:var(--muted);font-size:.85rem}
 
-    footer{max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
+    footer:not(.site-footer){max-width:var(--max);margin:0 auto;padding:30px 24px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.83rem}
 
     @media(max-width:760px){
       main{padding:50px 18px 74px}.case-head h1{font-size:2.2rem}
@@ -115,6 +117,7 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
   </style>
 </head>
 <body>
+    <SiteHeader articleShell />
 <main>
   <header class="case-head">
     <p class="kicker">Artistic Research / Public Surface Case</p>
@@ -262,6 +265,7 @@ not a claim that any one culture uniquely uses templates for public satire</pre>
     <p class="boundary-note">This is a reading across one external public-discourse field, held at a fixed date. It does not confirm the event, and one observed field does not establish a system-wide law. Cultural casting is treated here as a public-reading mechanism, not as factual equivalence.</p>
   </section>
 </main>
-<footer>External public-discourse observation ≠ repository evidence. Cultural readability ≠ factual verification. This page studies how public meaning becomes surface; it does not report, verify, or endorse the field it reads.</footer>
+<footer role="note">External public-discourse observation ≠ repository evidence. Cultural readability ≠ factual verification. This page studies how public meaning becomes surface; it does not report, verify, or endorse the field it reads.</footer>
+    <SiteFooter articleShell />
 </body>
 </html>

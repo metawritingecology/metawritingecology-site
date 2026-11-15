@@ -39,6 +39,7 @@ main {
 }
 
 
+
 h1 {
   font-size: clamp(1.65rem, 2.8vw, 2.3rem);
   margin-bottom: 1rem;
@@ -544,4 +545,16 @@ blockquote {
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.45;
+}
+
+/* Desktop surface width is shared by ordinary pages, navigation and footers.
+   Fine-pointer hover devices only: accepted mobile/touch layouts stay intact.
+   The separate --max token also serves the standalone dated reading pages. */
+@media screen and (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  body { --max-width: 1112px; --max: 1112px; }
+  .site-nav { max-width: 1064px; gap: 16px; align-items: center; }
+  main p { max-width: 80ch; }
+  main .lede { max-width: none; }
+  main img { max-width: 100%; height: auto; }
+  main .slice-head, main .case-head { max-width: none; }
 }
