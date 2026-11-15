@@ -1,0 +1,451 @@
+{
+  "title": "The Syringe Changes Its Place in the Sentence",
+  "subtitle": "A dated reading of how policy language moves between service, danger, and public explanation",
+  "updatedAt": "2026-10-04T11:26:00+08:00",
+  "lanes": [
+    {
+      "id": "health",
+      "label": "Public Health"
+    },
+    {
+      "id": "harm",
+      "label": "Drug Dependence and Harm Reduction"
+    },
+    {
+      "id": "rights",
+      "label": "Human Rights and LGBTQ Lives"
+    },
+    {
+      "id": "debate",
+      "label": "The 2026 Public Controversies"
+    }
+  ],
+  "events": [
+    {
+      "id": "martial",
+      "date": "1949-05-20",
+      "lane": "rights",
+      "title": "Martial Law Begins in Taiwan Province",
+      "summary": "Taiwan and Penghu remained under prolonged martial law until 1987; the dates when it ended in different territories must be distinguished.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://memory.nhrm.gov.tw/NormalNode/Detail/167?MenuNode=11"
+        }
+      ]
+    },
+    {
+      "id": "lift",
+      "date": "1987-07-15",
+      "lane": "rights",
+      "title": "Martial Law Ends in Taiwan and Penghu",
+      "summary": "Martial law ended in Taiwan and Penghu on July 15, 1987.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.president.gov.tw/Page/294/37460"
+        }
+      ],
+      "analysis": "Institutional change and changes in everyday treatment can be compared; the date alone does not establish changes in school culture or policing."
+    },
+    {
+      "id": "changde",
+      "date": "1997-07-30",
+      "lane": "rights",
+      "title": "The Changde Street Police Check Controversy",
+      "summary": "Dozens were taken to a police station between late on July 30 and early on July 31; participants’ accounts differ from those of the police.",
+      "status": "當事方說法",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://time.udn.com/udntime/story/122833/8193216"
+        }
+      ]
+    },
+    {
+      "id": "yeh",
+      "date": "2000-04-20",
+      "lane": "rights",
+      "title": "The Yeh Yung-chih Case",
+      "summary": "Found seriously injured in a school restroom, he died the next day. A history of bullying over gender expression is not proof that he was beaten to death.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://enews.url.com.tw/enews/40296"
+        }
+      ]
+    },
+    {
+      "id": "sars",
+      "date": "2003-04-24",
+      "lane": "health",
+      "title": "Heping Hospital Locked Down During SARS",
+      "summary": "Taiwan CDC records the Heping Hospital lockdown during the 2003 SARS outbreak.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/En/Category/Page/Kou_i6ATU8jUnmKlAORhUA"
+        }
+      ],
+      "analysis": "The essay places hospital infection and coordination problems beside subsequent institutional reforms; this selected chronology is not a full causal account."
+    },
+    {
+      "id": "pride",
+      "date": "2003-11-01",
+      "lane": "rights",
+      "title": "The First Taiwan Pride Parade",
+      "summary": "The Taiwan Pride organizer dates the first parade to November 1, 2003.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.taiwanpride.lgbt/about"
+        }
+      ],
+      "analysis": "The essay reads public visibility beside later civic organizing; this single date does not measure social recognition."
+    },
+    {
+      "id": "nongan",
+      "date": "2004-01-17",
+      "lane": "rights",
+      "title": "The Nong’an Street Police Operation",
+      "summary": "More than 90 people were taken to a police station, prompting concerns about privacy and HIV stigma; sources give differing totals of 92 and 93.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/En/Category/ListContent/TKG-8nvtp3Y1fHxeMxWJ1Q?uaid=XRnv5y8C2y_2FEXUb8e8KQ"
+        }
+      ]
+    },
+    {
+      "id": "genderlaw",
+      "date": "2004-06-23",
+      "lane": "rights",
+      "title": "Gender Equity Education Act Enacted",
+      "summary": "The original law explicitly covered gender characteristics and sexual orientation; gender identity and gender-based bullying were expressly included in later amendments.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.president.gov.tw/Page/294/36006"
+        }
+      ]
+    },
+    {
+      "id": "nhcc",
+      "date": "2005-01-18",
+      "lane": "health",
+      "title": "National Health Command Center Opens",
+      "summary": "A permanent foundation for preparedness, distinct from command centers activated for specific outbreaks.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://covid19.mohw.gov.tw/ch/cp-4833-53636-205.html"
+        }
+      ]
+    },
+    {
+      "id": "harmtrial",
+      "date": "2005-08",
+      "lane": "harm",
+      "title": "Harm Reduction Pilot Launched",
+      "summary": "Official accounts date the launch to August, in response to the HIV epidemic among people who inject drugs.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/Category/ListContent/Hh094B49-DRwe2RR4eFfrQ?uaId=OTzS0HgwOalKc89AV3Uzgw"
+        }
+      ]
+    },
+    {
+      "id": "beach",
+      "date": "2005-09-18",
+      "lane": "rights",
+      "title": "The Honeymoon Bay Attack",
+      "summary": "A near-contemporaneous Judicial Reform Foundation account describes gay men being attacked for kissing and questions whether police protection was adequate.",
+      "status": "當事方說法",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://digital.jrf.org.tw/articles/1520"
+        }
+      ]
+    },
+    {
+      "id": "methadone",
+      "date": "2006-02",
+      "lane": "harm",
+      "title": "Methadone Maintenance Treatment Introduced",
+      "summary": "Expanded nationwide in June of the same year; oral substitution treatment is distinct from needle services.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/Category/ListContent/TKG-8nvtp3Y1fHxeMxWJ1Q?uaid=wFSHiNSbq_yrCxiHnyDN8w"
+        }
+      ]
+    },
+    {
+      "id": "h1n1",
+      "date": "2009-04-28",
+      "lane": "health",
+      "title": "H1N1 Command Center Established",
+      "summary": "The cited CDC record dates establishment of the H1N1 command center to April 28, 2009.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/uploads/files/4c6e5d73-12a1-4b7a-b9a1-486c0c118629.pdf"
+        }
+      ]
+    },
+    {
+      "id": "shenessay",
+      "date": "2014-09-01",
+      "lane": "harm",
+      "title": "Puma Shen Publishes an Essay on Drug Policy",
+      "summary": "Discusses punishment, decriminalization, social work, and harm reduction; its scope is not explicitly limited to methadone.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.thinkingtaiwan.net/content/3055"
+        }
+      ]
+    },
+    {
+      "id": "equality",
+      "date": "2016-12-10",
+      "lane": "rights",
+      "title": "Street Mobilization for Marriage Equality",
+      "summary": "A Ketagalan Boulevard concert and cross-party lobbying accompanied the Equality Bees’ expansion of everyday public outreach.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.awakening.org.tw/publication-content/5059"
+        }
+      ]
+    },
+    {
+      "id": "748",
+      "date": "2017-05-24",
+      "lane": "rights",
+      "title": "Judicial Yuan Interpretation No. 748",
+      "summary": "Affirms constitutional guarantees of freedom to marry and equality, requiring legislation within two years.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://cons.judicial.gov.tw/docdata.aspx?fid=100&id=310929&rn=-7657"
+        }
+      ]
+    },
+    {
+      "id": "referendum",
+      "date": "2018-11-24",
+      "lane": "rights",
+      "title": "Referendums on Marriage and LGBTQ Education",
+      "summary": "The results of different proposals shaped the legislative route but did not overturn constitutional protections.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://web.cec.gov.tw/central/article/26953"
+        }
+      ]
+    },
+    {
+      "id": "rose",
+      "date": "2018-12-26",
+      "lane": "rights",
+      "title": "“Womxnly” Released",
+      "summary": "Included on Ugly Beauty, the song pays particular tribute to Yeh Yung-chih while addressing a broader range of experiences of difference.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.sonymusic.com.tw/album/jolin-tsai-ugly-beauty/"
+        }
+      ]
+    },
+    {
+      "id": "marriage",
+      "date": "2019-05-24",
+      "lane": "rights",
+      "title": "Special Same-Sex Marriage Legislation Takes Effect",
+      "summary": "Passed its third reading on May 17 and took effect on May 24; reforms on transnational marriage and adoption followed.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.judicial.gov.tw/tw/cp-1429-57760-61de7-1.html"
+        }
+      ]
+    },
+    {
+      "id": "covid",
+      "date": "2020-01-20",
+      "lane": "health",
+      "title": "COVID-19 Command Center Established",
+      "summary": "Taiwan CDC records establishment of the COVID-19 command center on January 20, 2020.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/En/Category/ListContent/EmXemht4IT-IRAPrAnyG9A?uaid=32NPG1QXFhAmaOLjDOpNmg"
+        }
+      ],
+      "analysis": "The essay places this coordination record beside later public instruction; it does not measure individual knowledge or explain the 2026 response."
+    },
+    {
+      "id": "selftest",
+      "date": "2021-06-24",
+      "lane": "health",
+      "title": "Public Guidance on Home Rapid Tests",
+      "summary": "Explains how to use tests and respond to results, with a reminder that a negative result does not remove the need for precautions.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/Bulletin/Detail/c8C9gtHwUNnkywyMqWoLJQ?typeid=9"
+        }
+      ]
+    },
+    {
+      "id": "homecare",
+      "date": "2022-04-08",
+      "lane": "health",
+      "title": "Home Care Guidelines for People with COVID-19",
+      "summary": "Guidance on reporting and monitoring symptoms and recognizing warning signs that require medical attention.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cdc.gov.tw/Bulletin/Detail/MHUuc30uAaJZjs0yE2r1xw?typeid=9"
+        }
+      ]
+    },
+    {
+      "id": "adoption",
+      "date": "2023-06-09",
+      "lane": "rights",
+      "title": "Adoption Rights Expanded for Same-Sex Spouses",
+      "summary": "Rights including joint adoption continued to expand, while remaining subject to assessment and court approval.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.moj.gov.tw/2204/2795/2796/170878/"
+        }
+      ]
+    },
+    {
+      "id": "photo",
+      "date": "2026-09-24",
+      "lane": "debate",
+      "title": "Controversy over a Harvard Speech Photograph",
+      "summary": "The contemporaneous report records Chiang at the Tianmu event and the deputy mayor and department heads at Pride. The later city-government account adds a claim that Chiang attended both. These accounts do not, by themselves, settle his full itinerary or identify the setting and date of each photograph.",
+      "status": "當事方說法",
+      "sources": [
+        {
+          "title": "Contemporaneous 2023 report: Chiang attends the Tianmu event; deputy mayor and others attend Pride",
+          "url": "https://news.housefun.com.tw/news/article/508277397790.html"
+        },
+        {
+          "title": "The city government’s later account in 2026: claims attendance at both events",
+          "url": "https://newtalk.tw/news/view/2026-09-24/1061831"
+        }
+      ]
+    },
+    {
+      "id": "debate",
+      "date": "2026-10-03",
+      "lane": "debate",
+      "title": "Harm Reduction Becomes an Electoral Dispute",
+      "summary": "CNA reports the October 3 exchange over passages from Shen’s 2014 essay and proposed community drug-policy measures.",
+      "status": "已核實",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://www.cna.com.tw/news/aloc/202610030206.aspx"
+        }
+      ],
+      "analysis": "Selected quotations, community needle services, and methadone require separate policy distinctions."
+    },
+    {
+      "id": "commander",
+      "date": "2026-10-03",
+      "lane": "debate",
+      "title": "Controversy over the Commander D Search",
+      "summary": "Police say they had a search warrant; customers and lawyers question the legal basis for taking people to the station as a group and how they were treated. In September, the mayor had instructed police to investigate after a city councilor raised the issue. The specific decisions to search the venue and take customers to the station, along with the procedures applied to each person, remain to be established.",
+      "status": "當事方說法",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://news.tvbs.com.tw/local/4031271"
+        },
+        {
+          "title": "Police account and the September administrative context",
+          "url": "https://news.tvbs.com.tw/local/4031274"
+        }
+      ]
+    },
+    {
+      "id": "comments",
+      "date": "2026-10-04",
+      "lane": "debate",
+      "title": "Media Report More Than 300,000 Comments",
+      "summary": "The cited media report records more than 300,000 comments at a particular moment.",
+      "status": "當事方說法",
+      "sources": [
+        {
+          "title": "Source",
+          "url": "https://udn.com/vote2026/story/124652/9793337"
+        }
+      ],
+      "caveat": "An attributed media count, not independently reverified platform data, distinct people, a live API reading, or a representative opinion poll."
+    },
+    {
+      "id": "council-directive",
+      "date": "2026-09-11",
+      "lane": "debate",
+      "title": "Council Questioning and an Administrative Directive",
+      "summary": "The contemporaneous report records Hung Chien-yi presenting a parent’s complaint and venue photographs in council, Chiang calling for inspections and strict enforcement, and the venue denying that it arranged the alleged conduct while saying it checked customers’ identities and ages.",
+      "status": "當事方說法",
+      "caveat": "The complaint is an allegation. This record does not establish minors’ involvement or the specific methods and authorization of the later search.",
+      "sources": [
+        {
+          "title": "Contemporaneous council report and venue response",
+          "url": "https://www.nownews.com/amp/news/6874284"
+        }
+      ]
+    },
+    {
+      "id": "clarification",
+      "date": "2026-10-04",
+      "lane": "debate",
+      "title": "Chiang Clarifies Support for Existing Harm Reduction",
+      "summary": "NOWnews reports Chiang expressing support for methadone and needle and syringe policies while distinguishing those services from the community drug-supply proposal discussed in the older essay.",
+      "status": "當事方說法",
+      "caveat": "An attributed statement, not evidence of a policy change or measured audience response. Exact publication time was not independently reverified in this revision pass.",
+      "sources": [
+        {
+          "title": "October 4 clarification reported by NOWnews",
+          "url": "https://www.nownews.com/news/6880451"
+        }
+      ]
+    }
+  ],
+  "caseDate": "2026-10-04",
+  "currentDiscourseWindow": "2026-10-03/2026-10-04; UTC+8",
+  "editorialSelectionCutoff": "2026-10-04T12:30:00+08:00",
+  "cutoffScope": "Editorial selection boundary; not a claim of exhaustive collection or independently reverified publication timestamps"
+}

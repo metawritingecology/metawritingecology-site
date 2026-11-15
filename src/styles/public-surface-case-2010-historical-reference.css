@@ -1,0 +1,9 @@
+/* Historical source layer; distinct from the October 4–5 news additions. */
+.review-2026-10-04 .historical-insertion{--review-bg:#212834;--review-text:#dfe5ef;--review-label:#aebed5;--review-line:#8499b7;--review-link:#becfeb}
+.review-2026-10-04 .historical-insertion a:hover{color:#edf2fa}
+.review-2026-10-04 .historical-insertion blockquote{margin:14px 0;padding-left:16px;border-left:2px solid var(--review-line)}
+.review-2026-10-04 .historical-legend{border-left:2px solid #8499b7;padding-left:14px;color:#aebed5;font-size:.875rem}
+@media print{
+.review-2026-10-04 .historical-insertion{background:#f0f2f6;color:#263247;border-left-color:#708199}
+.review-2026-10-04 .historical-insertion p,.review-2026-10-04 .historical-insertion a,.review-2026-10-04 .historical-insertion a:hover,.review-2026-10-04 .historical-insertion summary,.review-2026-10-04 .historical-insertion .review-label,.review-2026-10-04 .historical-legend{color:#263247}
+}

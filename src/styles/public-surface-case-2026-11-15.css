@@ -1,0 +1,6 @@
+/* Numbered references follow the October 4 slice; scope remains ordinary October 18 movement prose. */
+#sources-and-scope .article-sources{font-size:.875rem;line-height:1.65;padding-left:1.75em}
+#sources-and-scope .article-sources li{padding-left:4px;margin:14px 0}
+#sources-and-scope .article-sources p{margin:0}
+#article .source-citation{font-size:.82em;vertical-align:super;text-decoration:none;margin-left:2px}
+#sources-and-scope .article-sources li:target{outline:1px solid var(--link);outline-offset:6px;background:var(--surface)}

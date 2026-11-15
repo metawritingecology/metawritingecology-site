@@ -1,0 +1,44 @@
+{
+  "status": "new historical addition; not independently reviewed or pushed",
+  "id": "history-chen-chun-ju-2010",
+  "eventDate": "2010-09-18",
+  "label": "Historical reference · 18 September 2010",
+  "intro": "At the first Kaohsiung Pride march on 18 September 2010, Chen Chun-ju (陳君汝), mother of Yeh Yung-chih (葉永鋕), addressed the crowd. The National Museum of Taiwan History’s Taiwan Women website preserves the following excerpt.",
+  "excerptZh": "孩子們，你們要勇敢，天地創造你們這樣的一個人，一定有一個使命，讓你們去爭取人權。要做自己，不要怕……我曾經誇過海口：『我救不了我的小孩，我要救跟他一樣的小孩！』所以我今天必須要站出來。",
+  "translationEn": "Children, you must be brave. Heaven and earth made you who you are, surely with a mission: to fight for human rights. Be yourselves; do not be afraid… I once made a bold promise: ‘I could not save my own child; I want to save children like him!’ That is why I must stand up today.",
+  "reading": "",
+  "boundary": "This is a historical comparison introduced by this page. Chen’s 2010 remarks are not evidence about the 2026 search, and no response by her to that operation is implied. The Chinese excerpt follows the museum page; the English translation is provided here. The video is linked through CivilMedia’s contemporaneous report, but its audio and subtitles have not been independently checked.",
+  "sources": [
+    {
+      "title": "National Museum of Taiwan History — 陳君汝",
+      "url": "https://women.nmth.gov.tw/?p=20004",
+      "supports": "Name and Chinese excerpt; ellipsis retained as an excerpt, not a full transcript",
+      "pagePublicationDate": "unknown"
+    },
+    {
+      "title": "CivilMedia — contemporaneous report",
+      "url": "https://www.civilmedia.tw/archives/4660",
+      "publishedAt": "2010-09-27",
+      "eventDate": "2010-09-18",
+      "supports": "Event date and matching video link pJcP8AfyrwY"
+    },
+    {
+      "title": "Video linked by CivilMedia (audio and subtitles not independently checked)",
+      "url": "https://www.youtube.com/watch?v=pJcP8AfyrwY",
+      "uploadDate": "unknown"
+    }
+  ],
+  "placement": "After the original paragraph beginning Later changes can also be read through the question of who can appear, and before Street-level work for marriage equality",
+  "counts": {
+    "earlierAdditions": 7,
+    "october5News": 3,
+    "historicalReferences": 1
+  },
+  "limits": [
+    "No inference of Yeh Yung-chih’s sexual orientation",
+    "No added claim about cause of death",
+    "No claim that Chen responded to the 2026 events",
+    "No photograph, video embed, screenshot or authenticated transcript"
+  ],
+  "boundaryPlacement": "collapsed source details; the quotation remains visible"
+}

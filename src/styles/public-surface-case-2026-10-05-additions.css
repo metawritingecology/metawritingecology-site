@@ -1,0 +1,8 @@
+/* October 5 layer only. Time-layer colors do not encode evidentiary status. */
+.review-2026-10-04 .latest-insertion{--review-bg:#26212f;--review-text:#e2d8ef;--review-label:#c5addf;--review-line:#8e74b5;--review-link:#d1b7f0}
+.review-2026-10-04 .latest-insertion a:hover{color:#eee4fa}
+.review-2026-10-04 .latest-legend{border-left:2px solid #8e74b5;padding-left:14px;color:#c5addf;font-size:.875rem}
+@media print{
+.review-2026-10-04 .latest-insertion{background:#f4eff7;color:#2d2338;border-left-color:#77638d}
+.review-2026-10-04 .latest-insertion p,.review-2026-10-04 .latest-insertion a,.review-2026-10-04 .latest-insertion a:hover,.review-2026-10-04 .latest-insertion summary,.review-2026-10-04 .latest-insertion .review-label,.review-2026-10-04 .latest-legend{color:#2d2338}
+}

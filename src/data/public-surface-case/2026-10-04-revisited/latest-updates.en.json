@@ -1,0 +1,124 @@
+{
+  "status": "v4.2 precise source evidence and explicit authored reading; independent review pending",
+  "cutoff": "2026-10-05T21:28:00+08:00",
+  "design": {
+    "palette": "muted lavender, separate from original warm and existing teal layer",
+    "background": "#26212f",
+    "text": "#e2d8ef",
+    "label": "#c5addf",
+    "link": "#d1b7f0",
+    "meaning": "chronological layer only, not evidentiary certainty"
+  },
+  "preservation": "All original text and seven reviewed additions remain byte-identical; stripping only new latest-layer blocks must recover v3 composed body exactly",
+  "blocks": [
+    {
+      "id": "latest-disciplinary-levels",
+      "label": "5 October update · 2026-10-05 · cutoff 21:28 UTC+8",
+      "placement": "after existing R3 acknowledgment block; retain R3 unchanged",
+      "body": "On 5 October, the public account of responsibility became more specific. CNA reported that police had given four officers two reprimands each for inappropriate language, had given the on-scene investigation chief a demerit for failing to intervene, and had given the precinct chief two reprimands for supervision. Read together here, the reported penalties give a more differentiated administrative account of language, intervention, and supervision; the original questions about taking people to the station as a group, their individual procedural status, and their experience of the encounter still require their own answers.",
+      "sources": [
+        "cna-discipline-1005",
+        "ltn-command-1005"
+      ],
+      "sourceNote": "CNA published 15:11, updated 15:17; Liberty Times 14:51, Taiwan time. These are reporting timestamps. The disciplinary account is attributed to police; no complete administrative decisions or independent inquiry records were inspected.",
+      "afterV3InsertionId": "recording-and-admission"
+    },
+    {
+      "id": "latest-clarification-and-choice",
+      "label": "5 October update · 2026-10-05 · cutoff 21:28 UTC+8",
+      "placement": "after existing R4 search/inspection distinction block; retain R4 unchanged",
+      "body": "A later report returns to the question of how customers were taken to the station. NOWnews, in a report published at 16:21:50 Taiwan time, quotes police as saying there was no compulsory power requiring people to be taken away, and reports that police still needed to confirm what customers had been told. This account leaves a further question: how was the possibility of declining made available to each person at the scene? The report adds a police explanation to the record; it does not establish what every customer was told or how each person's movement was constrained.",
+      "sources": [
+        "now-procedure-1005"
+      ],
+      "sourceNote": "NOWnews, 5 October 16:21:50 Taiwan time. The paragraph attributes the account to that report, without treating a news quotation as a legal ruling or a complete record of individual consent.",
+      "afterV3InsertionId": "search-and-inspections"
+    },
+    {
+      "id": "latest-identification-boundary",
+      "label": "5 October update · 2026-10-05 · cutoff 21:28 UTC+8",
+      "placement": "after existing R7 records/visibility block; retain R7 unchanged",
+      "body": "By evening, the reporting also became more personally specific. FTNN identified one officer by surname, Zhuang, and by his station, Juguang; NOWnews subsequently cited that report and quoted the precinct declining to comment on the report. These reports share a source chain. They do not independently establish the allegations about earlier conduct, and no reliable full-name identification was established in this update's source check. A surname-and-station description may become a focal point for public attention, but that partial identification cannot substitute for reconstructing the command, procedures, and opportunities to intervene in this operation.",
+      "sources": [
+        "ftnn-officer-1005",
+        "now-officer-response-1005"
+      ],
+      "sourceNote": "FTNN 18:22; NOWnews 20:10:07, updated 20:10:34, 5 October Taiwan time. The Chinese identification is 莊姓員警; Zhuang is a surname transliteration, not a verified full legal name. Older alleged acts are not repeated as proven facts. Declining comment is not treated as confirmation.",
+      "afterV3InsertionId": "responsibility-after-recognition"
+    }
+  ],
+  "cutoffLabel": "Additional news selection through 5 October 2026, 21:28 Taiwan time (UTC+8)",
+  "legend": "The original reading remains warm; the earlier seven additions remain blue-green. Lavender passages marked “5 October update” add a separate news selection through 5 October 2026, 21:28 Taiwan time (UTC+8). The colors identify reading dates, not certainty. Publication and update times date reports, not necessarily the events or statements they describe.",
+  "sources": [
+    {
+      "id": "cna-discipline-1005",
+      "url": "https://www.cna.com.tw/news/asoc/202610050159.aspx",
+      "publisher": "CNA",
+      "author": "黃麗芸",
+      "publishedAt": "2026-10-05T15:11:00+08:00",
+      "updatedAt": "2026-10-05T15:17:00+08:00",
+      "supports": [
+        "Police announced four officers each given two reprimands for inappropriate language",
+        "On-scene investigation chief given a demerit for failing to intervene; precinct chief 陳勇華 two reprimands for supervision",
+        "林炎田 is identified as the commissioner announcing the penalties, not as the alleged on-scene speaker"
+      ],
+      "limit": "Reported police account and administrative discipline, not independent investigation or court finding; article does not name the four frontline officers",
+      "retrieval": "First-party article text retrieved in web search; direct web open returned inaccessible"
+    },
+    {
+      "id": "ltn-command-1005",
+      "url": "https://video.ltn.com.tw/article/0XTa-nEvBF8/PLI7xntdRxhw0VRxm8nImOBCW2OZN7Ktws",
+      "publisher": "Liberty Times",
+      "author": "王冠仁",
+      "publishedAt": "2026-10-05T14:51:00+08:00",
+      "supports": [
+        "Identifies on-scene investigation chief 陳怡凱 and supervisory penalty",
+        "Distinguishes precinct chief 陳勇華 and commissioner 林炎田"
+      ],
+      "limit": "Written article description; video not played/authenticated; headline is dated October5",
+      "retrieval": "First-party article text retrieved through web search"
+    },
+    {
+      "id": "now-procedure-1005",
+      "url": "https://www.nownews.com/news/6880812",
+      "publisher": "NOWnews",
+      "author": "蘇柏銓",
+      "publishedAt": "2026-10-05T16:21:50+08:00",
+      "supports": [
+        "Quotes police as saying there was no compulsory power requiring people to be taken away",
+        "Reports police still needed to confirm what customers were told"
+      ],
+      "limit": "Attribution to police via reporter; no complete prosecutor instruction, individual consent record or judicial ruling inspected",
+      "retrieval": "First-party article text retrieved through web search"
+    },
+    {
+      "id": "ftnn-officer-1005",
+      "url": "https://www.ftnn.com.tw/news/584748",
+      "publisher": "FTNN",
+      "author": "社會中心／臺北報導",
+      "publishedAt": "2026-10-05T18:22:00+08:00",
+      "supports": [
+        "Identifies a Juguang station officer by surname 莊, without full name",
+        "Raises allegations about earlier conduct using unnamed-source language"
+      ],
+      "limit": "No independent proof of full identity or prior misconduct; caption says demerit while CNA formal discipline account says reprimands, so use CNA for penalty and do not repeat the caption as fact",
+      "retrieval": "First-party complete text retrieved through targeted web search; direct open failed"
+    },
+    {
+      "id": "now-officer-response-1005",
+      "url": "https://www.nownews.com/news/6880868",
+      "publisher": "NOWnews",
+      "author": "蘇柏銓",
+      "publishedAt": "2026-10-05T20:10:07+08:00",
+      "updatedAt": "2026-10-05T20:10:34+08:00",
+      "supports": [
+        "Repeats surname 莊 and Juguang station identification, explicitly crediting FTNN",
+        "Quotes precinct response declining comment on that report"
+      ],
+      "limit": "Dependent on FTNN for older allegations, not independent confirmation; a refusal to comment establishes neither truth nor falsity",
+      "retrieval": "First-party complete article text retrieved through web search"
+    }
+  ],
+  "sourceCheckLimits": "Reliable retrieved reports identify one frontline officer by surname 莊 and station only; no reliable full name established. Do not infer identity from other police profiles. Not located in a bounded targeted official-site search; do not call the available news reports an independently retrieved official release.",
+  "reviewStatus": "New v4 additions require their own independent review; prior v3 review does not approve these additions."
+}

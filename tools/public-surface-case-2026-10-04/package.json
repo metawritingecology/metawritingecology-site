@@ -1,0 +1,15 @@
+{
+  "name": "mwe-public-surface-case-2026-10-04-renderer",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "marked": "17.0.5"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

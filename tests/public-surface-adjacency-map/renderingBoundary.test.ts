@@ -253,9 +253,11 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    NAME set moved 516 -> 511 (+2: @astrojs/compiler-binding-android-arm64,
  *    find-proc; -7: chalk, color-convert, color-name, find-process, has-flag,
  *    loglevel, stream-replace-string); 0 prohibited packages. */
+// PR #155 dependency maintenance: MDX 8 delegates to the Markdown processor.
+// Retain the exact lock identity and all prohibited-package/behavior guards.
 const LOCKFILE_IDENTITY = {
-  byteLength: 185136,
-  sha256: "6f2fb59a021756c5cde390e73ebe2dc1130a7d6ba644afb8de72e6bd2d4c3476",
+  byteLength: 143081,
+  sha256: "e939cfcdea4cf2839004a96c3cfccbe2c76f4866af6c57bf9dd4b7860f70a7b7",
 };
 
 /**
@@ -729,7 +731,7 @@ test("guard 8 — no motion or timer architecture", () => {
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "14.3.2",
-  "@astrojs/mdx": "7.0.7",
+  "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.3.1",
   "d3-selection": "3.0.0",
