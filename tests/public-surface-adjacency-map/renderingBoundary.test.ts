@@ -258,9 +258,11 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // PR #169: preserve the merged MDX 8 baseline while updating D3 and XML tooling.
 // PR #168: current MDX8/dev-tooling baseline plus the previously locked Astro/check graph.
 // Preserve exact identity and all prohibited-package and source-boundary guards.
+// PR #156: adapter 14.4.0 requires Astro ^7.4.0; retain merged Astro 7.4.2.
+// Wrangler 4.151.1 and its frozen transitive graph; no unrelated upgrades.
 const LOCKFILE_IDENTITY = {
-  byteLength: 152361,
-  sha256: "20bb4a8e2aab03da9d30b96c0ad88112c433aa7b56889d2f0e514e22cd71278d",
+  byteLength: 138450,
+  sha256: "7f3d2f66e75f7cc523547a9ed29ebb639b5ac6aec354de01fd3caaf012ceaff8",
 };
 
 /**
@@ -733,7 +735,7 @@ test("guard 8 — no motion or timer architecture", () => {
 // public sitemap, so the generated sitemap was compared against the main
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "14.3.2",
+  "@astrojs/cloudflare": "14.4.0",
   "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.4.2",
@@ -745,7 +747,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.12",
   "@types/d3-selection": "3.0.12",
   "fast-xml-parser": "5.12.0",
-  wrangler: "4.127.0",
+  wrangler: "4.151.1",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
