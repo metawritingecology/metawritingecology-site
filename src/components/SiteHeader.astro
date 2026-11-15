@@ -1,0 +1,48 @@
+---
+import PublicSearchModal from "./PublicSearchModal.astro";
+interface Props { articleShell?: boolean; }
+const { articleShell = false } = Astro.props;
+---
+
+    <header class="site-header" data-article-shell={articleShell ? "" : undefined}>
+      <nav class="site-nav">
+        <a href="/">Home</a>
+        <button
+          class="site-search-trigger"
+          type="button"
+          data-search-modal-trigger
+          aria-label="Search public MWE surfaces"
+        >
+          Search public MWE surfaces
+        </button>
+
+        <a href="/about/">About</a>
+
+        <a href="/surfaces/">Entry</a>
+
+        <a href="/atlas/">Atlas</a>
+
+        <a href="/models/">Models</a>
+
+        <a href="/fiction/">Fiction</a>
+
+        <a href="/artistic-research/">Artistic Research</a>
+
+        <a href="/publications/">Publications</a>
+
+        <a href="/ai-readable-knowledge-architecture/">AI Architecture</a>
+
+        <a href="/zh/">中文</a>
+      </nav>
+
+      <PublicSearchModal />
+    </header>
+
+<style is:global>
+  /* Only the newly added dated-page chrome is absent from article printouts.
+     BaseLayout callers have no marker and retain their existing print behavior. */
+  @media print {
+    .site-header[data-article-shell], .site-footer[data-article-shell] { display: none !important; }
+    html.public-search-open:has(.site-header[data-article-shell]) { overflow: visible; }
+  }
+</style>

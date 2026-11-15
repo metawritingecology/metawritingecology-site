@@ -1,4 +1,6 @@
 ---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
 import latest from "../../../data/public-surface-case/2026-10-04-revisited/latest-updates.en.json";
 import "../../../styles/global.css";
 import "../../../styles/public-surface-case-2026-10-04.css";
@@ -42,6 +44,7 @@ const { ui } = data;
     {jsonLd && <SchemaJsonLd data={jsonLd} />}
   </head>
   <body>
+    <SiteHeader articleShell />
     <a class="skip" href="#article">Skip to the interleaved reading</a>
     <main>
       <header class="case-head">
@@ -79,5 +82,6 @@ const { ui } = data;
     <script is:inline src="/assets/public-surface-case/2026-10-04/d3.v7.9.0.min.js"></script>
     <script is:inline src="/assets/public-surface-case/2026-10-04/branch-app.js"></script>
     <script is:inline src="/assets/public-surface-case/2026-10-04-revisited/review-layer.js"></script>
-  </body>
+      <SiteFooter articleShell />
+</body>
 </html>
