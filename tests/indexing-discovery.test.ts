@@ -1670,13 +1670,14 @@ test("forbidden origins: functional URLs flagged, prose platform names are not",
 // Canonical parity contract at the source level (SSR routes are not in dist)
 // ===========================================================================
 
-test("canonical parity: eligible pages use BaseLayout or the five exact standalone metadata contracts", () => {
+test("canonical parity: eligible pages use BaseLayout or the six exact standalone metadata contracts", () => {
   const standalone = new Set([
     "/artistic-research/public-surface-case/2026-08-18/",
     "/artistic-research/public-surface-case/2026-09-19/",
     "/artistic-research/public-surface-case/2026-10-04/",
     "/artistic-research/public-surface-case/2026-10-04-revisited/",
-    "/artistic-research/public-surface-case/2026-10-18/"
+    "/artistic-research/public-surface-case/2026-10-18/",
+    "/artistic-research/public-surface-case/2026-11-15/"
   ]);
   const known = knownRouteSet();
   for (const route of known) {
@@ -1750,7 +1751,7 @@ test("expanded adjacency view: noindex, excluded, with extension-bearing JSON en
 });
 
 test("the selected public surface cases are standalone, indexable and sitemap-eligible", () => {
-  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited", "2026-10-18"]) {
+  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited", "2026-10-18", "2026-11-15"]) {
     const page = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
     const route = `/artistic-research/public-surface-case/${date}/`;
     assert.equal(classifyRobots(page, route).status, "indexable");
@@ -1899,10 +1900,10 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 47 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 48 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 47);
+  assert.equal(expected.size, 48);
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-08-18/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-09-19/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04/"));
