@@ -143,3 +143,7 @@ Added the English Guandu reading, selected homepage illustration and Artistic Re
 Validation: Astro and TypeScript checks passed. Focused metadata, homepage, shared-shell, adjacency-metadata and indexing tests passed 316/316. Charset, pipeline-preservation and diff checks passed. Static desktop and mobile previews were inspected. Full build remains unverified because the local build environment failed during Cloudflare prerender setup.
 
 Remaining: Successful full build and exact-commit CI verification. No independent review is claimed; static preview inspection is not an integrated runtime browser pass.
+
+## Active Log Notice
+
+This is the active public worklog. Repository guidance is in `AGENTS.md`.
