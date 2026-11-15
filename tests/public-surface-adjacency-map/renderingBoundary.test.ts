@@ -253,11 +253,12 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    NAME set moved 516 -> 511 (+2: @astrojs/compiler-binding-android-arm64,
  *    find-proc; -7: chalk, color-convert, color-name, find-process, has-flag,
  *    loglevel, stream-replace-string); 0 prohibited packages. */
-// PR #169 maintenance baseline: d3-selection 3.0.1, matching types 3.0.12,
-// and fast-xml-parser 5.12.0. Package-name and prohibited-runtime guards remain.
+// PR #155 dependency maintenance: MDX 8 delegates to the Markdown processor.
+// Retain the exact lock identity and all prohibited-package/behavior guards.
+// PR #169: preserve the merged MDX 8 baseline while updating D3 and XML tooling.
 const LOCKFILE_IDENTITY = {
-  byteLength: 185136,
-  sha256: "26e15533123d22de1f920f2c6b495e125c17be9d6f484c0e964b00e663e83ed6",
+  byteLength: 143081,
+  sha256: "955bdbf19981c710bd4b76aa7a60901cdf8fa7648a0c88d1856d1be8b4f95517",
 };
 
 /**
@@ -731,7 +732,7 @@ test("guard 8 — no motion or timer architecture", () => {
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "14.3.2",
-  "@astrojs/mdx": "7.0.7",
+  "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.3.1",
   "d3-selection": "3.0.1",
