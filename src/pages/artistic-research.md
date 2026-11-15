@@ -200,6 +200,12 @@ The 18 October reading follows songs, public symbols, and gestures of care throu
 
 [Enter Public Surface Case — 18 October 2026](/artistic-research/public-surface-case/2026-10-18/)
 
+#### 15 November 2026 — From Formosa to Guandu
+
+A name on a map, a magazine, a station, a riverbank. The 15 November reading traces the distances between them, alongside Taiwan’s institutional changes, Kaohsiung’s waterfront, and the people gathering in Guandu. Historical context, campaign proposals, and observed participation retain their distinct evidentiary limits.
+
+[Enter Public Surface Case — 15 November 2026](/artistic-research/public-surface-case/2026-11-15/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.
