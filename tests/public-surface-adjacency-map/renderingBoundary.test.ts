@@ -253,9 +253,11 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    NAME set moved 516 -> 511 (+2: @astrojs/compiler-binding-android-arm64,
  *    find-proc; -7: chalk, color-convert, color-name, find-process, has-flag,
  *    loglevel, stream-replace-string); 0 prohibited packages. */
+// PR #169 maintenance baseline: d3-selection 3.0.1, matching types 3.0.12,
+// and fast-xml-parser 5.12.0. Package-name and prohibited-runtime guards remain.
 const LOCKFILE_IDENTITY = {
   byteLength: 185136,
-  sha256: "6f2fb59a021756c5cde390e73ebe2dc1130a7d6ba644afb8de72e6bd2d4c3476",
+  sha256: "26e15533123d22de1f920f2c6b495e125c17be9d6f484c0e964b00e663e83ed6",
 };
 
 /**
@@ -732,14 +734,14 @@ const BASELINE_DEPENDENCIES = {
   "@astrojs/mdx": "7.0.7",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.3.1",
-  "d3-selection": "3.0.0",
+  "d3-selection": "3.0.1",
   typescript: "6.0.3",
 };
 
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.10",
-  "@types/d3-selection": "3.0.11",
-  "fast-xml-parser": "5.11.1",
+  "@types/d3-selection": "3.0.12",
+  "fast-xml-parser": "5.12.0",
   wrangler: "4.127.0",
 };
 
