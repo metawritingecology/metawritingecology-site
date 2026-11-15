@@ -256,9 +256,11 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // PR #155 dependency maintenance: MDX 8 delegates to the Markdown processor.
 // Retain the exact lock identity and all prohibited-package/behavior guards.
 // PR #169: preserve the merged MDX 8 baseline while updating D3 and XML tooling.
+// PR #168: current MDX8/dev-tooling baseline plus the previously locked Astro/check graph.
+// Preserve exact identity and all prohibited-package and source-boundary guards.
 const LOCKFILE_IDENTITY = {
-  byteLength: 143081,
-  sha256: "955bdbf19981c710bd4b76aa7a60901cdf8fa7648a0c88d1856d1be8b4f95517",
+  byteLength: 152361,
+  sha256: "20bb4a8e2aab03da9d30b96c0ad88112c433aa7b56889d2f0e514e22cd71278d",
 };
 
 /**
@@ -734,13 +736,13 @@ const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "14.3.2",
   "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
-  astro: "7.3.1",
+  astro: "7.4.2",
   "d3-selection": "3.0.1",
   typescript: "6.0.3",
 };
 
 const BASELINE_DEV_DEPENDENCIES = {
-  "@astrojs/check": "0.9.10",
+  "@astrojs/check": "0.9.12",
   "@types/d3-selection": "3.0.12",
   "fast-xml-parser": "5.12.0",
   wrangler: "4.127.0",
