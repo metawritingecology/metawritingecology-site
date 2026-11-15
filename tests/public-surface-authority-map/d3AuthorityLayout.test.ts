@@ -988,7 +988,7 @@ test("boundary: only the approved D3 surface is a dependency", () => {
     (name) => name === "d3" || name.startsWith("d3-") || name.startsWith("@types/d3"),
   );
   assert.deepEqual(d3Packages.sort(), ["@types/d3-selection", "d3-selection"]);
-  assert.equal(deps["d3-selection"], "3.0.0");
+  assert.equal(deps["d3-selection"], "3.0.1");
 });
 
 test("boundary: the renderer imports only d3-selection, by name", () => {

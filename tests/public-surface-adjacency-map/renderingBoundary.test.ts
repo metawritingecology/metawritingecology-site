@@ -253,11 +253,14 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
  *    NAME set moved 516 -> 511 (+2: @astrojs/compiler-binding-android-arm64,
  *    find-proc; -7: chalk, color-convert, color-name, find-process, has-flag,
  *    loglevel, stream-replace-string); 0 prohibited packages. */
-// PR #168: refresh the exact baseline for Astro 7.4.2 and @astrojs/check 0.9.12.
-// Dependency-name, prohibited-package, and source-boundary assertions remain unchanged.
+// PR #155 dependency maintenance: MDX 8 delegates to the Markdown processor.
+// Retain the exact lock identity and all prohibited-package/behavior guards.
+// PR #169: preserve the merged MDX 8 baseline while updating D3 and XML tooling.
+// PR #168: current MDX8/dev-tooling baseline plus the previously locked Astro/check graph.
+// Preserve exact identity and all prohibited-package and source-boundary guards.
 const LOCKFILE_IDENTITY = {
-  byteLength: 189199,
-  sha256: "651bde84fead744596f3832b906125fa2c5bb9db561c2f0fe4f3c64c5d1eca14",
+  byteLength: 152361,
+  sha256: "20bb4a8e2aab03da9d30b96c0ad88112c433aa7b56889d2f0e514e22cd71278d",
 };
 
 /**
@@ -731,17 +734,17 @@ test("guard 8 — no motion or timer architecture", () => {
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "14.3.2",
-  "@astrojs/mdx": "7.0.7",
+  "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.4.2",
-  "d3-selection": "3.0.0",
+  "d3-selection": "3.0.1",
   typescript: "6.0.3",
 };
 
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.12",
-  "@types/d3-selection": "3.0.11",
-  "fast-xml-parser": "5.11.1",
+  "@types/d3-selection": "3.0.12",
+  "fast-xml-parser": "5.12.0",
   wrangler: "4.127.0",
 };
 
