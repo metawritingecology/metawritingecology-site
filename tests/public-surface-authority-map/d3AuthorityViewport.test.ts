@@ -1310,8 +1310,8 @@ test("dependency: the approved D3 surface is unchanged — no package was added"
     (name) => name === "d3" || name.startsWith("d3-") || name.startsWith("@types/d3"),
   );
   assert.deepEqual(d3Packages.sort(), ["@types/d3-selection", "d3-selection"]);
-  assert.equal(deps["d3-selection"], "3.0.0");
-  assert.equal(deps["@types/d3-selection"], "3.0.11");
+  assert.equal(deps["d3-selection"], "3.0.1");
+  assert.equal(deps["@types/d3-selection"], "3.0.12");
   // Nothing in the forbidden set exists at any version.
   for (const forbidden of [
     "d3",
