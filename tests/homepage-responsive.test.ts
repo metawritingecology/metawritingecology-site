@@ -27,9 +27,9 @@ test('homepage retains the four accepted v4 SVGs exactly, including mobile crop 
 function assertReadingLinks(markup: string) {
   // Count all opening anchors before reading attributes or nested text, so
   // a differently formatted duplicate cannot disappear from the contract.
-  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 5, 'exactly five reading anchors');
+  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 6, 'exactly six reading anchors');
   const anchors = [...markup.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi)];
-  assert.equal(anchors.length, 5, 'all reading anchors are closed');
+  assert.equal(anchors.length, 6, 'all reading anchors are closed');
   const links = anchors.map(([, attributes, contents]) => {
     const href = attributes.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
     assert.ok(href, 'every reading anchor has a quoted href');
@@ -41,10 +41,11 @@ function assertReadingLinks(markup: string) {
     ['/artistic-research/public-surface-case/2026-10-04-revisited/', 'Read the essay, revisited'],
     ['/artistic-research/public-surface-case/2026-10-18/', 'Read the France protests snapshot · 18 October 2026'],
     ['/artistic-research/public-surface-case/2026-11-15/', 'Read the Guandu snapshot · 15 November 2026'],
+    ['/artistic-research/public-surface-case/2026-11-18/', 'Read the Beiyang snapshot · 18 November 2026'],
   ]);
 }
 
-test('responsive artwork keeps one set of the five approved reading links', () => {
+test('responsive artwork keeps one set of the six approved reading links', () => {
   assertReadingLinks(source);
 });
 
@@ -53,7 +54,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
   const nestedText = first.replace('18 August: the first reading', '<span>18 August: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
-    assert.throws(() => assertReadingLinks(source + duplicate), /exactly five reading anchors/);
+    assert.throws(() => assertReadingLinks(source + duplicate), /exactly six reading anchors/);
   }
   const second = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/g)![1];
   assert.throws(() => assertReadingLinks(source.replace(second, extraAttributes)));

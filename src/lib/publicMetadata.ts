@@ -219,6 +219,7 @@ export const ROUTE_METADATA_REGISTRY: Readonly<Record<string, RouteMetadataPolic
   "/artistic-research/public-surface-case/2026-10-04-revisited/": casePage(),
   "/artistic-research/public-surface-case/2026-10-18/": casePage(),
   "/artistic-research/public-surface-case/2026-11-15/": casePage(),
+  "/artistic-research/public-surface-case/2026-11-18/": casePage(),
   "/atlas/": en(),
   "/boundary-preserving-use-conditions/": en(),
   "/boundary/": en(),

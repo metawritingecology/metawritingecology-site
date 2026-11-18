@@ -147,3 +147,23 @@ Remaining: Successful full build and exact-commit CI verification. No independen
 ## Active Log Notice
 
 This is the active public worklog. Repository guidance is in `AGENTS.md`.
+
+### 2026-11-18 — Beiyang dated reading and entry surfaces
+
+Agent: Codex. Implemented the author-approved English reading at the 18 November dated route, with a homepage card and Artistic Research entry. The approved illustration appears only on those two entry surfaces, not in the article. Removed draft/editorial presentation notices; preserved article wording, two broadcast passages, case-date metadata, 18 citations and 15 source entries. Shared site navigation and earlier content remain unchanged. Added scoped styling, route/shell registration and updated expected route/link contracts; no dependency or pipeline changes.
+
+Pre-append inventory: based on main 0c42d0010c447cfda5d2cd0d8243bc863ac73361. Remote open-PR query returned none. Relevant sanitize-guandu-worklog work is merged_via_pr: GitHub PR #170 reports merged on 15 November, merge commit d913779f9cfd7f997722460af54c8fc68ffc2f06. Local Guandu candidate trees match the earlier integrated source tree except historical worklog records; those branches and records were not modified. Remaining remote branch names were inventoried without inferring unmerged status from ancestry. Historical dependency branches are a separate queue, not included in this content change.
+
+Files: new dated page, rendered article, scoped style and PNG asset; homepage component, Artistic Research markdown, metadata registry, shell route contract and four corresponding tests. Existing worklog bytes were preserved as an exact prefix.
+
+Validation: pinned pnpm frozen-lockfile installation; Astro check 0 errors and 0 warnings (4 hints); TypeScript check passed; 328 focused metadata, indexing, homepage, shared-shell, charset and pipeline-structure tests passed. Diff whitespace, article-text/citation preservation, source fragments, image identity and entry-only image placement checks passed. Full check stopped during Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`; no full build or integrated browser pass is claimed. Offline three-surface preview is a static review artifact, not production-build evidence.
+
+No independent review is claimed. Reviewer interface: unknown; reviewer lineage: unknown; review mode: unknown; reviewed commit: unknown; review evidence reference: unknown. Exact-head CI and author review remain pending. This change prepares a draft PR only; no merge, production deployment or publication is authorized by this entry.
+
+### 2026-11-18 — Beiyang CI route-count follow-up
+
+Agent: Codex. With author approval, corrected two missed fixed-count checks after the new reading increased the site to 49 indexable routes and 51 registered routes; the two noindex routes remain unchanged. Added the 18 November route to the named rendered metadata-verification list and a regression assertion for that coverage. Article content, entry images, navigation, dependency inputs and the frozen check pipeline are unchanged.
+
+Inventory refresh: PR #174 is the only open PR returned by GitHub; its base remains 0c42d0010c447cfda5d2cd0d8243bc863ac73361 and the previous Guandu work remains verified merged via PR #170. This is a continuation of the same content branch, not an integration of other work. Historical worklog bytes are preserved.
+
+Failure evidence: Site CI run 44346321176, job 134949568375, reported `FAIL INDEXABLE_COUNT exactly 48 indexable routes — 49`; the unmodified adjacency metadata test separately reproduced `49 !== 48`. Modified files: scripts/verify-metadata-build.mjs and tests/public-surface-adjacency-map/metadataIndexing.test.ts. Validation: 302 focused metadata/indexing/adjacency/pipeline tests passed, including the new named-route regression test; git diff --check passed. Full rendered verification remains delegated to exact-head Linux CI because the local Cloudflare environment cannot complete the production build; broader local lifecycle suites were not yet complete at this checkpoint. No independent review or CI pass claimed. No merge or deployment.

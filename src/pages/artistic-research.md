@@ -206,6 +206,14 @@ A name on a map, a magazine, a station, a riverbank. The 15 November reading tra
 
 [Enter Public Surface Case — 15 November 2026](/artistic-research/public-surface-case/2026-11-15/)
 
+#### 18 November 2026 — The Beiyang Government, Reassembled
+
+<img src="/assets/public-surface-case/2026-11-18/beiyang-platform.png" alt="Minimal pale-gold railway carriage and five flag lines on a near-black field." style="display:block;width:100%;height:auto" />
+
+An army, a flag, and the distance between two railway platforms.
+
+[Enter Public Surface Case — 18 November 2026](/artistic-research/public-surface-case/2026-11-18/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

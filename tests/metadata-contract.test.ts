@@ -49,7 +49,7 @@ const INTERACTIVE = "/public-surface-map/interactive/";
 const EXPANDED = "/public-surface-map/expanded/";
 
 // The two noindex interactive previews. Every other registered route is one of
-// the 48 indexable routes.
+// the 49 indexable routes.
 const NOINDEX_PREVIEWS = [INTERACTIVE, EXPANDED];
 // An explicit technical metadata scope; no genre is inferred for these pages.
 const CASE_ROUTES = [
@@ -58,7 +58,8 @@ const CASE_ROUTES = [
   "/artistic-research/public-surface-case/2026-10-04/",
   "/artistic-research/public-surface-case/2026-10-04-revisited/",
   "/artistic-research/public-surface-case/2026-10-18/",
-  "/artistic-research/public-surface-case/2026-11-15/"
+  "/artistic-research/public-surface-case/2026-11-15/",
+  "/artistic-research/public-surface-case/2026-11-18/"
 ];
 const registeredRoutes = getRegisteredRoutes();
 const indexableRegistered = registeredRoutes.filter((r) => !NOINDEX_PREVIEWS.includes(r));
@@ -82,8 +83,8 @@ test("approved production origin equals Package C PRODUCTION_ORIGIN", () => {
 
 // --- 1 / 3: registration count and cardinality -----------------------------
 
-test("registry has exactly 48 indexable routes and 2 interactive noindex routes", () => {
-  assert.equal(indexableRegistered.length, 48);
+test("registry has exactly 49 indexable routes and 2 interactive noindex routes", () => {
+  assert.equal(indexableRegistered.length, 49);
   for (const route of NOINDEX_PREVIEWS) {
     const policy = getRoutePolicy(route);
     assert.ok(policy, route);
@@ -94,8 +95,8 @@ test("registry has exactly 48 indexable routes and 2 interactive noindex routes"
     assert.equal(policy.structuredData.type, "WebPage", route);
     assert.equal(policy.language, "en", route);
   }
-  // total registered = 50
-  assert.equal(registeredRoutes.length, 50);
+  // total registered = 51
+  assert.equal(registeredRoutes.length, 51);
   // Each noindex preview is registered exactly once.
   for (const route of NOINDEX_PREVIEWS) {
     assert.equal(registeredRoutes.filter((r) => r === route).length, 1, route);
