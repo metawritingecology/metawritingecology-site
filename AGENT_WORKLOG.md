@@ -147,3 +147,15 @@ Remaining: Successful full build and exact-commit CI verification. No independen
 ## Active Log Notice
 
 This is the active public worklog. Repository guidance is in `AGENTS.md`.
+
+### 2026-11-18 — Beiyang dated reading and entry surfaces
+
+Agent: Codex. Implemented the author-approved English reading at the 18 November dated route, with a homepage card and Artistic Research entry. The approved illustration appears only on those two entry surfaces, not in the article. Removed draft/editorial presentation notices; preserved article wording, two broadcast passages, case-date metadata, 18 citations and 15 source entries. Shared site navigation and earlier content remain unchanged. Added scoped styling, route/shell registration and updated expected route/link contracts; no dependency or pipeline changes.
+
+Pre-append inventory: based on main 0c42d0010c447cfda5d2cd0d8243bc863ac73361. Remote open-PR query returned none. Relevant sanitize-guandu-worklog work is merged_via_pr: GitHub PR #170 reports merged on 15 November, merge commit d913779f9cfd7f997722460af54c8fc68ffc2f06. Local Guandu candidate trees match the earlier integrated source tree except historical worklog records; those branches and records were not modified. Remaining remote branch names were inventoried without inferring unmerged status from ancestry. Historical dependency branches are a separate queue, not included in this content change.
+
+Files: new dated page, rendered article, scoped style and PNG asset; homepage component, Artistic Research markdown, metadata registry, shell route contract and four corresponding tests. Existing worklog bytes were preserved as an exact prefix.
+
+Validation: pinned pnpm frozen-lockfile installation; Astro check 0 errors and 0 warnings (4 hints); TypeScript check passed; 328 focused metadata, indexing, homepage, shared-shell, charset and pipeline-structure tests passed. Diff whitespace, article-text/citation preservation, source fragments, image identity and entry-only image placement checks passed. Full check stopped during Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`; no full build or integrated browser pass is claimed. Offline three-surface preview is a static review artifact, not production-build evidence.
+
+No independent review is claimed. Reviewer interface: unknown; reviewer lineage: unknown; review mode: unknown; reviewed commit: unknown; review evidence reference: unknown. Exact-head CI and author review remain pending. This change prepares a draft PR only; no merge, production deployment or publication is authorized by this entry.
