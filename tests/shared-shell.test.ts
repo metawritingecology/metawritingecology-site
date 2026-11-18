@@ -89,3 +89,14 @@ test('18 October article is text-only, citation-preserving and free of editing l
  assert.match(page,/France Protests 2026: When History Returns to the Street/);
  assert.doesNotMatch(page,/noindex|og:|twitter:/i);
 });
+
+
+test('Beiyang skip link remains keyboard-accessible but is visually hidden until focused',()=>{
+ const page=read('src/pages/artistic-research/public-surface-case/2026-11-18.astro');
+ const css=read('src/styles/public-surface-case-2026-11-18.css');
+ assert.match(page, /<a class="skip" href="#article">Skip to article<\/a>/);
+ assert.match(page, /<main id="article"/);
+ assert.match(css, /body > a\.skip\{position:absolute;left:-10000px\}/);
+ assert.match(css, /body > a\.skip:focus\{left:12px;top:12px;z-index:10;/);
+ assert.doesNotMatch(css, /body > a\.skip[^}]*display\s*:\s*none/);
+});

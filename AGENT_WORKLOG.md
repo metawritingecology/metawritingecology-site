@@ -175,3 +175,13 @@ Agent: Codex. At the author's request, removed only the Beiyang illustration ele
 Pre-append inventory: current main 14de4471907a3c1a6f1f7be028c7297c0f7064d9 includes merged PR #174 (GitHub merge timestamp 18 November 17:08:29 UTC); open-PR query returned none. Earlier Guandu work remains merged via PR #170. No other branch was integrated, rewritten or deleted. Historical worklog bytes remain an exact prefix.
 
 Files changed: src/pages/artistic-research.md and this appended record. Validation: 322 homepage, shared-shell, indexing, metadata and charset tests passed; exact-diff assertion confirms one image element and its following blank line are the only page changes; homepage image retained and article image-free checks passed; git diff --check passed. Full-build verification is left to exact-head CI due to the previously recorded local Cloudflare environment limitation. No independent review claimed. Separate follow-up draft PR only; no merge or deployment.
+
+
+## 2026-11-18 — Beiyang article skip-link visibility
+- Agent: ChatGPT assigned engineering task.
+- Authorization: author requested removal of the visible Skip to article label; preserve accessible navigation where needed. No merge or deployment authorized.
+- Inventory before append: main 4f119698 contains merged PR #175; #174 and #170 previously confirmed merged. GitHub open PR inventory empty. No other relevant unmerged work identified; existing branches and worklog history preserved.
+- Change: dated Beiyang stylesheet hides its direct-child skip link offscreen, reveals it on keyboard focus, following the existing 18 October article pattern. Anchor and article target unchanged; no shared component or article copy changes.
+- Files: dated stylesheet, shared-shell regression test, this append-only worklog.
+- Validation: shared-shell and metadata contract tests, Astro check, diff whitespace check; exact-head Linux Site CI is full readiness authority. Local Cloudflare build is known blocked by uv_interface_addresses in this executor.
+- Risk: keyboard focus intentionally reveals the navigation link; ordinary article reading no longer displays it. Other pages unaffected. No independent review; reviewer interface/lineage/mode/commit/evidence unknown.
