@@ -1,0 +1,62 @@
+{
+  "src/pages/artistic-research/public-slice/2026-07-25.astro": [
+    [
+      "        <h1>Public Slice — 2026-07-25</h1>\n",
+      "        <h1>Public Slice — 25 July 2026</h1>\n"
+    ],
+    [
+      "          25 July 2026\n",
+      "          <time datetime=\"2026-07-25\">25 July 2026</time>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-slice/2026-07-31.astro": [
+    [
+      "        <h1>Public Slice &mdash; 2026-07-31</h1>\n",
+      "        <h1>Public Slice &mdash; 31 July 2026</h1>\n"
+    ],
+    [
+      "          31 July 2026\n",
+      "          <time datetime=\"2026-07-31\">31 July 2026</time>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-slice/2026-08-07.astro": [
+    [
+      "    <h1>Public Slice — 2026-08-07</h1>\n",
+      "    <h1>Public Slice — 7 August 2026</h1>\n"
+    ],
+    [
+      "      <div><span>Slice date</span>7 August 2026</div>\n",
+      "      <div><span>Slice date</span><time datetime=\"2026-08-07\">7 August 2026</time></div>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-surface-case/2026-08-18.astro": [
+    [
+      "      <div><span>Case date</span>18 August 2026</div>\n",
+      "      <div><span>Case date</span><time datetime=\"2026-08-18\">18 August 2026</time></div>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-surface-case/2026-08-22.astro": [
+    [
+      "      <div><span>Case date</span>22 August 2026</div>\n",
+      "      <div><span>Case date</span><time datetime=\"2026-08-22\">22 August 2026</time></div>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-surface-case/2026-09-19.astro": [
+    [
+      "      <div><span>Case date</span>19 September 2026</div>\n",
+      "      <div><span>Case date</span><time datetime=\"2026-09-19\">19 September 2026</time></div>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-surface-case/2026-10-04.astro": [
+    [
+      "        <div class=\"meta\"><span>{metadata.meta}</span></div>\n",
+      "        <div class=\"meta\"><span>Observational essay | <time datetime=\"2026-10-04\">4 October 2026</time></span></div>\n"
+    ]
+  ],
+  "src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro": [
+    [
+      "        <p class=\"meta\">Later news selection through 4 October 2026, 22:29 UTC+8</p>\n        <p class=\"meta latest-cutoff\">{latest.cutoffLabel}</p>\n",
+      "        <p class=\"meta\">Case date: <time datetime=\"2026-10-04\">4 October 2026</time></p>\n        <p class=\"meta\">Later news selection through <time datetime=\"2026-10-04T22:29:00+08:00\">4 October 2026, 22:29 UTC+8</time></p>\n        <p class=\"meta latest-cutoff\">Additional news selection through <time datetime={latest.cutoff}>5 October 2026, 21:28 UTC+8</time></p>\n"
+    ]
+  ]
+}

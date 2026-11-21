@@ -1,0 +1,29 @@
+.skip { position: absolute; left: -10000px; }
+.skip:focus { z-index: 10; background: var(--surface); padding: 8px; top: 12px; left: 12px; }
+.kaohsiung-case .case-head { border-bottom: 1px solid var(--line); padding-bottom: 2rem; }
+.kaohsiung-case .case-head h1 { max-width: 21ch; font-size: clamp(2rem, 5vw, 3.45rem); letter-spacing: -.025em; }
+.kaohsiung-case .kicker, .kaohsiung-case .m-num { color: var(--link); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; }
+.kaohsiung-case .subtitle { font-size: 1.17rem; color: var(--muted); }
+.kaohsiung-case .date-row { display: flex; flex-wrap: wrap; gap: 1rem 1.8rem; font-size: .88rem; color: var(--muted); }
+.kaohsiung-case .date-row span { display: block; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; }
+.kaohsiung-case .movement { border-top: 1px solid var(--line); padding: 2.15rem 0 .5rem; }
+.kaohsiung-case .movement:first-of-type { border-top: 0; }
+.kaohsiung-case .movement h2 { margin: .4rem 0 1rem; font-size: clamp(1.4rem, 3vw, 2rem); }
+.kaohsiung-case .slice-copy { display: flow-root; max-width: 46rem; overflow-wrap: break-word; }
+.kaohsiung-case .slice-copy p + p { margin-top: 1rem; }
+.kaohsiung-case sup { margin-left: .18rem; font-size: .69em; }
+.kaohsiung-case figcaption, .kaohsiung-case .bridge-year { color: var(--muted); font-size: .76rem; }
+.kaohsiung-case .slice-sources li { margin-bottom: .65rem; overflow-wrap: anywhere; font-size: .9rem; }
+.kaohsiung-case .slice-bridge-pair { margin: 1.65rem 0; }
+.kaohsiung-case .bridge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.kaohsiung-case .bridge-panel { border-block: 1px solid var(--line); padding: 0 .7rem .8rem; }
+.kaohsiung-case .bridge-panel svg, .kaohsiung-case .slice-spot img { display: block; width: 100%; height: auto; }
+.kaohsiung-case .bridge-panel strong, .kaohsiung-case .bridge-note { display: block; }
+.kaohsiung-case .bridge-note { margin-top: .15rem; font-size: .83rem; }
+.kaohsiung-case .slice-bridge-pair figcaption { margin-top: .42rem; }
+.kaohsiung-case .slice-spot { width: min(62%, 350px); margin: 1.7rem auto; text-align: center; }
+.kaohsiung-case .slice-spot img { border: 1px solid var(--line); }
+@media (max-width: 620px) {
+  .kaohsiung-case .bridge-grid { grid-template-columns: 1fr; max-width: 310px; }
+  .kaohsiung-case .slice-spot { width: min(76%, 250px); }
+}

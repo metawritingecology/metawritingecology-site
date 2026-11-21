@@ -176,6 +176,40 @@ Pre-append inventory: current main 14de4471907a3c1a6f1f7be028c7297c0f7064d9 incl
 
 Files changed: src/pages/artistic-research.md and this appended record. Validation: 322 homepage, shared-shell, indexing, metadata and charset tests passed; exact-diff assertion confirms one image element and its following blank line are the only page changes; homepage image retained and article image-free checks passed; git diff --check passed. Full-build verification is left to exact-head CI due to the previously recorded local Cloudflare environment limitation. No independent review claimed. Separate follow-up draft PR only; no merge or deployment.
 
+### 2026-11-21 — Kaohsiung dated reading and entry surfaces
+
+Agent: Codex. Prepared the author-requested English reading, homepage card with the projection illustration, and a text-only Artistic Research entry. The dated article retains its two internal figures. Existing works, earlier cards and top navigation remain unchanged. The article identifies public commentary and first-person accounts without identifying private material supplied to the editor, and does not embed screenshots.
+
+Pre-append inventory: main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. PR #176 is an existing, separately held Beiyang correction; its stylesheet and regression test are not incorporated in this draft. Dependabot PRs #171, #172 and #173 are a separate queue. No other open feature PR was returned. No other branch was integrated, rewritten or deleted.
+
+Files: homepage and Artistic Research entries; dated Astro page, English HTML payload, scoped CSS and two WebP assets; route and shared-shell registration and accompanying build-verifier and test expectations. Dependencies, check pipeline and worklog history are preserved.
+
+Validation: 340 focused tests passed; Astro check 0 errors, 0 warnings (4 existing hints); git diff --check and citation fragment checks passed. Local build compiled the Vite bundles but stopped in Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`. Exact-head Linux CI and author review remain outstanding. No independent review of the integrated commit is claimed: reviewer interface, reviewer lineage, review mode, reviewed commit and review evidence reference are unknown. Draft for review only; no merge or deployment.
+
+### 2026-11-21 — Bring the Kaohsiung welcome anecdote into the closing comparison
+
+Agent: Gary (OpenAI). At the author's request, kept the World Games Station wayfinding in the transport opening and moved the Mallorca visitor and the quiet offer of help to the closing Liuhe–Lima comparison. The original source references, ending, illustrations, homepage and Artistic Research entry are unchanged. No screenshots or new factual claims were added.
+
+Pre-append inventory: continuing draft PR #177, whose base is 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft PR #176 remains on hold and unchanged; PRs #171–173 are the separate dependency queue. No other open feature PR was returned. The entire previous worklog is preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests; citation-target and worklog-prefix checks; git diff --check. Full build not rerun for this prose edit. No independent review, merge or deployment.
+
+### 2026-11-21 — Keep recognition separate from contact in the Liuhe passage
+
+Agent: Gary (OpenAI). Added one interpretive paragraph after the Liuhe footage passage, using the phone and the decision not to follow to express the author's point about learned restraint. It is written as a possibility, not an account of a specific spectator or a claim about a whole city. No wildlife analogy, new sources, screenshots or factual claims were added.
+
+Pre-append inventory: continued draft PR #177 at 36c7c228abfd22e7cfe258376d5330c45b57392b, based on main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. The separately held Beiyang draft #176 and dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests passed; single-paragraph insertion, unchanged link and anchor checks, and git diff --check passed. No full build or independent review claimed. No merge or deployment.
+
+### 2026-11-21 — Align homepage typography and dated reading labels
+
+Agent: Gary (OpenAI). Unified the date presentation in the homepage reading cards, the Artistic Research index and all twelve dated reading headers (the Beiyang header already complied). The six homepage cards now share title, summary, date and link typography at every width. Kept artwork, card order, reading destinations and evidentiary cutoff values. No article body was rewritten; the homepage scope is the public reading cards.
+
+Pre-append inventory: continued draft PR #177 at 2bb6fc3cca69acc4feed769d283ae3d15ed13e05 with main at 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft #176 remains separately held; dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: DesktopArticleEntries.astro, the Artistic Research index, the dated slice/case header templates or payloads, exact date-only shell normalization fixture, homepage and preservation assertions, and this worklog. Validation: 345 focused tests passed; Astro check found 0 errors, 0 warnings and 4 existing hints. Original shell digests, artwork hashes and reading link destinations remain tested. git diff --check passed. Local headless Chromium could not start because its process socket was denied; no browser visual pass or exact-head CI pass is claimed here. No independent review, merge or deployment.
+
 
 ## 2026-11-18 — Beiyang article skip-link visibility
 - Agent: ChatGPT assigned engineering task.
@@ -185,3 +219,11 @@ Files changed: src/pages/artistic-research.md and this appended record. Validati
 - Files: dated stylesheet, shared-shell regression test, this append-only worklog.
 - Validation: shared-shell and metadata contract tests, Astro check, diff whitespace check; exact-head Linux Site CI is full readiness authority. Local Cloudflare build is known blocked by uv_interface_addresses in this executor.
 - Risk: keyboard focus intentionally reveals the navigation link; ordinary article reading no longer displays it. Other pages unaffected. No independent review; reviewer interface/lineage/mode/commit/evidence unknown.
+
+### 2026-11-21 — Reconcile the Beiyang shortcut fix with current main
+
+Agent: Gary (OpenAI). Author approved updating PR #176 and merging after checks. Carried forward only the prior Beiyang skip-link stylesheet and exact keyboard-accessibility assertion. Maintained the earlier date-format and homepage work; neither the article nor the target anchor changed.
+
+Pre-append inventory: main 90516a4080947c09cee1ac5a3abeb54d70214e4f contains merged PR #177; PR #176 is the active branch, and #171–173 are dependency PRs. Main's worklog is preserved as a byte prefix. The original #176 worklog entry is appended unchanged.
+
+Files: src/styles/public-surface-case-2026-11-18.css, tests/shared-shell.test.ts and this worklog. Local shared-shell, homepage and charset validation: 41 tests passed. git diff --check passed. Exact-head Site CI and deployment were not yet verified at this checkpoint. No independent review claimed.

@@ -269,7 +269,7 @@ test('publication-status cleanup is limited to the two explicitly removed states
 test('Artistic Research separates three slices and the two distinct case groups', () => {
  const page=read('src/pages/artistic-research.md');
  for(const date of ['25 July 2026','31 July 2026','7 August 2026']) assert.equal(page.split('### Public Slice — '+date+'\n').length-1,1);
- const first=page.split('#### 18 August and 19 September 2026\n')[1]?.split('#### 4 October 2026 — original and revisited\n')[0];
+ const first=page.split('#### 18 August 2026 and 19 September 2026\n')[1]?.split('#### 4 October 2026 — original and revisited\n')[0];
  const second=page.split('#### 4 October 2026 — original and revisited\n')[1]?.split('\n## ')[0];
  assert(first&&second);
  for(const route of ['2026-08-18','2026-09-19']) {assert(first.includes('/public-surface-case/'+route+'/')); assert(!second.includes('/public-surface-case/'+route+'/'));}
