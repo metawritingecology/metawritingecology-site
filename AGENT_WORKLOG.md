@@ -201,3 +201,11 @@ Agent: Gary (OpenAI). Added one interpretive paragraph after the Liuhe footage p
 Pre-append inventory: continued draft PR #177 at 36c7c228abfd22e7cfe258376d5330c45b57392b, based on main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. The separately held Beiyang draft #176 and dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
 
 Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests passed; single-paragraph insertion, unchanged link and anchor checks, and git diff --check passed. No full build or independent review claimed. No merge or deployment.
+
+### 2026-11-21 — Align homepage typography and dated reading labels
+
+Agent: Gary (OpenAI). Unified the date presentation in the homepage reading cards, the Artistic Research index and all twelve dated reading headers (the Beiyang header already complied). The six homepage cards now share title, summary, date and link typography at every width. Kept artwork, card order, reading destinations and evidentiary cutoff values. No article body was rewritten; the homepage scope is the public reading cards.
+
+Pre-append inventory: continued draft PR #177 at 2bb6fc3cca69acc4feed769d283ae3d15ed13e05 with main at 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft #176 remains separately held; dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: DesktopArticleEntries.astro, the Artistic Research index, the dated slice/case header templates or payloads, exact date-only shell normalization fixture, homepage and preservation assertions, and this worklog. Validation: 345 focused tests passed; Astro check found 0 errors, 0 warnings and 4 existing hints. Original shell digests, artwork hashes and reading link destinations remain tested. git diff --check passed. Local headless Chromium could not start because its process socket was denied; no browser visual pass or exact-head CI pass is claimed here. No independent review, merge or deployment.

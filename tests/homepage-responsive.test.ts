@@ -36,8 +36,8 @@ function assertReadingLinks(markup: string) {
     return [href[2], contents.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()];
   });
   assert.deepEqual(links, [
-    ['/artistic-research/public-surface-case/2026-08-18/', '18 August: the first reading'],
-    ['/artistic-research/public-surface-case/2026-09-19/', '19 September: one month on'],
+    ['/artistic-research/public-surface-case/2026-08-18/', '18 August 2026: the first reading'],
+    ['/artistic-research/public-surface-case/2026-09-19/', '19 September 2026: one month on'],
     ['/artistic-research/public-surface-case/2026-10-04-revisited/', 'Read the essay, revisited'],
     ['/artistic-research/public-surface-case/2026-10-18/', 'Read the France protests snapshot · 18 October 2026'],
     ['/artistic-research/public-surface-case/2026-11-15/', 'Read the Guandu snapshot · 15 November 2026'],
@@ -53,7 +53,7 @@ test('responsive artwork keeps one set of the seven approved reading links', () 
 test('reading-link contract rejects duplicates with extra attributes or nested text', () => {
   const first = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/)![0];
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
-  const nestedText = first.replace('18 August: the first reading', '<span>18 August: the first reading</span>');
+  const nestedText = first.replace('18 August 2026: the first reading', '<span>18 August 2026: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
     assert.throws(() => assertReadingLinks(source + duplicate), /exactly seven reading anchors/);
   }
@@ -64,7 +64,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
 test('reading-link contract reads legitimate attributes and nested text without losing anchors', () => {
   assertReadingLinks(source
     .replace('<a href=', '<a class="reading-link" href=')
-    .replace('18 August: the first reading', '18 August: <span>the first reading</span>'));
+    .replace('18 August 2026: the first reading', '18 August 2026: <span>the first reading</span>'));
 });
 
 
@@ -89,4 +89,30 @@ test('Kaohsiung uses the same reading link at all widths and keeps its picture o
   assert.equal((article.match(/<li id="s\d+">/g) ?? []).length, 19);
   const sourceIds = new Set([...article.matchAll(/<li id="(s\d+)">/g)].map(m => m[1]));
   for (const [, ref] of article.matchAll(/href="#(s\d+)"/g)) assert.ok(sourceIds.has(ref), ref);
+});
+
+test('dated readings share the homepage date convention and remain in order', () => {
+  const dates = ['2026-08-18', '2026-09-19', '2026-10-04', '2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21'];
+  assert.deepEqual([...source.matchAll(/<time datetime="([^"]+)">([^<]+)<\/time>/g)].map(m => m[1]), dates);
+  const format = new Intl.DateTimeFormat('en-GB', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'});
+  const label = date => format.format(new Date(date));
+  for (const d of dates) assert.ok(source.includes(`<time datetime="${d}">${label(d)}</time>`), d);
+
+  const pages = [
+    ...['2026-07-25', '2026-07-31', '2026-08-07'].map(d => [d, `pages/artistic-research/public-slice/${d}.astro`]),
+    ...['2026-08-18', '2026-08-22', '2026-09-19', '2026-10-04', '2026-10-04-revisited'].map(d => [d.slice(0, 10), `pages/artistic-research/public-surface-case/${d}.astro`]),
+    ...['2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21'].map(d => [d, `data/public-surface-case/${d}/rendered-body.en.html`]),
+  ];
+  for (const [d, path] of pages) {
+    const page = readFileSync(new URL(`../src/${path}`, import.meta.url), 'utf8');
+    assert.ok(page.includes(`<time datetime="${d}">${label(d)}</time>`), path);
+  }
+});
+
+test('the six homepage article cards use shared typography at all widths', () => {
+  for (const role of ['h3', 'p', '.date', 'a']) {
+    assert.ok(source.includes(`.scene-entry article ${role} { font-size:`) ||
+              source.includes(`.scene-entry article ${role} { color: var(--muted); font-size:`), role);
+  }
+  assert.doesNotMatch(source, /\.(?:plate|guandu)-copy\s+h3\s*\{/);
 });

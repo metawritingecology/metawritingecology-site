@@ -51,8 +51,9 @@ const { ui } = data;
         <p class="kicker">{ui.kicker}</p>
         <h1>{reviewMetadata.title}</h1>
         <p class="subtitle">{reviewMetadata.subtitle}</p>
-        <p class="meta">Later news selection through 4 October 2026, 22:29 UTC+8</p>
-        <p class="meta latest-cutoff">{latest.cutoffLabel}</p>
+        <p class="meta">Case date: <time datetime="2026-10-04">4 October 2026</time></p>
+        <p class="meta">Later news selection through <time datetime="2026-10-04T22:29:00+08:00">4 October 2026, 22:29 UTC+8</time></p>
+        <p class="meta latest-cutoff">Additional news selection through <time datetime={latest.cutoff}>5 October 2026, 21:28 UTC+8</time></p>
       </header>
       <nav class="section-nav" aria-label="Reading navigation">
         <a href="#article">{review.navigation.expandedReadingLabel}</a>
