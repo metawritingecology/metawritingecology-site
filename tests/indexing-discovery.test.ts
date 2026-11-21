@@ -2252,12 +2252,20 @@ function knownFragmentsFromSource() {
     const ids = caseSectionAnchorIds(source);
     anchors.set(`/artistic-research/public-surface-case/${date}/`, ids);
   }
+  // The revisited reading renders these sections from its raw composed body.
+  const revisitedBody = rd("src/data/public-surface-case/2026-10-04-revisited/rendered-body.en.html");
+  anchors.set("/artistic-research/public-surface-case/2026-10-04-revisited/", caseSectionAnchorIds(revisitedBody));
   return anchors;
 }
 
 test("case anchor extraction rejects data-id replacements of the actual cited sections", () => {
-  for (const [date, id] of [["2026-08-18", "semantic-casting"], ["2026-09-19", "translation"]]) {
-    const source = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+  for (const [date, id, sourcePath] of [
+    ["2026-08-18", "semantic-casting", "src/pages/artistic-research/public-surface-case/2026-08-18.astro"],
+    ["2026-09-19", "translation", "src/pages/artistic-research/public-surface-case/2026-09-19.astro"],
+    ["2026-10-04-revisited", "latest-disciplinary-levels", "src/data/public-surface-case/2026-10-04-revisited/rendered-body.en.html"],
+    ["2026-10-04-revisited", "november-harm-reduction", "src/data/public-surface-case/2026-10-04-revisited/rendered-body.en.html"]
+  ]) {
+    const source = rd(sourcePath);
     const route = `/artistic-research/public-surface-case/${date}/`;
     assert.ok(caseSectionAnchorIds(source).has(id));
     const mutation = source.replace(` id="${id}"`, ` data-id="${id}"`);
