@@ -227,3 +227,10 @@ Agent: Gary (OpenAI). Author approved updating PR #176 and merging after checks.
 Pre-append inventory: main 90516a4080947c09cee1ac5a3abeb54d70214e4f contains merged PR #177; PR #176 is the active branch, and #171–173 are dependency PRs. Main's worklog is preserved as a byte prefix. The original #176 worklog entry is appended unchanged.
 
 Files: src/styles/public-surface-case-2026-11-18.css, tests/shared-shell.test.ts and this worklog. Local shared-shell, homepage and charset validation: 41 tests passed. git diff --check passed. Exact-head Site CI and deployment were not yet verified at this checkpoint. No independent review claimed.
+
+### 2026-11-21 — Limit the #173 XML tooling upgrade to its intended scope
+
+Agent: Gary (OpenAI). The owner authorized sequential dependency maintenance (#173, then #171, then #172), each gated by full CI. Updated the development-only fast-xml-parser pin from 5.12.0 to 5.12.1 and its required fast-xml-builder resolution from 1.3.1 to 1.3.2. Excluded unrelated Astro, Prism and Prettier lockfile churn from the original automated diff. Kept the exact dependency and lockfile guards; only updated the authorized pin and audited lockfile SHA-256.
+
+Inventory: main 83a5ecfb80bd6ddfcf5c79d268712a8f63a384ae contains merged #176 and #177; #171 and #172 remain separate dependency work in the user's approved sequence. Main worklog is preserved byte-for-byte as a prefix. Files: package.json, pnpm-lock.yaml, tests/public-surface-adjacency-map/renderingBoundary.test.ts and this worklog. Local validation: selected lockfile hunks apply exactly and match reviewed byte count and SHA-256; exact-head full Linux CI required before merging. No live action performed by this patch.
+Local guard suite on the assembled candidate: 13 checks passed (existing TypeScript evaluator; the new dependency installation is left to CI).

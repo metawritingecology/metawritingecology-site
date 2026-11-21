@@ -262,7 +262,7 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // Wrangler 4.151.1 and its frozen transitive graph; no unrelated upgrades.
 const LOCKFILE_IDENTITY = {
   byteLength: 138450,
-  sha256: "7f3d2f66e75f7cc523547a9ed29ebb639b5ac6aec354de01fd3caaf012ceaff8",
+  sha256: "3258ae11893eebf33b1530fe82444f8d33f07d3462b17244a6ee495841d1d85f",
 };
 
 /**
@@ -746,7 +746,7 @@ const BASELINE_DEPENDENCIES = {
 const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.12",
   "@types/d3-selection": "3.0.12",
-  "fast-xml-parser": "5.12.0",
+  "fast-xml-parser": "5.12.1",
   wrangler: "4.151.1",
 };
 
