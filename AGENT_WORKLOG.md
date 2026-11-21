@@ -147,3 +147,90 @@ Remaining: Successful full build and exact-commit CI verification. No independen
 ## Active Log Notice
 
 This is the active public worklog. Repository guidance is in `AGENTS.md`.
+
+### 2026-11-18 — Beiyang dated reading and entry surfaces
+
+Agent: Codex. Implemented the author-approved English reading at the 18 November dated route, with a homepage card and Artistic Research entry. The approved illustration appears only on those two entry surfaces, not in the article. Removed draft/editorial presentation notices; preserved article wording, two broadcast passages, case-date metadata, 18 citations and 15 source entries. Shared site navigation and earlier content remain unchanged. Added scoped styling, route/shell registration and updated expected route/link contracts; no dependency or pipeline changes.
+
+Pre-append inventory: based on main 0c42d0010c447cfda5d2cd0d8243bc863ac73361. Remote open-PR query returned none. Relevant sanitize-guandu-worklog work is merged_via_pr: GitHub PR #170 reports merged on 15 November, merge commit d913779f9cfd7f997722460af54c8fc68ffc2f06. Local Guandu candidate trees match the earlier integrated source tree except historical worklog records; those branches and records were not modified. Remaining remote branch names were inventoried without inferring unmerged status from ancestry. Historical dependency branches are a separate queue, not included in this content change.
+
+Files: new dated page, rendered article, scoped style and PNG asset; homepage component, Artistic Research markdown, metadata registry, shell route contract and four corresponding tests. Existing worklog bytes were preserved as an exact prefix.
+
+Validation: pinned pnpm frozen-lockfile installation; Astro check 0 errors and 0 warnings (4 hints); TypeScript check passed; 328 focused metadata, indexing, homepage, shared-shell, charset and pipeline-structure tests passed. Diff whitespace, article-text/citation preservation, source fragments, image identity and entry-only image placement checks passed. Full check stopped during Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`; no full build or integrated browser pass is claimed. Offline three-surface preview is a static review artifact, not production-build evidence.
+
+No independent review is claimed. Reviewer interface: unknown; reviewer lineage: unknown; review mode: unknown; reviewed commit: unknown; review evidence reference: unknown. Exact-head CI and author review remain pending. This change prepares a draft PR only; no merge, production deployment or publication is authorized by this entry.
+
+### 2026-11-18 — Beiyang CI route-count follow-up
+
+Agent: Codex. With author approval, corrected two missed fixed-count checks after the new reading increased the site to 49 indexable routes and 51 registered routes; the two noindex routes remain unchanged. Added the 18 November route to the named rendered metadata-verification list and a regression assertion for that coverage. Article content, entry images, navigation, dependency inputs and the frozen check pipeline are unchanged.
+
+Inventory refresh: PR #174 is the only open PR returned by GitHub; its base remains 0c42d0010c447cfda5d2cd0d8243bc863ac73361 and the previous Guandu work remains verified merged via PR #170. This is a continuation of the same content branch, not an integration of other work. Historical worklog bytes are preserved.
+
+Failure evidence: Site CI run 44346321176, job 134949568375, reported `FAIL INDEXABLE_COUNT exactly 48 indexable routes — 49`; the unmodified adjacency metadata test separately reproduced `49 !== 48`. Modified files: scripts/verify-metadata-build.mjs and tests/public-surface-adjacency-map/metadataIndexing.test.ts. Validation: 302 focused metadata/indexing/adjacency/pipeline tests passed, including the new named-route regression test; git diff --check passed. Full rendered verification remains delegated to exact-head Linux CI because the local Cloudflare environment cannot complete the production build; broader local lifecycle suites were not yet complete at this checkpoint. No independent review or CI pass claimed. No merge or deployment.
+
+### 2026-11-18 — Match the Artistic Research text-only list
+
+Agent: Codex. At the author's request, removed only the Beiyang illustration element from the Artistic Research listing, retaining its dated heading, description and article link in the same text-only form as adjacent entries. The homepage preview illustration and image-free article are unchanged.
+
+Pre-append inventory: current main 14de4471907a3c1a6f1f7be028c7297c0f7064d9 includes merged PR #174 (GitHub merge timestamp 18 November 17:08:29 UTC); open-PR query returned none. Earlier Guandu work remains merged via PR #170. No other branch was integrated, rewritten or deleted. Historical worklog bytes remain an exact prefix.
+
+Files changed: src/pages/artistic-research.md and this appended record. Validation: 322 homepage, shared-shell, indexing, metadata and charset tests passed; exact-diff assertion confirms one image element and its following blank line are the only page changes; homepage image retained and article image-free checks passed; git diff --check passed. Full-build verification is left to exact-head CI due to the previously recorded local Cloudflare environment limitation. No independent review claimed. Separate follow-up draft PR only; no merge or deployment.
+
+### 2026-11-21 — Kaohsiung dated reading and entry surfaces
+
+Agent: Codex. Prepared the author-requested English reading, homepage card with the projection illustration, and a text-only Artistic Research entry. The dated article retains its two internal figures. Existing works, earlier cards and top navigation remain unchanged. The article identifies public commentary and first-person accounts without identifying private material supplied to the editor, and does not embed screenshots.
+
+Pre-append inventory: main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. PR #176 is an existing, separately held Beiyang correction; its stylesheet and regression test are not incorporated in this draft. Dependabot PRs #171, #172 and #173 are a separate queue. No other open feature PR was returned. No other branch was integrated, rewritten or deleted.
+
+Files: homepage and Artistic Research entries; dated Astro page, English HTML payload, scoped CSS and two WebP assets; route and shared-shell registration and accompanying build-verifier and test expectations. Dependencies, check pipeline and worklog history are preserved.
+
+Validation: 340 focused tests passed; Astro check 0 errors, 0 warnings (4 existing hints); git diff --check and citation fragment checks passed. Local build compiled the Vite bundles but stopped in Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`. Exact-head Linux CI and author review remain outstanding. No independent review of the integrated commit is claimed: reviewer interface, reviewer lineage, review mode, reviewed commit and review evidence reference are unknown. Draft for review only; no merge or deployment.
+
+### 2026-11-21 — Bring the Kaohsiung welcome anecdote into the closing comparison
+
+Agent: Gary (OpenAI). At the author's request, kept the World Games Station wayfinding in the transport opening and moved the Mallorca visitor and the quiet offer of help to the closing Liuhe–Lima comparison. The original source references, ending, illustrations, homepage and Artistic Research entry are unchanged. No screenshots or new factual claims were added.
+
+Pre-append inventory: continuing draft PR #177, whose base is 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft PR #176 remains on hold and unchanged; PRs #171–173 are the separate dependency queue. No other open feature PR was returned. The entire previous worklog is preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests; citation-target and worklog-prefix checks; git diff --check. Full build not rerun for this prose edit. No independent review, merge or deployment.
+
+### 2026-11-21 — Keep recognition separate from contact in the Liuhe passage
+
+Agent: Gary (OpenAI). Added one interpretive paragraph after the Liuhe footage passage, using the phone and the decision not to follow to express the author's point about learned restraint. It is written as a possibility, not an account of a specific spectator or a claim about a whole city. No wildlife analogy, new sources, screenshots or factual claims were added.
+
+Pre-append inventory: continued draft PR #177 at 36c7c228abfd22e7cfe258376d5330c45b57392b, based on main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. The separately held Beiyang draft #176 and dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests passed; single-paragraph insertion, unchanged link and anchor checks, and git diff --check passed. No full build or independent review claimed. No merge or deployment.
+
+### 2026-11-21 — Align homepage typography and dated reading labels
+
+Agent: Gary (OpenAI). Unified the date presentation in the homepage reading cards, the Artistic Research index and all twelve dated reading headers (the Beiyang header already complied). The six homepage cards now share title, summary, date and link typography at every width. Kept artwork, card order, reading destinations and evidentiary cutoff values. No article body was rewritten; the homepage scope is the public reading cards.
+
+Pre-append inventory: continued draft PR #177 at 2bb6fc3cca69acc4feed769d283ae3d15ed13e05 with main at 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft #176 remains separately held; dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: DesktopArticleEntries.astro, the Artistic Research index, the dated slice/case header templates or payloads, exact date-only shell normalization fixture, homepage and preservation assertions, and this worklog. Validation: 345 focused tests passed; Astro check found 0 errors, 0 warnings and 4 existing hints. Original shell digests, artwork hashes and reading link destinations remain tested. git diff --check passed. Local headless Chromium could not start because its process socket was denied; no browser visual pass or exact-head CI pass is claimed here. No independent review, merge or deployment.
+
+
+## 2026-11-18 — Beiyang article skip-link visibility
+- Agent: ChatGPT assigned engineering task.
+- Authorization: author requested removal of the visible Skip to article label; preserve accessible navigation where needed. No merge or deployment authorized.
+- Inventory before append: main 4f119698 contains merged PR #175; #174 and #170 previously confirmed merged. GitHub open PR inventory empty. No other relevant unmerged work identified; existing branches and worklog history preserved.
+- Change: dated Beiyang stylesheet hides its direct-child skip link offscreen, reveals it on keyboard focus, following the existing 18 October article pattern. Anchor and article target unchanged; no shared component or article copy changes.
+- Files: dated stylesheet, shared-shell regression test, this append-only worklog.
+- Validation: shared-shell and metadata contract tests, Astro check, diff whitespace check; exact-head Linux Site CI is full readiness authority. Local Cloudflare build is known blocked by uv_interface_addresses in this executor.
+- Risk: keyboard focus intentionally reveals the navigation link; ordinary article reading no longer displays it. Other pages unaffected. No independent review; reviewer interface/lineage/mode/commit/evidence unknown.
+
+### 2026-11-21 — Reconcile the Beiyang shortcut fix with current main
+
+Agent: Gary (OpenAI). Author approved updating PR #176 and merging after checks. Carried forward only the prior Beiyang skip-link stylesheet and exact keyboard-accessibility assertion. Maintained the earlier date-format and homepage work; neither the article nor the target anchor changed.
+
+Pre-append inventory: main 90516a4080947c09cee1ac5a3abeb54d70214e4f contains merged PR #177; PR #176 is the active branch, and #171–173 are dependency PRs. Main's worklog is preserved as a byte prefix. The original #176 worklog entry is appended unchanged.
+
+Files: src/styles/public-surface-case-2026-11-18.css, tests/shared-shell.test.ts and this worklog. Local shared-shell, homepage and charset validation: 41 tests passed. git diff --check passed. Exact-head Site CI and deployment were not yet verified at this checkpoint. No independent review claimed.
+
+### 2026-11-21 — Limit the #173 XML tooling upgrade to its intended scope
+
+Agent: Gary (OpenAI). The owner authorized sequential dependency maintenance (#173, then #171, then #172), each gated by full CI. Updated the development-only fast-xml-parser pin from 5.12.0 to 5.12.1 and its required fast-xml-builder resolution from 1.3.1 to 1.3.2. Excluded unrelated Astro, Prism and Prettier lockfile churn from the original automated diff. Kept the exact dependency and lockfile guards; only updated the authorized pin and audited lockfile SHA-256.
+
+Inventory: main 83a5ecfb80bd6ddfcf5c79d268712a8f63a384ae contains merged #176 and #177; #171 and #172 remain separate dependency work in the user's approved sequence. Main worklog is preserved byte-for-byte as a prefix. Files: package.json, pnpm-lock.yaml, tests/public-surface-adjacency-map/renderingBoundary.test.ts and this worklog. Local validation: selected lockfile hunks apply exactly and match reviewed byte count and SHA-256; exact-head full Linux CI required before merging. No live action performed by this patch.
+Local guard suite on the assembled candidate: 13 checks passed (existing TypeScript evaluator; the new dependency installation is left to CI).

@@ -7,6 +7,7 @@ import { DATED_SHELL_ROUTES, SHELL_EXCEPTIONS, shellCounts, assertShellCounts } 
 const read = path => readFileSync(new URL('../'+path,import.meta.url),'utf8').replace(/\r\n/g,'\n');
 const sha = s => createHash('sha256').update(s).digest('hex');
 const baseline=JSON.parse(read('tests/fixtures/dated-shell-baseline.json'));
+const approvedDatePresentation=JSON.parse(read('tests/fixtures/dated-shell-date-format.json'));
 
 test('shell route coverage is exactly the nine approved dates and two preserved exceptions',()=>{
  assert.deepEqual(DATED_SHELL_ROUTES,[
@@ -14,12 +15,19 @@ test('shell route coverage is exactly the nine approved dates and two preserved 
   '/artistic-research/public-surface-case/2026-08-18/','/artistic-research/public-surface-case/2026-08-22/','/artistic-research/public-surface-case/2026-09-19/',
   '/artistic-research/public-surface-case/2026-10-04/','/artistic-research/public-surface-case/2026-10-04-revisited/',
   '/artistic-research/public-surface-case/2026-10-18/',
-  '/artistic-research/public-surface-case/2026-11-15/'
+  '/artistic-research/public-surface-case/2026-11-15/',
+  '/artistic-research/public-surface-case/2026-11-18/',
+  '/artistic-research/public-surface-case/2026-11-21/'
  ]);
  assert.deepEqual(SHELL_EXCEPTIONS,['/language-pressure-test-lab-prototype/','/404/']);
 });
 
-function removeApprovedIntegration(source) {
+function removeApprovedIntegration(source, path) {
+ // Revert only exact date-presentation changes before checking the historical digest.
+ for (const [original, approved] of approvedDatePresentation[path] ?? []) {
+  assert.equal(source.split(approved).length, 2, 'exactly one approved date presentation');
+  source=source.replace(approved,original);
+ }
  let s=source.replace('import SiteHeader from "../../../components/SiteHeader.astro";\n','')
   .replace('import SiteFooter from "../../../components/SiteFooter.astro";\n','')
   .replace('\n    <SiteHeader articleShell />','').replace('    <SiteFooter articleShell />\n','')
@@ -28,14 +36,14 @@ function removeApprovedIntegration(source) {
  return s;
 }
 for (const [path,expected] of Object.entries(baseline.pages)) {
- test(`${path}: original complete page survives only approved shell/CSS integration`,()=>{
+ test(`${path}: original complete page survives only approved shell, CSS and date-presentation changes`,()=>{
   const s=read(path);
   assert.equal((s.match(/<SiteHeader\b/g)||[]).length,1);
   assert.equal((s.match(/<SiteFooter\b/g)||[]).length,1);
   assert.match(s,/<SiteHeader articleShell \/>/);assert.match(s,/<SiteFooter articleShell \/>/);
   assert.doesNotMatch(s,/<BaseLayout\b/);
-  assert.equal(sha(removeApprovedIntegration(s)),expected,'head metadata, article text, local footer, scripts and ordering preserved');
-  assert.notEqual(sha(removeApprovedIntegration(s.replace('<main','<main data-unapproved-change'))),expected,'unapproved markup cannot disappear in normalization');
+  assert.equal(sha(removeApprovedIntegration(s,path)),expected,'head metadata, article text, local footer, scripts and ordering preserved');
+  assert.notEqual(sha(removeApprovedIntegration(s.replace('<main','<main data-unapproved-change'),path)),expected,'unapproved markup cannot disappear in normalization');
  });
 }
 for (const [path,expected] of Object.entries(baseline.exceptions)) test(`${path}: exception is unchanged`,()=>assert.equal(sha(read(path)),expected));
@@ -87,4 +95,15 @@ test('18 October article is text-only, citation-preserving and free of editing l
  assert.match(page,/<SiteFooter articleShell \/>/);
  assert.match(page,/France Protests 2026: When History Returns to the Street/);
  assert.doesNotMatch(page,/noindex|og:|twitter:/i);
+});
+
+
+test('Beiyang skip link remains keyboard-accessible but is visually hidden until focused',()=>{
+ const page=read('src/pages/artistic-research/public-surface-case/2026-11-18.astro');
+ const css=read('src/styles/public-surface-case-2026-11-18.css');
+ assert.match(page, /<a class="skip" href="#article">Skip to article<\/a>/);
+ assert.match(page, /<main id="article"/);
+ assert.match(css, /body > a\.skip\{position:absolute;left:-10000px\}/);
+ assert.match(css, /body > a\.skip:focus\{left:12px;top:12px;z-index:10;/);
+ assert.doesNotMatch(css, /body > a\.skip[^}]*display\s*:\s*none/);
 });
