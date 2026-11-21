@@ -246,3 +246,11 @@ Inventory: main 83ee64db5618487bb0afbf8d148e675d1a606347 includes #173, #176 and
 Agent: Gary (OpenAI). The owner approved Sitemap in #178 after Dependabot replaced #172. Updated the three direct pins only: Astro 7.4.12, MDX 8.1.6, and Sitemap 3.7.5. Kept the already merged Cloudflare 14.4.8, Wrangler 4.164.0 and XML tooling pins; rebound the adapter peer to the new Astro. Used the published astro2tsx 0.1.4 package to pair emnapi core/runtime 1.11.3 in the checker graph, without a global override. Kept the exact dependency-version and lockfile identity checks.
 
 Inventory: main f128c5282f883e868e06f32d5ddfc886663ba61b includes #171, #173, #176 and #177. #172 was closed unmerged by Dependabot; #178 is the only open PR in the inventory. Main worklog is preserved byte-for-byte. Files: package.json, pnpm-lock.yaml, renderingBoundary.test.ts and this worklog. Frozen installation with pnpm 10.34.5, 21 local boundary/homepage tests and astro check (0 errors, 0 warnings) passed. Audited lockfile: 134938 bytes, SHA-256 0edbad78a24856cc5373861f40d33904711024280bf94059cfa634303c2f1d08. Full exact-head Linux CI is required before merge. No manual deployment.
+
+### 2026-11-21 — Remove redundant bottom navigation on the two newest readings
+
+Agent: Gary (OpenAI). At the owner's request, removed the standalone bottom-link block from the Beiyang and Kaohsiung case pages because the shared header already links Artistic Research. Retained the shared footer, keyboard skip link and content target, article copy, dates, sources, and artwork. Reviewed older readings: a few early Public Slices use a separately arranged return link, and several dated cases use a footer note for an evidence boundary. No old pages were changed.
+
+Pre-append inventory: main 91a7422d8802da046c8f8a11b4f7db02c28039fd contains #176–#178, and the open PR query returned none. Historical worklog bytes are preserved.
+
+Files: the 18 and 21 November Astro shells, tests/shared-shell.test.ts, and this append-only record. Validation: 42 focused tests passed and astro check reported 0 errors and 0 warnings (4 existing hints). No independent review or exact-head full Site CI pass yet. Draft only; no merge or deployment.

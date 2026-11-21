@@ -53,9 +53,11 @@ export function assertShellCounts(counts, { present, dated }, route) {
   }
   if (counts.printMarkers !== (dated ? 2 : 0)) throw new Error(`${route}: dated print marker count ${counts.printMarkers}`);
   if (dated) {
-    const october = route.includes('/2026-10-04');
+    const withoutArticleFooter = route.includes('/2026-10-04') ||
+      route === '/artistic-research/public-surface-case/2026-11-18/' ||
+      route === '/artistic-research/public-surface-case/2026-11-21/';
     const scopedFooter = route.includes('/2026-07-25/') || route.includes('/2026-07-31/');
-    if (counts.articleFooters !== (october ? 0 : 1)) throw new Error(`${route}: original article footer count ${counts.articleFooters}`);
-    if (counts.articleNotes !== (!october && !scopedFooter ? 1 : 0)) throw new Error(`${route}: article footer landmark count ${counts.articleNotes}`);
+    if (counts.articleFooters !== (withoutArticleFooter ? 0 : 1)) throw new Error(`${route}: original article footer count ${counts.articleFooters}`);
+    if (counts.articleNotes !== (!withoutArticleFooter && !scopedFooter ? 1 : 0)) throw new Error(`${route}: article footer landmark count ${counts.articleNotes}`);
   }
 }
