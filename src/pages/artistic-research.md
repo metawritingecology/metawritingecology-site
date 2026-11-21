@@ -212,6 +212,12 @@ An army, a flag, and the distance between two railway platforms.
 
 [Enter Public Surface Case — 18 November 2026](/artistic-research/public-surface-case/2026-11-18/)
 
+#### 21 November 2026 — The City Between Shows
+
+Two concerts, three metro stops apart. The reading moves from the railway that carries both audiences to the lights, shops, and cameras that give a touring show a life beyond the venue. Kaohsiung and Lima appear side by side, not as rival hosts, but as places where a welcome and a person's time off can share the same street.
+
+[Enter Public Surface Case — 21 November 2026](/artistic-research/public-surface-case/2026-11-21/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

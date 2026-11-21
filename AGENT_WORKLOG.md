@@ -175,3 +175,13 @@ Agent: Codex. At the author's request, removed only the Beiyang illustration ele
 Pre-append inventory: current main 14de4471907a3c1a6f1f7be028c7297c0f7064d9 includes merged PR #174 (GitHub merge timestamp 18 November 17:08:29 UTC); open-PR query returned none. Earlier Guandu work remains merged via PR #170. No other branch was integrated, rewritten or deleted. Historical worklog bytes remain an exact prefix.
 
 Files changed: src/pages/artistic-research.md and this appended record. Validation: 322 homepage, shared-shell, indexing, metadata and charset tests passed; exact-diff assertion confirms one image element and its following blank line are the only page changes; homepage image retained and article image-free checks passed; git diff --check passed. Full-build verification is left to exact-head CI due to the previously recorded local Cloudflare environment limitation. No independent review claimed. Separate follow-up draft PR only; no merge or deployment.
+
+### 2026-11-21 — Kaohsiung dated reading and entry surfaces
+
+Agent: Codex. Prepared the author-requested English reading, homepage card with the projection illustration, and a text-only Artistic Research entry. The dated article retains its two internal figures. Existing works, earlier cards and top navigation remain unchanged. The article identifies public commentary and first-person accounts without identifying private material supplied to the editor, and does not embed screenshots.
+
+Pre-append inventory: main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. PR #176 is an existing, separately held Beiyang correction; its stylesheet and regression test are not incorporated in this draft. Dependabot PRs #171, #172 and #173 are a separate queue. No other open feature PR was returned. No other branch was integrated, rewritten or deleted.
+
+Files: homepage and Artistic Research entries; dated Astro page, English HTML payload, scoped CSS and two WebP assets; route and shared-shell registration and accompanying build-verifier and test expectations. Dependencies, check pipeline and worklog history are preserved.
+
+Validation: 340 focused tests passed; Astro check 0 errors, 0 warnings (4 existing hints); git diff --check and citation fragment checks passed. Local build compiled the Vite bundles but stopped in Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`. Exact-head Linux CI and author review remain outstanding. No independent review of the integrated commit is claimed: reviewer interface, reviewer lineage, review mode, reviewed commit and review evidence reference are unknown. Draft for review only; no merge or deployment.

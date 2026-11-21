@@ -27,9 +27,9 @@ test('homepage retains the four accepted v4 SVGs exactly, including mobile crop 
 function assertReadingLinks(markup: string) {
   // Count all opening anchors before reading attributes or nested text, so
   // a differently formatted duplicate cannot disappear from the contract.
-  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 6, 'exactly six reading anchors');
+  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 7, 'exactly seven reading anchors');
   const anchors = [...markup.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi)];
-  assert.equal(anchors.length, 6, 'all reading anchors are closed');
+  assert.equal(anchors.length, 7, 'all reading anchors are closed');
   const links = anchors.map(([, attributes, contents]) => {
     const href = attributes.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
     assert.ok(href, 'every reading anchor has a quoted href');
@@ -42,10 +42,11 @@ function assertReadingLinks(markup: string) {
     ['/artistic-research/public-surface-case/2026-10-18/', 'Read the France protests snapshot · 18 October 2026'],
     ['/artistic-research/public-surface-case/2026-11-15/', 'Read the Guandu snapshot · 15 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-18/', 'Read the Beiyang snapshot · 18 November 2026'],
+    ['/artistic-research/public-surface-case/2026-11-21/', 'Read the Kaohsiung snapshot · 21 November 2026'],
   ]);
 }
 
-test('responsive artwork keeps one set of the six approved reading links', () => {
+test('responsive artwork keeps one set of the seven approved reading links', () => {
   assertReadingLinks(source);
 });
 
@@ -54,7 +55,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
   const nestedText = first.replace('18 August: the first reading', '<span>18 August: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
-    assert.throws(() => assertReadingLinks(source + duplicate), /exactly six reading anchors/);
+    assert.throws(() => assertReadingLinks(source + duplicate), /exactly seven reading anchors/);
   }
   const second = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/g)![1];
   assert.throws(() => assertReadingLinks(source.replace(second, extraAttributes)));
@@ -75,4 +76,17 @@ test('new history card uses one inline vector layer without an image rectangle',
   assert.doesNotMatch(source, /<img[^>]*history-art/);
   assert.match(source, /\.plate--history::before/);
   assert.match(source, /overflow: visible/);
+});
+
+test('Kaohsiung uses the same reading link at all widths and keeps its picture on the homepage', () => {
+  const art = readFileSync(new URL('../src/pages/artistic-research.md', import.meta.url), 'utf8');
+  const article = readFileSync(new URL('../src/data/public-surface-case/2026-11-21/rendered-body.en.html', import.meta.url), 'utf8');
+  const asset = '/assets/public-surface-case/2026-11-21/harbour-projection.webp';
+  assert.ok(source.includes(`src="${asset}"`));
+  assert.ok(!art.includes(asset), 'Art listing remains text-only');
+  assert.ok(!article.includes(asset), 'article uses its own figures');
+  assert.match(art, /Two concerts, three metro stops apart\./);
+  assert.equal((article.match(/<li id="s\d+">/g) ?? []).length, 19);
+  const sourceIds = new Set([...article.matchAll(/<li id="(s\d+)">/g)].map(m => m[1]));
+  for (const [, ref] of article.matchAll(/href="#(s\d+)"/g)) assert.ok(sourceIds.has(ref), ref);
 });
