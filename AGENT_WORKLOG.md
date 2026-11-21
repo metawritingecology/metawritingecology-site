@@ -209,3 +209,21 @@ Agent: Gary (OpenAI). Unified the date presentation in the homepage reading card
 Pre-append inventory: continued draft PR #177 at 2bb6fc3cca69acc4feed769d283ae3d15ed13e05 with main at 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft #176 remains separately held; dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
 
 Files changed: DesktopArticleEntries.astro, the Artistic Research index, the dated slice/case header templates or payloads, exact date-only shell normalization fixture, homepage and preservation assertions, and this worklog. Validation: 345 focused tests passed; Astro check found 0 errors, 0 warnings and 4 existing hints. Original shell digests, artwork hashes and reading link destinations remain tested. git diff --check passed. Local headless Chromium could not start because its process socket was denied; no browser visual pass or exact-head CI pass is claimed here. No independent review, merge or deployment.
+
+
+## 2026-11-18 — Beiyang article skip-link visibility
+- Agent: ChatGPT assigned engineering task.
+- Authorization: author requested removal of the visible Skip to article label; preserve accessible navigation where needed. No merge or deployment authorized.
+- Inventory before append: main 4f119698 contains merged PR #175; #174 and #170 previously confirmed merged. GitHub open PR inventory empty. No other relevant unmerged work identified; existing branches and worklog history preserved.
+- Change: dated Beiyang stylesheet hides its direct-child skip link offscreen, reveals it on keyboard focus, following the existing 18 October article pattern. Anchor and article target unchanged; no shared component or article copy changes.
+- Files: dated stylesheet, shared-shell regression test, this append-only worklog.
+- Validation: shared-shell and metadata contract tests, Astro check, diff whitespace check; exact-head Linux Site CI is full readiness authority. Local Cloudflare build is known blocked by uv_interface_addresses in this executor.
+- Risk: keyboard focus intentionally reveals the navigation link; ordinary article reading no longer displays it. Other pages unaffected. No independent review; reviewer interface/lineage/mode/commit/evidence unknown.
+
+### 2026-11-21 — Reconcile the Beiyang shortcut fix with current main
+
+Agent: Gary (OpenAI). Author approved updating PR #176 and merging after checks. Carried forward only the prior Beiyang skip-link stylesheet and exact keyboard-accessibility assertion. Maintained the earlier date-format and homepage work; neither the article nor the target anchor changed.
+
+Pre-append inventory: main 90516a4080947c09cee1ac5a3abeb54d70214e4f contains merged PR #177; PR #176 is the active branch, and #171–173 are dependency PRs. Main's worklog is preserved as a byte prefix. The original #176 worklog entry is appended unchanged.
+
+Files: src/styles/public-surface-case-2026-11-18.css, tests/shared-shell.test.ts and this worklog. Local shared-shell, homepage and charset validation: 41 tests passed. git diff --check passed. Exact-head Site CI and deployment were not yet verified at this checkpoint. No independent review claimed.
