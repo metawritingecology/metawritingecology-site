@@ -185,3 +185,11 @@ Pre-append inventory: main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. PR #176 is 
 Files: homepage and Artistic Research entries; dated Astro page, English HTML payload, scoped CSS and two WebP assets; route and shared-shell registration and accompanying build-verifier and test expectations. Dependencies, check pipeline and worklog history are preserved.
 
 Validation: 340 focused tests passed; Astro check 0 errors, 0 warnings (4 existing hints); git diff --check and citation fragment checks passed. Local build compiled the Vite bundles but stopped in Cloudflare prerender setup at `uv_interface_addresses returned Unknown system error 1`. Exact-head Linux CI and author review remain outstanding. No independent review of the integrated commit is claimed: reviewer interface, reviewer lineage, review mode, reviewed commit and review evidence reference are unknown. Draft for review only; no merge or deployment.
+
+### 2026-11-21 — Bring the Kaohsiung welcome anecdote into the closing comparison
+
+Agent: Gary (OpenAI). At the author's request, kept the World Games Station wayfinding in the transport opening and moved the Mallorca visitor and the quiet offer of help to the closing Liuhe–Lima comparison. The original source references, ending, illustrations, homepage and Artistic Research entry are unchanged. No screenshots or new factual claims were added.
+
+Pre-append inventory: continuing draft PR #177, whose base is 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft PR #176 remains on hold and unchanged; PRs #171–173 are the separate dependency queue. No other open feature PR was returned. The entire previous worklog is preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests; citation-target and worklog-prefix checks; git diff --check. Full build not rerun for this prose edit. No independent review, merge or deployment.
