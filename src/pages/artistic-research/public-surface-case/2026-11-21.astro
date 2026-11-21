@@ -1,0 +1,36 @@
+---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
+import "../../../styles/global.css";
+import "../../../styles/public-surface-case-2026-11-21.css";
+import bodyHTML from "../../../data/public-surface-case/2026-11-21/rendered-body.en.html?raw";
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: "The City Between Shows",
+  description: "Two stages, three stops, and the streets a concert leaves behind.",
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
+---
+<!doctype html>
+<html lang={publicMetadata.language}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>{publicMetadata.title}</title>
+  <meta name="description" content={publicMetadata.description} />
+  <link rel="canonical" href={publicMetadata.canonicalUrl} />
+  {jsonLd && <SchemaJsonLd data={jsonLd} />}
+</head>
+<body id="top">
+  <SiteHeader articleShell />
+  <a class="skip" href="#article">Skip to article</a>
+  <main id="article" set:html={bodyHTML} />
+  <footer role="note"><a href="/artistic-research/">Return to Artistic Research</a> · <a href="#top">Back to the beginning ↑</a></footer>
+  <SiteFooter articleShell />
+</body>
+</html>

@@ -176,7 +176,7 @@ Public forms can also be read through the permissions attached to them. This sli
 
 A Public Surface Case reads an external public-discourse field as a bounded, dated, verify-only specimen. Its material is external observation, not repository evidence. A dated specimen is preserved as written; a later reading is added as a separate page rather than as a revision.
 
-#### 18 August and 19 September 2026
+#### 18 August 2026 and 19 September 2026
 
 The 2026 pair below reads one field twice: first at the moment a cultural template was cast onto a public controversy, then a month later, when the field had become a five-night festival, to record how fast cohesion formed and how the dispute's template was translated into an existing performance repertoire.
 
@@ -190,7 +190,7 @@ The October 4 essay follows how selected statements and reports place a needle, 
 
 The October 4 essay is read again with later observations inserted beside the passages they return to. The earlier essay is retained, with only outdated publication-status wording removed. The added paragraphs follow changes in the public record and keep unresolved questions visible. The original page remains available separately.
 
-[Revisit the October 4 Slice — with later evidence](/artistic-research/public-surface-case/2026-10-04-revisited/)
+[Revisit the 4 October 2026 slice — with later evidence](/artistic-research/public-surface-case/2026-10-04-revisited/)
 
 [Original Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
 
@@ -211,6 +211,12 @@ A name on a map, a magazine, a station, a riverbank. The 15 November reading tra
 An army, a flag, and the distance between two railway platforms.
 
 [Enter Public Surface Case — 18 November 2026](/artistic-research/public-surface-case/2026-11-18/)
+
+#### 21 November 2026 — The City Between Shows
+
+Two concerts, three metro stops apart. The reading moves from the railway that carries both audiences to the lights, shops, and cameras that give a touring show a life beyond the venue. Kaohsiung and Lima appear side by side, not as rival hosts, but as places where a welcome and a person's time off can share the same street.
+
+[Enter Public Surface Case — 21 November 2026](/artistic-research/public-surface-case/2026-11-21/)
 
 ## Exhibition or Presentation Version
 
