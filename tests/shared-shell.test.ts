@@ -107,3 +107,16 @@ test('Beiyang skip link remains keyboard-accessible but is visually hidden until
  assert.match(css, /body > a\.skip:focus\{left:12px;top:12px;z-index:10;/);
  assert.doesNotMatch(css, /body > a\.skip[^}]*display\s*:\s*none/);
 });
+
+
+test('Beiyang and Kaohsiung use the top navigation and shared footer without redundant bottom links', () => {
+ assert.match(read('src/components/SiteHeader.astro'), /href="\/artistic-research\/"[^>]*>Artistic Research<\/a>/);
+ for (const date of ['2026-11-18','2026-11-21']) {
+  const page=read(`src/pages/artistic-research/public-surface-case/${date}.astro`);
+  assert.equal((page.match(/<SiteHeader articleShell \/>/g)||[]).length,1);
+  assert.equal((page.match(/<SiteFooter articleShell \/>/g)||[]).length,1);
+  assert.match(page,/<a class="skip" href="#article">Skip to article<\/a>/);
+  assert.match(page,/<main id="article"/);
+  assert.doesNotMatch(page,/Back to the beginning|Return to Artistic Research/);
+ }
+});
