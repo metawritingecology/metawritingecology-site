@@ -27,9 +27,9 @@ test('homepage retains the four accepted v4 SVGs exactly, including mobile crop 
 function assertReadingLinks(markup: string) {
   // Count all opening anchors before reading attributes or nested text, so
   // a differently formatted duplicate cannot disappear from the contract.
-  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 7, 'exactly seven reading anchors');
+  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 10, 'exactly ten reading anchors');
   const anchors = [...markup.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi)];
-  assert.equal(anchors.length, 7, 'all reading anchors are closed');
+  assert.equal(anchors.length, 10, 'all reading anchors are closed');
   const links = anchors.map(([, attributes, contents]) => {
     const href = attributes.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
     assert.ok(href, 'every reading anchor has a quoted href');
@@ -38,7 +38,10 @@ function assertReadingLinks(markup: string) {
   assert.deepEqual(links, [
     ['/artistic-research/public-surface-case/2026-08-18/', '18 August 2026: the first reading'],
     ['/artistic-research/public-surface-case/2026-09-19/', '19 September 2026: one month on'],
-    ['/artistic-research/public-surface-case/2026-10-04-revisited/', 'Read the essay, revisited'],
+    ['/artistic-research/public-surface-case/2026-10-04/', '4 October 2026 · Original essay'],
+    ['/artistic-research/public-surface-case/2026-10-04-revisited/#latest-disciplinary-levels', '5 October 2026 · Additions'],
+    ['/artistic-research/public-surface-case/2026-10-04-revisited/#november-harm-reduction', '21 November 2026 · Follow-up'],
+    ['/artistic-research/public-surface-case/2026-10-04-revisited/', 'Read all layers together'],
     ['/artistic-research/public-surface-case/2026-10-18/', 'Read the France protests snapshot · 18 October 2026'],
     ['/artistic-research/public-surface-case/2026-11-15/', 'Read the Guandu snapshot · 15 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-18/', 'Read the Beiyang snapshot · 18 November 2026'],
@@ -46,7 +49,7 @@ function assertReadingLinks(markup: string) {
   ]);
 }
 
-test('responsive artwork keeps one set of the seven approved reading links', () => {
+test('responsive artwork keeps one set of the ten approved reading links', () => {
   assertReadingLinks(source);
 });
 
@@ -55,7 +58,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
   const nestedText = first.replace('18 August 2026: the first reading', '<span>18 August 2026: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
-    assert.throws(() => assertReadingLinks(source + duplicate), /exactly seven reading anchors/);
+    assert.throws(() => assertReadingLinks(source + duplicate), /exactly ten reading anchors/);
   }
   const second = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/g)![1];
   assert.throws(() => assertReadingLinks(source.replace(second, extraAttributes)));

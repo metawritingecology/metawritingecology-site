@@ -1,0 +1,6 @@
+/* Copper is scoped to the 21 November reading layer. */
+.review-2026-10-04 .november-insertion{--review-bg:#30211d;--review-text:#f2dccf;--review-label:#f1b593;--review-line:#c08366;--review-link:#f3bd9d}
+.review-2026-10-04 .november-insertion h3{color:var(--review-text);margin:0 0 13px;font-size:1.22rem;line-height:1.35}
+.review-2026-10-04 .november-legend{border-left:2px solid #c08366;padding-left:14px;color:#f1b593;font-size:.875rem}
+.review-2026-10-04 .november-insertion a:hover{color:#fff1e7}
+@media print{.review-2026-10-04 .november-insertion{background:#fff0e7;border-color:#9b5a40}.review-2026-10-04 .november-insertion h3,.review-2026-10-04 .november-insertion p,.review-2026-10-04 .november-insertion a,.review-2026-10-04 .november-insertion summary,.review-2026-10-04 .november-insertion .review-label,.review-2026-10-04 .november-legend{color:#572b1b}}

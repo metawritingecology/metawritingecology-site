@@ -6,6 +6,7 @@ import "../../../styles/global.css";
 import "../../../styles/public-surface-case-2026-10-04.css";
 import "../../../styles/public-surface-case-2026-10-04-revisited.css";
 import "../../../styles/public-surface-case-2026-10-05-additions.css";
+import "../../../styles/public-surface-case-2026-11-21-additions.css";
 import "../../../styles/public-surface-case-2010-historical-reference.css";
 import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
 import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
@@ -54,18 +55,21 @@ const { ui } = data;
         <p class="meta">Case date: <time datetime="2026-10-04">4 October 2026</time></p>
         <p class="meta">Later news selection through <time datetime="2026-10-04T22:29:00+08:00">4 October 2026, 22:29 UTC+8</time></p>
         <p class="meta latest-cutoff">Additional news selection through <time datetime={latest.cutoff}>5 October 2026, 21:28 UTC+8</time></p>
+        <p class="meta november-cutoff">Follow-up checked through <time datetime="2026-11-21">21 November 2026</time> (Taiwan time)</p>
       </header>
       <nav class="section-nav" aria-label="Reading navigation">
         <a href="#article">{review.navigation.expandedReadingLabel}</a>
         <a href={review.original.route}>Read the original October 4 page</a>
         <a href="#sources">Original sources</a>
         <a class="latest-nav" href={"#"+latest.blocks[0].id}>5 October additions</a>
+        <a class="november-nav" href="#november-harm-reduction">21 November follow-up</a>
       </nav>
       <div class="review-framing">
-        {review.framing.map(paragraph => <p>{paragraph}</p>)}
+        <p>The original essay is preserved. Later readings appear next to the passages they revisit, with their own sources and dates. All dates and times use Taiwan time (UTC+8).</p>
         <p class="review-legend">Warm text retains the original reading. Blue-green passages marked “Added reading” are later additions; their sources and verification details can be opened separately.</p>
-        <p class="latest-legend">{latest.legend}</p>
-        <p class="historical-legend">Blue-gray passages marked “Historical reference” introduce a dated historical source. This 2010 material is separate from the October 4–5, 2026 news selections.</p>
+        <p class="latest-legend">Lavender passages marked “5 October update” follow reports through 5 October, 21:28 Taiwan time.</p>
+        <p class="historical-legend">Blue-gray passages marked “Historical reference” introduce a dated historical source. The 2010 material is separate from the 2026 news selections.</p>
+        <p class="november-legend">Copper passages marked “21 November update” follow the later record. Color marks the reading date, not certainty. Report publication times do not necessarily date the events they describe.</p>
       </div>
       <header class="original-head">
         <p class="kicker">Preserved October 4 essay</p>

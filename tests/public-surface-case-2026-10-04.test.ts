@@ -192,21 +192,22 @@ test('revisited print fallback and October 5 stylesheet precedence stay scoped',
  assert(latest.slice(latest.indexOf('@media print{')).includes('.review-2026-10-04 .latest-insertion{background:#f4eff7;color:#2d2338;border-left-color:#77638d}'));
 });
 
-test('revisited composition preserves the original, ten additions and a historical source', () => {
+test('revisited composition preserves the original, fourteen additions and a historical source', () => {
  const dir='src/data/public-surface-case/2026-10-04-revisited/';
  const composed=read(dir+'rendered-body.en.html');
  const earlier=JSON.parse(read(dir+'annotations.en.json')).annotations;
  const latest=JSON.parse(read(dir+'latest-updates.en.json')).blocks;
  const decode=s=>s.replace(/<[^>]+>/g,'').replace(/&#(?:39|x27);/g,"'").replace(/&quot;/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&');
  const verify=body=>{
-  const blocks=[...body.matchAll(/\n<!-- BEGIN (REVIEW|LATEST|HISTORICAL|FILM) INSERTION ([a-z0-9-]+) -->\n([\s\S]*?)\n<!-- END \1 INSERTION \2 -->/g)];
+  const blocks=[...body.matchAll(/\n<!-- BEGIN (REVIEW|LATEST|HISTORICAL|FILM|NOVEMBER) INSERTION ([a-z0-9-]+) -->\n([\s\S]*?)\n<!-- END \1 INSERTION \2 -->/g)];
   assert.equal(blocks.filter(m=>m[1]==='REVIEW').length,7);
   assert.equal(blocks.filter(m=>m[1]==='LATEST').length,3);
   assert.equal(blocks.filter(m=>m[1]==='HISTORICAL').length,1);
   assert.equal(blocks.filter(m=>m[1]==='FILM').length,1);
-  assert.equal(new Set(blocks.map(m=>m[2])).size,12);
+  assert.equal(blocks.filter(m=>m[1]==='NOVEMBER').length,4);
+  assert.equal(new Set(blocks.map(m=>m[2])).size,16);
   let stripped=body; for(const m of blocks) stripped=stripped.replace(m[0],'');
-  assert.equal(stripped,html,'removing the ten additions and historical insertion recovers the original bytes');
+  assert.equal(stripped,html,'removing all dated insertions recovers the original bytes');
   const ids=[...body.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
   assert.equal(ids.length,new Set(ids).size,'unique composed IDs');
   const idSet=new Set(ids); for(const m of body.matchAll(/href="#([^"]+)"/g)) assert(idSet.has(m[1]),m[1]);
@@ -285,4 +286,32 @@ test('earlier additions retain dark text and source URLs when hovered in print',
  verify(css);
  const i=css.indexOf('@media print{');
  assert.throws(()=>verify(css.slice(0,i)+css.slice(i).replace('.review-2026-10-04 .review-insertion a:hover,','')));
+});
+
+test('the three October case dates are navigable on Home and Artistic Research', () => {
+ const home=read('src/components/DesktopArticleEntries.astro');
+ const art=read('src/pages/artistic-research.md');
+ const caseBase='/artistic-research/public-surface-case/';
+ const city=caseBase+'2026-11-21/';
+ const links=[
+  [caseBase+'2026-10-04/', '4 October 2026 · Original essay'],
+  [caseBase+'2026-10-04-revisited/#latest-disciplinary-levels', '5 October 2026 · Additions'],
+  [caseBase+'2026-10-04-revisited/#november-harm-reduction', '21 November 2026 · Follow-up'],
+ ];
+ for(const [route,label] of links) {
+  assert(home.includes('<a href="'+route+'">'+label+'</a>'),route);
+  assert(art.includes('['+label+']('+route+')'),route);
+ }
+ assert(home.includes(city) && art.includes(city),'independent Kaohsiung entry remains');
+ const casePage=read('src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro');
+ assert(!/Unpublished preview|noindex|file:\/\//i.test(casePage));
+ const body=read('src/data/public-surface-case/2026-10-04-revisited/rendered-body.en.html');
+ const inserts=[...body.matchAll(/<section class="review-insertion november-insertion"[^>]*>([\s\S]*?)<\/section>/g)];
+ assert.equal(inserts.length,4);
+ for(const [,section] of inserts) {
+  const prose=section.split('<details')[0];
+  assert(prose.includes('21 November update'));
+  assert(!/<[^>]+\bhidden\b|display\s*:\s*none|visibility\s*:\s*hidden/.test(prose));
+  assert.match(section,/<details[^>]*><summary>Sources and verification<\/summary>/);
+ }
 });
