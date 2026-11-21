@@ -193,3 +193,11 @@ Agent: Gary (OpenAI). At the author's request, kept the World Games Station wayf
 Pre-append inventory: continuing draft PR #177, whose base is 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. Beiyang draft PR #176 remains on hold and unchanged; PRs #171–173 are the separate dependency queue. No other open feature PR was returned. The entire previous worklog is preserved.
 
 Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests; citation-target and worklog-prefix checks; git diff --check. Full build not rerun for this prose edit. No independent review, merge or deployment.
+
+### 2026-11-21 — Keep recognition separate from contact in the Liuhe passage
+
+Agent: Gary (OpenAI). Added one interpretive paragraph after the Liuhe footage passage, using the phone and the decision not to follow to express the author's point about learned restraint. It is written as a possibility, not an account of a specific spectator or a claim about a whole city. No wildlife analogy, new sources, screenshots or factual claims were added.
+
+Pre-append inventory: continued draft PR #177 at 36c7c228abfd22e7cfe258376d5330c45b57392b, based on main 4f1196982fb9d506d3b8e4f597c37e67ed4a0f03. The separately held Beiyang draft #176 and dependency PRs #171–173 were not integrated. All earlier worklog entries are preserved.
+
+Files changed: src/data/public-surface-case/2026-11-21/rendered-body.en.html and this appended record. Validation: 38 focused shell, homepage and charset tests passed; single-paragraph insertion, unchanged link and anchor checks, and git diff --check passed. No full build or independent review claimed. No merge or deployment.
