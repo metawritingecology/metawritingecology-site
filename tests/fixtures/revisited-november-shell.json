@@ -1,0 +1,22 @@
+[
+  [
+    "import \"../../../styles/public-surface-case-2026-10-05-additions.css\";\n",
+    "import \"../../../styles/public-surface-case-2026-10-05-additions.css\";\nimport \"../../../styles/public-surface-case-2026-11-21-additions.css\";\n"
+  ],
+  [
+    "        <p class=\"meta latest-cutoff\">Additional news selection through <time datetime={latest.cutoff}>5 October 2026, 21:28 UTC+8</time></p>\n",
+    "        <p class=\"meta latest-cutoff\">Additional news selection through <time datetime={latest.cutoff}>5 October 2026, 21:28 UTC+8</time></p>\n        <p class=\"meta november-cutoff\">Follow-up checked through <time datetime=\"2026-11-21\">21 November 2026</time> (Taiwan time)</p>\n"
+  ],
+  [
+    "        <a class=\"latest-nav\" href={\"#\"+latest.blocks[0].id}>5 October additions</a>\n",
+    "        <a class=\"latest-nav\" href={\"#\"+latest.blocks[0].id}>5 October additions</a>\n        <a class=\"november-nav\" href=\"#november-harm-reduction\">21 November follow-up</a>\n"
+  ],
+  [
+    "        {review.framing.map(paragraph => <p>{paragraph}</p>)}\n",
+    "        <p>The original essay is preserved. Later readings appear next to the passages they revisit, with their own sources and dates. All dates and times use Taiwan time (UTC+8).</p>\n"
+  ],
+  [
+    "        <p class=\"latest-legend\">{latest.legend}</p>\n        <p class=\"historical-legend\">Blue-gray passages marked “Historical reference” introduce a dated historical source. This 2010 material is separate from the October 4–5, 2026 news selections.</p>\n",
+    "        <p class=\"latest-legend\">Lavender passages marked “5 October update” follow reports through 5 October, 21:28 Taiwan time.</p>\n        <p class=\"historical-legend\">Blue-gray passages marked “Historical reference” introduce a dated historical source. The 2010 material is separate from the 2026 news selections.</p>\n        <p class=\"november-legend\">Copper passages marked “21 November update” follow the later record. Color marks the reading date, not certainty. Report publication times do not necessarily date the events they describe.</p>\n"
+  ]
+]

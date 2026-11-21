@@ -188,11 +188,13 @@ The 2026 pair below reads one field twice: first at the moment a cultural templa
 
 The October 4 essay follows how selected statements and reports place a needle, a venue, and an event photograph into different relations of service, suspicion, and representation. The comparisons are authored; the sources retain their own evidentiary limits. Optional reading branches and timelines expose the selected material without establishing causal relations.
 
-The October 4 essay is read again with later observations inserted beside the passages they return to. The earlier essay is retained, with only outdated publication-status wording removed. The added paragraphs follow changes in the public record and keep unresolved questions visible. The original page remains available separately.
+The revisited page places the later observations beside the passages they return to. Each dated layer keeps its own sources and limits; the original essay remains separately available.
 
-[Revisit the 4 October 2026 slice — with later evidence](/artistic-research/public-surface-case/2026-10-04-revisited/)
+- [4 October 2026 · Original essay](/artistic-research/public-surface-case/2026-10-04/)
+- [5 October 2026 · Additions](/artistic-research/public-surface-case/2026-10-04-revisited/#latest-disciplinary-levels)
+- [21 November 2026 · Follow-up](/artistic-research/public-surface-case/2026-10-04-revisited/#november-harm-reduction)
 
-[Original Public Surface Case — 4 October 2026](/artistic-research/public-surface-case/2026-10-04/)
+[Read all layers together](/artistic-research/public-surface-case/2026-10-04-revisited/)
 
 #### 18 October 2026 — When History Returns to the Street
 
