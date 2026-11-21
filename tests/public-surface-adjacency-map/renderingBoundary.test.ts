@@ -261,8 +261,8 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // PR #156: adapter 14.4.0 requires Astro ^7.4.0; retain merged Astro 7.4.2.
 // Wrangler 4.151.1 and its frozen transitive graph; no unrelated upgrades.
 const LOCKFILE_IDENTITY = {
-  byteLength: 148368,
-  sha256: "83daad2fba194630a404cdbc7b9e5d0e57baffa8a56340443dddc75ce9a65cc1",
+  byteLength: 134938,
+  sha256: "0edbad78a24856cc5373861f40d33904711024280bf94059cfa634303c2f1d08",
 };
 
 /**
@@ -736,9 +736,9 @@ test("guard 8 — no motion or timer architecture", () => {
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
   "@astrojs/cloudflare": "14.4.8",
-  "@astrojs/mdx": "8.0.1",
-  "@astrojs/sitemap": "3.7.4",
-  astro: "7.4.2",
+  "@astrojs/mdx": "8.1.6",
+  "@astrojs/sitemap": "3.7.5",
+  astro: "7.4.12",
   "d3-selection": "3.0.1",
   typescript: "6.0.3",
 };
