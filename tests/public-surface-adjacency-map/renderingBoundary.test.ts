@@ -261,8 +261,8 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // PR #156: adapter 14.4.0 requires Astro ^7.4.0; retain merged Astro 7.4.2.
 // Wrangler 4.151.1 and its frozen transitive graph; no unrelated upgrades.
 const LOCKFILE_IDENTITY = {
-  byteLength: 138450,
-  sha256: "3258ae11893eebf33b1530fe82444f8d33f07d3462b17244a6ee495841d1d85f",
+  byteLength: 148368,
+  sha256: "83daad2fba194630a404cdbc7b9e5d0e57baffa8a56340443dddc75ce9a65cc1",
 };
 
 /**
@@ -735,7 +735,7 @@ test("guard 8 — no motion or timer architecture", () => {
 // public sitemap, so the generated sitemap was compared against the main
 // build and is identical apart from lastmod.
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "14.4.0",
+  "@astrojs/cloudflare": "14.4.8",
   "@astrojs/mdx": "8.0.1",
   "@astrojs/sitemap": "3.7.4",
   astro: "7.4.2",
@@ -747,7 +747,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.12",
   "@types/d3-selection": "3.0.12",
   "fast-xml-parser": "5.12.1",
-  wrangler: "4.151.1",
+  wrangler: "4.164.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [

@@ -234,3 +234,9 @@ Agent: Gary (OpenAI). The owner authorized sequential dependency maintenance (#1
 
 Inventory: main 83a5ecfb80bd6ddfcf5c79d268712a8f63a384ae contains merged #176 and #177; #171 and #172 remain separate dependency work in the user's approved sequence. Main worklog is preserved byte-for-byte as a prefix. Files: package.json, pnpm-lock.yaml, tests/public-surface-adjacency-map/renderingBoundary.test.ts and this worklog. Local validation: selected lockfile hunks apply exactly and match reviewed byte count and SHA-256; exact-head full Linux CI required before merging. No live action performed by this patch.
 Local guard suite on the assembled candidate: 13 checks passed (existing TypeScript evaluator; the new dependency installation is left to CI).
+
+### 2026-11-21 — Constrain the refreshed #171 Cloudflare and Wrangler update
+
+Agent: Gary (OpenAI). Continued the owner-approved dependency sequence after #173. Dependabot refreshed #171 to Cloudflare adapter 14.4.8 and Wrangler 4.164.0. Carried forward those exact two approved direct dependency updates and their required transitive closure, excluding unrelated Astro/MDX and checker changes. Preserved the exact direct-version and lockfile-identity guards, updating only the intended pins and audited lock identity.
+
+Inventory: main 83ee64db5618487bb0afbf8d148e675d1a606347 includes #173, #176 and #177; #171 is current and #172 remains separate. Files: package.json, pnpm-lock.yaml, renderingBoundary.test.ts, and this append-only worklog. Frozen pnpm 10.34.5 installation and 21 local boundary/homepage checks passed. Audited lockfile: 148368 bytes, SHA-256 83daad2fba194630a404cdbc7b9e5d0e57baffa8a56340443dddc75ce9a65cc1. Full exact-head Site CI remains the merge gate. No manual deployment.
