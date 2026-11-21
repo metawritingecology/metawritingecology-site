@@ -23,6 +23,15 @@ test('shell route coverage is exactly the nine approved dates and two preserved 
 });
 
 function removeApprovedIntegration(source, path) {
+ // Revert only the exact November additions to the revisited shell before verifying the historical digest.
+ if (path === 'src/pages/artistic-research/public-surface-case/2026-10-04-revisited.astro') {
+  const november = JSON.parse(read('tests/fixtures/revisited-november-shell.json'));
+  for (const [original, approved] of november.reverse()) {
+   assert.equal(source.split(approved).length, 2, 'exactly one approved November shell edit');
+   source = source.replace(approved, original);
+  }
+ }
+
  // Revert only exact date-presentation changes before checking the historical digest.
  for (const [original, approved] of approvedDatePresentation[path] ?? []) {
   assert.equal(source.split(approved).length, 2, 'exactly one approved date presentation');
