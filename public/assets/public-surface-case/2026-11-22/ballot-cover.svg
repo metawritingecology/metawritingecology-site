@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 338" width="580" height="338" role="img" aria-labelledby="cover-title cover-desc">
+<title id="cover-title">The Name on the Ballot</title>
+<desc id="cover-desc">An outlined baton between two election forms. A short name fits its line; the marks of a longer name continue past the edge of the second form.</desc>
+<path fill="#191712" d="M0 0h580v338H0z"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M119 270h140m87 0h140" stroke="#9d8657" stroke-width="1" opacity=".65"/>
+  <path d="M119 248V149h140v99m87 0V149h140v99" stroke="#9d8657" stroke-width="1.15"/>
+  <path d="M128 252h131m96 0h131M131 158h28m199 0h28m-255 70h112m115 0h112m-339 9h112m115 0h112" stroke="#776f59" opacity=".61"/>
+  <path d="M132 178h113v32H132zm227 0h113v32H359z" stroke="#85744f" opacity=".8"/>
+  <path d="M144 194h41m185 0h161" stroke="#a78b58" opacity=".45"/>
+  <path d="M148 190v8m10-8v8m10-8v8" stroke="#b29b68" stroke-width="1.4"/>
+  <path d="M372 190v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8m10-8v8" stroke="#b29b68" stroke-width="1.25"/>
+  <g transform="translate(232 132) rotate(-15)">
+    <rect x="0" y="0" width="118" height="11" rx="5.5" stroke="#ad925d" stroke-width="1.15"/>
+    <path d="M12 1v9m95-9v9" stroke="#9d8657" opacity=".75"/>
+  </g>
+</g>
+</svg>

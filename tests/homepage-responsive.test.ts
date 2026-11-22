@@ -27,9 +27,9 @@ test('homepage retains the four accepted v4 SVGs exactly, including mobile crop 
 function assertReadingLinks(markup: string) {
   // Count all opening anchors before reading attributes or nested text, so
   // a differently formatted duplicate cannot disappear from the contract.
-  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 10, 'exactly ten reading anchors');
+  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 11, 'exactly eleven reading anchors');
   const anchors = [...markup.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi)];
-  assert.equal(anchors.length, 10, 'all reading anchors are closed');
+  assert.equal(anchors.length, 11, 'all reading anchors are closed');
   const links = anchors.map(([, attributes, contents]) => {
     const href = attributes.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
     assert.ok(href, 'every reading anchor has a quoted href');
@@ -46,10 +46,11 @@ function assertReadingLinks(markup: string) {
     ['/artistic-research/public-surface-case/2026-11-15/', 'Read the Guandu snapshot · 15 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-18/', 'Read the Beiyang snapshot · 18 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-21/', 'Read the Kaohsiung snapshot · 21 November 2026'],
+    ['/artistic-research/public-surface-case/2026-11-22/', 'Read the election snapshot · 22 November 2026'],
   ]);
 }
 
-test('responsive artwork keeps one set of the ten approved reading links', () => {
+test('responsive artwork keeps one set of the eleven approved reading links', () => {
   assertReadingLinks(source);
 });
 
@@ -58,7 +59,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
   const nestedText = first.replace('18 August 2026: the first reading', '<span>18 August 2026: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
-    assert.throws(() => assertReadingLinks(source + duplicate), /exactly ten reading anchors/);
+    assert.throws(() => assertReadingLinks(source + duplicate), /exactly eleven reading anchors/);
   }
   const second = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/g)![1];
   assert.throws(() => assertReadingLinks(source.replace(second, extraAttributes)));
@@ -95,7 +96,7 @@ test('Kaohsiung uses the same reading link at all widths and keeps its picture o
 });
 
 test('dated readings share the homepage date convention and remain in order', () => {
-  const dates = ['2026-08-18', '2026-09-19', '2026-10-04', '2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21'];
+  const dates = ['2026-08-18', '2026-09-19', '2026-10-04', '2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21', '2026-11-22'];
   assert.deepEqual([...source.matchAll(/<time datetime="([^"]+)">([^<]+)<\/time>/g)].map(m => m[1]), dates);
   const format = new Intl.DateTimeFormat('en-GB', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'});
   const label = date => format.format(new Date(date));
@@ -104,7 +105,7 @@ test('dated readings share the homepage date convention and remain in order', ()
   const pages = [
     ...['2026-07-25', '2026-07-31', '2026-08-07'].map(d => [d, `pages/artistic-research/public-slice/${d}.astro`]),
     ...['2026-08-18', '2026-08-22', '2026-09-19', '2026-10-04', '2026-10-04-revisited'].map(d => [d.slice(0, 10), `pages/artistic-research/public-surface-case/${d}.astro`]),
-    ...['2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21'].map(d => [d, `data/public-surface-case/${d}/rendered-body.en.html`]),
+    ...['2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21', '2026-11-22'].map(d => [d, `data/public-surface-case/${d}/rendered-body.en.html`]),
   ];
   for (const [d, path] of pages) {
     const page = readFileSync(new URL(`../src/${path}`, import.meta.url), 'utf8');
@@ -112,7 +113,7 @@ test('dated readings share the homepage date convention and remain in order', ()
   }
 });
 
-test('the six homepage article cards use shared typography at all widths', () => {
+test('homepage article cards use shared typography at all widths', () => {
   for (const role of ['h3', 'p', '.date', 'a']) {
     assert.ok(source.includes(`.scene-entry article ${role} { font-size:`) ||
               source.includes(`.scene-entry article ${role} { color: var(--muted); font-size:`), role);

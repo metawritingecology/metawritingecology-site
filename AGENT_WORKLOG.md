@@ -254,3 +254,29 @@ Agent: Gary (OpenAI). At the owner's request, removed the standalone bottom-link
 Pre-append inventory: main 91a7422d8802da046c8f8a11b4f7db02c28039fd contains #176–#178, and the open PR query returned none. Historical worklog bytes are preserved.
 
 Files: the 18 and 21 November Astro shells, tests/shared-shell.test.ts, and this append-only record. Validation: 42 focused tests passed and astro check reported 0 errors and 0 warnings (4 existing hints). No independent review or exact-head full Site CI pass yet. Draft only; no merge or deployment.
+
+### 2026-11-22 - The Name on the Ballot
+
+Prepared the dated English reading with the shared article header and footer, numbered sources, and the existing article palette and type. Added the illustrated homepage entry and text-only Artistic Research entry in date order. Registered the new route and extended the existing homepage, shell, and indexing checks without changing the check pipeline.
+
+Validation: Dot prepared the local candidate. The focused contracts passed 312 tests. A two-page Astro static build verified the new and adjacent reading with the same shared page structure. The full Cloudflare build remains subject to repository CI; no production deployment or independent review was performed.
+
+### 2026-11-22 - Beiyang reading layout alignment
+
+Aligned the Beiyang article's title and reading gutters with the adjacent dated articles, and condensed the source list without changing the prose, contents links, 15 source targets, or 20 external source URLs. Changes are confined to the Beiyang rendered entry and its dedicated stylesheet.
+
+Validation: Dot verified preservation of the article and link targets, and rendered the updated route in the focused Astro static build. No production deployment or independent review was performed.
+
+### 2026-11-22 - Synchronize route-count checks for PR #181
+
+Agent: Gary (OpenAI). Updated the adjacency metadata regression test to expect 51 indexable routes and the same two noindex previews, and to verify explicitly that both the Beiyang and Ballot readings are named in the rendered metadata verifier and registered as indexable. No route, article, style, dependency, or check-pipeline changes.
+
+Pre-append inventory: PR #181 was the only open pull request. The relevant Beiyang, Kaohsiung, footer and Taipei follow-up work (#174–#177, #179–#180) is merged via PR. Routine dependency refs were excluded from the feature gate.
+
+Files: tests/public-surface-adjacency-map/metadataIndexing.test.ts and this append-only entry. Reproduced both assertions before the fix; 323 focused tests passed afterward. Local full check reached the Cloudflare Vite build and stopped on the runner's network-interface system error; exact-head GitHub Site CI remains the full verification. No independent review, merge or production deployment.
+
+### 2026-11-22 - Restore the Beiyang keyboard skip-link styling
+
+Agent: Gary (OpenAI). Site CI run 44996772552 cleared the metadata assertions and found that the revised Beiyang stylesheet omitted the existing off-screen and visible-on-focus skip-link rules. Restored the original two scoped rules without changing the new reading layout or article content. The shell test retains its original accessibility assertions.
+
+Inventory unchanged: #181 is separate from the merged Beiyang and adjacent reading work. Files: src/styles/public-surface-case-2026-11-18.css and this append-only entry. 323 focused tests passed after testing with the revised stylesheet actually in place. Full GitHub Site CI is the remaining check; no independent review, merge or deployment.
