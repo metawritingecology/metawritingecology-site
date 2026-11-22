@@ -145,12 +145,12 @@ test("the JSON endpoints are extension-bearing and never enter the sitemap", () 
   }
 });
 
-test("route counts were updated mechanically: 50 indexable, 2 noindex previews", () => {
+test("route counts were updated mechanically: 51 indexable, 2 noindex previews", () => {
   const routes = getRegisteredRoutes();
   const noindex = routes.filter((route) => getRoutePolicy(route).indexing.kind === "noindex");
   assert.deepEqual(noindex.sort(), [EXPANDED_ROUTE, AUTHORITY_ROUTE].sort());
-  assert.equal(routes.length - noindex.length, 50);
-  assert.equal(routes.length, 52);
+  assert.equal(routes.length - noindex.length, 51);
+  assert.equal(routes.length, 53);
 });
 
 test("the source route file and the exclusion list agree", () => {
@@ -162,11 +162,14 @@ test("the source route file and the exclusion list agree", () => {
   assert.ok(contract.includes(`"${AUTHORITY_ROUTE}"`));
 });
 
-test("Beiyang dated reading is included in named rendered metadata verification", () => {
+test("Beiyang and Ballot dated readings are included in named rendered metadata verification", () => {
   const verifier = rd("scripts/verify-metadata-build.mjs");
   const namedCases = verifier.match(/const INDEXABLE_CASE_ROUTES = \[([\s\S]*?)\];/);
   assert.ok(namedCases, "named case verification list exists");
-  assert.match(namedCases[1], /"\/artistic-research\/public-surface-case\/2026-11-18\/"/);
-  assert.match(verifier, /indexableRoutes\.length === 50/);
-  assert.equal(getRoutePolicy("/artistic-research/public-surface-case/2026-11-18/").indexing.kind, "indexable");
+  for (const date of ["2026-11-18", "2026-11-22"]) {
+    const route = `/artistic-research/public-surface-case/${date}/`;
+    assert.ok(namedCases[1].includes(JSON.stringify(route)), route);
+    assert.equal(getRoutePolicy(route).indexing.kind, "indexable", route);
+  }
+  assert.match(verifier, /indexableRoutes\.length === 51/);
 });

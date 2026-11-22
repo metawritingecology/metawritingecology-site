@@ -266,3 +266,11 @@ Validation: Dot prepared the local candidate. The focused contracts passed 312 t
 Aligned the Beiyang article's title and reading gutters with the adjacent dated articles, and condensed the source list without changing the prose, contents links, 15 source targets, or 20 external source URLs. Changes are confined to the Beiyang rendered entry and its dedicated stylesheet.
 
 Validation: Dot verified preservation of the article and link targets, and rendered the updated route in the focused Astro static build. No production deployment or independent review was performed.
+
+### 2026-11-22 - Synchronize route-count checks for PR #181
+
+Agent: Gary (OpenAI). Updated the adjacency metadata regression test to expect 51 indexable routes and the same two noindex previews, and to verify explicitly that both the Beiyang and Ballot readings are named in the rendered metadata verifier and registered as indexable. No route, article, style, dependency, or check-pipeline changes.
+
+Pre-append inventory: PR #181 was the only open pull request. The relevant Beiyang, Kaohsiung, footer and Taipei follow-up work (#174–#177, #179–#180) is merged via PR. Routine dependency refs were excluded from the feature gate.
+
+Files: tests/public-surface-adjacency-map/metadataIndexing.test.ts and this append-only entry. Reproduced both assertions before the fix; 323 focused tests passed afterward. Local full check reached the Cloudflare Vite build and stopped on the runner's network-interface system error; exact-head GitHub Site CI remains the full verification. No independent review, merge or production deployment.
