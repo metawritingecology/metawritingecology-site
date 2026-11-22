@@ -38,3 +38,7 @@ body > a.skip:focus {
   .beiyang-article h2 { break-after: avoid; }
   .beiyang-article p { orphans: 3; widows: 3; }
 }
+
+/* Keep the article shortcut keyboard-accessible without a permanent visual label. */
+body > a.skip{position:absolute;left:-10000px}
+body > a.skip:focus{left:12px;top:12px;z-index:10;background:var(--surface);color:var(--text);padding:8px;outline:2px solid var(--accent);outline-offset:4px}

@@ -274,3 +274,9 @@ Agent: Gary (OpenAI). Updated the adjacency metadata regression test to expect 5
 Pre-append inventory: PR #181 was the only open pull request. The relevant Beiyang, Kaohsiung, footer and Taipei follow-up work (#174–#177, #179–#180) is merged via PR. Routine dependency refs were excluded from the feature gate.
 
 Files: tests/public-surface-adjacency-map/metadataIndexing.test.ts and this append-only entry. Reproduced both assertions before the fix; 323 focused tests passed afterward. Local full check reached the Cloudflare Vite build and stopped on the runner's network-interface system error; exact-head GitHub Site CI remains the full verification. No independent review, merge or production deployment.
+
+### 2026-11-22 - Restore the Beiyang keyboard skip-link styling
+
+Agent: Gary (OpenAI). Site CI run 44996772552 cleared the metadata assertions and found that the revised Beiyang stylesheet omitted the existing off-screen and visible-on-focus skip-link rules. Restored the original two scoped rules without changing the new reading layout or article content. The shell test retains its original accessibility assertions.
+
+Inventory unchanged: #181 is separate from the merged Beiyang and adjacent reading work. Files: src/styles/public-surface-case-2026-11-18.css and this append-only entry. 323 focused tests passed after testing with the revised stylesheet actually in place. Full GitHub Site CI is the remaining check; no independent review, merge or deployment.
