@@ -254,3 +254,15 @@ Agent: Gary (OpenAI). At the owner's request, removed the standalone bottom-link
 Pre-append inventory: main 91a7422d8802da046c8f8a11b4f7db02c28039fd contains #176–#178, and the open PR query returned none. Historical worklog bytes are preserved.
 
 Files: the 18 and 21 November Astro shells, tests/shared-shell.test.ts, and this append-only record. Validation: 42 focused tests passed and astro check reported 0 errors and 0 warnings (4 existing hints). No independent review or exact-head full Site CI pass yet. Draft only; no merge or deployment.
+
+### 2026-11-22 - The Name on the Ballot
+
+Prepared the dated English reading with the shared article header and footer, numbered sources, and the existing article palette and type. Added the illustrated homepage entry and text-only Artistic Research entry in date order. Registered the new route and extended the existing homepage, shell, and indexing checks without changing the check pipeline.
+
+Validation: Dot prepared the local candidate. The focused contracts passed 312 tests. A two-page Astro static build verified the new and adjacent reading with the same shared page structure. The full Cloudflare build remains subject to repository CI; no production deployment or independent review was performed.
+
+### 2026-11-22 - Beiyang reading layout alignment
+
+Aligned the Beiyang article's title and reading gutters with the adjacent dated articles, and condensed the source list without changing the prose, contents links, 15 source targets, or 20 external source URLs. Changes are confined to the Beiyang rendered entry and its dedicated stylesheet.
+
+Validation: Dot verified preservation of the article and link targets, and rendered the updated route in the focused Astro static build. No production deployment or independent review was performed.

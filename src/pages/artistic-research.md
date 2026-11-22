@@ -220,6 +220,12 @@ Two concerts, three metro stops apart. The reading moves from the railway that c
 
 [Enter Public Surface Case — 21 November 2026](/artistic-research/public-surface-case/2026-11-21/)
 
+#### 22 November 2026 — The Name on the Ballot
+
+A relay baton in Yunlin and a new name in Taoyuan. This reading follows what a family name carries into an election, what a candidate can make an official record say, and what happens when a campaign chooses not to repeat an attack.
+
+[Enter Public Surface Case — 22 November 2026](/artistic-research/public-surface-case/2026-11-22/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

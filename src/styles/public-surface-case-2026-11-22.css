@@ -1,0 +1,15 @@
+.skip { position: absolute; left: -10000px; }
+.skip:focus { z-index: 10; background: var(--surface); padding: 8px; top: 12px; left: 12px; }
+.ballot-case .case-head { border-bottom: 1px solid var(--line); padding-bottom: 2rem; }
+.ballot-case .case-head h1 { max-width: 21ch; font-size: clamp(2rem, 5vw, 3.45rem); letter-spacing: -.025em; }
+.ballot-case .kicker, .ballot-case .m-num { color: var(--link); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; }
+.ballot-case .subtitle { font-size: 1.17rem; color: var(--muted); }
+.ballot-case .date-row { display: flex; flex-wrap: wrap; gap: 1rem 1.8rem; font-size: .88rem; color: var(--muted); }
+.ballot-case .date-row span { display: block; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; }
+.ballot-case .movement { border-top: 1px solid var(--line); padding: 2.15rem 0 .5rem; }
+.ballot-case .movement:first-of-type { border-top: 0; }
+.ballot-case .movement h2 { margin: .4rem 0 1rem; font-size: clamp(1.4rem, 3vw, 2rem); }
+.ballot-case .slice-copy { display: flow-root; max-width: 46rem; overflow-wrap: break-word; }
+.ballot-case .slice-copy p + p { margin-top: 1rem; }
+.ballot-case sup { margin-left: .18rem; font-size: .69em; }
+.ballot-case .slice-sources li { margin-bottom: .65rem; overflow-wrap: anywhere; font-size: .9rem; }

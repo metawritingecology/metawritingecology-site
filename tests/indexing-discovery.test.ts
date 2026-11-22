@@ -1679,7 +1679,8 @@ test("canonical parity: eligible pages use BaseLayout or the six exact standalon
     "/artistic-research/public-surface-case/2026-10-18/",
     "/artistic-research/public-surface-case/2026-11-15/",
     "/artistic-research/public-surface-case/2026-11-18/",
-    "/artistic-research/public-surface-case/2026-11-21/"
+    "/artistic-research/public-surface-case/2026-11-21/",
+    "/artistic-research/public-surface-case/2026-11-22/"
   ]);
   const known = knownRouteSet();
   for (const route of known) {
@@ -1753,7 +1754,7 @@ test("expanded adjacency view: noindex, excluded, with extension-bearing JSON en
 });
 
 test("the selected public surface cases are standalone, indexable and sitemap-eligible", () => {
-  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited", "2026-10-18", "2026-11-15", "2026-11-18", "2026-11-21"]) {
+  for (const date of ["2026-08-18", "2026-09-19", "2026-10-04", "2026-10-04-revisited", "2026-10-18", "2026-11-15", "2026-11-18", "2026-11-21", "2026-11-22"]) {
     const page = rd(`src/pages/artistic-research/public-surface-case/${date}.astro`);
     const route = `/artistic-research/public-surface-case/${date}/`;
     assert.equal(classifyRobots(page, route).status, "indexable");
@@ -1902,10 +1903,10 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 50 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 51 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 50);
+  assert.equal(expected.size, 51);
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-08-18/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-09-19/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04/"));
