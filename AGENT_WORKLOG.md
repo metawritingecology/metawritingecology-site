@@ -280,3 +280,21 @@ Files: tests/public-surface-adjacency-map/metadataIndexing.test.ts and this appe
 Agent: Gary (OpenAI). Site CI run 44996772552 cleared the metadata assertions and found that the revised Beiyang stylesheet omitted the existing off-screen and visible-on-focus skip-link rules. Restored the original two scoped rules without changing the new reading layout or article content. The shell test retains its original accessibility assertions.
 
 Inventory unchanged: #181 is separate from the merged Beiyang and adjacent reading work. Files: src/styles/public-surface-case-2026-11-18.css and this append-only entry. 323 focused tests passed after testing with the revised stylesheet actually in place. Full GitHub Site CI is the remaining check; no independent review, merge or deployment.
+
+### 2026-11-23 — Prepare After the Votes Are Counted
+
+Agent: Gary (OpenAI). The owner approved the existing convergence illustration and requested preparation of the homepage, Artistic Research index, and article. Added the cover only to the homepage card, a text entry to the Artistic Research index, and a clean dated article with a single centred reading width. Kept the shared navigation, keyboard skip link, site footer, and eleven source references.
+
+Pre-append inventory: main d7d388bba6b8a37e2311cd9b632bf985ba1b78ae includes merged editorial PR #181; relevant remote branch names did not reveal another homecoming candidate. Open PR inventory returned only dependency work (#182 and #183), not included. The historical worklog is preserved as an exact byte prefix.
+
+Files: DesktopArticleEntries.astro, the Artistic Research index, the new dated Astro page, HTML body, CSS and SVG, metadata registry and matching shell/indexing/layout checks. Validation: 340 focused tests passed, static Astro preview built 60 pages, browser verified both entries, a full 580 × 338 cover, no horizontal overflow at the tested widths, and an aligned headline, body, and sources. Production Cloudflare build was blocked by the local uv_interface_addresses permission error; exact-head CI was not run. No independent review of the resulting patch, PR, merge or production deployment.
+
+### 2026-11-23 — Apply the approved manuscript to After the Votes Are Counted
+
+Agent: Gary (OpenAI). Replaced the staged English article body with the author's approved manuscript, keeping its final paragraph and eleven numbered source entries. No further changes to the prepared homepage card, Artistic Research entry, art, route, or layout. The author requested a pull request, not a merge or deployment.
+
+Pre-append inventory: remote main remained d7d388b; the prior editorial work is merged via PR #181. The only open PRs were dependency updates (#182 and #183), excluded from this change. Preserved the main worklog as an exact byte prefix.
+
+Files: the dated rendered-body.en.html and this append-only entry. Checked the approved wording against the article output, the two entry links, homepage-only cover, and canonical URL. The local static build generated 60 pages, Astro diagnostics had no errors or warnings, and TypeScript passed. Full local check could not complete at the Cloudflare build stage because the runner denied network-interface enumeration (uv_interface_addresses); GitHub Site CI remains the full check.
+
+Focused result: all 340 tests for the homepage, shell, character encoding, metadata, and indexing passed. The separate Wrangler-based metadata-verifier lifecycle suite did not complete locally; one case timed out. That suite remains for Site CI.

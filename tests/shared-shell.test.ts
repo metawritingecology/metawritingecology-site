@@ -9,7 +9,7 @@ const sha = s => createHash('sha256').update(s).digest('hex');
 const baseline=JSON.parse(read('tests/fixtures/dated-shell-baseline.json'));
 const approvedDatePresentation=JSON.parse(read('tests/fixtures/dated-shell-date-format.json'));
 
-test('shell route coverage is exactly the nine approved dates and two preserved exceptions',()=>{
+test('shell route coverage is the approved dated routes and two preserved exceptions',()=>{
  assert.deepEqual(DATED_SHELL_ROUTES,[
   '/artistic-research/public-slice/2026-07-25/','/artistic-research/public-slice/2026-07-31/','/artistic-research/public-slice/2026-08-07/',
   '/artistic-research/public-surface-case/2026-08-18/','/artistic-research/public-surface-case/2026-08-22/','/artistic-research/public-surface-case/2026-09-19/',
@@ -18,7 +18,8 @@ test('shell route coverage is exactly the nine approved dates and two preserved 
   '/artistic-research/public-surface-case/2026-11-15/',
   '/artistic-research/public-surface-case/2026-11-18/',
   '/artistic-research/public-surface-case/2026-11-21/',
-  '/artistic-research/public-surface-case/2026-11-22/'
+  '/artistic-research/public-surface-case/2026-11-22/',
+  '/artistic-research/public-surface-case/2026-11-23/'
  ]);
  assert.deepEqual(SHELL_EXCEPTIONS,['/language-pressure-test-lab-prototype/','/404/']);
 });
@@ -121,7 +122,7 @@ test('Beiyang skip link remains keyboard-accessible but is visually hidden until
 
 test('The recent dated cases use the top navigation and shared footer without redundant bottom links', () => {
  assert.match(read('src/components/SiteHeader.astro'), /href="\/artistic-research\/"[^>]*>Artistic Research<\/a>/);
- for (const date of ['2026-11-18','2026-11-21','2026-11-22']) {
+ for (const date of ['2026-11-18','2026-11-21','2026-11-22', '2026-11-23']) {
   const page=read(`src/pages/artistic-research/public-surface-case/${date}.astro`);
   assert.equal((page.match(/<SiteHeader articleShell \/>/g)||[]).length,1);
   assert.equal((page.match(/<SiteFooter articleShell \/>/g)||[]).length,1);
