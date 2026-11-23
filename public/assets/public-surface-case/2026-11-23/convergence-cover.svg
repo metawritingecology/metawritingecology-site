@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 338" width="580" height="338" role="img" aria-labelledby="cover-title cover-desc">
+<title id="cover-title">After the Votes Are Counted</title>
+<desc id="cover-desc">Fine lines come from several directions, pass alongside one another at the center, then continue on separate paths.</desc>
+<path fill="#191712" d="M0 0h580v338H0z"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="#776f59" opacity=".56" d="M233 131v-13h114v13m-114 76v13h114v-13"/>
+  <path stroke="#9d8657" stroke-width="1.18" d="M78 84c77 0 93 63 166 63h92c72 0 99-48 166-48"/>
+  <path stroke="#c2aa76" stroke-width="1.35" d="M70 135c75 0 108 28 174 28h92c73 0 114-20 175-20"/>
+  <path stroke="#b29b68" stroke-width="1.25" d="M73 254c70 0 98-74 171-74h92c69 0 113 48 168 48"/>
+  <path stroke="#847b63" stroke-width="1.05" d="M99 209c64 0 88-12 145-12h92c69 0 94 68 150 68"/>
+  <path stroke="#9d8657" opacity=".6" d="M271 126h38m-38 86h38"/>
+  <g stroke="#a88e58" opacity=".78"><circle cx="78" cy="84" r="2.8"/><circle cx="70" cy="135" r="2.8"/><circle cx="73" cy="254" r="2.8"/><circle cx="99" cy="209" r="2.8"/><circle cx="502" cy="99" r="2.8"/><circle cx="511" cy="143" r="2.8"/><circle cx="504" cy="228" r="2.8"/><circle cx="486" cy="265" r="2.8"/></g>
+</g>
+</svg>

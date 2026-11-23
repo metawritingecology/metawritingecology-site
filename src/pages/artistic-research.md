@@ -226,6 +226,12 @@ A relay baton in Yunlin and a new name in Taoyuan. This reading follows what a f
 
 [Enter Public Surface Case — 22 November 2026](/artistic-research/public-surface-case/2026-11-22/)
 
+#### 23 November 2026 — After the Votes Are Counted
+
+A dated reading of returning home to vote in Taiwan, watching a count with people who want a different outcome, and living with the result when the votes are in.
+
+[Enter Public Surface Case — 23 November 2026](/artistic-research/public-surface-case/2026-11-23/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

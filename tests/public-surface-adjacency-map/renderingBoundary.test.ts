@@ -261,8 +261,8 @@ const LOCKFILE_BYTES = readFileSync(p("pnpm-lock.yaml"));
 // PR #156: adapter 14.4.0 requires Astro ^7.4.0; retain merged Astro 7.4.2.
 // Wrangler 4.151.1 and its frozen transitive graph; no unrelated upgrades.
 const LOCKFILE_IDENTITY = {
-  byteLength: 134938,
-  sha256: "0edbad78a24856cc5373861f40d33904711024280bf94059cfa634303c2f1d08",
+  byteLength: 143113,
+  sha256: "2c59b6e16da08a0b3e2c36ea2408624a9c756f2a7f568c26ac23abca53723307",
 };
 
 /**
@@ -734,8 +734,12 @@ test("guard 8 — no motion or timer architecture", () => {
 // added or removed; 0 prohibited packages. @astrojs/sitemap generates the
 // public sitemap, so the generated sitemap was compared against the main
 // build and is identical apart from lastmod.
+// 2026-11-23, owner-authorized Dependabot #182 baseline: Cloudflare adapter
+// 14.4.8 -> 14.4.9 and Wrangler 4.164.0 -> 4.165.0, including the required
+// deploy-tooling closure only. Unchanged importer resolution, including the
+// checker/language-server's emnapi 1.11.3 peer context, remains pinned.
 const BASELINE_DEPENDENCIES = {
-  "@astrojs/cloudflare": "14.4.8",
+  "@astrojs/cloudflare": "14.4.9",
   "@astrojs/mdx": "8.1.6",
   "@astrojs/sitemap": "3.7.5",
   astro: "7.4.12",
@@ -747,7 +751,7 @@ const BASELINE_DEV_DEPENDENCIES = {
   "@astrojs/check": "0.9.12",
   "@types/d3-selection": "3.0.12",
   "fast-xml-parser": "5.12.1",
-  wrangler: "4.164.0",
+  wrangler: "4.165.0",
 };
 
 const PROHIBITED_RUNTIME_PACKAGES = [
