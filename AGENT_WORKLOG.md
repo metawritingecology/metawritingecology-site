@@ -345,3 +345,13 @@ Agent: Gary (OpenAI). With owner approval, added the 26 November case to the nam
 Agent: Gary (OpenAI). With the owner's authorization to align repository review disclosure rules, updated `AGENTS.md` and appended this worklog entry. Full private provenance remains in restricted records; the shared log records scope and limitations without private identifiers. This does not relax review requirements or revise any historical entry.
 
 Validation: reviewed the two-file documentation diff, confirmed the existing worklog is an exact byte prefix, and checked the new text for private identifiers. No code or workflow changed. Repository CI, where configured, is separate. No merge or deployment. Next eligible action: owner review.
+
+### 2026-11-26: Add Between Two Pairs of Hands
+
+Agent: Gary (OpenAI). Added the approved English reading, the pale ochre cover on the homepage only, and a text entry in Artistic Research. The reading reuses the 26 November article shell and stylesheet without changing either existing reference. Updated the route registration and its shell, homepage and metadata checks. No dependencies, workflows or existing article copy changed.
+
+Pre-append inventory: no open PRs in the site repository; the recent relevant dated editorial PRs were merged. The separately held post-election work remains outside this change.
+
+Verification: compared the published reference layout and the matching candidate preview at 1280 and 390 CSS px. Prose widths matched at 736 and 327 CSS px in the test browser, respectively. An independent review covered an earlier illustration draft only, not this manuscript or proposed change. Opening for review only; no merge or deployment.
+
+Local verification: 332 targeted checks passed. The full local check stopped in the Cloudflare build on an environment network-interface error; Site CI remains the full-suite authority.

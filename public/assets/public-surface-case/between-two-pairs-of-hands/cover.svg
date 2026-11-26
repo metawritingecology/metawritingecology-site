@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="580" height="338" viewBox="0 0 580 338" role="img" aria-labelledby="title desc">
+<title id="title">Between Two Hands</title>
+<desc id="desc">A fine blue-grey sword lies high above two outlined hands that meet beneath a small swaddled bundle.</desc>
+<rect width="580" height="338" fill="#191712"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- The sword is horizontal, away from the hands. -->
+  <path d="M237 99h112l23 5-23 5H237" stroke="#8597a2" stroke-width="1.52"/>
+  <path d="M246 104h100" stroke="#53616b" stroke-width="1"/>
+  <path d="M237 92v24m-4-17h-18a5 5 0 0 0 0 10h18m-13-9v8m6-8v8" stroke="#8999a3" stroke-width="1.25"/>
+  <!-- The handoff: a modest diagonal, with each palm carrying a different end. -->
+  <path d="M110 234h50c15 0 27-3 40-11l22-14 20-9c5-2 10 2 7 6l-17 14 33-3c9-1 15 3 16 9l-41 12c-14 5-25 7-39 7h-43l-48 11" stroke="#82939b" stroke-width="1.72"/>
+  <path d="M159 234v12m28-12c15 1 33-1 47-7" stroke="#53636a" stroke-width="1.05"/>
+  <path d="M471 225h-45c-17 0-29-5-41-13l-21-13-20-8c-6-2-10 3-7 7l13 11-20-2c-9 0-17 5-18 11l41 10c13 4 24 5 40 5h34l44 10" stroke="#8d9fa8" stroke-width="1.72"/>
+  <path d="M427 225v11m-29-12c-14 1-28-1-43-6" stroke="#576972" stroke-width="1.05"/>
+  <!-- No face: the swaddle reads as one small shape, not a portrait. -->
+  <path d="M243 206c-7-7-4-14 4-19l62-33c14-8 27-3 33 7 9 15 3 30-12 36l-69 23c-8 3-15-6-18-14Z" fill="#70534e" stroke="#c2a39a" stroke-width="1.72"/>
+  <path d="M252 185c13 10 30 16 48 21m14-51c-3 11 3 23 21 30" stroke="#a17f75" stroke-width="1.12"/>
+</g>
+</svg>
