@@ -335,3 +335,7 @@ Independent editorial review covered the manuscript and source labels, not the u
 ### 2026-11-26: Retain the survey method without linking to results
 
 Agent: Gary (OpenAI). The owner approved opening a draft PR with the G6 classification method retained and the direct link to the poll results removed. The source identification remains as plain text. The 22 November first-use Puma Shen correction stays in scope. This candidate is based directly on main so the unpublished linked version is not in the PR history. No merge or deployment was requested.
+
+### 2026-11-26: Synchronise the adjacency metadata test for PR #185
+
+Agent: Gary (OpenAI). With owner approval, added the 26 November case to the named checks and updated the fixed counts to 53 indexable routes and 55 total routes. The same two noindex previews remain. The targeted adjacency metadata tests passed locally. No article, production registry, workflow, deployment, or merge changes.
