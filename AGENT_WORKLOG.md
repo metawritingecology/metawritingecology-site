@@ -314,3 +314,24 @@ Agent: Gary (OpenAI). After #182 was merged, applied the owner's authorization f
 Pre-append inventory: main 8ea4544adeadc2e75a0b8432fc8ad3063265f35a contains merged PRs #182 and #184; #183 was the only open PR. The candidate merges current main into original bot head 652fde8194356c9293a7909305e56c6b4a8da5a0 and retains both as ancestors. Historical worklog is preserved as an exact byte prefix.
 
 Files: package.json, pnpm-lock.yaml, tests/public-surface-adjacency-map/renderingBoundary.test.ts, and this worklog. Guard 9 lock identity: 149921 bytes, SHA-256 d2424fb6c0a50926b95d56787d23945eee2d31d46ccc95b37cf9cec5c6722ff4. Frozen installation with pnpm 10.34.5, all 316 focused checks, Astro diagnostics (zero errors and warnings), and TypeScript after Astro type generation passed on local Linux Node 24.22.3. Both baseline and candidate sitemap-enabled static builds generated 60 pages and the same 52 canonical sitemap URLs. Exact-head full GitHub Site CI on Node 22 is required before merge. No manual deployment.
+
+
+### 2026-11-26 — Prepare the Taipei administrative-neutrality case for review
+
+Agent: Gary (OpenAI). Prepared the owner-requested English case, its homepage-only balance illustration and Artistic Research entry, plus the first-use name in the 22 November case. The new case matches the recent dated article shell and 46-rem reading column. It dates and attributes the observed traffic controls, campaign statements and planned transport changes separately.
+
+Files: new 26 November article, stylesheet and SVG; homepage entry, Artistic Research listing, registry, recent shell and discovery verification, 22 November rendered copy, and this append. No workflow, dependency, or deployment changes. Pre-append inventory: origin/main f4a3434ba050bd46e06b14da55a5dfb7610d3e93; GitHub search showed no open PRs. Relevant historical editorial and slice branches were identified; no conflicting 26 November branch was found. No branch was pushed.
+
+Checks: frozen installation and Astro build passed on Windows / Node 24.18.0. Homepage responsive 10, metadata contract 28, shell contract 18, frozen pipeline 6, indexing/discovery 257 passed with one Windows skip. The existing October fixtures were read in their original Git LF format for the byte-sensitive tests; no changes to those files are part of this candidate. Rendered metadata 1438/1438 and shared shell 61/61 passed. Full Linux Site CI and independent review are pending. Review interface, lineage, mode and reviewed commit: not applicable; no independent reviewer was run. Evidence: local checks above. Draft remains local and must not be pushed or deployed while the publication hold is in effect.
+
+### 2026-11-26: Revise the Taipei neutrality case after editorial review
+
+Agent: Gary (OpenAI). With the owner's approval, clarified how Beiping East Road preceded the planned Ren'ai Road event, corrected the March 2025 recall chronology, and anchored the lead to both municipal transit notices. The draft distinguishes the survey's G6 from political identity and makes the reason for the France comparison explicit. Renumbered the sources in order of first appearance and updated the existing count assertion. The article layout, art, navigation, and earlier articles were left unchanged.
+
+Pre-append inventory: origin/main f4a3434ba050bd46e06b14da55a5dfb7610d3e93 is unchanged; no open GitHub PRs. Prior relevant dated work is merged; the separate post-election work remains on hold and outside this change. No dependency or workflow changes.
+
+Independent editorial review covered the manuscript and source labels, not the underlying sources. Full Linux Site CI was pending at the time of review.
+
+### 2026-11-26: Retain the survey method without linking to results
+
+Agent: Gary (OpenAI). The owner approved opening a draft PR with the G6 classification method retained and the direct link to the poll results removed. The source identification remains as plain text. The 22 November first-use Puma Shen correction stays in scope. This candidate is based directly on main so the unpublished linked version is not in the PR history. No merge or deployment was requested.

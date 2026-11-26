@@ -1,0 +1,35 @@
+---
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import SchemaJsonLd from "../../../components/SchemaJsonLd.astro";
+import { resolvePublicMetadata, buildJsonLd, APPROVED_PRODUCTION_ORIGIN } from "../../../lib/publicMetadata";
+import "../../../styles/global.css";
+import "../../../styles/public-surface-case-2026-11-26.css";
+import bodyHTML from "../../../data/public-surface-case/2026-11-26/rendered-body.en.html?raw";
+const siteOrigin = (Astro.site ?? new URL(APPROVED_PRODUCTION_ORIGIN)).origin;
+const publicMetadata = resolvePublicMetadata({
+  route: Astro.url.pathname,
+  title: "Neutrality Is Not the Middle",
+  description: "A campaign rally, a metro entrance, and the rules that decide who can use public space in Taipei.",
+  siteOrigin
+});
+const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
+---
+<!doctype html>
+<html lang={publicMetadata.language}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>{publicMetadata.title}</title>
+  <meta name="description" content={publicMetadata.description} />
+  <link rel="canonical" href={publicMetadata.canonicalUrl} />
+  {jsonLd && <SchemaJsonLd data={jsonLd} />}
+</head>
+<body id="top">
+  <SiteHeader articleShell />
+  <a class="skip" href="#article">Skip to article</a>
+  <main id="article" set:html={bodyHTML} />
+  <SiteFooter articleShell />
+</body>
+</html>
