@@ -20,7 +20,8 @@ test('shell route coverage is the approved dated routes and two preserved except
   '/artistic-research/public-surface-case/2026-11-21/',
   '/artistic-research/public-surface-case/2026-11-22/',
   '/artistic-research/public-surface-case/2026-11-23/',
-  '/artistic-research/public-surface-case/2026-11-26/'
+  '/artistic-research/public-surface-case/2026-11-26/',
+  '/artistic-research/public-surface-case/between-two-pairs-of-hands/'
  ]);
  assert.deepEqual(SHELL_EXCEPTIONS,['/language-pressure-test-lab-prototype/','/404/']);
 });
