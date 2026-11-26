@@ -350,7 +350,7 @@ Validation: reviewed the two-file documentation diff, confirmed the existing wor
 
 Agent: Gary (OpenAI). Added the approved English reading, the pale ochre cover on the homepage only, and a text entry in Artistic Research. The reading reuses the 26 November article shell and stylesheet without changing either existing reference. Updated the route registration and its shell, homepage and metadata checks. No dependencies, workflows or existing article copy changed.
 
-Pre-append inventory: no open PRs in the site repository; the recent relevant dated editorial PRs were merged. The separately held post-election work remains outside this change.
+Pre-append inventory: no open PRs in the site repository; the recent relevant dated editorial PRs were merged.
 
 Verification: compared the published reference layout and the matching candidate preview at 1280 and 390 CSS px. Prose widths matched at 736 and 327 CSS px in the test browser, respectively. An independent review covered an earlier illustration draft only, not this manuscript or proposed change. Opening for review only; no merge or deployment.
 
