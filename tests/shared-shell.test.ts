@@ -19,7 +19,8 @@ test('shell route coverage is the approved dated routes and two preserved except
   '/artistic-research/public-surface-case/2026-11-18/',
   '/artistic-research/public-surface-case/2026-11-21/',
   '/artistic-research/public-surface-case/2026-11-22/',
-  '/artistic-research/public-surface-case/2026-11-23/'
+  '/artistic-research/public-surface-case/2026-11-23/',
+  '/artistic-research/public-surface-case/2026-11-26/'
  ]);
  assert.deepEqual(SHELL_EXCEPTIONS,['/language-pressure-test-lab-prototype/','/404/']);
 });
@@ -122,7 +123,7 @@ test('Beiyang skip link remains keyboard-accessible but is visually hidden until
 
 test('The recent dated cases use the top navigation and shared footer without redundant bottom links', () => {
  assert.match(read('src/components/SiteHeader.astro'), /href="\/artistic-research\/"[^>]*>Artistic Research<\/a>/);
- for (const date of ['2026-11-18','2026-11-21','2026-11-22', '2026-11-23']) {
+ for (const date of ['2026-11-18','2026-11-21','2026-11-22', '2026-11-23', '2026-11-26']) {
   const page=read(`src/pages/artistic-research/public-surface-case/${date}.astro`);
   assert.equal((page.match(/<SiteHeader articleShell \/>/g)||[]).length,1);
   assert.equal((page.match(/<SiteFooter articleShell \/>/g)||[]).length,1);

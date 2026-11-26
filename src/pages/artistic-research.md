@@ -232,6 +232,12 @@ A dated reading of returning home to vote in Taiwan, watching a count with peopl
 
 [Enter Public Surface Case — 23 November 2026](/artistic-research/public-surface-case/2026-11-23/)
 
+#### 26 November 2026 — Neutrality Is Not the Middle
+
+A campaign rally, a metro entrance, and the rules that decide who can use public space in Taipei.
+
+[Enter Public Surface Case — 26 November 2026](/artistic-research/public-surface-case/2026-11-26/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

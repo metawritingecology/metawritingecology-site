@@ -1,0 +1,22 @@
+.skip { position: absolute; left: -10000px; }
+.skip:focus { z-index: 10; background: var(--surface); padding: 8px; top: 12px; left: 12px; }
+.neutrality-case .case-head { border-bottom: 1px solid var(--line); padding-bottom: 2rem; }
+.neutrality-case .case-head h1 { max-width: 21ch; font-size: clamp(2rem, 5vw, 3.45rem); letter-spacing: -.025em; }
+.neutrality-case .kicker, .neutrality-case .m-num { color: var(--link); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; }
+.neutrality-case .subtitle { font-size: 1.17rem; color: var(--muted); }
+.neutrality-case .date-row { display: flex; flex-wrap: wrap; gap: 1rem 1.8rem; font-size: .88rem; color: var(--muted); }
+.neutrality-case .date-row span { display: block; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; }
+.neutrality-case .movement { border-top: 1px solid var(--line); padding: 2.15rem 0 .5rem; }
+.neutrality-case .movement:first-of-type { border-top: 0; }
+.neutrality-case .movement h2 { margin: .4rem 0 1rem; font-size: clamp(1.4rem, 3vw, 2rem); }
+.neutrality-case .slice-copy { display: flow-root; min-inline-size: 0; overflow-wrap: break-word; }
+.neutrality-case .slice-copy p + p { margin-top: 1rem; }
+.neutrality-case sup { margin-left: .18rem; font-size: .69em; }
+.neutrality-case .slice-sources li { margin-bottom: .65rem; overflow-wrap: anywhere; font-size: .9rem; }
+
+/* One reading gutter for the headline, prose, and source list. */
+.neutrality-case { inline-size: min(100%, 46rem); margin-inline: auto; }
+#article .neutrality-case :is(p, li) { max-inline-size: none; }
+.neutrality-case .slice-sources { padding-inline-start: 1.55rem; }
+.neutrality-case .slice-sources li { scroll-margin-block-start: 1rem; }
+.neutrality-case .slice-sources li:target { outline: 1px solid var(--line); outline-offset: 4px; }
