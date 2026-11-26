@@ -339,3 +339,9 @@ Agent: Gary (OpenAI). The owner approved opening a draft PR with the G6 classifi
 ### 2026-11-26: Synchronise the adjacency metadata test for PR #185
 
 Agent: Gary (OpenAI). With owner approval, added the 26 November case to the named checks and updated the fixed counts to 53 indexable routes and 55 total routes. The same two noindex previews remain. The targeted adjacency metadata tests passed locally. No article, production registry, workflow, deployment, or merge changes.
+
+### 2026-11-26: Separate private review provenance from the shared worklog
+
+Agent: Gary (OpenAI). With the owner's authorization to align repository review disclosure rules, updated `AGENTS.md` and appended this worklog entry. Full private provenance remains in restricted records; the shared log records scope and limitations without private identifiers. This does not relax review requirements or revise any historical entry.
+
+Validation: reviewed the two-file documentation diff, confirmed the existing worklog is an exact byte prefix, and checked the new text for private identifiers. No code or workflow changed. Repository CI, where configured, is separate. No merge or deployment. Next eligible action: owner review.

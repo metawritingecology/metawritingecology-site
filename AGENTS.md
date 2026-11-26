@@ -139,12 +139,20 @@ After any change, update AGENT_WORKLOG.md with:
 - unresolved questions
 - risks or assumptions
 
-For boundary-sensitive work and any change that received an independent review, also record the review provenance. Record a value as `unknown` rather than omitting the field:
+For boundary-sensitive work and any change that received an independent review, record the following provenance in accordance with the review disclosure rule below:
 - reviewer interface (for example Codex CLI, Copilot pull-request reviewer, Cursor, direct API)
 - reviewer lineage (the model family behind the interface; `unknown` if the interface does not disclose it)
 - review mode (`parallel blind`, `sequential blind`, `sequential`, or `corroboration`)
 - reviewed commit (the exact commit SHA the reviewer saw)
 - review evidence reference (where the review text and its verdict are kept)
+
+### Review provenance and disclosure
+
+For boundary-sensitive work or changes that received independent review, keep a traceable review record. Record the reviewer interface, model lineage, review mode, exact reviewed commit or immutable snapshot, and the evidence reference and verdict. Use `unknown` only when a value cannot be established.
+
+- **Private review:** Keep the complete record in owner-authorized, access-controlled storage outside Git. In `AGENT_WORKLOG.md` and other shared or public records, record only the fact, scope, and limitations of the review. Do not disclose private paths, executable commands, reviewer or routing identifiers, model and tool details, unpublished commit or snapshot identifiers, private receipt IDs, or links to restricted evidence. Do not substitute `unknown` for intentionally withheld details.
+- **Public review:** When the review, reviewed revision, and evidence are already public and safe to reference, the shared worklog may record public provenance and link to the public evidence. While any necessary part remains private, use the private-review rule.
+- This is a disclosure rule, not an instruction to weaken any review or evidence requirement, promote a review to a later revision, or rewrite prior log entries. Check the complete diff for disclosures before pushing.
 
 ## Worklog Governance
 
