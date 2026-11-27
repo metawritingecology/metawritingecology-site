@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 338" width="580" height="338" role="img" aria-labelledby="t d">
+<title id="t">How Taiwan Is Seen</title>
+<desc id="d">Seen from below and at an angle, a tall digital billboard displays a medical mask. Beside it, a low stone memorial bears rows of short lines in place of engraved names.</desc>
+<path fill="#191712" d="M0 0h580v338H0z"/>
+<g stroke-linecap="round" stroke-linejoin="round">
+<g fill="none" stroke-width="1">
+<path d="M103 240h194m34 0h135" stroke="#58616a"/>
+<path d="m126 44 11 196m145-173 13 173m-10-132 69 9 8 113-68 10" stroke="#485059"/>
+<path d="m296 133 49 5m-47 8 48 4m-45 47 48-2" stroke="#41474c"/>
+</g>
+<path d="m160 64 117 28 10 128-111 14z" fill="#1c2225" stroke="#9aabb9" stroke-width="1.45"/>
+<path d="m160 64 12-5 116 31 9 125-10 5m-118-145 99 22 9 115-92 11z" fill="none" stroke="#657782" stroke-width="1.1"/>
+<path d="m187 112 61 9m-60-2 51 7m-43 66 61-1m-59 8 44-1" fill="none" stroke="#647783" stroke-width="1" opacity=".63"/>
+<g fill="none" stroke="#8196a5" stroke-width="1.15">
+<path d="M202 149c-10-7-19-5-19 1 1 7 11 12 20 13m42-8c8-4 17-2 17 3-1 5-8 8-16 10"/>
+</g>
+<path d="M200 147c7 0 15-3 21-2s15 6 24 8l1 15c-6 3-15 6-22 5-8-1-16-4-22-9z" fill="#354853" stroke="#9aabb9" stroke-width="1.25"/>
+<path d="M204 152q20 9 37 5m-36 0q19 8 37 5m-36 0q18 8 36 5" fill="none" stroke="#728894" stroke-width=".9"/>
+<path d="M350 224 368 189 469 189 482 224z" fill="#32302d" stroke="#a49d94" stroke-width="1.35"/>
+<path d="M350 224h132v10H350z" fill="#242321" stroke="#766f68" stroke-width="1.2"/>
+<path d="m369 194 98 0 10 26H357z" fill="none" stroke="#675f59" stroke-width=".75"/>
+<g fill="none" stroke="#ae9e92" stroke-width="1.15">
+<path d="M378 200h13m9 0h19m10 0h11m8 0h11M374 207h18m9 0h12m9 0h17m9 0h14M369 214h13m10 0h20m10 0h12m9 0h22"/>
+</g>
+</g>
+</svg>
