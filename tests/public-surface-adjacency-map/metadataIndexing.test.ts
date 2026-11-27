@@ -166,7 +166,7 @@ test("Recent dated readings are included in named rendered metadata verification
   const verifier = rd("scripts/verify-metadata-build.mjs");
   const namedCases = verifier.match(/const INDEXABLE_CASE_ROUTES = \[([\s\S]*?)\];/);
   assert.ok(namedCases, "named case verification list exists");
-  for (const date of ["2026-11-18", "2026-11-22", "2026-11-23", "2026-11-26", "between-two-pairs-of-hands", "2026-11-27"]) {
+  for (const date of ["2026-11-18", "2026-11-22", "2026-11-23", "2026-11-26", "2026-11-26-between-two-pairs-of-hands", "2026-11-27"]) {
     const route = `/artistic-research/public-surface-case/${date}/`;
     assert.ok(namedCases[1].includes(JSON.stringify(route)), route);
     assert.equal(getRoutePolicy(route).indexing.kind, "indexable", route);

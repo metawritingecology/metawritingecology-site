@@ -31,10 +31,14 @@ function resolveDeploymentCommit() {
 const deploymentCommit = resolveDeploymentCommit();
 const pagesDir = new URL("./src/pages/", import.meta.url);
 
+const formerHandsRoute = "/artistic-research/public-surface-case/between-two-pairs-of-hands/";
+const currentHandsRoute = "/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/";
+
 export default defineConfig({
   site: PRODUCTION_ORIGIN,
   output: "server",
   adapter: cloudflare(),
+  redirects: { [formerHandsRoute]: { status: 301, destination: currentHandsRoute } },
   vite: {
     define: {
       __PSADJ_DEPLOYMENT_COMMIT__: JSON.stringify(deploymentCommit)
@@ -47,7 +51,7 @@ export default defineConfig({
       // noindex prototype and interactive-preview routes, the unmatched-route
       // representation, and any endpoint/asset route. Exact-path matching so a
       // future, similarly named route is never excluded by accident.
-      filter: (page) => isSitemapEligible(page),
+      filter: (page) => new URL(page).pathname.replace(/\/?$/, "/") !== formerHandsRoute && isSitemapEligible(page),
       serialize(item) {
         // Resolver contract violations (unsafe route input, ambiguous source
         // resolution) are NOT swallowed — they fail the build. Only Git

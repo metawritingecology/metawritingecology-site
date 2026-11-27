@@ -49,7 +49,7 @@ function assertReadingLinks(markup: string) {
     ['/artistic-research/public-surface-case/2026-11-22/', 'Read the election snapshot · 22 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-23/', 'Read the homecoming snapshot · 23 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-26/', 'Read the Taipei case · 26 November 2026'],
-    ['/artistic-research/public-surface-case/between-two-pairs-of-hands/', 'Read Between Two Pairs of Hands · 26 November 2026'],
+    ['/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/', 'Read Between Two Pairs of Hands · 26 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-27/', 'Read How Taiwan Is Seen · 27 November 2026'],
   ]);
 }
@@ -160,7 +160,7 @@ test('Taipei neutrality uses a homepage-only cover and numbered article sources'
 });
 
 test('Between Two Pairs of Hands uses the existing reading width, the homepage-only cover, and approved sources', () => {
-  const route = '/artistic-research/public-surface-case/between-two-pairs-of-hands/';
+  const route = '/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/';
   const asset = '/assets/public-surface-case/between-two-pairs-of-hands/cover.svg';
   const routeSource = readFileSync(new URL('../src/pages' + route.slice(0, -1) + '.astro', import.meta.url), 'utf8');
   const art = readFileSync(new URL('../src/pages/artistic-research.md', import.meta.url), 'utf8');

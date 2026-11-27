@@ -361,3 +361,7 @@ Local verification: 332 targeted checks passed. The full local check stopped in 
 Agent: Gary (OpenAI). Added an English reading with endnotes, a homepage-only cover, and a text entry in Artistic Research. Reused the existing reading layout and updated route checks. The earlier readings and their URLs are unchanged.
 
 Validation: 69 focused checks passed. Broader local verification was not clean; full Site CI is pending.
+
+### 2026-11-27: Align the Between Two Pairs of Hands URL
+
+Agent: Gary (OpenAI). Moved the reading to a date-plus-title URL, updated its entry links and kept a permanent redirect from its former address. The article text and the other 26 November reading are unchanged.

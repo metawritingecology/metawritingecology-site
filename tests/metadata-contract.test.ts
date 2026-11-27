@@ -64,7 +64,7 @@ const CASE_ROUTES = [
   "/artistic-research/public-surface-case/2026-11-22/",
   "/artistic-research/public-surface-case/2026-11-23/",
   "/artistic-research/public-surface-case/2026-11-26/",
-  "/artistic-research/public-surface-case/between-two-pairs-of-hands/",
+  "/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/",
   "/artistic-research/public-surface-case/2026-11-27/"
 ];
 const registeredRoutes = getRegisteredRoutes();
