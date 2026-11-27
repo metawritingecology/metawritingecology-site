@@ -244,6 +244,12 @@ An election-eve rally, a family waiting for answers, and what happens between on
 
 [Enter Public Surface Case — Between Two Pairs of Hands](/artistic-research/public-surface-case/between-two-pairs-of-hands/)
 
+#### 27 November 2026 — How Taiwan Is Seen
+
+A billboard in New York, a day off in Kaohsiung, and a sign at Taipei’s February 28 memorial.
+
+[Enter Public Surface Case — How Taiwan Is Seen](/artistic-research/public-surface-case/2026-11-27/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.

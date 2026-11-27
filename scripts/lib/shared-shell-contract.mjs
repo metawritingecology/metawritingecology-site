@@ -15,7 +15,8 @@ export const DATED_SHELL_ROUTES = [
   '/artistic-research/public-surface-case/2026-11-22/',
   '/artistic-research/public-surface-case/2026-11-23/',
   '/artistic-research/public-surface-case/2026-11-26/',
-  '/artistic-research/public-surface-case/between-two-pairs-of-hands/'
+  '/artistic-research/public-surface-case/between-two-pairs-of-hands/',
+  '/artistic-research/public-surface-case/2026-11-27/'
 ];
 export const SHELL_EXCEPTIONS = ['/language-pressure-test-lab-prototype/', '/404/'];
 
@@ -63,7 +64,8 @@ export function assertShellCounts(counts, { present, dated }, route) {
       route === '/artistic-research/public-surface-case/2026-11-22/' ||
       route === '/artistic-research/public-surface-case/2026-11-23/' ||
       route === '/artistic-research/public-surface-case/2026-11-26/' ||
-      route === '/artistic-research/public-surface-case/between-two-pairs-of-hands/';
+      route === '/artistic-research/public-surface-case/between-two-pairs-of-hands/' ||
+      route === '/artistic-research/public-surface-case/2026-11-27/';
     const scopedFooter = route.includes('/2026-07-25/') || route.includes('/2026-07-31/');
     if (counts.articleFooters !== (withoutArticleFooter ? 0 : 1)) throw new Error(`${route}: original article footer count ${counts.articleFooters}`);
     if (counts.articleNotes !== (!withoutArticleFooter && !scopedFooter ? 1 : 0)) throw new Error(`${route}: article footer landmark count ${counts.articleNotes}`);

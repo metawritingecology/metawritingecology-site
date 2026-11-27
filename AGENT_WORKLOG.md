@@ -355,3 +355,9 @@ Pre-append inventory: no open PRs in the site repository; the recent relevant da
 Verification: compared the published reference layout and the matching candidate preview at 1280 and 390 CSS px. Prose widths matched at 736 and 327 CSS px in the test browser, respectively. An independent review covered an earlier illustration draft only, not this manuscript or proposed change. Opening for review only; no merge or deployment.
 
 Local verification: 332 targeted checks passed. The full local check stopped in the Cloudflare build on an environment network-interface error; Site CI remains the full-suite authority.
+
+### 2026-11-27: Add How Taiwan Is Seen
+
+Agent: Gary (OpenAI). Added an English reading with endnotes, a homepage-only cover, and a text entry in Artistic Research. Reused the existing reading layout and updated route checks. The earlier readings and their URLs are unchanged.
+
+Validation: 69 focused checks passed. Broader local verification was not clean; full Site CI is pending.
