@@ -27,9 +27,9 @@ test('homepage retains the four accepted v4 SVGs exactly, including mobile crop 
 function assertReadingLinks(markup: string) {
   // Count all opening anchors before reading attributes or nested text, so
   // a differently formatted duplicate cannot disappear from the contract.
-  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 15, 'exactly fifteen reading anchors');
+  assert.equal((markup.match(/<a\b[^>]*>/gi) ?? []).length, 16, 'exactly sixteen reading anchors');
   const anchors = [...markup.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi)];
-  assert.equal(anchors.length, 15, 'all reading anchors are closed');
+  assert.equal(anchors.length, 16, 'all reading anchors are closed');
   const links = anchors.map(([, attributes, contents]) => {
     const href = attributes.match(/\bhref\s*=\s*(["'])(.*?)\1/i);
     assert.ok(href, 'every reading anchor has a quoted href');
@@ -51,10 +51,11 @@ function assertReadingLinks(markup: string) {
     ['/artistic-research/public-surface-case/2026-11-26/', 'Read the Taipei case · 26 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/', 'Read Between Two Pairs of Hands · 26 November 2026'],
     ['/artistic-research/public-surface-case/2026-11-27/', 'Read How Taiwan Is Seen · 27 November 2026'],
+    ['/artistic-research/public-surface-case/2026-11-28/', 'Read After the Count · 28 November 2026'],
   ]);
 }
 
-test('responsive artwork keeps one set of the fifteen approved reading links', () => {
+test('responsive artwork keeps one set of the sixteen approved reading links', () => {
   assertReadingLinks(source);
 });
 
@@ -63,7 +64,7 @@ test('reading-link contract rejects duplicates with extra attributes or nested t
   const extraAttributes = first.replace('<a href=', '<a class="duplicate" href=');
   const nestedText = first.replace('18 August 2026: the first reading', '<span>18 August 2026: the first reading</span>');
   for (const duplicate of [extraAttributes, nestedText]) {
-    assert.throws(() => assertReadingLinks(source + duplicate), /exactly fifteen reading anchors/);
+    assert.throws(() => assertReadingLinks(source + duplicate), /exactly sixteen reading anchors/);
   }
   const second = source.match(/<a\b[^>]*>[\s\S]*?<\/a>/g)![1];
   assert.throws(() => assertReadingLinks(source.replace(second, extraAttributes)));
@@ -100,7 +101,7 @@ test('Kaohsiung uses the same reading link at all widths and keeps its picture o
 });
 
 test('dated readings share the homepage date convention and remain in order', () => {
-  const dates = ['2026-08-18', '2026-09-19', '2026-10-04', '2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21', '2026-11-22', '2026-11-23', '2026-11-26', '2026-11-26', '2026-11-27'];
+  const dates = ['2026-08-18', '2026-09-19', '2026-10-04', '2026-10-18', '2026-11-15', '2026-11-18', '2026-11-21', '2026-11-22', '2026-11-23', '2026-11-26', '2026-11-26', '2026-11-27', '2026-11-28'];
   assert.deepEqual([...source.matchAll(/<time datetime="([^"]+)">([^<]+)<\/time>/g)].map(m => m[1]), dates);
   const format = new Intl.DateTimeFormat('en-GB', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'});
   const label = date => format.format(new Date(date));
@@ -194,4 +195,19 @@ test('How Taiwan Is Seen uses the shared reading layout and ends with four sourc
   const groups = ['s1', 's2', 's3', 's4'];
   assert.ok(groups.every(id => article.indexOf('id="' + id + '"') > article.indexOf('id="sources"')));
   assert.ok(!article.slice(0, article.indexOf('id="sources"')).includes('<a '));
+});
+
+test('After the Count has one homepage cover, a text-only research entry, and five source groups', () => {
+  const route = '/artistic-research/public-surface-case/2026-11-28/';
+  const asset = '/assets/public-surface-case/after-the-count/cover.svg';
+  const art = readFileSync(new URL('../src/pages/artistic-research.md', import.meta.url), 'utf8');
+  const article = readFileSync(new URL('../src/data/public-surface-case/after-the-count/rendered-body.en.html', import.meta.url), 'utf8');
+  const svg = readFileSync(new URL('../public' + asset, import.meta.url), 'utf8');
+  assert.equal(source.split(asset).length - 1, 1);
+  assert.ok(art.includes(route) && !art.includes(asset));
+  assert.ok(!article.includes('<img') && !article.includes('<svg'));
+  assert.ok(article.includes('664,586 votes, or 45.69 percent'));
+  assert.ok(article.includes('11:29 p.m. Taiwan time'));
+  assert.equal(XMLValidator.validate(svg), true);
+  assert.deepEqual([...article.matchAll(/<li id="(s[1-5])">/g)].map(match => match[1]), ['s1','s2','s3','s4','s5']);
 });

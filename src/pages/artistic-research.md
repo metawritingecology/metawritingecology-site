@@ -250,6 +250,12 @@ A billboard in New York, a day off in Kaohsiung, and a sign at Taipei’s Februa
 
 [Enter Public Surface Case — How Taiwan Is Seen](/artistic-research/public-surface-case/2026-11-27/)
 
+#### 28 November 2026 — After the Count
+
+The count settles who won in Yunlin, Taoyuan, and Taipei. A flashlight at a 1977 count in Guanyin and the remarks made on election night return to what people still share after the result.
+
+[Enter Public Surface Case — After the Count](/artistic-research/public-surface-case/2026-11-28/)
+
 ## Exhibition or Presentation Version
 
 If presented in an art context, the work does not need to be separated from the website or repository.
