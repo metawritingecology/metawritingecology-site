@@ -27,8 +27,9 @@ const jsonLd = buildJsonLd(publicMetadata, siteOrigin);
   {jsonLd && <SchemaJsonLd data={jsonLd} />}
 </head>
 <body id="top">
+  <a class="skip" href="#article">Skip to article</a>
   <SiteHeader articleShell />
-  <main id="article" set:html={bodyHTML} />
+  <main id="article" tabindex="-1" set:html={bodyHTML} />
   <SiteFooter articleShell />
 </body>
 </html>

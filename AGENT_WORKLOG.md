@@ -371,3 +371,5 @@ Agent: Gary (OpenAI). Moved the reading to a date-plus-title URL, updated its en
 Agent: Gary (OpenAI). Added the approved English reading, its homepage-only cover, and a text entry in Artistic Research. Registered the new route and updated the corresponding checks. No open PRs were found; the preceding dated readings are already integrated.
 
 Validation: 328 focused tests passed. The local Cloudflare build stopped at an environment network-interface error; full Site CI is pending.
+
+Follow-up: Added a keyboard skip link before navigation on the 28 November reading. 328 focused checks passed.
