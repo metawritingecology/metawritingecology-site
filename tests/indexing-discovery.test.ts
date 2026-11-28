@@ -1684,7 +1684,8 @@ test("canonical parity: eligible pages use BaseLayout or the exact standalone me
     "/artistic-research/public-surface-case/2026-11-23/",
     "/artistic-research/public-surface-case/2026-11-26/",
   "/artistic-research/public-surface-case/2026-11-26-between-two-pairs-of-hands/",
-  "/artistic-research/public-surface-case/2026-11-27/"
+  "/artistic-research/public-surface-case/2026-11-27/",
+  "/artistic-research/public-surface-case/2026-11-28/"
   ]);
   const known = knownRouteSet();
   for (const route of known) {
@@ -1907,10 +1908,10 @@ test("classifyRobots: duplicate name/content WITHIN one meta tag fails closed (n
   );
 });
 
-test("buildExpectedRouteSet: real repo yields 55 routes, includes /about/, excludes prototype/interactive/404", () => {
+test("buildExpectedRouteSet: real repo yields 56 routes, includes /about/, excludes prototype/interactive/404", () => {
   const { expected, findings } = buildExpectedRouteSet({ pagesDir: DEFAULT_PAGES_DIR });
   assert.deepEqual(findings, [], `unexpected robots findings: ${findings.map((f) => f.message).join("; ")}`);
-  assert.equal(expected.size, 55);
+  assert.equal(expected.size, 56);
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-08-18/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-09-19/"));
   assert.ok(expected.has("/artistic-research/public-surface-case/2026-10-04/"));
